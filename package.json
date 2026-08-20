@@ -4,9 +4,8 @@
   "description": "Office Escape: Corporate Run - An addictive satirical endless runner game",
   "main": "index.html",
   "scripts": {
-    "start": "powershell -Command \"Start-Process chrome http://localhost:3000; npx -y serve -p 3000 .\"",
-    "dev": "powershell -Command \"Start-Process chrome http://localhost:3000; npx -y serve -p 3000 .\"",
-    "open": "powershell -Command \"Start-Process chrome http://localhost:3000\"",
+    "start": "node server.js",
+    "dev": "node server.js",
     "build": "node build.js"
   },
   "keywords": ["game", "runner", "canvas", "office-escape"],
