@@ -1,0 +1,970 @@
+/* ==========================================================================
+   TRAJECTORY SVG OVERLAY & AIM RETICLE
+   ========================================================================== */
+.cannon-trajectory-svg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 45;
+  overflow: visible;
+  transition: opacity 0.35s ease;
+}
+
+.cannon-trajectory-svg.is-idle {
+  opacity: 0;
+}
+
+.cannon-trajectory-svg.is-aiming {
+  opacity: 0.85;
+}
+
+.cannon-trajectory-svg.locked-on {
+  opacity: 1;
+}
+
+.trajectory-glow-line {
+  stroke: rgba(157, 78, 221, 0.2);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.cannon-trajectory-svg.locked-on .trajectory-glow-line {
+  stroke: rgba(56, 176, 0, 0.4);
+  stroke-width: 7;
+}
+
+.trajectory-line {
+  stroke: url(#laserGradient);
+  stroke-width: 2.2;
+  stroke-dasharray: 6 5;
+  stroke-linecap: round;
+  animation: laserStream 0.6s linear infinite;
+  filter: drop-shadow(0 0 5px #ffb703);
+}
+
+.cannon-trajectory-svg.locked-on .trajectory-line {
+  stroke: url(#laserLockedGradient);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 10px #38b000);
+}
+
+@keyframes laserStream {
+  from { stroke-dashoffset: 22; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Aim Reticle */
+.aim-reticle-group {
+  pointer-events: none;
+  transition: transform 0.04s linear;
+}
+
+.aim-reticle-outer {
+  fill: none;
+  stroke: rgba(255, 183, 3, 0.85);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 2;
+  animation: reticleSpin 6s linear infinite;
+  transition: all 0.2s ease;
+}
+
+.aim-reticle-dot {
+  fill: #ffb703;
+  filter: drop-shadow(0 0 6px #ffb703);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.aim-reticle-cross {
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 1;
+}
+
+/* Locked-on Reticle (◎ -> ◉) */
+.aim-reticle-group.is-locked .aim-reticle-outer {
+  stroke: #38b000;
+  stroke-width: 2.2;
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 10px #38b000);
+}
+
+.aim-reticle-group.is-locked .aim-reticle-dot {
+  fill: #38b000;
+  filter: drop-shadow(0 0 8px #38b000);
+  animation: dotPulse 0.6s ease-in-out infinite alternate;
+}
+
+.aim-reticle-lock-bracket {
+  fill: none;
+  stroke: #ffb703;
+  stroke-width: 1.5;
+  stroke-dasharray: 8 6;
+  animation: reticleSpin 3s linear infinite reverse;
+}
+
+.lock-text {
+  fill: #38b000;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  filter: drop-shadow(0 0 4px #38b000);
+}
+
+@keyframes dotPulse {
+  0% { transform: scale(0.9); }
+  100% { transform: scale(1.2); }
+}
+
+@keyframes reticleSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+
+/* ==========================================================================
+   SHOOTER ROOT CONTAINER
+   ========================================================================== */
+.shooter-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 110px;
+  z-index: 50;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* ==========================================================================
+   1. SPACE THEME: STARFIGHTER SPACESHIP
+   ========================================================================== */
+.spaceship-shooter {
+  position: absolute;
+  bottom: 12px;
+  width: 54px;
+  height: 64px;
+  transform-origin: bottom center;
+  transition: transform 0.04s ease-out;
+  will-change: transform;
+}
+
+.spaceship-hull {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 50px;
+  background: linear-gradient(to top, #1a1e38 0%, #303761 60%, #00b4d8 100%);
+  border: 1.5px solid #00b4d8;
+  border-radius: 50% 50% 15% 15% / 70% 70% 20% 20%;
+  box-shadow: 0 0 15px rgba(0, 180, 216, 0.7);
+  z-index: 3;
+}
+
+.spaceship-cockpit {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 18px;
+  background: radial-gradient(ellipse at 40% 40%, #ffffff 0%, #70d6ff 60%, #0077b6 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 8px #70d6ff;
+}
+
+.spaceship-nose-cannon {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 10px;
+  background: #ffb703;
+  border-radius: 2px;
+  box-shadow: 0 0 10px #ffb703;
+}
+
+.spaceship-wing {
+  position: absolute;
+  bottom: 8px;
+  width: 18px;
+  height: 32px;
+  background: linear-gradient(135deg, #1e2340 0%, #00b4d8 100%);
+  border: 1px solid rgba(0, 180, 216, 0.6);
+  z-index: 2;
+}
+
+.spaceship-wing.wing-left {
+  left: 0;
+  border-radius: 12px 0 0 4px;
+  transform: rotate(-15deg);
+}
+
+.spaceship-wing.wing-right {
+  right: 0;
+  border-radius: 0 12px 4px 0;
+  transform: rotate(15deg);
+}
+
+.wing-blaster {
+  position: absolute;
+  top: -4px;
+  width: 4px;
+  height: 12px;
+  background: #ffb703;
+  border-radius: 2px;
+  box-shadow: 0 0 8px #ffb703;
+}
+
+.wing-left .wing-blaster { left: 2px; }
+.wing-right .wing-blaster { right: 2px; }
+
+.spaceship-engine-glow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, #ff007f 0%, #00b4d8 60%, transparent 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 16px #00b4d8, 0 4px 12px #ff007f;
+  animation: enginePulse 0.3s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+@keyframes enginePulse {
+  0% { transform: translateX(-50%) scale(0.85); opacity: 0.7; }
+  100% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+}
+
+/* ==========================================================================
+   2. SLIMY / HUNTER THEME: VETERAN WOLF-PELT HUNTER
+   ========================================================================== */
+.veteran-hunter-wrapper {
+  position: absolute;
+  bottom: 0;
+  width: 140px;
+  height: 115px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Reaction speech / emote badge */
+.hunter-reaction-bubble {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65);
+  animation: reactionBubblePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  pointer-events: none;
+}
+
+.hunter-reaction-bubble.happy-reaction {
+  background: linear-gradient(135deg, #ffd700 0%, #ff9100 100%);
+  color: #1a0f00;
+  border: 2px solid #ffffff;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+.hunter-reaction-bubble.angry-reaction {
+  background: linear-gradient(135deg, #ff3366 0%, #990022 100%);
+  color: #ffffff;
+  border: 2px solid #ffccd5;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.reaction-sparkle {
+  font-size: 12px;
+  animation: sparkleTwinkle 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes reactionBubblePop {
+  0% {
+    transform: translateX(-50%) translateY(12px) scale(0.6);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-50%) translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes sparkleTwinkle {
+  0% { transform: scale(0.8) rotate(-10deg); }
+  100% { transform: scale(1.25) rotate(10deg); }
+}
+
+/* Veteran Hunter Bust / Portrait Frame */
+.hunter-bust-container {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 88px;
+  height: 94px;
+  background: radial-gradient(circle at 50% 30%, #353f22 0%, #141c0a 100%);
+  border: 3.5px solid #8d5b2c;
+  border-radius: 44px 44px 14px 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 14px rgba(57, 255, 20, 0.35);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.hunter-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 8%;
+  transform: scale(1.18);
+  pointer-events: none;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.hunter-bust-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, transparent 60%, rgba(0, 0, 0, 0.4) 100%);
+  pointer-events: none;
+}
+
+/* Mood Reaction States */
+.veteran-hunter-wrapper.mood-happy .hunter-bust-container {
+  border-color: #ffd700;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.85), 0 4px 20px rgba(0, 0, 0, 0.9);
+  animation: hunterHappyCheer 0.45s ease-in-out infinite alternate;
+}
+
+.veteran-hunter-wrapper.mood-happy .hunter-portrait-img {
+  filter: brightness(1.12) saturate(1.2);
+}
+
+.veteran-hunter-wrapper.mood-angry .hunter-bust-container {
+  border-color: #ff3366;
+  box-shadow: 0 0 28px rgba(255, 51, 102, 0.9), 0 4px 20px rgba(0, 0, 0, 0.9);
+  animation: hunterAngryRage 0.12s ease-in-out infinite alternate;
+}
+
+.veteran-hunter-wrapper.mood-angry .hunter-portrait-img {
+  filter: brightness(1.05) saturate(1.3) contrast(1.15);
+}
+
+.veteran-hunter-wrapper.mood-idle .hunter-bust-container {
+  animation: hunterIdleBreathing 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes hunterHappyCheer {
+  0% { transform: translateX(-50%) translateY(0) rotate(-1deg); }
+  100% { transform: translateX(-50%) translateY(-6px) rotate(1deg); }
+}
+
+@keyframes hunterAngryRage {
+  0% { transform: translateX(calc(-50% - 2px)) translateY(0) rotate(-2deg); }
+  100% { transform: translateX(calc(-50% + 2px)) translateY(-2px) rotate(2deg); }
+}
+
+@keyframes hunterIdleBreathing {
+  0% { transform: translateX(-50%) translateY(0); }
+  100% { transform: translateX(-50%) translateY(-2px); }
+}
+
+/* Double-Barrel Shotgun Assembly */
+.veteran-shotgun-assembly {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  width: 26px;
+  height: 75px;
+  transform-origin: bottom center;
+  transition: transform 0.04s ease-out;
+  z-index: 4;
+  will-change: transform;
+}
+
+.veteran-shotgun-assembly .shotgun-barrels {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 15px;
+  height: 52px;
+  display: flex;
+  gap: 2px;
+}
+
+.veteran-shotgun-assembly .barrel {
+  flex: 1;
+  background: linear-gradient(to right, #495057 0%, #dee2e6 45%, #6c757d 80%, #212529 100%);
+  border: 1px solid #111111;
+  border-radius: 3px 3px 0 0;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4);
+}
+
+.veteran-shotgun-assembly .barrel-muzzle {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 19px;
+  height: 6px;
+  background: #70e000;
+  border-radius: 3px;
+  box-shadow: 0 0 12px #39ff14, 0 0 22px #70e000;
+}
+
+.veteran-shotgun-assembly .shotgun-receiver {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 17px;
+  height: 10px;
+  background: linear-gradient(135deg, #b8860b 0%, #d4af37 50%, #8b6508 100%);
+  border: 1px solid #5c4000;
+  border-radius: 2px;
+}
+
+.veteran-shotgun-assembly .shotgun-stock {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 20px;
+  background: linear-gradient(135deg, #8b4513 0%, #5c2c0b 60%, #3d1c05 100%);
+  border: 1px solid #281102;
+  border-radius: 3px 3px 6px 6px;
+}
+
+.veteran-shotgun-assembly .shotgun-pump {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 19px;
+  height: 14px;
+  background: #5c3a21;
+  border-radius: 3px;
+  border: 1px solid #2e1a0b;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================================
+   3. DYSTOPIAN THEME: CYBER RAILGUN / LASER TURRET
+   ========================================================================== */
+.dystopian-railgun-shooter {
+  position: absolute;
+  bottom: 0;
+  width: 90px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.railgun-turret-barrel {
+  position: absolute;
+  bottom: 18px;
+  width: 22px;
+  height: 65px;
+  transform-origin: bottom center;
+  transition: transform 0.04s ease-out;
+  z-index: 4;
+  will-change: transform;
+}
+
+.railgun-rails {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 48px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.rail {
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to top, #ff007f 0%, #00f0ff 100%);
+  border-radius: 2px;
+  box-shadow: 0 0 10px #00f0ff;
+}
+
+.laser-emitter-lens {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 7px;
+  background: #ff007f;
+  border-radius: 4px;
+  box-shadow: 0 0 16px #ff007f;
+}
+
+.railgun-core-chamber {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 24px;
+  background: #110519;
+  border: 1.5px solid #ff007f;
+  border-radius: 5px;
+  box-shadow: 0 0 12px rgba(255, 0, 127, 0.6);
+}
+
+.railgun-turret-base {
+  width: 70px;
+  height: 30px;
+  background: #0d0213;
+  border: 2px solid #00f0ff;
+  border-radius: 35px 35px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 240, 255, 0.5);
+  position: relative;
+  z-index: 2;
+}
+
+.turret-neon-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  border: 2px solid #ff007f;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ff007f;
+}
+
+/* ==========================================================================
+   4. BEACH THEME: BEACH UMBRELLA CANNON
+   ========================================================================== */
+.beach-umbrella-shooter {
+  position: absolute;
+  bottom: 0;
+  width: 90px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.umbrella-stand-base {
+  position: absolute;
+  bottom: 0;
+  width: 60px;
+  height: 28px;
+  background: radial-gradient(circle at 50% 30%, #e9c46a 0%, #d4a373 80%);
+  border: 2px solid #bc6c25;
+  border-radius: 30px 30px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(233, 196, 106, 0.6);
+  z-index: 2;
+}
+
+.tiki-badge {
+  font-size: 1.4rem;
+  margin-top: -8px;
+}
+
+.umbrella-canopy-assembly {
+  position: absolute;
+  bottom: 16px;
+  width: 60px;
+  height: 60px;
+  transform-origin: bottom center;
+  transition: transform 0.04s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 4;
+  will-change: transform;
+}
+
+.umbrella-launcher-barrel {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 38px;
+  background: linear-gradient(to right, #d4a373 0%, #fefae0 50%, #bc6c25 100%);
+  border-radius: 4px;
+}
+
+.umbrella-canopy-striped {
+  position: absolute;
+  top: 6px;
+  width: 52px;
+  height: 26px;
+  border-radius: 30px 30px 0 0;
+  background: repeating-linear-gradient(
+    90deg,
+    #e63946 0px, #e63946 9px,
+    #ffffff 9px, #ffffff 18px,
+    #ffd166 18px, #ffd166 27px
+  );
+  border: 1.5px solid #bc6c25;
+  box-shadow: 0 0 14px rgba(230, 57, 70, 0.6);
+}
+
+.umbrella-tip-melon-loader {
+  position: absolute;
+  top: -8px;
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 6px #2a9d8f);
+  animation: melonBounce 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes melonBounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-3px); }
+}
+
+
+/* ==========================================================================
+   PROJECTILES IN FLIGHT (THEMED)
+   ========================================================================== */
+.projectile-entity {
+  position: fixed;
+  z-index: 40;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 1. Space: Plasma Bullet */
+.plasma-bullet-node {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #00b4d8 50%, #7209b7 100%);
+  box-shadow: 0 0 16px #00b4d8, 0 0 28px rgba(114, 9, 183, 0.8);
+  position: relative;
+}
+
+.plasma-trail {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 18px;
+  background: linear-gradient(to bottom, #00b4d8, transparent);
+  border-radius: 3px;
+  filter: blur(1px);
+}
+
+/* 2. Slimy: Shotgun Buckshot Shell */
+.shotgun-bullet-node {
+  width: 12px;
+  height: 20px;
+  position: relative;
+}
+
+.shotgun-shell-casing {
+  width: 10px;
+  height: 18px;
+  background: linear-gradient(to right, #ffd700 0%, #ffae00 40%, #b8860b 100%);
+  border: 1px solid #784212;
+  border-radius: 3px 3px 1px 1px;
+  box-shadow: 0 0 12px #ffd700;
+}
+
+.shotgun-smoke-trail {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 14px;
+  background: radial-gradient(circle, rgba(200, 200, 200, 0.6) 0%, transparent 80%);
+  filter: blur(2px);
+}
+
+/* 3. Dystopian: High-Energy Laser Beam */
+.laser-beam-node {
+  width: 8px;
+  height: 32px;
+  position: relative;
+}
+
+.laser-core-beam {
+  width: 6px;
+  height: 30px;
+  background: linear-gradient(to top, #ff007f 0%, #ffffff 50%, #00f0ff 100%);
+  border-radius: 3px;
+  box-shadow: 0 0 16px #ff007f, 0 0 24px #00f0ff;
+}
+
+.laser-spark-corona {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #00f0ff;
+}
+
+/* 4. Beach: Spinning Watermelon */
+.watermelon-node {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: spinWatermelon 0.4s linear infinite;
+}
+
+.watermelon-skin {
+  font-size: 1.6rem;
+  filter: drop-shadow(0 0 8px #2a9d8f);
+}
+
+.watermelon-splash-trail {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 14px;
+  background: radial-gradient(circle, rgba(230, 57, 70, 0.7) 0%, transparent 80%);
+  filter: blur(1.5px);
+}
+
+@keyframes spinWatermelon {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   5. SALMAN KHAN THEME: BHAIJAAN SHOOTER & FLYING SUV CARS
+   ========================================================================== */
+.salman-shooter-wrapper {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  transform-origin: bottom center;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.salman-shooter-wrapper.mood-happy {
+  animation: salmanHappyBounce 0.45s ease-out;
+}
+
+.salman-shooter-wrapper.mood-angry {
+  animation: salmanAngryShake 0.45s ease-in-out;
+}
+
+@keyframes salmanHappyBounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.15) translateY(-14px); }
+  75% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes salmanAngryShake {
+  0%, 100% { transform: translateX(0) scale(1); }
+  20% { transform: translateX(-8px) scale(1.08) rotate(-4deg); }
+  40% { transform: translateX(8px) scale(1.08) rotate(4deg); }
+  60% { transform: translateX(-5px) rotate(-2deg); }
+  80% { transform: translateX(5px) rotate(2deg); }
+}
+
+.salman-bust-container {
+  width: 96px;
+  height: 104px;
+  border-radius: 48px 48px 16px 16px;
+  border: 3.5px solid #f59e0b;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85), 0 0 20px rgba(245, 158, 11, 0.6);
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, #27272a 0%, #09090b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.salman-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 8%;
+  transform: scale(1.18);
+  display: block;
+}
+
+.salman-bust-vignette {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 -16px 20px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
+.salman-bracelet-glow {
+  position: absolute;
+  bottom: 6px;
+  right: 12px;
+  width: 10px;
+  height: 10px;
+  background: #00f0ff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00f0ff;
+}
+
+/* Reaction Speech Bubbles */
+.salman-reaction-bubble {
+  position: absolute;
+  top: -55px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 900;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  animation: salmanPopBubble 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 10;
+}
+
+.salman-reaction-bubble.happy-reaction {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  border: 2px solid #fbbf24;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.8);
+}
+
+.salman-reaction-bubble.angry-reaction {
+  background: linear-gradient(135deg, #ef4444, #991b1b);
+  color: #ffffff;
+  border: 2px solid #f87171;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.9);
+}
+
+@keyframes salmanPopBubble {
+  0% { transform: translateX(-50%) scale(0.3); opacity: 0; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* Aiming SUV Arm Launcher */
+.salman-car-aim-assembly {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform-origin: bottom center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.aiming-suv-car {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 10px #f59e0b);
+  animation: carIdleHover 1.5s ease-in-out infinite alternate;
+}
+
+.car-headlight-beam {
+  width: 3px;
+  height: 45px;
+  background: linear-gradient(to top, rgba(245, 158, 11, 0.8) 0%, transparent 100%);
+  filter: blur(1px);
+}
+
+@keyframes carIdleHover {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+/* 5. Salman: Flying SUV Projectile */
+.flying-car-node {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: spinCarFlight 0.35s linear infinite;
+}
+
+.flying-car-body {
+  font-size: 1.8rem;
+  filter: drop-shadow(0 0 10px #f59e0b) drop-shadow(0 0 18px #ef4444);
+}
+
+.car-exhaust-fire {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 16px;
+  background: radial-gradient(circle, #fbbf24 0%, #ef4444 60%, transparent 100%);
+  filter: blur(1.5px);
+}
+
+.car-drift-sparks {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #fbbf24;
+}
+
+@keyframes spinCarFlight {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+

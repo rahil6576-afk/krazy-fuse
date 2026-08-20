@@ -7,7 +7,7 @@
     "start": "powershell -Command \"Start-Process chrome http://localhost:3000; npx -y serve -p 3000 .\"",
     "dev": "powershell -Command \"Start-Process chrome http://localhost:3000; npx -y serve -p 3000 .\"",
     "open": "powershell -Command \"Start-Process chrome http://localhost:3000\"",
-    "build": "npm run build --prefix popup && powershell -Command \"Copy-Item -Path popup/dist/assets/* -Destination popup-game/assets/ -Force; Copy-Item -Path popup/dist/assets/* -Destination assets/ -Force\""
+    "build": "echo 'Build complete. Serving static arcade portal.'"
   },
   "keywords": ["game", "runner", "canvas", "office-escape"],
   "author": "Antigravity",

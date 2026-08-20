@@ -1,0 +1,627 @@
+/* ==========================================================================
+   THEME ENVIRONMENT ROOT
+   ========================================================================== */
+.game-theme-background {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  transition: background 0.6s ease;
+}
+
+/* ==========================================================================
+   1. SPACE THEME (Default)
+   ========================================================================== */
+.game-theme-background.theme-space {
+  background: radial-gradient(circle at 50% 35%, #171a42 0%, #0c0e28 60%, #050614 100%);
+}
+
+.game-theme-background.theme-space.fever-active {
+  background: radial-gradient(circle at 50% 35%, #3d0c2e 0%, #1c082b 55%, #080314 100%);
+  animation: spaceFeverPulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes spaceFeverPulse {
+  0% { filter: brightness(1); }
+  100% { filter: brightness(1.25); }
+}
+
+.nebula-layer {
+  position: absolute;
+  inset: -100px;
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(157, 78, 221, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(0, 180, 216, 0.1) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 30%, rgba(255, 102, 196, 0.08) 0%, transparent 50%);
+  filter: blur(40px);
+  animation: nebulaDrift 25s ease-in-out infinite alternate;
+}
+
+@keyframes nebulaDrift {
+  0% { transform: scale(1) rotate(0deg); }
+  100% { transform: scale(1.08) rotate(3deg); }
+}
+
+.stars-layer-1 {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 28% 38%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(2px 2px at 48% 12%, rgba(255, 255, 255, 0.95), transparent),
+    radial-gradient(1.5px 1.5px at 68% 28%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(1px 1px at 88% 18%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(2px 2px at 94% 48%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1.5px 1.5px at 18% 68%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(1px 1px at 38% 82%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(2px 2px at 78% 72%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 58% 92%, rgba(255, 255, 255, 0.55), transparent);
+  animation: starTwinkle 4s ease-in-out infinite alternate;
+}
+
+.stars-layer-2 {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 8% 85%, rgba(0, 180, 216, 0.8), transparent),
+    radial-gradient(1.5px 1.5px at 22% 52%, rgba(255, 183, 3, 0.7), transparent),
+    radial-gradient(1px 1px at 35% 20%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(2px 2px at 60% 65%, rgba(157, 78, 221, 0.8), transparent),
+    radial-gradient(1px 1px at 74% 40%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 85% 88%, rgba(0, 180, 216, 0.6), transparent);
+  animation: starTwinkle 6s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes starTwinkle {
+  0% { opacity: 0.65; transform: translateY(0); }
+  50% { opacity: 0.95; }
+  100% { opacity: 0.7; transform: translateY(-4px); }
+}
+
+.shooting-star {
+  position: absolute;
+  top: 15%;
+  left: 80%;
+  width: 90px;
+  height: 1.5px;
+  background: linear-gradient(to left, rgba(255, 255, 255, 0.9), rgba(255, 183, 3, 0.6), transparent);
+  transform: rotate(-35deg);
+  opacity: 0;
+  animation: shootStar 10s ease-in-out infinite;
+}
+
+@keyframes shootStar {
+  0%, 80% { opacity: 0; transform: translate(0, 0) rotate(-35deg); }
+  85% { opacity: 1; transform: translate(-180px, 120px) rotate(-35deg); }
+  90%, 100% { opacity: 0; transform: translate(-300px, 200px) rotate(-35deg); }
+}
+
+/* ==========================================================================
+   2. BEACH THEME (Tropical Pirate Island & Azure Waters)
+   ========================================================================== */
+.game-theme-background.theme-beach {
+  background: #38bdf8;
+}
+
+.game-theme-background.theme-beach.fever-active {
+  animation: beachFeverGlow 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes beachFeverGlow {
+  0% { filter: saturate(1.2) brightness(1.05) contrast(1.05); }
+  100% { filter: saturate(1.5) brightness(1.18) contrast(1.12); }
+}
+
+.beach-environment {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.beach-art-backdrop {
+  position: absolute;
+  inset: 0;
+  background-image: url('./beach_theme_bg.jpg');
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  animation: beachSubtleBreathe 18s ease-in-out infinite alternate;
+  transform-origin: center center;
+}
+
+@keyframes beachSubtleBreathe {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.025) translate(-4px, -2px);
+  }
+  100% {
+    transform: scale(1.015) translate(3px, 1px);
+  }
+}
+
+/* Warm ambient sunlight flare in the top sky */
+.beach-sun-gleam {
+  position: absolute;
+  top: -100px;
+  right: 15%;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 230, 0.35) 0%, rgba(255, 220, 120, 0.15) 45%, transparent 70%);
+  filter: blur(30px);
+  pointer-events: none;
+  animation: sunGleamPulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes sunGleamPulse {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+
+/* Drifting soft cloud highlights */
+.beach-cloud-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: radial-gradient(ellipse at 70% 25%, rgba(255, 255, 255, 0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 25% 15%, rgba(255, 255, 255, 0.1) 0%, transparent 55%);
+  filter: blur(20px);
+  animation: cloudSlowDrift 30s linear infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes cloudSlowDrift {
+  0% { transform: translateX(-20px); }
+  100% { transform: translateX(20px); }
+}
+
+/* Sparkling dynamic water highlights on the ocean */
+.beach-water-shimmer {
+  position: absolute;
+  top: 38%;
+  bottom: 22%;
+  left: 0;
+  right: 0;
+  background: 
+    radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.12) 0%, transparent 65%),
+    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%);
+  filter: blur(8px);
+  opacity: 0.6;
+  animation: waterCausticShimmer 4s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes waterCausticShimmer {
+  0% { opacity: 0.3; transform: scaleY(0.95) translateX(-10px); }
+  100% { opacity: 0.75; transform: scaleY(1.05) translateX(10px); }
+}
+
+/* Dynamic Starburst Ocean Sparkles */
+.beach-sparkles-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.b-sparkle {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: #ffffff;
+  clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+  box-shadow: 0 0 10px #ffffff, 0 0 20px #00f2fe;
+  animation: sparkleGlint 3s ease-in-out infinite;
+}
+
+.b-sparkle.sp1 { top: 48%; left: 38%; animation-delay: 0s; transform: scale(0.9); }
+.b-sparkle.sp2 { top: 53%; left: 58%; animation-delay: 0.7s; transform: scale(1.2); }
+.b-sparkle.sp3 { top: 62%; left: 45%; animation-delay: 1.4s; transform: scale(0.7); }
+.b-sparkle.sp4 { top: 57%; left: 78%; animation-delay: 2.1s; transform: scale(1.1); }
+.b-sparkle.sp5 { top: 45%; left: 72%; animation-delay: 0.4s; transform: scale(0.85); }
+.b-sparkle.sp6 { top: 67%; left: 52%; animation-delay: 1.8s; transform: scale(1); }
+.b-sparkle.sp7 { top: 52%; left: 28%; animation-delay: 1.1s; transform: scale(0.75); }
+.b-sparkle.sp8 { top: 60%; left: 66%; animation-delay: 2.5s; transform: scale(1.15); }
+
+@keyframes sparkleGlint {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.2) rotate(45deg);
+  }
+}
+
+/* Flying Seagulls Animation */
+.beach-seagulls-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.seagull {
+  position: absolute;
+  transform-origin: center center;
+}
+
+.seagull-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+  animation: seagullWingFlap 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes seagullWingFlap {
+  0% { transform: scaleY(0.7); }
+  100% { transform: scaleY(1.2); }
+}
+
+.seagull.s1 {
+  width: 24px;
+  height: 12px;
+  top: 14%;
+  left: 28%;
+  animation: seagullFlyAcross1 22s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.seagull.s2 {
+  width: 18px;
+  height: 9px;
+  top: 20%;
+  left: 36%;
+  animation: seagullFlyAcross2 28s cubic-bezier(0.4, 0, 0.2, 1) infinite 4s;
+}
+
+.seagull.s3 {
+  width: 15px;
+  height: 8px;
+  top: 10%;
+  left: 65%;
+  animation: seagullFlyAcross3 25s cubic-bezier(0.4, 0, 0.2, 1) infinite 8s;
+}
+
+@keyframes seagullFlyAcross1 {
+  0% { transform: translate(0, 0) rotate(-2deg); opacity: 0; }
+  10% { opacity: 0.85; }
+  45% { transform: translate(80px, -15px) rotate(3deg); }
+  85% { opacity: 0.85; }
+  100% { transform: translate(180px, -25px) rotate(0deg); opacity: 0; }
+}
+
+@keyframes seagullFlyAcross2 {
+  0% { transform: translate(0, 0) rotate(2deg); opacity: 0; }
+  10% { opacity: 0.75; }
+  50% { transform: translate(110px, 12px) rotate(-3deg); }
+  85% { opacity: 0.75; }
+  100% { transform: translate(220px, -10px) rotate(2deg); opacity: 0; }
+}
+
+@keyframes seagullFlyAcross3 {
+  0% { transform: translate(0, 0) rotate(-1deg); opacity: 0; }
+  10% { opacity: 0.7; }
+  50% { transform: translate(-90px, -18px) rotate(-4deg); }
+  85% { opacity: 0.7; }
+  100% { transform: translate(-190px, -5px) rotate(1deg); opacity: 0; }
+}
+
+/* Subtle Vignette to keep balloons & UI pop */
+.beach-vignette-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 40, 80, 0.2) 100%);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   3. DYSTOPIAN THEME (Cyberpunk Wasteland)
+   ========================================================================== */
+.game-theme-background.theme-dystopian {
+  background: #090212;
+}
+
+.game-theme-background.theme-dystopian.fever-active {
+  animation: dystopianFeverGlitch 0.5s steps(2, start) infinite;
+}
+
+@keyframes dystopianFeverGlitch {
+  0% { filter: hue-rotate(0deg) contrast(1.15) brightness(1.05); }
+  50% { filter: hue-rotate(25deg) contrast(1.35) brightness(1.25); }
+  100% { filter: hue-rotate(0deg) contrast(1.15) brightness(1.05); }
+}
+
+.dystopian-environment {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.dystopia-glitch-layer {
+  position: absolute;
+  inset: 0;
+  background-image: url('./dystopia_dynamic.gif');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  filter: brightness(0.92) contrast(1.1) saturate(1.15);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dystopian-ambient-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(20, 5, 30, 0.2) 0%, rgba(5, 1, 10, 0.58) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.toxic-rain-streaks {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(170deg, transparent 94%, rgba(0, 240, 255, 0.35) 95%, transparent 98%);
+  background-size: 60px 180px;
+  animation: toxicRain 0.6s linear infinite;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes toxicRain {
+  0% { background-position: 0 0; }
+  100% { background-position: -20px 180px; }
+}
+
+.dystopian-scanlines {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+  background-size: 100% 4px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.neon-hologram-beacon {
+  position: absolute;
+  top: 10%;
+  right: 15%;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(255, 0, 128, 0.2) 0%, rgba(0, 240, 255, 0.1) 50%, transparent 75%);
+  filter: blur(25px);
+  pointer-events: none;
+  z-index: 2;
+  animation: neonBeaconPulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes neonBeaconPulse {
+  0% { opacity: 0.4; transform: scale(0.9); }
+  100% { opacity: 0.85; transform: scale(1.15); }
+}
+
+/* ==========================================================================
+   4. SLIMY THEME (Toxic Slime Cavern / Bio-Ooze)
+   ========================================================================== */
+.game-theme-background.theme-slimy {
+  background: radial-gradient(circle at 50% 40%, #082915 0%, #03140a 60%, #010804 100%);
+}
+
+.game-theme-background.theme-slimy.fever-active {
+  animation: slimyFeverPulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes slimyFeverPulse {
+  0% { filter: brightness(1) drop-shadow(0 0 10px #39ff14); }
+  100% { filter: brightness(1.3) drop-shadow(0 0 30px #70e000); }
+}
+
+.slimy-environment {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.slime-video-backdrop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.92;
+  filter: brightness(0.95) contrast(1.1) saturate(1.15);
+}
+
+.slimy-ambient-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(3, 20, 10, 0.15) 0%, rgba(1, 8, 4, 0.55) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.slimy-drips-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 45px;
+  background: linear-gradient(180deg, #38b000 0%, rgba(57, 255, 20, 0.4) 60%, transparent 100%);
+  clip-path: polygon(
+    0 0, 100% 0, 100% 40%,
+    92% 85%, 90% 40%, 82% 95%, 80% 35%, 70% 75%, 68% 30%, 58% 90%, 55% 35%,
+    45% 80%, 42% 25%, 32% 100%, 30% 30%, 20% 75%, 18% 35%, 8% 90%, 5% 40%, 0 35%
+  );
+  filter: drop-shadow(0 4px 12px rgba(57, 255, 20, 0.6));
+  animation: slimeDripWobble 4s ease-in-out infinite alternate;
+  z-index: 2;
+}
+
+@keyframes slimeDripWobble {
+  0% { transform: scaleY(1); }
+  100% { transform: scaleY(1.2); }
+}
+
+/* Constantly falling goopy slime drops & streams */
+.goopy-falling-slime-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.slime-drip {
+  position: absolute;
+  top: -30px;
+  width: 10px;
+  height: 24px;
+  background: radial-gradient(ellipse at 50% 70%, #ffffff 0%, #39ff14 40%, #007200 100%);
+  border-radius: 50% 50% 60% 60% / 30% 30% 70% 70%;
+  box-shadow: 0 0 14px #39ff14;
+  opacity: 0.85;
+  animation: slimeDripFall 4.5s cubic-bezier(0.55, 0.085, 0.68, 0.53) infinite;
+}
+
+.slime-drip.d1 { left: 8%; width: 9px; height: 26px; animation-duration: 3.8s; animation-delay: 0s; }
+.slime-drip.d2 { left: 19%; width: 13px; height: 34px; animation-duration: 4.2s; animation-delay: 1.2s; }
+.slime-drip.d3 { left: 31%; width: 8px; height: 22px; animation-duration: 3.5s; animation-delay: 2.1s; }
+.slime-drip.d4 { left: 44%; width: 14px; height: 38px; animation-duration: 4.8s; animation-delay: 0.5s; }
+.slime-drip.d5 { left: 56%; width: 11px; height: 30px; animation-duration: 4.0s; animation-delay: 1.8s; }
+.slime-drip.d6 { left: 68%; width: 9px; height: 25px; animation-duration: 3.7s; animation-delay: 2.9s; }
+.slime-drip.d7 { left: 79%; width: 12px; height: 32px; animation-duration: 4.4s; animation-delay: 0.9s; }
+.slime-drip.d8 { left: 88%; width: 8px; height: 20px; animation-duration: 3.6s; animation-delay: 2.4s; }
+.slime-drip.d9 { left: 95%; width: 11px; height: 28px; animation-duration: 4.1s; animation-delay: 1.5s; }
+.slime-drip.d10 { left: 25%; width: 10px; height: 26px; animation-duration: 4.6s; animation-delay: 3.3s; }
+
+@keyframes slimeDripFall {
+  0% {
+    transform: translateY(0) scaleY(0.4) scaleX(1.4);
+    opacity: 0.2;
+  }
+  15% {
+    transform: translateY(40px) scaleY(1.8) scaleX(0.7);
+    opacity: 0.95;
+  }
+  85% {
+    transform: translateY(85vh) scaleY(1.5) scaleX(0.8);
+    opacity: 0.9;
+  }
+  98% {
+    transform: translateY(100vh) scaleY(0.5) scaleX(2.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(102vh) scaleY(0.2) scaleX(3);
+    opacity: 0;
+  }
+}
+
+.radioactive-bubbles {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.radioactive-bubbles .bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #70e000 40%, #007200 100%);
+  box-shadow: 0 0 12px #39ff14;
+  opacity: 0.65;
+  animation: bubbleRise 6s linear infinite;
+}
+
+.bubble.b1 { width: 18px; height: 18px; left: 15%; bottom: -20px; animation-duration: 7s; animation-delay: 0s; }
+.bubble.b2 { width: 26px; height: 26px; left: 35%; bottom: -30px; animation-duration: 9s; animation-delay: 1.5s; }
+.bubble.b3 { width: 14px; height: 14px; left: 52%; bottom: -20px; animation-duration: 6s; animation-delay: 3s; }
+.bubble.b4 { width: 22px; height: 22px; left: 68%; bottom: -25px; animation-duration: 8s; animation-delay: 0.8s; }
+.bubble.b5 { width: 30px; height: 30px; left: 82%; bottom: -35px; animation-duration: 10s; animation-delay: 2.2s; }
+.bubble.b6 { width: 12px; height: 12px; left: 25%; bottom: -15px; animation-duration: 5.5s; animation-delay: 4s; }
+.bubble.b7 { width: 16px; height: 16px; left: 45%; bottom: -20px; animation-duration: 7.5s; animation-delay: 2.7s; }
+.bubble.b8 { width: 20px; height: 20px; left: 92%; bottom: -25px; animation-duration: 8.5s; animation-delay: 1.1s; }
+
+@keyframes bubbleRise {
+  0% { transform: translateY(0) scale(0.8) translateX(0); opacity: 0; }
+  15% { opacity: 0.75; }
+  85% { opacity: 0.75; }
+  100% { transform: translateY(-110vh) scale(1.1) translateX(30px); opacity: 0; }
+}
+
+.toxic-sludge-floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 14%;
+  background: linear-gradient(0deg, #004b23 0%, rgba(56, 176, 0, 0.7) 70%, transparent 100%);
+  filter: drop-shadow(0 -8px 25px rgba(57, 255, 20, 0.5));
+  z-index: 2;
+}
+
+/* ==========================================================================
+   5. SALMAN KHAN THEME: RAJASTHAN DESERT SAFARI AT TWILIGHT
+   ========================================================================== */
+.salman-environment {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #09090b;
+}
+
+.salman-desert-backdrop {
+  position: absolute;
+  inset: 0;
+  background-image: url('./bhai_theme_bg.jpg');
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  filter: saturate(1.15) brightness(0.95);
+  animation: desertBreathe 14s ease-in-out infinite alternate;
+}
+
+@keyframes desertBreathe {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.03); }
+}
+
+.salman-twilight-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: radial-gradient(ellipse at 50% 20%, rgba(245, 158, 11, 0.18) 0%, rgba(180, 83, 9, 0.1) 45%, transparent 80%);
+  pointer-events: none;
+}
+
+.salman-dust-haze {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background: linear-gradient(0deg, rgba(120, 53, 15, 0.35) 0%, rgba(180, 83, 9, 0.15) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+.salman-vignette-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 40%, rgba(15, 10, 5, 0.6) 95%);
+  pointer-events: none;
+}
+
+
+
