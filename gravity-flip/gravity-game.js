@@ -191,10 +191,11 @@ class CaveGravityRunner {
         this.coins = 0;
         this.flips = 0;
         this.level = 1;
-        this.baseSpeed = 2.7; // Smooth, accessible, and enjoyable pacing
-        this.speed = 2.7;
+        this.baseSpeed = 2.8; // Smooth start
+        this.speed = 2.8;
         this.combo = 1;
         this.highestCombo = 1;
+        this.gameStartTime = performance.now();
 
         this.player.y = this.floorY - 42;
         this.player.vy = 0;
@@ -218,12 +219,12 @@ class CaveGravityRunner {
     }
 
     flipGravity() {
+        if (!this.player.isGrounded) return;
         this.player.gravDir *= -1;
         this.player.isGrounded = false;
-        this.player.scaleX = 0.8;
-        this.player.scaleY = 1.25;
+        this.player.vy = this.player.gravDir * 4.5;
         this.flips++;
-        this.createRockDust(this.player.x + 14, this.player.y + (this.player.gravDir === 1 ? 0 : 42));
+        this.createRockDust(this.player.x + 14, this.player.gravDir === 1 ? this.ceilY : this.floorY);
         window.gravityAudio.playFlip();
     }
 
@@ -282,8 +283,8 @@ class CaveGravityRunner {
     update() {
         if (this.gameState !== STATE.PLAYING) return;
 
-        // Progressive Cave Biome Level Ups (Every 500m)
-        const targetLevel = Math.min(5, Math.floor(this.distance / 500) + 1);
+        // Progressive Cave Biome Level Ups (Every 450m)
+        const targetLevel = Math.min(5, Math.floor(this.distance / 450) + 1);
         if (targetLevel > this.level) {
             this.level = targetLevel;
             this.shakeTimer = 18;
@@ -292,12 +293,15 @@ class CaveGravityRunner {
             window.gravityAudio.playLevelUp();
         }
 
-        // Progressive Speed Scaling: The further you go, the faster it gets!
-        const distSpeedBonus = Math.min(3.2, this.distance * 0.0009);
-        let effectiveSpeed = this.baseSpeed + distSpeedBonus;
+        // Continuous Progression: Speed ramps up noticeably with seconds played + distance explored!
+        const elapsedSec = (performance.now() - (this.gameStartTime || performance.now())) / 1000;
+        const timeSpeedBonus = Math.min(3.8, elapsedSec * 0.045); // +0.45 speed every 10 seconds
+        const distSpeedBonus = Math.min(3.5, this.distance * 0.001);
+        let effectiveSpeed = this.baseSpeed + timeSpeedBonus + distSpeedBonus;
+        
         if (this.player.slowMoTimer > 0) {
             this.player.slowMoTimer--;
-            effectiveSpeed *= 0.58;
+            effectiveSpeed *= 0.55;
         }
         this.speed = effectiveSpeed;
         this.distance += this.speed * 0.04;
@@ -367,11 +371,12 @@ class CaveGravityRunner {
         // Timers
         if (this.player.magnetTimer > 0) this.player.magnetTimer--;
 
-        // Spawn Procedural Cave Obstacles
+        // Spawn Procedural Cave Obstacles (Ramps up with speed and time)
         this.spawnTimer--;
         if (this.spawnTimer <= 0) {
             this.spawnProceduralCavePattern();
-            this.spawnTimer = Math.max(48, Math.floor(105 - this.level * 8));
+            const timeReduction = Math.min(25, elapsedSec * 0.25);
+            this.spawnTimer = Math.max(34, Math.floor(82 - timeReduction - this.level * 5));
         }
 
         // Update Obstacles (Stalagmites, Stalactites, Falling Boulders, Crystal Traps)
@@ -424,14 +429,14 @@ class CaveGravityRunner {
                 const dx = (this.player.x + 14) - (item.x + item.w / 2);
                 const dy = (this.player.y + 21) - (item.y + item.h / 2);
                 const dist = Math.hypot(dx, dy);
-                if (dist < 220) {
-                    item.x += (dx / dist) * 7.5;
-                    item.y += (dy / dist) * 7.5;
+                if (dist < 250) {
+                    item.x += (dx / dist) * 8.5;
+                    item.y += (dy / dist) * 8.5;
                 }
             }
 
-            // Collect Item
-            if (this.checkCollision(this.player, item)) {
+            // Collect Item (Generous pickup hitbox for ceiling and floor stars)
+            if (this.checkItemPickup(this.player, item)) {
                 if (item.type === 'GEM') {
                     this.coins += this.combo;
                     this.combo = Math.min(10, this.combo + 1);
@@ -478,8 +483,8 @@ class CaveGravityRunner {
         for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
             const ft = this.floatingTexts[i];
             ft.y += ft.vy;
-            ft.life--;
-            if (ft.life <= 0) this.floatingTexts.splice(i, 1);
+            ft.alpha -= 0.02;
+            if (ft.alpha <= 0) this.floatingTexts.splice(i, 1);
         }
 
         this.updateHUD();
@@ -504,7 +509,7 @@ class CaveGravityRunner {
                 });
             }
             // Gems appear along the safe ceiling running surface (Player flips to ceiling to collect)
-            this.spawnGemArc(startX, this.ceilY + 32, 3);
+            this.spawnGemArc(startX, this.ceilY + 6, 3);
         } else if (rand < 0.65) {
             // Pattern 2: Ceiling Stalactite spike -> Gems safely placed on FLOOR path
             const count = Math.random() < 0.5 ? 1 : 2;
@@ -520,7 +525,7 @@ class CaveGravityRunner {
                 });
             }
             // Gems appear along the safe floor running surface (Player runs on floor to collect)
-            this.spawnGemArc(startX, this.floorY - 44, 3);
+            this.spawnGemArc(startX, this.floorY - 32, 3);
         } else if (rand < 0.85) {
             // Pattern 3: Dual Staggered Pinch (Floor spike at start, ceiling spike 150px later)
             this.obstacles.push({
@@ -541,7 +546,7 @@ class CaveGravityRunner {
             });
             // Relic / Gems spawn in the safe mid-air arch between flips
             this.spawnRelic(startX + 80, (this.floorY + this.ceilY) / 2);
-            this.spawnGemArc(startX + 40, this.ceilY + 32, 2);
+            this.spawnGemArc(startX + 40, (this.floorY + this.ceilY) / 2 - 12, 2);
         } else {
             // Pattern 4: Falling Stalactite Rock with safe central crystal pathway
             this.obstacles.push({
@@ -554,7 +559,7 @@ class CaveGravityRunner {
                 falling: false,
                 shapeSeed: 0.5
             });
-            this.spawnGemArc(startX - 60, this.floorY - 44, 3);
+            this.spawnGemArc(startX - 60, this.floorY - 32, 3);
         }
     }
 
@@ -600,6 +605,7 @@ class CaveGravityRunner {
         });
     }
 
+    // Strict obstacle collision for fatal rock hazards
     checkCollision(p, obj) {
         const pad = 6;
         return (
@@ -607,6 +613,17 @@ class CaveGravityRunner {
             p.x + p.w - pad > obj.x + pad &&
             p.y + pad < obj.y + obj.h - pad &&
             p.y + p.h - pad > obj.y + pad
+        );
+    }
+
+    // Generous, forgiving pickup collision for Stars, Gems, and Relics
+    checkItemPickup(p, obj) {
+        const pickupRadius = 14;
+        return (
+            p.x < obj.x + obj.w + pickupRadius &&
+            p.x + p.w > obj.x - pickupRadius &&
+            p.y < obj.y + obj.h + pickupRadius &&
+            p.y + p.h > obj.y - pickupRadius
         );
     }
 
