@@ -1581,25 +1581,36 @@ function gameOver(customReason) {
     document.getElementById('gameover-screen').classList.remove('hidden');
 }
 
-// Spawner Logic
+// Spawner Logic — The further you go, the more obstacles and combinations appear!
 function updateSpawner() {
     spawnTimer--;
     if (spawnTimer <= 0) {
-        // Spawn rate scales naturally with current gameSpeed and time
-        const interval = Math.max(48, Math.floor((480 / gameSpeed) - (survivalTime * 0.08)));
+        // Obstacle frequency scales progressively with distance and survival time
+        const distReduction = Math.min(26, distance * 0.012);
+        const interval = Math.max(32, Math.floor(64 - distReduction - (survivalTime * 0.04)));
         spawnTimer = interval;
 
         const rand = Math.random();
-        if (rand < 0.35) {
+        if (rand < 0.30) {
             obstacles.push(new Obstacle('CALENDAR', 1050));
-        } else if (rand < 0.6) {
+        } else if (rand < 0.52) {
             obstacles.push(new Obstacle('LAPTOP', 1050));
-        } else if (rand < 0.78) {
+        } else if (rand < 0.72) {
             obstacles.push(new Obstacle('FLYING_BUZZWORD', 1050));
-        } else if (rand < 0.90) {
+        } else if (rand < 0.88) {
             obstacles.push(new Obstacle('COFFEE_SPILL', 1050));
         } else {
             obstacles.push(new Obstacle('TASK_BOULDER', 1050));
+        }
+
+        // At higher distances (>350m), occasionally spawn a staggered follow-up obstacle!
+        if (distance > 350 && Math.random() < 0.28) {
+            setTimeout(() => {
+                if (currentState === GAME_STATE.PLAYING) {
+                    const extraType = Math.random() < 0.5 ? 'FLYING_BUZZWORD' : 'LAPTOP';
+                    obstacles.push(new Obstacle(extraType, 1180));
+                }
+            }, 250);
         }
 
         // Spawn Coins & Power-ups
@@ -1611,18 +1622,19 @@ function updateSpawner() {
             }
         }
 
-        // Rare Powerup Drop
-        if (Math.random() < 0.18) {
+        // Powerup Drops (Slightly more frequent during high-speed sections to reward skill)
+        const powerupChance = distance > 500 ? 0.25 : 0.18;
+        if (Math.random() < powerupChance) {
             const powerups = ['COFFEE', 'HEADPHONES', 'PTO', 'OOO'];
             const chosen = powerups[Math.floor(Math.random() * powerups.length)];
             items.push(new Item(chosen, 1200, 420));
         }
     }
 
-    // Boss Battle Trigger
+    // Boss Battle Trigger (Scales with distance milestones)
     if (distance >= nextBossTriggerDist && !bossManager.active) {
         bossManager.trigger();
-        nextBossTriggerDist += 1200 + Math.random() * 500;
+        nextBossTriggerDist += 1000 + Math.random() * 400;
     }
 }
 
@@ -1642,10 +1654,10 @@ function updateGame() {
 
     survivalTime = (performance.now() - runStartTime) / 1000;
 
-    // Gentle, comfortable speed progression over time and distance
-    const timeSpeedBonus = survivalTime * 0.015; 
-    const distSpeedBonus = distance * 0.0004;   
-    const currentBaseSpeed = baseSpeed + Math.min(2.5, timeSpeedBonus + distSpeedBonus);
+    // Progressive Speed Scaling: The further you go, the faster and more intense it gets!
+    const timeSpeedBonus = Math.min(2.0, survivalTime * 0.02); 
+    const distSpeedBonus = Math.min(3.8, distance * 0.0012);   
+    const currentBaseSpeed = baseSpeed + timeSpeedBonus + distSpeedBonus;
 
     // Coffee & Dash speed boost multipliers
     const speedBoost = player.coffeeTimer > 0 ? 1.25 : (player.isDashing ? 1.35 : 1.0);

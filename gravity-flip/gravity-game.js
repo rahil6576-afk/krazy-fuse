@@ -254,7 +254,7 @@ class CaveGravityRunner {
         this.gameState = STATE.GAMEOVER;
         this.shakeTimer = 35;
         this.createRockExplosion(this.player.x, this.player.y, '#f43f5e');
-        window.gravityAudio.playCrash();
+        window.gravityAudio.playDeath();
         window.gravityAudio.stopBGM();
 
         if (this.distance > this.bestDistance) {
@@ -263,34 +263,41 @@ class CaveGravityRunner {
         }
 
         setTimeout(() => {
-            document.getElementById('res-dist').textContent = Math.floor(this.distance) + 'm';
-            document.getElementById('res-level').textContent = 'Level ' + this.level;
-            document.getElementById('res-coins').textContent = this.coins;
-            document.getElementById('res-flips').textContent = this.flips;
-            document.getElementById('res-combo').textContent = this.highestCombo + 'x';
-            document.getElementById('gameover-screen').classList.remove('hidden');
+            const distEl = document.getElementById('res-dist');
+            if (distEl) distEl.textContent = Math.floor(this.distance) + 'm';
+            const lvlEl = document.getElementById('res-level');
+            if (lvlEl) lvlEl.textContent = 'Level ' + this.level;
+            const coinEl = document.getElementById('res-coins');
+            if (coinEl) coinEl.textContent = this.coins;
+            const flipEl = document.getElementById('res-flips');
+            if (flipEl) flipEl.textContent = this.flips;
+            const comboEl = document.getElementById('res-combo');
+            if (comboEl) comboEl.textContent = this.highestCombo + 'x';
+            
+            const goScreen = document.getElementById('gameover-screen');
+            if (goScreen) goScreen.classList.remove('hidden');
         }, 500);
     }
 
     update() {
         if (this.gameState !== STATE.PLAYING) return;
 
-        // Level Up check every 850 meters
-        const targetLevel = Math.min(5, Math.floor(this.distance / 850) + 1);
+        // Progressive Cave Biome Level Ups (Every 500m)
+        const targetLevel = Math.min(5, Math.floor(this.distance / 500) + 1);
         if (targetLevel > this.level) {
             this.level = targetLevel;
-            this.baseSpeed += 0.12;
-            this.shakeTimer = 16;
+            this.shakeTimer = 18;
             const theme = CAVE_THEMES[(this.level - 1) % CAVE_THEMES.length];
             this.addFloatingText(`ENTERING: ${theme.name}`, CANVAS_WIDTH / 2, 280, theme.torchGlow, 22);
             window.gravityAudio.playLevelUp();
         }
 
-        // Speed & Slow-mo
-        let effectiveSpeed = this.baseSpeed;
+        // Progressive Speed Scaling: The further you go, the faster it gets!
+        const distSpeedBonus = Math.min(3.2, this.distance * 0.0009);
+        let effectiveSpeed = this.baseSpeed + distSpeedBonus;
         if (this.player.slowMoTimer > 0) {
             this.player.slowMoTimer--;
-            effectiveSpeed *= 0.6;
+            effectiveSpeed *= 0.58;
         }
         this.speed = effectiveSpeed;
         this.distance += this.speed * 0.04;
