@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elevator of Doom 99 🛗💀 — krazio games</title>
+    <base href="/elevator-doom/">
+    <!-- Favicon -->
+    <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="elevator-doom.css">
+</head>
+<body>
+
+<div id="game-wrapper">
+    <!-- Canvas for rendering -->
+    <canvas id="elevatorCanvas" width="900" height="600"></canvas>
+
+    <!-- Top HUD Overlay -->
+    <div id="hud">
+        <div class="hud-left">
+            <a href="../index.html" class="hud-btn" title="Back to krazio games">
+                <img src="krazio-icon.svg" alt="krazio" style="width: 20px; height: 20px; border-radius: 50%;">
+            </a>
+            <div class="hud-pill floor-pill">
+                🛗 <span id="hud-floor-text">FLOOR 1</span>
+            </div>
+            <div class="hud-pill alive-pill">
+                👥 <span id="hud-alive-count">8/8 ALIVE</span>
+            </div>
+        </div>
+
+        <div class="hud-center">
+            <div id="doom-event-banner" class="event-banner hidden">
+                <span id="doom-event-icon">⚠️</span>
+                <span id="doom-event-text">WARNING: PREPARE FOR DOOM</span>
+                <span id="doom-timer-pips"></span>
+            </div>
+        </div>
+
+        <div class="hud-right">
+            <div class="hud-pill power-pill" id="hud-ability-pill" title="Press E or Shift to Sabotage!">
+                <span>⚡ SABOTAGE:</span>
+                <strong id="hud-ability-name">PUSH (E)</strong>
+            </div>
+            <button id="btn-sound-toggle" class="hud-btn" title="Toggle Sound">🔊</button>
+        </div>
+    </div>
+
+    <!-- Elevator Mechanical Doors -->
+    <div id="door-left" class="elevator-door left"></div>
+    <div id="door-right" class="elevator-door right"></div>
+
+    <!-- Start / Lobby Screen -->
+    <div id="start-screen" class="screen">
+        <div class="title-box">
+            <div class="danger-tag">⚠️ MULTIPLAYER SURVIVAL CHAOS ⚠️</div>
+            <h1 class="game-title">ELEVATOR OF DOOM 99</h1>
+            <p class="game-subtitle">Survive 99 floors of unpredictable hazards, collapsing floors & sabotage!</p>
+        </div>
+
+        <!-- How To Play / Rules Explanation Card -->
+        <div class="rules-explanation-card">
+            <div class="rules-header">
+                <span style="font-size: 1.1rem; font-weight: 800; color: #facc15;">📜 HOW TO PLAY & RULES</span>
+                <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">30–60s Party Survival</span>
+            </div>
+            
+            <div class="rules-grid">
+                <div class="rule-box">
+                    <div class="rule-icon">🛗</div>
+                    <div class="rule-title">1. The Goal</div>
+                    <div class="rule-desc">You are trapped with 7 other passengers. Survive random floor hazards all the way to <strong>Floor 99</strong>.</div>
+                </div>
+
+                <div class="rule-box">
+                    <div class="rule-icon">⚠️</div>
+                    <div class="rule-title">2. Random Doom</div>
+                    <div class="rule-desc">Every floor triggers a surprise hazard: <strong>Collapsing tiles</strong>, <strong>Laser sweeps</strong>, or <strong>Ticking bombs</strong>!</div>
+                </div>
+
+                <div class="rule-box">
+                    <div class="rule-icon">🥊</div>
+                    <div class="rule-title">3. Sabotage & Push</div>
+                    <div class="rule-desc">Press <strong>E</strong> or <strong>Shift</strong> to shove rivals into hazards. Avoid getting pushed off yourself!</div>
+                </div>
+
+                <div class="rule-box">
+                    <div class="rule-icon">🏆</div>
+                    <div class="rule-title">4. Floor 99 Escape</div>
+                    <div class="rule-desc">At Floor 99, the <strong>Golden Escape Hatch</strong> opens. First survivor to leap in wins the crown!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Character Roster -->
+        <div class="lobby-roster-card">
+            <h3>👥 8 ELEVATOR PASSENGERS (YOU + 7 BOTS)</h3>
+            <div class="passenger-preview-grid" id="passenger-grid">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <div class="action-row">
+            <button id="btn-start-game" class="btn-play-primary">
+                <span>🚪 ENTER ELEVATOR & SURVIVE</span>
+            </button>
+            <a href="index.html" class="btn-secondary-lobby">
+                <span>🏠 KRAZIO HUB</span>
+            </a>
+        </div>
+
+        <!-- Controls Guide -->
+        <div class="controls-pill-strip">
+            <div class="ctrl-item"><span class="key-k">A / D / ← →</span> Walk</div>
+            <div class="ctrl-item"><span class="key-k">W / SPACE / ↑</span> Jump</div>
+            <div class="ctrl-item"><span class="key-k">S / ↓</span> Duck / Crouch</div>
+            <div class="ctrl-item"><span class="key-k">E / SHIFT</span> Push / Sabotage</div>
+        </div>
+    </div>
+
+    <!-- Game Over / Victory Screen -->
+    <div id="gameover-screen" class="screen hidden">
+        <div class="gameover-box">
+            <div id="gameover-badge" class="result-badge">💀 ELEVATOR CRUSHED</div>
+            <h2 id="gameover-title" class="result-title">You Were Eliminated!</h2>
+            <p id="gameover-subtitle" class="result-subtitle">Floor 37: Knocked into the abyss by Chad.</p>
+
+            <div class="stats-matrix">
+                <div class="stat-card">
+                    <span class="sc-label">Highest Floor</span>
+                    <strong class="sc-val" id="res-floor">Floor 37</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="sc-label">Dooms Survived</span>
+                    <strong class="sc-val" id="res-dooms">12</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="sc-label">Players Sabotaged</span>
+                    <strong class="sc-val" id="res-sabotages">4</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="sc-label">Rank</span>
+                    <strong class="sc-val" id="res-rank">Certified Splat 💀</strong>
+                </div>
+            </div>
+
+            <div class="action-row" style="margin-top: 20px;">
+                <button id="btn-restart" class="btn-play-primary">
+                    <span>⚡ RIDE AGAIN (SPACE)</span>
+                </button>
+                <a href="index.html" class="btn-secondary-lobby">
+                    <span>🌐 KRAZIO HUB</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ghost Spectator Overlay (when dead before match ends) -->
+    <div id="spectator-hud" class="spectator-banner hidden">
+        👻 YOU ARE A GHOST! Click anywhere to haunt & throw slime at survivors!
+    </div>
+</div>
+
+<!-- Audio Engine & Game Engine -->
+<script src="elevator-audio.js"></script>
+<script src="elevator-game.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "cyber-clash-pvp-arena",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "2D PvP Action Fighting Game featuring Aarav and Champions",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx http-server . -p 3000 -c-1 -o",
+    "start": "npx http-server . -p 3000 -c-1 -o",
+    "serve": "npx http-server . -p 3000 -c-1 -o"
+  },
+  "keywords": [
+    "fighting-game",
+    "2d-pvp",
+    "aarav",
+    "arcade"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "pngjs": "^7.0.0",
+    "sharp": "^0.35.3"
+  }
+}

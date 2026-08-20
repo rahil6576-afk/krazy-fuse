@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fallen One ⚔️⚡ — krazio games</title>
+    <base href="/fallen-one/">
+    <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
+    <meta name="description" content="Fast-paced 2D competitive PvP action fighting game featuring Aarav and champions with combos, specials, parries, training mode, and online PvP.">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+      #krazio-floating-back {
+        position: fixed;
+        top: 14px;
+        left: 16px;
+        z-index: 99999;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(99, 102, 241, 0.4);
+        color: #f8fafc;
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 0.85rem;
+        font-weight: 800;
+        padding: 8px 16px;
+        border-radius: 9999px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.3);
+        transition: all 0.2s ease;
+      }
+      #krazio-floating-back:hover {
+        background: rgba(79, 70, 229, 0.95);
+        border-color: #6366f1;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(79, 70, 229, 0.6);
+      }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Back to Krazio Hub Button -->
+    <a href="../index.html" id="krazio-floating-back" title="Back to krazio games portal">
+      <img src="krazio-icon.svg" alt="krazio" style="width: 20px; height: 20px; border-radius: 50%;">
+      <span>🏠 KRAZIO GAMES</span>
+    </a>
+
+    <div id="game-container">
+        <!-- Game Canvas -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- ==========================================================================
+             IN-GAME HUD
+             ========================================================================== -->
+        <div id="game-hud" class="hidden">
+            <div class="hud-top">
+                <!-- Player 1 HUD -->
+                <div class="fighter-hud-card p1-hud">
+                    <div class="hud-portrait-wrap">
+                        <img id="p1-portrait" src="assets/characters/aarav.jpg" alt="P1" class="hud-portrait" />
+                    </div>
+                    <div class="hud-bars-wrap">
+                        <div class="hud-name-row">
+                            <span id="p1-name" class="hud-fighter-name">AARAV</span>
+                            <div id="p1-round-pips" class="round-pips">
+                                <span class="pip"></span>
+                                <span class="pip"></span>
+                            </div>
+                        </div>
+                        <div class="health-bar-container">
+                            <div id="p1-health-buffer" class="health-buffer" style="width: 100%;"></div>
+                            <div id="p1-health-fill" class="health-fill" style="width: 100%;"></div>
+                        </div>
+                        <div class="energy-bar-container">
+                            <div id="p1-energy-fill" class="energy-fill" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center Match Timer & Pause Button -->
+                <div class="hud-center-timer">
+                    <div id="tower-floor-indicator" class="tower-floor-tag hidden">FLOOR 10: BOSS</div>
+                    <span id="match-timer" class="timer-num">60</span>
+                    <span class="timer-label">TIME</span>
+                    <button id="btn-hud-pause" class="hud-pause-btn" title="Pause Game (ESC / P)">
+                        <span>⏸️ PAUSE</span>
+                    </button>
+                </div>
+
+                <!-- Player 2 / Boss 1 HUD -->
+                <div class="fighter-hud-card p2-hud">
+                    <div class="hud-portrait-wrap">
+                        <img id="p2-portrait" src="assets/characters/solar.jpg" alt="P2" class="hud-portrait" />
+                    </div>
+                    <div class="hud-bars-wrap">
+                        <div class="hud-name-row">
+                            <span id="p2-name" class="hud-fighter-name">SOLAR</span>
+                            <div id="p2-round-pips" class="round-pips">
+                                <span class="pip"></span>
+                                <span class="pip"></span>
+                            </div>
+                        </div>
+                        <div class="health-bar-container">
+                            <div id="p2-health-buffer" class="health-buffer" style="width: 100%;"></div>
+                            <div id="p2-health-fill" class="health-fill" style="width: 100%;"></div>
+                        </div>
+                        <div class="energy-bar-container">
+                            <div id="p2-energy-fill" class="energy-fill" style="width: 100%;"></div>
+                        </div>
+
+                        <!-- Secondary Boss Bar for Floor 10 (2v1) -->
+                        <div id="p3-boss-bar-wrap" class="secondary-boss-bar hidden" style="margin-top: 4px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; color: #facc15; margin-bottom: 2px;">
+                                <span id="p3-name">VOLT (TWIN BOSS)</span>
+                            </div>
+                            <div class="health-bar-container" style="height: 12px;">
+                                <div id="p3-health-fill" class="health-fill" style="width: 100%; background: linear-gradient(90deg, #facc15, #f59e0b);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Combo Popups -->
+            <div id="p1-combo-box" class="combo-display">
+                <div id="p1-combo-hits" class="combo-hits">3 HITS</div>
+                <div id="p1-combo-damage" class="combo-damage">145 DMG</div>
+            </div>
+            <div id="p2-combo-box" class="combo-display">
+                <div id="p2-combo-hits" class="combo-hits">3 HITS</div>
+                <div id="p2-combo-damage" class="combo-damage">145 DMG</div>
+            </div>
+
+            <!-- Super Meters -->
+            <div class="hud-bottom">
+                <div class="super-meter-wrap p1-super">
+                    <span class="super-label">SUPER // FOCUS</span>
+                    <div class="super-bar">
+                        <div id="p1-super-fill" class="super-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="super-meter-wrap p2-super">
+                    <span class="super-label">SUPER // FOCUS</span>
+                    <div class="super-bar">
+                        <div id="p2-super-fill" class="super-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             TRAINING MODE OVERLAY
+             ========================================================================== -->
+        <div id="training-panel" class="hidden">
+            <div class="training-row">
+                <span>Frame Advantage:</span>
+                <strong id="frame-advantage-val" style="color: #4ade80;">+0F</strong>
+            </div>
+            <div class="training-row">
+                <span>Dummy State:</span>
+                <select id="dummy-state-select" class="training-btn">
+                    <option value="IDLE">Standing</option>
+                    <option value="CROUCH">Crouching</option>
+                    <option value="JUMP">Jumping</option>
+                    <option value="GUARD_ALL">Guard All</option>
+                    <option value="COUNTER">Counter Attack</option>
+                </select>
+            </div>
+            <div class="training-row">
+                <button id="toggle-hitboxes-btn" class="training-btn">Hitboxes: OFF</button>
+                <button id="reset-training-btn" class="training-btn">Reset Pos</button>
+            </div>
+            <div id="input-history-list" style="margin-top: 4px; font-family: monospace; font-size: 11px; color: #94a3b8;"></div>
+        </div>
+
+        <!-- ==========================================================================
+             MOBILE TOUCH CONTROLS
+             ========================================================================== -->
+        <div id="mobile-touch-hud">
+            <div id="touch-dpad" class="touch-dpad-container">
+                <div id="touch-stick" class="touch-stick"></div>
+            </div>
+            <div class="touch-buttons-grid">
+                <div id="touch-btn-lp" class="touch-action-btn">LP</div>
+                <div id="touch-btn-hp" class="touch-action-btn">HP</div>
+                <div id="touch-btn-lk" class="touch-action-btn">LK</div>
+                <div id="touch-btn-hk" class="touch-action-btn">HK</div>
+                <div id="touch-btn-sp" class="touch-action-btn">SP</div>
+                <div id="touch-btn-ult" class="touch-action-btn btn-super">ULT</div>
+                <div id="touch-btn-blk" class="touch-action-btn">BLK</div>
+                <div id="touch-btn-dsh" class="touch-action-btn">DSH</div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             MAIN MENU SCREEN
+             ========================================================================== -->
+        <div id="main-menu-screen" class="menu-screen">
+            <div class="main-menu-content">
+                <div class="menu-title-area">
+                    <span class="game-subtitle">Next-Gen 2D Arcade Fighter</span>
+                    <h1 class="game-title">CYBER CLASH<br><span style="color: var(--primary);">PVP ARENA</span></h1>
+                    <p style="color: #94a3b8; font-size: 14px; max-width: 420px; line-height: 1.5;">
+                        Master martial arts, elemental forces and ultimate focus attacks in fast-paced 60 FPS competitive arcade fighting.
+                    </p>
+
+                    <!-- QUICK MOVES MANUAL PREVIEW ON HOMEPAGE -->
+                    <div class="homepage-move-manual">
+                        <div class="manual-header-row">
+                            <span class="manual-title">⚡ COMBAT MOVES MANUAL</span>
+                            <div id="manual-char-tabs" class="manual-char-tabs">
+                                <button class="char-tab active" data-char="AARAV">AARAV</button>
+                                <button class="char-tab" data-char="SOLAR">SOLAR</button>
+                                <button class="char-tab" data-char="FROST">FROST</button>
+                                <button class="char-tab" data-char="VOLT">VOLT</button>
+                                <button class="char-tab" data-char="SHADOW">SHADOW</button>
+                                <button class="char-tab" data-char="TERRA">TERRA</button>
+                            </div>
+                        </div>
+
+                        <div id="manual-skills-content" class="manual-skills-grid">
+                            <!-- Populated dynamically by MenuManager -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-buttons">
+                    <button id="btn-mode-local" class="arcade-btn primary-btn">
+                        <span>LOCAL VS (1v1)</span>
+                        <span>➔</span>
+                    </button>
+                    <button id="btn-mode-ai" class="arcade-btn">
+                        <span>VS CPU (AI BATTLE)</span>
+                        <span>➔</span>
+                    </button>
+                    <button id="btn-mode-training" class="arcade-btn">
+                        <span>TRAINING DOJO</span>
+                        <span>➔</span>
+                    </button>
+                    <button id="btn-mode-online" class="arcade-btn">
+                        <span>ONLINE MULTIPLAYER</span>
+                        <span>➔</span>
+                    </button>
+                    <button id="btn-mode-tower" class="arcade-btn tower-btn">
+                        <span>🗼 TOWER CLIMB (10 FLOORS)</span>
+                        <span>➔</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="menu-footer">
+                <div>
+                    <span>Controls: [WASD] Move/Jump &bull; [J/K] Punch &bull; [U/I] Kick &bull; [L] Special &bull; [O] Ultimate &bull; [H] Block &bull; [Space] Dash</span>
+                </div>
+                <div>
+                    <button id="btn-toggle-fullscreen" class="footer-btn">⛶ FULLSCREEN</button>
+                    <button id="btn-open-moves" class="footer-btn">📖 FULL MANUAL</button>
+                    <button id="btn-open-settings" class="footer-btn">⚙️ SETTINGS</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             CHARACTER SELECT SCREEN
+             ========================================================================== -->
+        <div id="char-select-screen" class="menu-screen hidden">
+            <div class="select-header">
+                <h2 class="select-title">SELECT FIGHTER</h2>
+                <button id="btn-confirm-char" class="arcade-btn primary-btn" style="width: auto; padding: 8px 24px;">
+                    CONFIRM ➔
+                </button>
+            </div>
+
+            <div class="char-select-body">
+                <div id="character-grid" class="char-grid"></div>
+
+                <div class="char-preview-panel">
+                    <div class="preview-portrait-wrap">
+                        <img id="cs-p1-portrait" src="assets/characters/aarav_preview.jpg" alt="Preview" class="preview-portrait" />
+                    </div>
+                    <div>
+                        <div id="cs-p1-name" class="preview-name">AARAV</div>
+                        <div id="cs-p1-title" class="preview-title">THE BALANCED FIGHTER</div>
+                        <div id="cs-p1-role" style="font-size: 13px; color: #94a3b8; margin-top: 2px;">All-Rounder</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div class="stat-row">
+                            <span class="stat-label">HEALTH</span>
+                            <div class="stat-bar-bg"><div id="cs-p1-stat-hp" class="stat-bar-fill" style="width: 83%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">ATTACK</span>
+                            <div class="stat-bar-bg"><div id="cs-p1-stat-atk" class="stat-bar-fill" style="width: 80%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">DEFENSE</span>
+                            <div class="stat-bar-bg"><div id="cs-p1-stat-def" class="stat-bar-fill" style="width: 75%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">SPEED</span>
+                            <div class="stat-bar-bg"><div id="cs-p1-stat-spd" class="stat-bar-fill" style="width: 80%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             STAGE SELECT SCREEN
+             ========================================================================== -->
+        <div id="stage-select-screen" class="menu-screen hidden">
+            <div class="select-header">
+                <h2 class="select-title">SELECT BATTLE ARENA</h2>
+                <button id="btn-start-match" class="arcade-btn primary-btn" style="width: auto; padding: 8px 24px;">
+                    FIGHT! ➔
+                </button>
+            </div>
+
+            <div id="stage-grid" class="stage-grid"></div>
+        </div>
+
+        <!-- ==========================================================================
+             PAUSE MODAL
+             ========================================================================== -->
+        <div id="pause-modal" class="modal-backdrop hidden">
+            <div class="modal-dialog" style="width: 420px; text-align: center;">
+                <div class="modal-header" style="justify-content: center;">
+                    <h3 class="modal-title" style="font-size: 40px; letter-spacing: 3px; color: var(--accent);">GAME PAUSED</h3>
+                </div>
+                <p style="color: #94a3b8; font-size: 13px; margin-top: -6px;">Combat is halted. Choose an action:</p>
+
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px;">
+                    <button id="btn-pause-resume" class="arcade-btn primary-btn" style="justify-content: center; font-size: 24px;">
+                        <span>▶️ RESUME FIGHT</span>
+                    </button>
+                    <button id="btn-pause-restart" class="arcade-btn" style="justify-content: center; font-size: 24px;">
+                        <span>🔄 RESTART MATCH</span>
+                    </button>
+                    <button id="btn-pause-home" class="arcade-btn" style="justify-content: center; font-size: 24px; border-color: #ef4444; color: #f87171;">
+                        <span>🏠 MAIN MENU / HOME</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             RESULTS SCREEN
+             ========================================================================== -->
+        <div id="results-screen" class="menu-screen hidden">
+            <div class="results-card">
+                <img id="res-winner-portrait" src="assets/characters/aarav.jpg" alt="Winner" class="results-winner-portrait" />
+                <div style="text-align: center;">
+                    <div style="font-size: 14px; letter-spacing: 4px; color: var(--accent); font-weight: 800;">VICTORIOUS</div>
+                    <div id="res-winner-name" class="results-winner-name">AARAV</div>
+                </div>
+
+                <div class="results-stats-row">
+                    <div class="results-stat-box">
+                        <div id="res-score" class="res-stat-val">2 - 0</div>
+                        <div class="res-stat-lbl">ROUNDS</div>
+                    </div>
+                    <div class="results-stat-box">
+                        <div id="res-time" class="res-stat-val">38s</div>
+                        <div class="res-stat-lbl">MATCH TIME</div>
+                    </div>
+                    <div class="results-stat-box">
+                        <div id="res-xp" class="res-stat-val" style="color: var(--accent);">+750 XP</div>
+                        <div class="res-stat-lbl">EXPERIENCE</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 14px; width: 100%;">
+                    <button id="btn-rematch" class="arcade-btn primary-btn" style="flex: 1; text-align: center; justify-content: center;">REMATCH</button>
+                    <button id="btn-return-menu" class="arcade-btn" style="flex: 1; text-align: center; justify-content: center;">MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             ONLINE MULTIPLAYER MODAL
+             ========================================================================== -->
+        <div id="online-modal" class="modal-backdrop hidden">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <h3 class="modal-title">ONLINE PVP MULTIPLAYER</h3>
+                    <button class="btn-close-modal">&times;</button>
+                </div>
+                <p style="color: #94a3b8; font-size: 14px;">Connect with a rival in real-time peer-to-peer battle.</p>
+
+                <div style="display: flex; flex-direction: column; gap: 16px; margin: 12px 0;">
+                    <button id="btn-host-room" class="arcade-btn primary-btn" style="justify-content: center;">HOST NEW MATCH</button>
+                    
+                    <div id="online-host-section" class="hidden" style="background: #1e293b; padding: 14px; border-radius: 6px; text-align: center;">
+                        <span style="font-size: 13px; color: #94a3b8;">SHARE ROOM CODE:</span>
+                        <div id="host-room-code-display" style="font-family: var(--font-heading); font-size: 38px; color: var(--accent); letter-spacing: 4px;">---</div>
+                        <span style="font-size: 12px; color: #38bdf8;">Waiting for opponent to join...</span>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input id="join-room-input" type="text" placeholder="Enter 6-Digit Room Code" style="flex: 1; padding: 12px; background: #1e293b; border: 1px solid #475569; border-radius: 6px; color: #ffffff; font-size: 16px;" />
+                        <button id="btn-join-room" class="arcade-btn" style="width: auto; padding: 12px 20px;">JOIN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             SETTINGS MODAL
+             ========================================================================== -->
+        <div id="settings-modal" class="modal-backdrop hidden">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <h3 class="modal-title">AUDIO & GAMEPLAY SETTINGS</h3>
+                    <button class="btn-close-modal">&times;</button>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 8px;">
+                    <div class="setting-slider-row">
+                        <span>Master Volume</span>
+                        <input id="slider-master-volume" type="range" min="0" max="1" step="0.05" value="0.8" />
+                    </div>
+                    <div class="setting-slider-row">
+                        <span>Sound Effects (SFX)</span>
+                        <input id="slider-sfx-volume" type="range" min="0" max="1" step="0.05" value="0.9" />
+                    </div>
+                    <div class="setting-slider-row">
+                        <span>Battle Music</span>
+                        <input id="slider-music-volume" type="range" min="0" max="1" step="0.05" value="0.65" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             MOVELIST MODAL
+             ========================================================================== -->
+        <div id="moves-modal" class="modal-backdrop hidden">
+            <div class="modal-dialog" style="width: 580px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">COMMAND LIST — AARAV</h3>
+                    <button class="btn-close-modal">&times;</button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+                    <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px;">
+                        <strong style="color: var(--primary);">Light Attack:</strong> <code>J (Punch) / U (Kick)</code><br>
+                        <small style="color: #94a3b8;">Fast jabs that cancel into full combos.</small>
+                    </div>
+                    <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px;">
+                        <strong style="color: var(--primary);">Heavy Attack:</strong> <code>K (Straight) / I (Kick)</code><br>
+                        <small style="color: #94a3b8;">Powerful lunging strikes with energy slash arcs.</small>
+                    </div>
+                    <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px;">
+                        <strong style="color: var(--primary);">Rising Kick:</strong> <code>S + I (Down + Heavy Kick)</code><br>
+                        <small style="color: #94a3b8;">Invincible anti-air upward kick launching enemies into aerial juggles.</small>
+                    </div>
+                    <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px;">
+                        <strong style="color: var(--primary);">Focus Strike:</strong> <code>L (Special)</code><br>
+                        <small style="color: #94a3b8;">Armored forward energy punch that interrupts enemy attacks.</small>
+                    </div>
+                    <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px;">
+                        <strong style="color: var(--primary);">Energy Wave:</strong> <code>S + U (Down + Light Kick)</code><br>
+                        <small style="color: #94a3b8;">Thrusts hands forward releasing a flying cyan energy crescent wave.</small>
+                    </div>
+                    <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px;">
+                        <strong style="color: var(--primary);">Ground Burst:</strong> <code>S + L (Down + Special)</code><br>
+                        <small style="color: #94a3b8;">Slams fist into the ground generating an expanding shockwave ring.</small>
+                    </div>
+                    <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px;">
+                        <strong style="color: var(--accent);">ULTIMATE — Focus Burst:</strong> <code>O (Super with Full Meter)</code><br>
+                        <small style="color: #94a3b8;">Fires an overwhelming full-screen energy beam with screen shake & slow-mo!</small>
+                    </div>
+                    <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px;">
+                        <strong style="color: #38bdf8;">Block / Shield:</strong> <code>H (Hold for Shield, Tap on impact for Parry)</code>
+                    </div>
+                    <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px;">
+                        <strong style="color: #cbd5e1;">Dash / Evade:</strong> <code>Space (Invincible startup dodge)</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Entrypoint -->
+    <script type="module" src="js/game.js"></script>
+</body>
+</html>

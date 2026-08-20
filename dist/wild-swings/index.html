@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wild Swings: Stickman Hook Arcade 🕷️🐒 — krazio games</title>
+    <!-- Favicon -->
+    <link rel="icon" href="../krazio-icon.svg" type="image/svg+xml">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+      :root {
+        --primary: #4353ff;
+        --accent: #00f0ff;
+        --spider-red: #ff2a55;
+        --jungle-green: #10b981;
+        --bg-dark: #090c18;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --glass-bg: rgba(15, 23, 42, 0.88);
+        --glass-border: rgba(255, 255, 255, 0.16);
+        --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: var(--bg-dark);
+        font-family: var(--font-main);
+        color: var(--text-main);
+        touch-action: none;
+      }
+
+      #game-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #080b14;
+      }
+
+      #gameCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        z-index: 1;
+        cursor: pointer;
+      }
+
+      /* In-Game Top HUD (Zero Overlap Grid) */
+      #hud-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      .hud-left-group,
+      .hud-center-group,
+      .hud-right-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        pointer-events: auto;
+      }
+
+      .hud-pill {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        padding: 8px 16px;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 0.88rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        text-decoration: none;
+        color: var(--text-main);
+        white-space: nowrap;
+      }
+
+      .hud-pill.krazio-home-pill {
+        background: rgba(30, 27, 75, 0.9);
+        border-color: rgba(99, 102, 241, 0.5);
+        transition: all 0.2s ease;
+      }
+
+      .hud-pill.krazio-home-pill:hover {
+        background: rgba(79, 70, 229, 0.95);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+      }
+
+      .hud-pill.level-badge {
+        background: linear-gradient(135deg, rgba(67, 83, 255, 0.9), rgba(124, 58, 237, 0.9));
+        border-color: rgba(167, 139, 250, 0.4);
+        color: #fff;
+        letter-spacing: 0.5px;
+      }
+
+      .hud-pill.theme-badge {
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+
+      .hud-pill.theme-badge:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent);
+      }
+
+      /* Level Progress Track */
+      .level-progress-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        min-width: 240px;
+      }
+
+      .progress-track-bg {
+        width: 100%;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 9999px;
+        overflow: visible;
+        position: relative;
+      }
+
+      .progress-track-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #ff007f, #00f0ff);
+        border-radius: 9999px;
+        transition: width 0.08s linear;
+        box-shadow: 0 0 12px #00f0ff;
+        position: relative;
+      }
+
+      .progress-runner-avatar {
+        position: absolute;
+        right: -10px;
+        top: -6px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      }
+
+      .progress-icons {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        font-size: 0.78rem;
+        font-weight: 900;
+        color: var(--text-muted);
+      }
+
+      .hud-btn {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        color: var(--text-main);
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.05rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      }
+
+      .hud-btn:hover {
+        background: rgba(79, 70, 229, 0.85);
+        border-color: #6366f1;
+        transform: scale(1.1);
+      }
+
+      #touch-hint-prompt {
+        position: absolute;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.88);
+        backdrop-filter: blur(8px);
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
+        color: #f8fafc;
+        padding: 10px 28px;
+        border-radius: 9999px;
+        font-size: 0.9rem;
+        font-weight: 800;
+        pointer-events: none;
+        z-index: 5;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
+        animation: pulseHint 2s infinite ease-in-out;
+      }
+
+      @keyframes pulseHint {
+        0%, 100% { opacity: 0.85; transform: translateX(-50%) scale(0.98); }
+        50% { opacity: 1; transform: translateX(-50%) scale(1.02); }
+      }
+
+      /* Modals */
+      .modal-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(5, 7, 20, 0.88);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        padding: 20px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .modal-card {
+        background: linear-gradient(135deg, rgba(26, 29, 66, 0.96), rgba(12, 14, 34, 0.96));
+        border: 1.5px solid rgba(255, 255, 255, 0.16);
+        border-radius: 28px;
+        padding: 36px;
+        max-width: 520px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8), 0 0 40px rgba(67, 83, 255, 0.35);
+        transform: scale(0.9);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+      }
+
+      .modal-overlay.active .modal-card {
+        transform: scale(1);
+      }
+
+      .modal-title {
+        font-size: 2.2rem;
+        font-weight: 900;
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, #fff, #93c5fd);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .modal-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 24px;
+      }
+
+      .themes-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .theme-select-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 18px;
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+        position: relative;
+      }
+
+      .theme-select-card:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .theme-select-card.active {
+        border-color: #4353ff;
+        box-shadow: 0 0 20px rgba(67, 83, 255, 0.4);
+        background: rgba(67, 83, 255, 0.2);
+      }
+
+      .theme-card-emoji {
+        font-size: 2.4rem;
+      }
+
+      .theme-card-info h4 {
+        font-size: 1.15rem;
+        font-weight: 800;
+        margin-bottom: 2px;
+      }
+
+      .theme-card-info p {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+      }
+
+      .theme-active-tag {
+        margin-left: auto;
+        background: #4353ff;
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 900;
+        padding: 4px 10px;
+        border-radius: 9999px;
+      }
+
+      .levels-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-bottom: 24px;
+        max-height: 280px;
+        overflow-y: auto;
+        padding: 4px;
+      }
+
+      .level-btn {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1.5px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        padding: 12px 6px;
+        color: #fff;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s ease;
+      }
+
+      .level-btn:hover:not(.locked) {
+        background: #4353ff;
+        border-color: #6366f1;
+        transform: scale(1.08);
+      }
+
+      .level-btn.active {
+        border-color: #00f0ff;
+        background: rgba(0, 240, 255, 0.2);
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+      }
+
+      .level-btn.locked {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .level-stars-mini {
+        font-size: 0.65rem;
+        color: #fbbf24;
+      }
+
+      .btn-cta {
+        background: linear-gradient(135deg, #4353ff 0%, #6366f1 100%);
+        color: #fff;
+        border: none;
+        font-size: 1.15rem;
+        font-weight: 900;
+        padding: 15px 32px;
+        border-radius: 9999px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 8px 25px rgba(67, 83, 255, 0.5);
+        transition: all 0.2s ease;
+        width: 100%;
+      }
+
+      .btn-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(67, 83, 255, 0.7);
+        filter: brightness(1.1);
+      }
+
+      .btn-secondary-link {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #e2e8f0;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 10px 20px;
+        border-radius: 9999px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        margin-top: 10px;
+        width: 100%;
+      }
+
+      .btn-secondary-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      .victory-stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .v-stat-box {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 12px;
+      }
+
+      .v-stat-val {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #00f0ff;
+        display: block;
+      }
+
+      .v-stat-lbl {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      @media (max-width: 768px) {
+        #hud-overlay { padding: 12px 14px; }
+        .hud-pill { padding: 6px 12px; font-size: 0.78rem; gap: 6px; }
+        .level-progress-container { min-width: 130px; }
+        .modal-card { padding: 24px 18px; }
+        .levels-grid { grid-template-columns: repeat(4, 1fr); }
+      }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- 60FPS Stickman Hook Physics Canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Top HUD Overlay (Cleanly Separated Left, Center & Right) -->
+        <div id="hud-overlay">
+            <div class="hud-left-group">
+                <!-- Floating Back Button (Integrated to prevent overlap) -->
+                <a href="../index.html" class="hud-pill krazio-home-pill" title="Back to krazio games portal">
+                    <img src="krazio-icon.svg" alt="krazio" style="width: 18px; height: 18px; border-radius: 50%;">
+                    <span>🏠 KRAZIO</span>
+                </a>
+                <div class="hud-pill level-badge" id="hud-level-text">LEVEL 1 / 20</div>
+                <div class="hud-pill theme-badge" id="btn-open-themes" title="Change Theme">
+                    <span id="hud-theme-text">🕷️ SPIDER-MAN</span>
+                </div>
+            </div>
+
+            <div class="hud-center-group">
+                <div class="level-progress-container">
+                    <div class="progress-icons">
+                        <span>START</span>
+                        <span>FINISH 🏁</span>
+                    </div>
+                    <div class="progress-track-bg">
+                        <div id="progress-track-fill" class="progress-track-fill">
+                            <div class="progress-runner-avatar" id="hud-runner-avatar">🕷️</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-right-group">
+                <button class="hud-btn" id="btn-sound-toggle" title="Toggle Sound">🔊</button>
+                <button class="hud-btn" id="btn-levels-open" title="Level Select">🗺️</button>
+                <button class="hud-btn" id="btn-pause-open" title="Pause Game">⏸️</button>
+            </div>
+        </div>
+
+        <!-- Touch / Click Hint -->
+        <div id="touch-hint-prompt">🎯 HOLD TO HOOK • RELEASE TO FLY • DON'T FALL!</div>
+
+        <!-- Theme Selector Modal -->
+        <div class="modal-overlay" id="theme-modal">
+            <div class="modal-card">
+                <h2 class="modal-title">CHOOSE THEME</h2>
+                <p class="modal-subtitle">Pick character suit, rope style & world atmosphere</p>
+
+                <div class="themes-grid" id="theme-picker-list">
+                    <div class="theme-select-card active" data-theme="spiderman">
+                        <div class="theme-card-emoji">🕷️</div>
+                        <div class="theme-card-info">
+                            <h4>Spider-Man: NYC Skyline</h4>
+                            <p>Web sling between skyscraper spires</p>
+                        </div>
+                    </div>
+                    <div class="theme-select-card" data-theme="monkey">
+                        <div class="theme-card-emoji">🐒</div>
+                        <div class="theme-card-info">
+                            <h4>Jungle Monkey: Canopy Rush</h4>
+                            <p>Swing wild jungle vines across ancient ruins</p>
+                        </div>
+                    </div>
+                    <div class="theme-select-card" data-theme="human">
+                        <div class="theme-card-emoji">🥷</div>
+                        <div class="theme-card-info">
+                            <h4>Acrobatic Ninja: Cyber Arena</h4>
+                            <p>Grapple high-tech neon rings & launch across platforms</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-cta" id="btn-close-themes">
+                    <span>CONFIRM THEME</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Level Selector Modal -->
+        <div class="modal-overlay" id="levels-modal">
+            <div class="modal-card">
+                <h2 class="modal-title">SELECT LEVEL</h2>
+                <p class="modal-subtitle">Conquer all 20 handcrafted Stickman Hook courses</p>
+
+                <div class="levels-grid" id="levels-container"></div>
+
+                <button class="btn-secondary-link" id="btn-close-levels">
+                    <span>BACK</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Victory Modal -->
+        <div class="modal-overlay" id="victory-modal">
+            <div class="modal-card">
+                <div style="font-size: 3.5rem; margin-bottom: 6px;">🏆🎉</div>
+                <h2 class="modal-title" id="vic-title">LEVEL CLEARED!</h2>
+                <p class="modal-subtitle">Magnificent Acrobatic Finish!</p>
+
+                <div class="victory-stats-grid">
+                    <div class="v-stat-box">
+                        <span class="v-stat-val" id="vic-time">3.8s</span>
+                        <span class="v-stat-lbl">CLEAR TIME</span>
+                    </div>
+                    <div class="v-stat-box">
+                        <span class="v-stat-val" id="vic-swings">4 Swings</span>
+                        <span class="v-stat-lbl">HOOK SWINGS</span>
+                    </div>
+                </div>
+
+                <button class="btn-cta" id="btn-next-level">
+                    <span>NEXT LEVEL ➔</span>
+                </button>
+                <button class="btn-secondary-link" id="btn-vic-menu">
+                    <span>LEVEL SELECT</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Pause Modal -->
+        <div class="modal-overlay" id="pause-modal">
+            <div class="modal-card" style="max-width: 420px;">
+                <h2 class="modal-title">GAME PAUSED</h2>
+                <p class="modal-subtitle">Take a breather, Champion</p>
+
+                <button class="btn-cta" id="btn-resume-game" style="margin-bottom: 10px;">
+                    <span>▶ RESUME</span>
+                </button>
+                <button class="btn-secondary-link" id="btn-pause-restart">
+                    <span>🔄 RESTART LEVEL</span>
+                </button>
+                <button class="btn-secondary-link" id="btn-pause-levels">
+                    <span>🗺️ LEVEL SELECT</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complete Authentic Stickman Hook Engine -->
+    <script>
+      // ==========================================
+      // 1. Web Audio Synthesizer
+      // ==========================================
+      class StickmanAudio {
+        constructor() {
+          this.ctx = null;
+          this.muted = localStorage.getItem('wild_swings_muted') === 'true';
+        }
+
+        init() {
+          if (this.ctx) return;
+          try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) this.ctx = new AudioCtx();
+          } catch (e) {}
+        }
+
+        ensure() {
+          if (!this.ctx) this.init();
+          if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+        }
+
+        toggleMute() {
+          this.muted = !this.muted;
+          localStorage.setItem('wild_swings_muted', this.muted.toString());
+          return this.muted;
+        }
+
+        playHook(theme) {
+          if (this.muted) return;
+          this.ensure();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          if (theme === 'spiderman') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(1700, now + 0.04);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.12);
+            gain.gain.setValueAtTime(0.28, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+          } else if (theme === 'monkey') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(360, now);
+            osc.frequency.linearRampToValueAtTime(140, now + 0.1);
+            gain.gain.setValueAtTime(0.32, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+          } else {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1200, now);
+            osc.frequency.exponentialRampToValueAtTime(380, now + 0.08);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+          }
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.13);
+        }
+
+        playRelease() {
+          if (this.muted) return;
+          this.ensure();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(200, now);
+          osc.frequency.exponentialRampToValueAtTime(340, now + 0.06);
+          osc.frequency.exponentialRampToValueAtTime(120, now + 0.16);
+
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.17);
+        }
+
+        playBounce() {
+          if (this.muted) return;
+          this.ensure();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(170, now);
+          osc.frequency.linearRampToValueAtTime(540, now + 0.12);
+          osc.frequency.exponentialRampToValueAtTime(200, now + 0.25);
+
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.26);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.27);
+        }
+
+        playDeath() {
+          if (this.muted) return;
+          this.ensure();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.linearRampToValueAtTime(45, now + 0.3);
+
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.31);
+        }
+
+        playVictory() {
+          if (this.muted) return;
+          this.ensure();
+          if (!this.ctx) return;
+          const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const noteTime = this.ctx.currentTime + idx * 0.08;
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, noteTime);
+            gain.gain.setValueAtTime(0.24, noteTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, noteTime + 0.35);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(noteTime);
+            osc.stop(noteTime + 0.36);
+          });
+        }
+      }
+
+      const audio = new StickmanAudio();
+
+      // ==========================================
+      // 2. Authentic Stickman Hook Game Engine
+      // ==========================================
+      class StickmanHookGame {
+        constructor() {
+          this.canvas = document.getElementById('gameCanvas');
+          this.ctx = this.canvas.getContext('2d');
+          this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+          this.gameState = 'playing';
+          this.theme = localStorage.getItem('wild_swings_theme') || 'spiderman';
+          this.currentLevel = parseInt(localStorage.getItem('wild_swings_level') || '1', 10);
+          this.unlockedLevels = parseInt(localStorage.getItem('wild_swings_unlocked') || '1', 10);
+
+          // Starting Platform & Player Physics
+          this.startPlatform = { x: 30, y: 330, width: 130, height: 26 };
+          this.player = {
+            x: 80,
+            y: 310,
+            vx: 3.2,
+            vy: -1.2,
+            radius: 14,
+            rollAngle: 0,
+            mode: 'ball', // 'ball' | 'stickman'
+            isHooked: false,
+            hookTarget: null,
+            hookLength: 0,
+            hookAngle: 0,
+            hookAngularVel: 0,
+            alive: true,
+            swingsCount: 0,
+            trail: [],
+          };
+
+          // Smooth, Relaxed Accessible Swing Physics
+          this.gravity = 0.16;
+          this.airResistance = 0.998;
+          this.maxSpeed = 10.5;
+          this.hookMaxRange = 360;
+          this.isHolding = false;
+
+          this.camera = { x: 0, y: 0 };
+          this.anchors = [];
+          this.trampolines = [];
+          this.finishLine = { x: 2200, y: 100, width: 35, height: 550 };
+
+          this.particles = [];
+          this.confetti = [];
+          this.bgStars = [];
+          this.buildings = [];
+
+          this.levelStartTime = performance.now();
+          this.levelTime = 0;
+
+          this.initDecorations();
+          this.bindEvents();
+          this.resize();
+          this.loadLevel(this.currentLevel);
+
+          this.lastTime = performance.now();
+          requestAnimationFrame((t) => this.loop(t));
+        }
+
+        initDecorations() {
+          this.buildings = [];
+          for (let i = 0; i < 40; i++) {
+            this.buildings.push({
+              x: i * 200 + (Math.random() * 80 - 40),
+              width: 120 + Math.random() * 90,
+              height: 280 + Math.random() * 360,
+              layer: (i % 3) + 1,
+            });
+          }
+
+          this.bgStars = [];
+          for (let i = 0; i < 100; i++) {
+            this.bgStars.push({
+              x: Math.random() * 4000,
+              y: Math.random() * 1200,
+              radius: 0.8 + Math.random() * 1.5,
+              opacity: 0.25 + Math.random() * 0.7,
+            });
+          }
+        }
+
+        resize() {
+          this.width = window.innerWidth;
+          this.height = window.innerHeight;
+          this.canvas.width = this.width * this.dpr;
+          this.canvas.height = this.height * this.dpr;
+          this.ctx.scale(this.dpr, this.dpr);
+        }
+
+        bindEvents() {
+          window.addEventListener('resize', () => this.resize());
+
+          const onPress = (e) => {
+            if (e.target.closest('.modal-overlay') || e.target.closest('.hud-btn') || e.target.closest('button') || e.target.closest('a')) return;
+            this.isHolding = true;
+            if (this.gameState === 'playing') {
+              this.tryHookNearest();
+            }
+          };
+
+          const onRelease = (e) => {
+            this.isHolding = false;
+            if (this.gameState === 'playing') {
+              this.releaseHook();
+            }
+          };
+
+          window.addEventListener('mousedown', onPress);
+          window.addEventListener('mouseup', onRelease);
+          window.addEventListener('touchstart', onPress, { passive: true });
+          window.addEventListener('touchend', onRelease, { passive: true });
+
+          window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+              e.preventDefault();
+              if (!this.isHolding) {
+                this.isHolding = true;
+                if (this.gameState === 'playing') this.tryHookNearest();
+              }
+            } else if (e.code === 'KeyR') {
+              this.restartLevel();
+            } else if (e.code === 'Escape') {
+              this.togglePause();
+            }
+          });
+
+          window.addEventListener('keyup', (e) => {
+            if (e.code === 'Space') {
+              this.isHolding = false;
+              if (this.gameState === 'playing') this.releaseHook();
+            }
+          });
+        }
+
+        setTheme(newTheme) {
+          this.theme = newTheme;
+          localStorage.setItem('wild_swings_theme', newTheme);
+          this.updateHUDTheme();
+        }
+
+        updateHUDTheme() {
+          const badge = document.getElementById('hud-theme-text');
+          const avatar = document.getElementById('hud-runner-avatar');
+          const names = {
+            spiderman: '🕷️ SPIDER-MAN',
+            monkey: '🐒 JUNGLE MONKEY',
+            human: '🥷 ACROBATIC NINJA',
+          };
+          const emojis = {
+            spiderman: '🕷️',
+            monkey: '🐒',
+            human: '🥷',
+          };
+          if (badge) badge.textContent = names[this.theme] || 'THEME';
+          if (avatar) avatar.textContent = emojis[this.theme] || '🕷️';
+        }
+
+        findNearestAnchor() {
+          let best = null;
+          let minScore = Infinity;
+
+          for (const a of this.anchors) {
+            const dx = a.x - this.player.x;
+            const dy = a.y - this.player.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist <= this.hookMaxRange) {
+              const forwardBias = dist - (dx > 0 ? 100 : -20);
+              if (forwardBias < minScore) {
+                minScore = forwardBias;
+                best = a;
+              }
+            }
+          }
+          return best;
+        }
+
+        tryHookNearest() {
+          if (!this.player.alive) return;
+          const target = this.findNearestAnchor();
+          if (!target) return;
+
+          const dx = this.player.x - target.x;
+          const dy = this.player.y - target.y;
+          const length = Math.max(45, Math.sqrt(dx * dx + dy * dy));
+
+          this.player.isHooked = true;
+          this.player.hookTarget = target;
+          this.player.hookLength = length;
+          this.player.hookAngle = Math.atan2(dy, dx);
+          this.player.mode = 'stickman';
+          this.player.swingsCount++;
+
+          // Tangential swing momentum (Smoother, controlled rate)
+          const tangentialVel = (-Math.sin(this.player.hookAngle) * this.player.vx + Math.cos(this.player.hookAngle) * this.player.vy);
+          this.player.hookAngularVel = tangentialVel / this.player.hookLength;
+
+          // Clamp angular velocity for gentle swing control
+          this.player.hookAngularVel = Math.max(-0.04, Math.min(0.04, this.player.hookAngularVel));
+
+          if (!Number.isFinite(this.player.hookAngularVel) || Math.abs(this.player.hookAngularVel) < 0.02) {
+            this.player.hookAngularVel = this.player.vx >= 0 ? 0.03 : -0.03;
+          }
+
+          audio.playHook(this.theme);
+          this.spawnSparks(target.x, target.y);
+        }
+
+        releaseHook() {
+          if (!this.player.isHooked) return;
+          const angSpeed = Number.isFinite(this.player.hookAngularVel) ? this.player.hookAngularVel : 0.03;
+          const r = this.player.hookLength || 100;
+          const theta = this.player.hookAngle || 0;
+
+          // Controlled momentum launch on release
+          let vx = -r * Math.sin(theta) * angSpeed * 0.98;
+          let vy = r * Math.cos(theta) * angSpeed * 0.98;
+
+          const speed = Math.sqrt(vx * vx + vy * vy);
+          if (speed > this.maxSpeed) {
+            const scale = this.maxSpeed / speed;
+            vx *= scale;
+            vy *= scale;
+          }
+
+          this.player.vx = Number.isFinite(vx) ? vx : 4;
+          this.player.vy = Number.isFinite(vy) ? vy : -1.5;
+          this.player.isHooked = false;
+          this.player.hookTarget = null;
+          this.player.mode = 'ball';
+
+          audio.playRelease();
+        }
+
+        loadLevel(lvl) {
+          this.currentLevel = lvl;
+          this.gameState = 'playing';
+          this.levelStartTime = performance.now();
+
+          // Spawn on top of the starting platform
+          this.startPlatform = { x: 30, y: 340, width: 130, height: 26 };
+          this.player.x = 85;
+          this.player.y = 314;
+          this.player.vx = 2.4;
+          this.player.vy = -0.9;
+          this.player.rollAngle = 0;
+          this.player.mode = 'ball';
+          this.player.isHooked = false;
+          this.player.hookTarget = null;
+          this.player.alive = true;
+          this.player.swingsCount = 0;
+          this.player.trail = [];
+          this.particles = [];
+          this.confetti = [];
+
+          this.camera.x = 0;
+          this.camera.y = 0;
+
+          const vicModal = document.getElementById('victory-modal');
+          if (vicModal) vicModal.classList.remove('active');
+
+          this.buildLevel(lvl);
+          this.updateHUD();
+          this.updateHUDTheme();
+        }
+
+        buildLevel(lvl) {
+          this.anchors = [];
+          this.trampolines = [];
+
+          const levelLength = 1400 + lvl * 320;
+          this.finishLine = { x: levelLength, y: 100, width: 35, height: 550 };
+
+          let curX = 240;
+          let idx = 0;
+
+          while (curX < levelLength - 160) {
+            const anchorY = 170 + Math.sin(idx * 1.2) * 75;
+
+            this.anchors.push({
+              id: `a-${idx}`,
+              x: curX,
+              y: anchorY,
+              radius: 16,
+            });
+
+            if (idx % 2 === 1 || lvl <= 4) {
+              this.trampolines.push({
+                x: curX - 45,
+                y: Math.min(520, anchorY + 270),
+                width: 90,
+                height: 22,
+                bouncePower: 11.5 + Math.min(lvl * 0.2, 2.5),
+                squish: 0,
+              });
+            }
+
+            curX += 240 + Math.random() * 40;
+            idx++;
+          }
+        }
+
+        update(dt) {
+          this.levelTime = (performance.now() - this.levelStartTime) / 1000;
+
+          if (this.gameState === 'playing') {
+            // 1. Physics: Hooked Pendulum vs Free Flight Ball
+            if (this.player.isHooked && this.player.hookTarget) {
+              const a = this.player.hookTarget;
+              const r = this.player.hookLength;
+
+              // Gentle Pendulum Swing: a = (-g / r) * cos(theta) * 0.85
+              const angularAcc = (-this.gravity / r) * Math.cos(this.player.hookAngle) * 0.85;
+              this.player.hookAngularVel += angularAcc;
+              this.player.hookAngularVel *= 0.995; // Smooth arc dampening
+              this.player.hookAngle += this.player.hookAngularVel;
+
+              this.player.x = a.x + r * Math.cos(this.player.hookAngle);
+              this.player.y = a.y + r * Math.sin(this.player.hookAngle);
+              this.player.vx = -r * Math.sin(this.player.hookAngle) * this.player.hookAngularVel;
+              this.player.vy = r * Math.cos(this.player.hookAngle) * this.player.hookAngularVel;
+            } else {
+              // Free flight: Ball Mode with gentle gravity
+              this.player.vy += this.gravity;
+              this.player.vx *= this.airResistance;
+              this.player.vy *= this.airResistance;
+
+              this.player.x += this.player.vx;
+              this.player.y += this.player.vy;
+
+              this.player.rollAngle += this.player.vx * 0.06;
+            }
+
+            // Motion speed trail
+            if (Math.hypot(this.player.vx, this.player.vy) > 6) {
+              this.player.trail.push({ x: this.player.x, y: this.player.y, alpha: 0.6 });
+              if (this.player.trail.length > 8) this.player.trail.shift();
+            } else if (this.player.trail.length > 0) {
+              this.player.trail.shift();
+            }
+            for (const t of this.player.trail) t.alpha *= 0.88;
+
+            // 2. Starting Platform Surface Support
+            const sp = this.startPlatform;
+            if (
+              this.player.x >= sp.x &&
+              this.player.x <= sp.x + sp.width &&
+              this.player.y + this.player.radius >= sp.y &&
+              this.player.y + this.player.radius <= sp.y + 16 &&
+              this.player.vy > 0
+            ) {
+              this.player.y = sp.y - this.player.radius;
+              this.player.vy = 0;
+            }
+
+            // 3. Trampoline Bouncers Collision
+            for (const pad of this.trampolines) {
+              if (pad.squish > 0) pad.squish *= 0.82;
+
+              const px = this.player.x;
+              const py = this.player.y + this.player.radius;
+
+              if (
+                px >= pad.x &&
+                px <= pad.x + pad.width &&
+                py >= pad.y - 10 &&
+                py <= pad.y + pad.height &&
+                this.player.vy > 0
+              ) {
+                this.player.y = pad.y - this.player.radius - 2;
+                this.player.vy = -pad.bouncePower;
+                this.player.vx = Math.max(this.player.vx * 1.1, 5);
+                pad.squish = 12;
+
+                audio.playBounce();
+                this.spawnShockwave(pad.x + pad.width / 2, pad.y);
+                break;
+              }
+            }
+
+            // 4. Fall Death Check
+            if (this.player.y > 660 || this.player.y > this.height + 250) {
+              this.killPlayer();
+              return;
+            }
+
+            // 5. Finish Line Check
+            if (this.player.x >= this.finishLine.x) {
+              this.completeLevel();
+            }
+          }
+
+          // Camera Follow
+          const lookAhead = (this.player.vx || 0) * 12;
+          const targetCamX = this.player.x - this.width * 0.3 + lookAhead;
+          const targetCamY = this.player.y - this.height * 0.5;
+          this.camera.x += (targetCamX - this.camera.x) * 0.1;
+          this.camera.y += (targetCamY - this.camera.y) * 0.08;
+
+          // Update Particles & Confetti
+          for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= p.decay;
+            if (p.alpha <= 0) this.particles.splice(i, 1);
+          }
+
+          for (let i = this.confetti.length - 1; i >= 0; i--) {
+            const c = this.confetti[i];
+            c.x += c.vx;
+            c.y += c.vy;
+            c.vy += 0.2;
+            c.rot += c.rotSpeed;
+            c.alpha -= 0.008;
+            if (c.alpha <= 0) this.confetti.splice(i, 1);
+          }
+
+          this.updateHUD();
+        }
+
+        killPlayer() {
+          if (!this.player.alive) return;
+          this.player.alive = false;
+          audio.playDeath();
+          this.spawnExplosion(this.player.x, this.player.y);
+
+          setTimeout(() => {
+            this.loadLevel(this.currentLevel);
+          }, 500);
+        }
+
+        completeLevel() {
+          if (this.gameState === 'level_cleared') return;
+          this.gameState = 'level_cleared';
+          audio.playVictory();
+          this.spawnConfetti(this.finishLine.x, this.finishLine.y);
+
+          if (this.currentLevel >= this.unlockedLevels && this.currentLevel < 20) {
+            this.unlockedLevels = this.currentLevel + 1;
+            localStorage.setItem('wild_swings_unlocked', this.unlockedLevels.toString());
+          }
+
+          const modal = document.getElementById('victory-modal');
+          if (modal) {
+            const title = document.getElementById('vic-title');
+            const timeVal = document.getElementById('vic-time');
+            const swingsVal = document.getElementById('vic-swings');
+            if (title) title.textContent = `LEVEL ${this.currentLevel} CLEARED!`;
+            if (timeVal) timeVal.textContent = `${this.levelTime.toFixed(1)}s`;
+            if (swingsVal) swingsVal.textContent = `${this.player.swingsCount} Swings`;
+            modal.classList.add('active');
+          }
+        }
+
+        spawnSparks(x, y) {
+          const color = this.theme === 'spiderman' ? '#ffffff' : this.theme === 'monkey' ? '#10b981' : '#00f0ff';
+          for (let i = 0; i < 10; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 2 + Math.random() * 3.5;
+            this.particles.push({
+              x, y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              radius: 2 + Math.random() * 2.5,
+              color, alpha: 1, decay: 0.04,
+            });
+          }
+        }
+
+        spawnShockwave(x, y) {
+          for (let i = 0; i < 12; i++) {
+            this.particles.push({
+              x: x + (Math.random() * 60 - 30),
+              y: y - 4,
+              vx: Math.random() * 5 - 2.5,
+              vy: -Math.random() * 4 - 2,
+              radius: 2.5 + Math.random() * 2.5,
+              color: '#ff2a55',
+              alpha: 1, decay: 0.04,
+            });
+          }
+        }
+
+        spawnExplosion(x, y) {
+          for (let i = 0; i < 20; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 2.5 + Math.random() * 5;
+            this.particles.push({
+              x, y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              radius: 3.5 + Math.random() * 3.5,
+              color: '#ff0055',
+              alpha: 1, decay: 0.03,
+            });
+          }
+        }
+
+        spawnConfetti(x, y) {
+          const colors = ['#4353ff', '#00f0ff', '#ff2a55', '#ffd700', '#10b981', '#ffffff'];
+          for (let i = 0; i < 70; i++) {
+            this.confetti.push({
+              x: x + (Math.random() * 200 - 100),
+              y: y + (Math.random() * 200 - 100),
+              vx: Math.random() * 10 - 5,
+              vy: -Math.random() * 8 - 3,
+              width: 7 + Math.random() * 5,
+              height: 10 + Math.random() * 7,
+              color: colors[i % colors.length],
+              rot: Math.random() * 360,
+              rotSpeed: Math.random() * 0.2 - 0.1,
+              alpha: 1,
+            });
+          }
+        }
+
+        updateHUD() {
+          const lvlText = document.getElementById('hud-level-text');
+          const trackFill = document.getElementById('progress-track-fill');
+
+          if (lvlText) lvlText.textContent = `LEVEL ${this.currentLevel} / 20`;
+          if (trackFill) {
+            const total = this.finishLine.x - 100;
+            const progress = Math.max(0, Math.min(100, ((this.player.x - 100) / total) * 100));
+            trackFill.style.width = `${progress.toFixed(1)}%`;
+          }
+        }
+
+        // ==========================================
+        // 3. Rendering Engine
+        // ==========================================
+        render() {
+          this.ctx.clearRect(0, 0, this.width, this.height);
+          this.renderBackground();
+
+          this.ctx.save();
+          this.ctx.translate(-this.camera.x, -this.camera.y);
+
+          // 1. Starting Platform & Tower Pylon
+          const sp = this.startPlatform;
+          this.ctx.save();
+          this.ctx.fillStyle = '#0f172a';
+          this.ctx.fillRect(sp.x + 20, sp.y + sp.height, sp.width - 40, 400); // Tower pylon
+
+          this.ctx.fillStyle = '#1e293b';
+          this.ctx.strokeStyle = '#4353ff';
+          this.ctx.lineWidth = 2.5;
+          this.ctx.shadowColor = '#4353ff';
+          this.ctx.shadowBlur = 12;
+          this.ctx.beginPath();
+          this.ctx.roundRect(sp.x, sp.y, sp.width, sp.height, 6);
+          this.ctx.fill();
+          this.ctx.stroke();
+
+          // Start Platform Surface Pattern
+          this.ctx.fillStyle = '#00f0ff';
+          this.ctx.fillRect(sp.x + 8, sp.y + 4, sp.width - 16, 4);
+
+          // Start Signpost
+          this.ctx.fillStyle = '#ffffff';
+          this.ctx.font = 'bold 11px sans-serif';
+          this.ctx.textAlign = 'center';
+          this.ctx.fillText('🏁 START', sp.x + sp.width / 2, sp.y + 18);
+          this.ctx.restore();
+
+          // 2. Target Indicator Line & Lock Circle
+          if (!this.player.isHooked && this.player.alive) {
+            const nearest = this.findNearestAnchor();
+            if (nearest) {
+              this.ctx.save();
+              this.ctx.beginPath();
+              this.ctx.setLineDash([6, 6]);
+              this.ctx.moveTo(this.player.x, this.player.y);
+              this.ctx.lineTo(nearest.x, nearest.y);
+              this.ctx.strokeStyle = this.theme === 'spiderman' ? 'rgba(255,255,255,0.6)' : this.theme === 'monkey' ? 'rgba(16, 185, 129, 0.7)' : 'rgba(0, 240, 255, 0.7)';
+              this.ctx.lineWidth = 2;
+              this.ctx.stroke();
+
+              // Glowing Target Lock Ring
+              this.ctx.beginPath();
+              this.ctx.arc(nearest.x, nearest.y, nearest.radius + 12, 0, Math.PI * 2);
+              this.ctx.strokeStyle = '#00f0ff';
+              this.ctx.lineWidth = 2.5;
+              this.ctx.stroke();
+              this.ctx.restore();
+            }
+          }
+
+          // 3. Active Hook Rope
+          if (this.player.isHooked && this.player.hookTarget) {
+            this.ctx.save();
+            if (this.theme === 'spiderman') {
+              this.ctx.strokeStyle = '#ffffff';
+              this.ctx.lineWidth = 3;
+              this.ctx.shadowColor = '#00f0ff';
+              this.ctx.shadowBlur = 10;
+            } else if (this.theme === 'monkey') {
+              this.ctx.strokeStyle = '#10b981';
+              this.ctx.lineWidth = 3.5;
+            } else {
+              this.ctx.strokeStyle = '#00f0ff';
+              this.ctx.lineWidth = 3;
+              this.ctx.shadowColor = '#00f0ff';
+              this.ctx.shadowBlur = 10;
+            }
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.player.x, this.player.y);
+            this.ctx.lineTo(this.player.hookTarget.x, this.player.hookTarget.y);
+            this.ctx.stroke();
+            this.ctx.restore();
+          }
+
+          // 4. Anchor Pegs
+          for (const a of this.anchors) {
+            this.ctx.save();
+            this.ctx.translate(a.x, a.y);
+
+            this.ctx.beginPath();
+            this.ctx.setLineDash([4, 4]);
+            this.ctx.arc(0, 0, a.radius + 6, 0, Math.PI * 2);
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            this.ctx.lineWidth = 1.5;
+            this.ctx.stroke();
+
+            if (this.theme === 'spiderman') {
+              this.ctx.fillStyle = '#ff2a55';
+              this.ctx.shadowColor = '#ff2a55';
+              this.ctx.shadowBlur = 12;
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, a.radius, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.fillStyle = '#ffffff';
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, 5, 0, Math.PI * 2);
+              this.ctx.fill();
+            } else if (this.theme === 'monkey') {
+              this.ctx.fillStyle = '#f59e0b';
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, a.radius, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.font = '14px sans-serif';
+              this.ctx.textAlign = 'center';
+              this.ctx.textBaseline = 'middle';
+              this.ctx.fillText('🍌', 0, 0);
+            } else {
+              this.ctx.strokeStyle = '#00f0ff';
+              this.ctx.lineWidth = 3;
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, a.radius, 0, Math.PI * 2);
+              this.ctx.stroke();
+              this.ctx.fillStyle = '#ffffff';
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, 4, 0, Math.PI * 2);
+              this.ctx.fill();
+            }
+            this.ctx.restore();
+          }
+
+          // 5. Trampolines / Bouncers
+          for (const pad of this.trampolines) {
+            this.ctx.save();
+            const sq = pad.squish || 0;
+            this.ctx.fillStyle = '#475569';
+            this.ctx.fillRect(pad.x + 8, pad.y + 6, pad.width - 16, 12);
+
+            this.ctx.fillStyle = '#ff007f';
+            this.ctx.shadowColor = '#ff007f';
+            this.ctx.shadowBlur = 12;
+            this.ctx.beginPath();
+            this.ctx.roundRect(pad.x, pad.y + sq, pad.width, pad.height - sq, 8);
+            this.ctx.fill();
+
+            this.ctx.fillStyle = '#ffd700';
+            this.ctx.fillRect(pad.x + pad.width * 0.35, pad.y + sq + 3, pad.width * 0.3, 4);
+            this.ctx.restore();
+          }
+
+          // 6. Checkered Finish Line Banner
+          this.ctx.save();
+          const fn = this.finishLine;
+          this.ctx.fillStyle = '#10b981';
+          this.ctx.shadowColor = '#10b981';
+          this.ctx.shadowBlur = 20;
+          this.ctx.fillRect(fn.x, fn.y, fn.width, fn.height);
+
+          this.ctx.fillStyle = '#ffffff';
+          for (let y = fn.y; y < fn.y + fn.height; y += 24) {
+            this.ctx.fillRect(fn.x, y, fn.width / 2, 12);
+            this.ctx.fillRect(fn.x + fn.width / 2, y + 12, fn.width / 2, 12);
+          }
+          this.ctx.restore();
+
+          // 7. Character Rendering
+          if (this.player.alive) {
+            this.renderCharacter();
+          }
+
+          // 8. Particles & Confetti
+          for (const p of this.particles) {
+            this.ctx.save();
+            this.ctx.globalAlpha = p.alpha;
+            this.ctx.fillStyle = p.color;
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.restore();
+          }
+
+          for (const c of this.confetti) {
+            this.ctx.save();
+            this.ctx.globalAlpha = c.alpha;
+            this.ctx.translate(c.x, c.y);
+            this.ctx.rotate(c.rot);
+            this.ctx.fillStyle = c.color;
+            this.ctx.fillRect(-c.width / 2, -c.height / 2, c.width, c.height);
+            this.ctx.restore();
+          }
+
+          this.ctx.restore();
+        }
+
+        renderCharacter() {
+          this.ctx.save();
+          this.ctx.translate(this.player.x, this.player.y);
+
+          const r = this.player.radius;
+
+          if (this.player.mode === 'ball') {
+            // Ball Mode (Rolling)
+            this.ctx.rotate(this.player.rollAngle);
+
+            if (this.theme === 'spiderman') {
+              this.ctx.fillStyle = '#ff2a55';
+              this.ctx.shadowColor = 'rgba(255, 42, 85, 0.6)';
+              this.ctx.shadowBlur = 12;
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, r, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#ffffff';
+              this.ctx.beginPath();
+              this.ctx.ellipse(r * 0.35, -r * 0.25, r * 0.4, r * 0.25, 0.4, 0, Math.PI * 2);
+              this.ctx.ellipse(r * 0.35, r * 0.25, r * 0.4, r * 0.25, -0.4, 0, Math.PI * 2);
+              this.ctx.fill();
+            } else if (this.theme === 'monkey') {
+              this.ctx.fillStyle = '#854d0e';
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, r, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#fed7aa';
+              this.ctx.beginPath();
+              this.ctx.arc(r * 0.2, 0, r * 0.6, 0, Math.PI * 2);
+              this.ctx.fill();
+            } else {
+              this.ctx.fillStyle = '#1e293b';
+              this.ctx.shadowColor = '#00f0ff';
+              this.ctx.shadowBlur = 12;
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, r, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#00f0ff';
+              this.ctx.fillRect(r * 0.1, -r * 0.25, r * 0.6, r * 0.5);
+            }
+          } else {
+            // Stickman Swing Mode
+            this.ctx.rotate(this.player.hookAngle + Math.PI / 2);
+
+            if (this.theme === 'spiderman') {
+              this.ctx.strokeStyle = '#ff2a55';
+              this.ctx.lineWidth = 4;
+              this.ctx.lineCap = 'round';
+
+              this.ctx.fillStyle = '#ff2a55';
+              this.ctx.beginPath();
+              this.ctx.arc(0, -18, 7, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.beginPath();
+              this.ctx.moveTo(0, -11);
+              this.ctx.lineTo(0, 8);
+              this.ctx.stroke();
+
+              this.ctx.beginPath();
+              this.ctx.moveTo(0, -8);
+              this.ctx.lineTo(-10, -22);
+              this.ctx.moveTo(0, -8);
+              this.ctx.lineTo(10, -22);
+              this.ctx.stroke();
+
+              this.ctx.strokeStyle = '#3b82f6';
+              this.ctx.beginPath();
+              this.ctx.moveTo(0, 8);
+              this.ctx.lineTo(-8, 20);
+              this.ctx.moveTo(0, 8);
+              this.ctx.lineTo(8, 16);
+              this.ctx.stroke();
+            } else if (this.theme === 'monkey') {
+              this.ctx.strokeStyle = '#854d0e';
+              this.ctx.lineWidth = 4;
+              this.ctx.lineCap = 'round';
+
+              this.ctx.fillStyle = '#854d0e';
+              this.ctx.beginPath();
+              this.ctx.arc(0, -18, 7, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.beginPath();
+              this.ctx.moveTo(0, -11);
+              this.ctx.lineTo(0, 8);
+              this.ctx.stroke();
+
+              this.ctx.beginPath();
+              this.ctx.moveTo(0, -8);
+              this.ctx.lineTo(-11, -22);
+              this.ctx.moveTo(0, -8);
+              this.ctx.lineTo(11, -22);
+              this.ctx.stroke();
+
+              this.ctx.beginPath();
+              this.ctx.arc(-8, 4, 10, 0.5, Math.PI * 1.5, false);
+              this.ctx.stroke();
+            } else {
+              this.ctx.strokeStyle = '#00f0ff';
+              this.ctx.lineWidth = 3.5;
+              this.ctx.lineCap = 'round';
+
+              this.ctx.fillStyle = '#1e293b';
+              this.ctx.beginPath();
+              this.ctx.arc(0, -18, 7, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.beginPath();
+              this.ctx.moveTo(0, -11);
+              this.ctx.lineTo(0, 8);
+              this.ctx.stroke();
+
+              this.ctx.beginPath();
+              this.ctx.moveTo(0, -8);
+              this.ctx.lineTo(-10, -22);
+              this.ctx.moveTo(0, -8);
+              this.ctx.lineTo(10, -22);
+              this.ctx.stroke();
+            }
+          }
+
+          this.ctx.restore();
+        }
+
+        renderBackground() {
+          const camX = this.camera.x;
+          const camY = this.camera.y;
+
+          if (this.theme === 'spiderman') {
+            const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
+            grad.addColorStop(0, '#0a0d24');
+            grad.addColorStop(0.6, '#14183d');
+            grad.addColorStop(1, '#2a1236');
+            this.ctx.fillStyle = grad;
+            this.ctx.fillRect(0, 0, this.width, this.height);
+
+            this.ctx.fillStyle = '#ffffff';
+            for (const s of this.bgStars) {
+              const sx = ((s.x - camX * 0.05) % (this.width + 400) + this.width + 400) % (this.width + 400) - 200;
+              this.ctx.globalAlpha = s.opacity;
+              this.ctx.beginPath();
+              this.ctx.arc(sx, s.y, s.radius, 0, Math.PI * 2);
+              this.ctx.fill();
+            }
+            this.ctx.globalAlpha = 1;
+
+            for (const b of this.buildings) {
+              const factor = b.layer === 1 ? 0.12 : b.layer === 2 ? 0.25 : 0.42;
+              const bx = b.x - camX * factor;
+              const by = this.height - b.height + camY * 0.1;
+              if (bx > -200 && bx < this.width + 200) {
+                this.ctx.fillStyle = b.layer === 1 ? '#080a1c' : b.layer === 2 ? '#101432' : '#181e46';
+                this.ctx.fillRect(bx, by, b.width, b.height + 400);
+              }
+            }
+          } else if (this.theme === 'monkey') {
+            const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
+            grad.addColorStop(0, '#032615');
+            grad.addColorStop(0.5, '#054433');
+            grad.addColorStop(1, '#012019');
+            this.ctx.fillStyle = grad;
+            this.ctx.fillRect(0, 0, this.width, this.height);
+          } else {
+            const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
+            grad.addColorStop(0, '#0c0418');
+            grad.addColorStop(0.5, '#160830');
+            grad.addColorStop(1, '#070210');
+            this.ctx.fillStyle = grad;
+            this.ctx.fillRect(0, 0, this.width, this.height);
+          }
+        }
+
+        loop(time) {
+          const dt = Math.min((time - this.lastTime) / 1000, 0.1);
+          this.lastTime = time;
+          this.update(dt);
+          this.render();
+          requestAnimationFrame((t) => this.loop(t));
+        }
+
+        startGame() {
+          this.gameState = 'playing';
+          this.loadLevel(this.currentLevel);
+        }
+
+        restartLevel() {
+          this.loadLevel(this.currentLevel);
+        }
+
+        nextLevel() {
+          const modal = document.getElementById('victory-modal');
+          if (modal) modal.classList.remove('active');
+          if (this.currentLevel < 20) {
+            this.loadLevel(this.currentLevel + 1);
+          } else {
+            this.loadLevel(1);
+          }
+        }
+
+        togglePause() {
+          if (this.gameState === 'playing') {
+            this.gameState = 'paused';
+            const p = document.getElementById('pause-modal');
+            if (p) p.classList.add('active');
+          } else if (this.gameState === 'paused') {
+            this.gameState = 'playing';
+            const p = document.getElementById('pause-modal');
+            if (p) p.classList.remove('active');
+          }
+        }
+      }
+
+      // Bootstrap & Event Binding
+      document.addEventListener('DOMContentLoaded', () => {
+        window.stickmanGame = new StickmanHookGame();
+
+        const themeBadge = document.getElementById('btn-open-themes');
+        const themeModal = document.getElementById('theme-modal');
+        const closeThemeBtn = document.getElementById('btn-close-themes');
+        const levelsBtn = document.getElementById('btn-levels-open');
+        const levelsModal = document.getElementById('levels-modal');
+        const closeLevelsBtn = document.getElementById('btn-close-levels');
+        const soundBtn = document.getElementById('btn-sound-toggle');
+        const pauseBtn = document.getElementById('btn-pause-open');
+        const pauseModal = document.getElementById('pause-modal');
+        const resumeBtn = document.getElementById('btn-resume-game');
+        const nextLvlBtn = document.getElementById('btn-next-level');
+        const vicMenuBtn = document.getElementById('btn-vic-menu');
+        const pauseRestartBtn = document.getElementById('btn-pause-restart');
+
+        const refreshThemeCards = (activeTheme) => {
+          document.querySelectorAll('.theme-select-card').forEach(card => {
+            const t = card.dataset.theme;
+            if (t === activeTheme) card.classList.add('active');
+            else card.classList.remove('active');
+          });
+        };
+
+        document.querySelectorAll('.theme-select-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const theme = card.dataset.theme;
+            if (window.stickmanGame) window.stickmanGame.setTheme(theme);
+            refreshThemeCards(theme);
+          });
+        });
+
+        if (themeBadge && themeModal) {
+          themeBadge.addEventListener('click', () => themeModal.classList.add('active'));
+        }
+
+        if (closeThemeBtn && themeModal) {
+          closeThemeBtn.addEventListener('click', () => themeModal.classList.remove('active'));
+        }
+
+        const buildLevelsGrid = () => {
+          const container = document.getElementById('levels-container');
+          if (!container || !window.stickmanGame) return;
+          container.innerHTML = '';
+          const unlocked = window.stickmanGame.unlockedLevels;
+          for (let i = 1; i <= 20; i++) {
+            const btn = document.createElement('button');
+            btn.className = `level-btn ${i > unlocked ? 'locked' : ''} ${i === window.stickmanGame.currentLevel ? 'active' : ''}`;
+            btn.innerHTML = `<span>${i}</span><span class="level-stars-mini">${i <= unlocked ? '⭐⭐⭐' : '🔒'}</span>`;
+            if (i <= unlocked) {
+              btn.addEventListener('click', () => {
+                window.stickmanGame.loadLevel(i);
+                levelsModal.classList.remove('active');
+              });
+            }
+            container.appendChild(btn);
+          }
+        };
+
+        if (levelsBtn && levelsModal) {
+          levelsBtn.addEventListener('click', () => {
+            buildLevelsGrid();
+            levelsModal.classList.add('active');
+          });
+        }
+
+        if (closeLevelsBtn && levelsModal) {
+          closeLevelsBtn.addEventListener('click', () => levelsModal.classList.remove('active'));
+        }
+
+        if (soundBtn) {
+          soundBtn.addEventListener('click', () => {
+            const muted = audio.toggleMute();
+            soundBtn.textContent = muted ? '🔇' : '🔊';
+          });
+        }
+
+        if (pauseBtn) {
+          pauseBtn.addEventListener('click', () => {
+            if (window.stickmanGame) window.stickmanGame.togglePause();
+          });
+        }
+
+        if (resumeBtn) {
+          resumeBtn.addEventListener('click', () => {
+            if (window.stickmanGame) window.stickmanGame.togglePause();
+          });
+        }
+
+        if (pauseRestartBtn) {
+          pauseRestartBtn.addEventListener('click', () => {
+            if (window.stickmanGame) {
+              window.stickmanGame.restartLevel();
+              pauseModal.classList.remove('active');
+            }
+          });
+        }
+
+        if (nextLvlBtn) {
+          nextLvlBtn.addEventListener('click', () => {
+            if (window.stickmanGame) window.stickmanGame.nextLevel();
+          });
+        }
+
+        if (vicMenuBtn) {
+          vicMenuBtn.addEventListener('click', () => {
+            const vicModal = document.getElementById('victory-modal');
+            if (vicModal) vicModal.classList.remove('active');
+            buildLevelsGrid();
+            levelsModal.classList.add('active');
+          });
+        }
+      });
+    </script>
+</body>
+</html>
