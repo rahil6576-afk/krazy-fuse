@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flappy Man: Sky Leap 🦸‍♂️🚀 — Krazio Games</title>
+    <!-- Favicon & Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Fredoka:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky-blue: #4ec0ca;
+            --pipe-green: #73bf2e;
+            --pipe-dark: #558022;
+            --ground-yellow: #ded895;
+            --ground-stripes: #cbb968;
+            --grass-green: #73bf2e;
+            --font-arcade: 'Fredoka', 'Outfit', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        body {
+            background-color: #0b1120;
+            font-family: var(--font-arcade);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #gameWrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 480px;
+            max-height: 840px;
+            background: var(--sky-blue);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 900px) {
+            #gameWrapper {
+                max-width: 520px;
+                max-height: 880px;
+            }
+        }
+
+        /* Top Header Bar */
+        .top-bar {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 30;
+        }
+
+        .btn-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: rgba(30, 41, 59, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(8px);
+            transition: transform 0.15s ease, background 0.2s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-icon:hover {
+            transform: scale(1.08);
+            background: rgba(30, 41, 59, 0.85);
+        }
+
+        .btn-icon:active {
+            transform: scale(0.95);
+        }
+
+        /* Main Big Score In-Game */
+        .score-hud {
+            position: absolute;
+            top: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 
+                3px 3px 0px #000,
+                -3px -3px 0px #000,
+                3px -3px 0px #000,
+                -3px 3px 0px #000,
+                0px 6px 15px rgba(0, 0, 0, 0.4);
+            z-index: 25;
+            pointer-events: none;
+            letter-spacing: 2px;
+        }
+
+        /* Canvas Stage */
+        #gameCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        /* Get Ready Overlay */
+        .get-ready-panel {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 25;
+            pointer-events: none;
+            text-align: center;
+            transition: opacity 0.25s ease;
+        }
+
+        .title-badge {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #fbc531;
+            text-shadow: 
+                3px 3px 0px #2f3640,
+                -3px -3px 0px #2f3640,
+                3px -3px 0px #2f3640,
+                -3px 3px 0px #2f3640,
+                0px 8px 20px rgba(0, 0, 0, 0.4);
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+            animation: bounceTitle 2s ease-in-out infinite;
+        }
+
+        @keyframes bounceTitle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .tap-prompt-box {
+            background: rgba(30, 41, 59, 0.75);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 9999px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: pulsePrompt 1.4s ease-in-out infinite;
+        }
+
+        @keyframes pulsePrompt {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Game Over Scoreboard Card Modal */
+        .gameover-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.85);
+            background: #eccc68;
+            border: 4px solid #57606f;
+            border-radius: 24px;
+            width: 86%;
+            max-width: 360px;
+            padding: 24px 20px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .gameover-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .gameover-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #ff4757;
+            text-shadow: 2px 2px 0px #2f3640;
+            margin-bottom: 16px;
+        }
+
+        .score-summary-card {
+            width: 100%;
+            background: #f1f2f6;
+            border: 3px solid #747d8c;
+            border-radius: 16px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .medal-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #dfe4ea;
+            border: 2px solid #a4b0be;
+            border-radius: 12px;
+            padding: 10px;
+            min-height: 85px;
+        }
+
+        .medal-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #747d8c;
+            text-transform: uppercase;
+        }
+
+        .medal-icon {
+            font-size: 2.4rem;
+            line-height: 1;
+            margin-top: 4px;
+        }
+
+        .stats-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: right;
+        }
+
+        .stat-item-label {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #e67e22;
+            text-transform: uppercase;
+        }
+
+        .stat-item-val {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #2f3542;
+            line-height: 1;
+        }
+
+        .btn-play-again {
+            width: 100%;
+            background: linear-gradient(135deg, #2ed573, #26af5f);
+            border: 3px solid #1e824c;
+            color: #fff;
+            padding: 14px;
+            border-radius: 16px;
+            font-family: inherit;
+            font-size: 1.3rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(46, 213, 115, 0.4);
+            transition: transform 0.15s ease;
+        }
+
+        .btn-play-again:hover {
+            transform: scale(1.04);
+        }
+
+        .btn-play-again:active {
+            transform: scale(0.96);
+        }
+
+        /* Screen Flash on Collision */
+        .flash-overlay {
+            position: absolute;
+            inset: 0;
+            background: #fff;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 50;
+            transition: opacity 0.12s ease-out;
+        }
+
+        .flash-overlay.active {
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gameWrapper">
+        <!-- Top Navigation -->
+        <header class="top-bar">
+            <a href="../index.html" class="btn-icon" title="Back to Games">‹</a>
+            <button class="btn-icon" id="btnMute" title="Toggle Sound">🔊</button>
+        </header>
+
+        <!-- Big Running Score -->
+        <div class="score-hud" id="scoreHUD">0</div>
+
+        <!-- Get Ready Screen -->
+        <div class="get-ready-panel" id="getReadyPanel">
+            <h1 class="title-badge">FLAPPY MAN</h1>
+            <div class="tap-prompt-box">
+                <span>🚀</span>
+                <span>TAP / CLICK OR SPACE TO FLY!</span>
+            </div>
+        </div>
+
+        <!-- Interactive Canvas Stage -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Game Over Summary Card -->
+        <div class="gameover-modal" id="gameoverModal">
+            <div class="gameover-title">GAME OVER</div>
+
+            <div class="score-summary-card">
+                <div class="medal-box">
+                    <span class="medal-label">MEDAL</span>
+                    <span class="medal-icon" id="medalIcon">🥉</span>
+                </div>
+                <div class="stats-col">
+                    <div>
+                        <div class="stat-item-label">SCORE</div>
+                        <div class="stat-item-val" id="finalScoreVal">0</div>
+                    </div>
+                    <div>
+                        <div class="stat-item-label">BEST</div>
+                        <div class="stat-item-val" id="bestScoreVal">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-play-again" id="btnPlayAgain">PLAY AGAIN</button>
+        </div>
+
+        <!-- Flash Effect -->
+        <div class="flash-overlay" id="flashOverlay"></div>
+    </div>
+
+    <!-- Complete Flappy Man Arcade Engine & Audio Synthesizer -->
+    <script>
+    (function() {
+        'use strict';
+
+        // 1. Web Audio Synthesizer Sound Engine
+        class FlappyAudio {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+            }
+            toggleMute() {
+                this.muted = !this.muted;
+                return this.muted;
+            }
+            playFlap() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(320, now);
+                osc.frequency.exponentialRampToValueAtTime(740, now + 0.12);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.12);
+            }
+            playPoint() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987, now);
+                osc.frequency.setValueAtTime(1318, now + 0.08);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+            playHit() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            }
+            playDie() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(80, now + 0.35);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+        }
+
+        const audio = new FlappyAudio();
+
+        // 2. Main Flappy Man Arcade Engine
+        class FlappyManGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+
+                this.width = 440;
+                this.height = 760;
+                this.groundHeight = 110;
+
+                // State: 'READY' | 'PLAYING' | 'GAMEOVER'
+                this.state = 'READY';
+                this.score = 0;
+                this.bestScore = parseInt(localStorage.getItem('flappyman_best') || '0', 10);
+
+                // Flappy Man Physics
+                this.man = {
+                    x: 100,
+                    y: 320,
+                    w: 36,
+                    h: 42,
+                    vy: 0,
+                    angle: 0,
+                    flapTimer: 0,
+                    hoverTime: 0
+                };
+
+                // Constants
+                this.gravity = 0.38;
+                this.flapForce = -7.4;
+                this.pipeSpeed = 2.4;
+                this.pipeGap = 150;
+                this.pipeWidth = 68;
+
+                // Background & Parallax
+                this.pipes = [];
+                this.particles = [];
+                this.cityOffset = 0;
+                this.groundOffset = 0;
+                this.clouds = [
+                    { x: 40, y: 120, scale: 1.2 },
+                    { x: 220, y: 80, scale: 0.9 },
+                    { x: 380, y: 160, scale: 1.1 }
+                ];
+
+                this.resizeCanvas();
+                this.setupEvents();
+                this.reset();
+                this.loop();
+            }
+
+            resizeCanvas() {
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                this.width = rect.width || 440;
+                this.height = rect.height || 760;
+                const dpr = window.devicePixelRatio || 1;
+                this.canvas.width = this.width * dpr;
+                this.canvas.height = this.height * dpr;
+                this.canvas.style.width = `${this.width}px`;
+                this.canvas.style.height = `${this.height}px`;
+
+                this.man.x = this.width * 0.28;
+            }
+
+            setupEvents() {
+                window.addEventListener('resize', () => this.resizeCanvas());
+
+                const handleAction = () => {
+                    audio.init();
+                    if (this.state === 'READY') {
+                        this.state = 'PLAYING';
+                        document.getElementById('getReadyPanel').style.opacity = '0';
+                        this.flap();
+                    } else if (this.state === 'PLAYING') {
+                        this.flap();
+                    }
+                };
+
+                window.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' || e.code === 'ArrowUp') {
+                        e.preventDefault();
+                        handleAction();
+                    }
+                });
+
+                this.canvas.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    handleAction();
+                });
+
+                const btnPlayAgain = document.getElementById('btnPlayAgain');
+                if (btnPlayAgain) {
+                    btnPlayAgain.addEventListener('click', () => {
+                        this.reset();
+                    });
+                }
+
+                const btnMute = document.getElementById('btnMute');
+                if (btnMute) {
+                    btnMute.addEventListener('click', () => {
+                        const isMuted = audio.toggleMute();
+                        btnMute.textContent = isMuted ? '🔇' : '🔊';
+                    });
+                }
+            }
+
+            reset() {
+                this.state = 'READY';
+                this.score = 0;
+                this.pipes = [];
+                this.particles = [];
+                this.man.y = this.height * 0.42;
+                this.man.vy = 0;
+                this.man.angle = 0;
+                this.man.hoverTime = 0;
+
+                document.getElementById('scoreHUD').textContent = '0';
+                document.getElementById('scoreHUD').style.display = 'block';
+                document.getElementById('getReadyPanel').style.opacity = '1';
+                document.getElementById('gameoverModal').classList.remove('show');
+            }
+
+            flap() {
+                audio.playFlap();
+                this.man.vy = this.flapForce;
+                this.man.flapTimer = 14;
+
+                // Heroic Flight Energy & Sonic Trail
+                for (let i = 0; i < 9; i++) {
+                    this.particles.push({
+                        x: this.man.x - 16,
+                        y: this.man.y + 8,
+                        vx: -3 - Math.random() * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                        size: 3 + Math.random() * 4.5,
+                        color: Math.random() > 0.5 ? '#fbc531' : (Math.random() > 0.5 ? '#eb4d4b' : '#38bdf8'),
+                        life: 22
+                    });
+                }
+            }
+
+            spawnPipe() {
+                const minH = 70;
+                const maxH = this.height - this.groundHeight - this.pipeGap - minH;
+                const topH = minH + Math.random() * (maxH - minH);
+                const bottomY = topH + this.pipeGap;
+                const bottomH = this.height - this.groundHeight - bottomY;
+
+                this.pipes.push({
+                    x: this.width + 20,
+                    topY: 0,
+                    topH: topH,
+                    bottomY: bottomY,
+                    bottomH: bottomH,
+                    passed: false
+                });
+            }
+
+            triggerGameOver() {
+                this.state = 'GAMEOVER';
+                audio.playHit();
+                setTimeout(() => audio.playDie(), 120);
+
+                // Screen Flash
+                const flash = document.getElementById('flashOverlay');
+                if (flash) {
+                    flash.classList.add('active');
+                    setTimeout(() => flash.classList.remove('active'), 120);
+                }
+
+                // Update High Score
+                if (this.score > this.bestScore) {
+                    this.bestScore = this.score;
+                    localStorage.setItem('flappyman_best', this.bestScore);
+                }
+
+                // Award Medal
+                const medalIcon = document.getElementById('medalIcon');
+                if (this.score >= 40) medalIcon.textContent = '💎'; // Platinum
+                else if (this.score >= 25) medalIcon.textContent = '🥇'; // Gold
+                else if (this.score >= 15) medalIcon.textContent = '🥈'; // Silver
+                else if (this.score >= 5) medalIcon.textContent = '🥉'; // Bronze
+                else medalIcon.textContent = '🎖️';
+
+                document.getElementById('finalScoreVal').textContent = this.score;
+                document.getElementById('bestScoreVal').textContent = this.bestScore;
+                document.getElementById('scoreHUD').style.display = 'none';
+
+                setTimeout(() => {
+                    document.getElementById('gameoverModal').classList.add('show');
+                }, 450);
+            }
+
+            update() {
+                // Parallax ground & city
+                if (this.state !== 'GAMEOVER') {
+                    this.groundOffset = (this.groundOffset + this.pipeSpeed) % 24;
+                    this.cityOffset = (this.cityOffset + this.pipeSpeed * 0.3) % 400;
+                }
+
+                // Update Particles
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life--;
+                    if (p.life <= 0) this.particles.splice(i, 1);
+                }
+
+                if (this.state === 'READY') {
+                    // Gentle hover sine wave
+                    this.man.hoverTime += 0.08;
+                    this.man.y = (this.height * 0.42) + Math.sin(this.man.hoverTime) * 10;
+                    this.man.angle = 0;
+                    return;
+                }
+
+                if (this.state === 'PLAYING') {
+                    // Physics gravity & angle tilt
+                    this.man.vy += this.gravity;
+                    this.man.y += this.man.vy;
+
+                    if (this.man.vy < 0) {
+                        this.man.angle = -0.38; // ~ -22 deg jump tilt
+                    } else {
+                        this.man.angle = Math.min(1.3, this.man.angle + 0.045); // Dive tilt down
+                    }
+
+                    if (this.man.flapTimer > 0) this.man.flapTimer--;
+
+                    // Pipe Spawning
+                    if (this.pipes.length === 0 || this.pipes[this.pipes.length - 1].x < this.width - 210) {
+                        this.spawnPipe();
+                    }
+
+                    // Pipe Movement & Collision Check
+                    const manBox = {
+                        left: this.man.x - 14,
+                        right: this.man.x + 14,
+                        top: this.man.y - 16,
+                        bottom: this.man.y + 16
+                    };
+
+                    const floorLimit = this.height - this.groundHeight;
+
+                    // Ground / Ceiling crash
+                    if (manBox.bottom >= floorLimit || manBox.top <= 0) {
+                        this.man.y = floorLimit - 16;
+                        this.triggerGameOver();
+                        return;
+                    }
+
+                    for (let i = this.pipes.length - 1; i >= 0; i--) {
+                        const p = this.pipes[i];
+                        p.x -= this.pipeSpeed;
+
+                        // Pipe Hitbox
+                        const pipeLeft = p.x;
+                        const pipeRight = p.x + this.pipeWidth;
+
+                        if (manBox.right > pipeLeft && manBox.left < pipeRight) {
+                            if (manBox.top < p.topH || manBox.bottom > p.bottomY) {
+                                this.triggerGameOver();
+                                return;
+                            }
+                        }
+
+                        // Score increment on passing
+                        if (!p.passed && p.x + this.pipeWidth < this.man.x) {
+                            p.passed = true;
+                            this.score++;
+                            audio.playPoint();
+                            document.getElementById('scoreHUD').textContent = this.score;
+                        }
+
+                        // Remove offscreen pipes
+                        if (p.x < -this.pipeWidth - 10) {
+                            this.pipes.splice(i, 1);
+                        }
+                    }
+                } else if (this.state === 'GAMEOVER') {
+                    // Fall to ground if in mid-air
+                    const floorLimit = this.height - this.groundHeight;
+                    if (this.man.y < floorLimit - 16) {
+                        this.man.vy += this.gravity * 1.5;
+                        this.man.y += this.man.vy;
+                        this.man.angle = Math.min(1.4, this.man.angle + 0.08);
+                    } else {
+                        this.man.y = floorLimit - 16;
+                    }
+                }
+            }
+
+            drawBackground() {
+                const ctx = this.ctx;
+                const floorY = this.height - this.groundHeight;
+
+                // 1. Fluffy Clouds
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+                this.clouds.forEach(c => {
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, 24 * c.scale, 0, Math.PI * 2);
+                    ctx.arc(c.x + 22 * c.scale, c.y - 10 * c.scale, 30 * c.scale, 0, Math.PI * 2);
+                    ctx.arc(c.x + 50 * c.scale, c.y, 24 * c.scale, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // 2. Distant Retro Skyline
+                ctx.fillStyle = '#83d8e0';
+                for (let i = -1; i < 8; i++) {
+                    const bx = i * 80 - this.cityOffset;
+                    ctx.fillRect(bx, floorY - 120, 60, 120);
+                    ctx.fillRect(bx + 18, floorY - 150, 24, 30);
+                }
+
+                ctx.fillStyle = '#6ec8d1';
+                for (let i = -1; i < 10; i++) {
+                    const bx = i * 65 - (this.cityOffset * 1.4);
+                    ctx.fillRect(bx, floorY - 80, 50, 80);
+                }
+            }
+
+            drawPipes() {
+                const ctx = this.ctx;
+                const lipH = 26;
+                const lipOver = 4;
+
+                this.pipes.forEach(p => {
+                    // Top Pipe
+                    const topGrad = ctx.createLinearGradient(p.x, 0, p.x + this.pipeWidth, 0);
+                    topGrad.addColorStop(0, '#73bf2e');
+                    topGrad.addColorStop(0.35, '#8be03a');
+                    topGrad.addColorStop(0.85, '#558022');
+                    topGrad.addColorStop(1, '#3b5c14');
+
+                    // Top Pipe Body
+                    ctx.fillStyle = topGrad;
+                    ctx.fillRect(p.x, 0, this.pipeWidth, p.topH - lipH);
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#2f3640';
+                    ctx.strokeRect(p.x, 0, this.pipeWidth, p.topH - lipH);
+
+                    // Top Pipe Lip Cap
+                    ctx.fillRect(p.x - lipOver, p.topH - lipH, this.pipeWidth + lipOver * 2, lipH);
+                    ctx.strokeRect(p.x - lipOver, p.topH - lipH, this.pipeWidth + lipOver * 2, lipH);
+
+                    // Bottom Pipe
+                    // Bottom Pipe Lip Cap
+                    ctx.fillRect(p.x - lipOver, p.bottomY, this.pipeWidth + lipOver * 2, lipH);
+                    ctx.strokeRect(p.x - lipOver, p.bottomY, this.pipeWidth + lipOver * 2, lipH);
+
+                    // Bottom Pipe Body
+                    ctx.fillRect(p.x, p.bottomY + lipH, this.pipeWidth, p.bottomH);
+                    ctx.strokeRect(p.x, p.bottomY + lipH, this.pipeWidth, p.bottomH);
+                });
+            }
+
+            drawGround() {
+                const ctx = this.ctx;
+                const floorY = this.height - this.groundHeight;
+
+                // Grass Header
+                ctx.fillStyle = '#73bf2e';
+                ctx.fillRect(0, floorY, this.width, 14);
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = '#2f3640';
+                ctx.strokeRect(0, floorY, this.width, 14);
+
+                // Soil Body
+                ctx.fillStyle = '#ded895';
+                ctx.fillRect(0, floorY + 14, this.width, this.groundHeight - 14);
+
+                // Scrolling Diagonal Soil Pattern
+                ctx.fillStyle = '#cbb968';
+                for (let i = -2; i < this.width / 20 + 4; i++) {
+                    const gx = i * 24 - this.groundOffset;
+                    ctx.beginPath();
+                    ctx.moveTo(gx, floorY + 14);
+                    ctx.lineTo(gx + 12, floorY + 14);
+                    ctx.lineTo(gx - 6, this.height);
+                    ctx.lineTo(gx - 18, this.height);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+
+            drawFlappyMan() {
+                const ctx = this.ctx;
+                const m = this.man;
+
+                ctx.save();
+                ctx.translate(m.x, m.y);
+                ctx.rotate(m.angle);
+
+                const isFlapping = m.flapTimer > 0;
+                const time = Date.now() * 0.012;
+                const capeWave1 = Math.sin(time) * 8;
+                const capeWave2 = Math.cos(time * 1.2) * 10;
+
+                // 1. Flowing Crimson Superhero Cape (Multi-layer billowing)
+                ctx.save();
+                // Outer Red Cape
+                ctx.beginPath();
+                ctx.moveTo(-6, -6);
+                ctx.lineTo(-38, 4 + capeWave1);
+                ctx.lineTo(-44, 20 + capeWave2);
+                ctx.lineTo(-24, 16 + capeWave1);
+                ctx.lineTo(-2, 10);
+                ctx.closePath();
+                ctx.fillStyle = '#d63031';
+                ctx.fill();
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = '#2d3436';
+                ctx.stroke();
+
+                // Inner Cape Highlight fold
+                ctx.beginPath();
+                ctx.moveTo(-10, -4);
+                ctx.lineTo(-34, 10 + capeWave1);
+                ctx.lineTo(-28, 18 + capeWave2);
+                ctx.closePath();
+                ctx.fillStyle = '#eb4d4b';
+                ctx.fill();
+                ctx.restore();
+
+                // 2. Aerodynamic Blue Legs & Red Knee-High Boots
+                // Left Leg (Back)
+                ctx.fillStyle = '#0652dd';
+                ctx.fillRect(-18, 4, 14, 8);
+                // Left Boot
+                ctx.fillStyle = '#eb4d4b';
+                ctx.beginPath();
+                ctx.moveTo(-18, 4);
+                ctx.lineTo(-28, 6);
+                ctx.lineTo(-26, 12);
+                ctx.lineTo(-18, 12);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Right Leg (Front)
+                ctx.fillStyle = '#0984e3';
+                ctx.fillRect(-14, 8, 14, 9);
+                // Right Boot
+                ctx.fillStyle = '#eb4d4b';
+                ctx.beginPath();
+                ctx.moveTo(-14, 8);
+                ctx.lineTo(-26, 10);
+                ctx.lineTo(-24, 17);
+                ctx.lineTo(-14, 17);
+                ctx.closePath();
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#2d3436';
+                ctx.stroke();
+
+                // 3. Classic Red Trunks & Gold Belt
+                ctx.fillStyle = '#eb4d4b';
+                ctx.fillRect(-10, 4, 12, 12);
+                ctx.strokeRect(-10, 4, 12, 12);
+
+                // Golden Belt with Buckle
+                ctx.fillStyle = '#fbc531';
+                ctx.fillRect(-9, 2, 14, 4);
+                ctx.strokeRect(-9, 2, 14, 4);
+                ctx.fillStyle = '#e1b12c';
+                ctx.fillRect(-4, 1, 4, 6);
+
+                // 4. Royal Blue Muscular Torso Suit
+                ctx.beginPath();
+                ctx.roundRect(-6, -16, 22, 22, 5);
+                ctx.fillStyle = '#0984e3';
+                ctx.fill();
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = '#2d3436';
+                ctx.stroke();
+
+                // 5. Iconic 'S' Shield Crest on Chest
+                ctx.save();
+                ctx.translate(3, -7);
+                // Diamond Pentagon Shield
+                ctx.beginPath();
+                ctx.moveTo(-7, -5);
+                ctx.lineTo(7, -5);
+                ctx.lineTo(9, -1);
+                ctx.lineTo(0, 7);
+                ctx.lineTo(-9, -1);
+                ctx.closePath();
+                ctx.fillStyle = '#fbc531';
+                ctx.fill();
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#eb4d4b';
+                ctx.stroke();
+
+                // Red 'S' Symbol inside
+                ctx.fillStyle = '#eb4d4b';
+                ctx.font = '900 8px Outfit, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('S', 0, 0.5);
+                ctx.restore();
+
+                // 6. Superhero Head, Face & Iconic S-Curl Hair
+                ctx.beginPath();
+                ctx.arc(12, -18, 10, 0, Math.PI * 2);
+                ctx.fillStyle = '#fbc531';
+                ctx.fillStyle = '#ffdfba'; // Heroic skin tone
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#2d3436';
+                ctx.stroke();
+
+                // Heroic Eye & Determined Brow
+                ctx.fillStyle = '#2d3436';
+                ctx.fillRect(15, -20, 4, 2.5);
+                ctx.fillStyle = '#0984e3'; // Blue Eyes
+                ctx.fillRect(16, -18, 3, 3);
+
+                // Jet-Black Hair with Superman Front S-Curl
+                ctx.beginPath();
+                ctx.arc(10, -22, 9, Math.PI * 0.9, Math.PI * 2.2);
+                ctx.lineTo(19, -21);
+                ctx.lineTo(15, -27);
+                ctx.closePath();
+                ctx.fillStyle = '#1e272e';
+                ctx.fill();
+
+                // Iconic Front S-Curl Strand
+                ctx.beginPath();
+                ctx.moveTo(17, -23);
+                ctx.quadraticCurveTo(20, -18, 17, -15);
+                ctx.quadraticCurveTo(15, -17, 16, -23);
+                ctx.fillStyle = '#1e272e';
+                ctx.fill();
+
+                // 7. Superman Flying Fist Lead Arm
+                ctx.save();
+                if (isFlapping) {
+                    // Upward power leap thrust
+                    ctx.beginPath();
+                    ctx.moveTo(4, -12);
+                    ctx.lineTo(26, -26);
+                    ctx.lineWidth = 6;
+                    ctx.strokeStyle = '#0984e3';
+                    ctx.lineCap = 'round';
+                    ctx.stroke();
+
+                    // Clenched Skin Fist
+                    ctx.beginPath();
+                    ctx.arc(28, -27, 4.5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffdfba';
+                    ctx.fill();
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = '#2d3436';
+                    ctx.stroke();
+                } else {
+                    // Forward Aerodynamic Flying Fist Pose
+                    ctx.beginPath();
+                    ctx.moveTo(4, -8);
+                    ctx.lineTo(28, -8);
+                    ctx.lineWidth = 6;
+                    ctx.strokeStyle = '#0984e3';
+                    ctx.lineCap = 'round';
+                    ctx.stroke();
+
+                    // Clenched Leading Fist
+                    ctx.beginPath();
+                    ctx.arc(30, -8, 4.5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffdfba';
+                    ctx.fill();
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = '#2d3436';
+                    ctx.stroke();
+                }
+                ctx.restore();
+
+                ctx.restore();
+            }
+
+            drawParticles() {
+                const ctx = this.ctx;
+                this.particles.forEach(p => {
+                    ctx.save();
+                    ctx.globalAlpha = p.life / 20;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 8;
+                    ctx.fill();
+                    ctx.restore();
+                });
+            }
+
+            render() {
+                const dpr = window.devicePixelRatio || 1;
+                this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                this.drawBackground();
+                this.drawPipes();
+                this.drawGround();
+                this.drawParticles();
+                this.drawFlappyMan();
+            }
+
+            loop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.loop());
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.flappyGame = new FlappyManGame();
+        });
+    })();
+    </script>
+</body>
+</html>

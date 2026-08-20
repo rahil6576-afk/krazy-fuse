@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>krazio games 🎮⚡ — Wild & Addictive Web Arcade</title>
+    <!-- Favicon -->
+    <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portal.css">
+    <!-- PixiJS v8 WebGL Accelerated 2D Engine -->
+    <script src="https://pixijs.download/v8.8.1/pixi.min.js"></script>
+</head>
+<body>
+
+
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <a href="index.html" class="logo-container" title="krazio games homepage">
+            <img src="krazio-logo.svg" alt="krazio games" class="brand-logo-img" style="height: 42px; width: auto; display: block;">
+        </a>
+
+        <div class="nav-actions">
+            <button id="btn-theme-toggle" class="btn-theme" title="Toggle Day/Night Theme">
+                <span>☀️ Day</span>
+            </button>
+            <a href="office-escape/index.html" class="nav-btn nav-btn-highlight">
+                <span>🏃 PLAY OFFICE ESCAPE</span>
+            </a>
+            <button id="btn-open-suggest" class="nav-btn">
+                <span>💡 Suggest Game</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Sequential Game Carousel Slider -->
+    <section class="hero-section">
+        <div class="hero-carousel-container" id="hero-carousel-container">
+            <div class="hero-carousel-track" id="hero-carousel-track">
+                <!-- Injected dynamically from GAMES_CATALOG -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Game Catalog Section -->
+    <main class="main-content">
+        <!-- Filter & Search Controls -->
+        <div class="filter-bar-container">
+            <div class="category-tabs">
+                <button class="category-pill active" data-category="all">🎮 All Games</button>
+                <button class="category-pill" data-category="runner">🏃 Endless Runner</button>
+                <button class="category-pill" data-category="action">🛗 Party Survival</button>
+                <button class="category-pill" data-category="arcade">🎈 Arcade & Shooter</button>
+                <button class="category-pill" data-category="pvp">⚔️ PvP Fighting</button>
+                <button class="category-pill" data-category="reflex">⚡ Reflex Runner</button>
+            </div>
+
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-games-input" class="search-input" placeholder="Search krazy games...">
+            </div>
+        </div>
+
+        <!-- Games Grid (Populated by portal.js) -->
+        <div id="games-grid" class="games-grid"></div>
+
+        <!-- Suggest a Game Banner -->
+        <section class="suggest-banner">
+            <div class="suggest-info">
+                <h3>💡 Have a Krazy Game Idea?</h3>
+                <p>We are constantly building and adding new indie web games. Pitch your kraziest game concept!</p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <button id="btn-view-stored" class="nav-btn" title="View previously submitted ideas">
+                    <span>📋 View Pitches</span>
+                </button>
+                <button id="btn-open-suggest-2" class="btn-suggest" onclick="document.getElementById('suggest-modal').classList.add('active')">
+                    <span>🚀 Pitch Your Idea</span>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Interactive Game Suggestion Modal -->
+    <div id="suggest-modal" class="modal-backdrop">
+        <div class="modal-box">
+            <h3 class="modal-title">💡 Pitch a Game to Krazio Games</h3>
+            <p style="color: var(--text-secondary); font-size: 0.88rem;">What kind of hilarious or addictive game should we build next?</p>
+
+            <textarea id="idea-input" class="modal-input" rows="4" placeholder="e.g. A game where you play as an overly aggressive barista fighting off caffeinated zombies..."></textarea>
+
+            <div id="stored-ideas-list" style="display: none; max-height: 180px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.25); border-radius: 12px; padding: 12px; margin-top: 10px; font-size: 0.88rem;"></div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px;">
+                <button id="btn-toggle-saved" class="nav-btn" style="font-size: 0.8rem;">📋 View Saved (<span id="saved-ideas-count">0</span>)</button>
+                <button id="btn-close-modal" class="nav-btn">Cancel</button>
+                <button id="btn-submit-idea" class="btn-suggest" style="padding: 8px 20px;">Submit Concept</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 12px;">
+            <img src="krazio-logo.svg" alt="krazio games" style="height: 32px; width: auto; opacity: 0.9;">
+            <span style="font-size: 0.85rem; color: #818cf8; letter-spacing: 0.5px; font-weight: 600;">Let’s Connect Experience</span>
+        </div>
+        <p>© 2026 krazio games • Wild, Addictive Indie Web Games • More games dropping regularly!</p>
+    </footer>
+
+    <!-- Portal Scripts -->
+    <script src="portal.js"></script>
+</body>
+</html>

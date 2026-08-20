@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Flip: Cavern Runner ⛏️🪨 — krazio games</title>
+    <base href="/gravity-flip/">
+    <!-- Favicon -->
+    <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="gravity-flip.css">
+</head>
+<body>
+
+    <!-- Floating Back to Krazio Hub Button -->
+    <a href="../index.html" id="krazio-floating-back" title="Back to krazio games portal">
+        <img src="krazio-icon.svg" alt="krazio" style="width: 20px; height: 20px; border-radius: 50%;">
+        <span>🏠 KRAZIO GAMES</span>
+    </a>
+
+    <div id="game-wrapper">
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- In-Game HUD -->
+        <div id="hud">
+            <div class="hud-group">
+                <div class="hud-pill level-pill">
+                    <span id="hud-level">LVL 1</span>
+                </div>
+                <div class="hud-pill">
+                    📏 <span id="hud-dist">0m</span>
+                </div>
+                <div class="hud-pill coins-pill">
+                    <span id="hud-coins">💎 0</span>
+                </div>
+            </div>
+
+            <div class="hud-group">
+                <div class="hud-pill speed-pill">
+                    <span id="hud-speed">⚡ 65 KM/H</span>
+                </div>
+                <button id="btn-pause" class="hud-btn" title="Pause Game (P / ESC)">⏸️</button>
+                <button id="btn-mute" class="hud-btn" title="Toggle Sound">🔊</button>
+            </div>
+        </div>
+
+        <!-- Powerup Status Strip -->
+        <div id="powerup-status-strip"></div>
+
+        <!-- START SCREEN -->
+        <div id="start-screen" class="screen">
+            <div class="game-title-box">
+                <span class="danger-tag">⛏️ SUBTERRANEAN GRAVITY RUNNER</span>
+                <h1 class="game-title">GRAVITY FLIP</h1>
+                <p class="game-subtitle">Explore deep caverns. Invert gravity to dodge sharp stalagmites & hanging rock spikes.</p>
+            </div>
+
+            <!-- How To Play & Rules Card -->
+            <div class="rules-card">
+                <div class="rules-grid">
+                    <div class="rule-item">
+                        <span class="rule-icon">🌀</span>
+                        <h4 class="rule-title">1. INVERT GRAVITY</h4>
+                        <p class="rule-desc">Click, Tap, or press <strong>SPACE</strong> to run along ceiling or floor.</p>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">🪨</span>
+                        <h4 class="rule-title">2. DODGE STALACTITES</h4>
+                        <p class="rule-desc">Evade razor-sharp rock spikes, falling boulders, and crystal pendulums.</p>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">💎</span>
+                        <h4 class="rule-title">3. COLLECT GEMS</h4>
+                        <p class="rule-desc">Mine sparkling gold nuggets and crystals to multiply your score.</p>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">🛡️</span>
+                        <h4 class="rule-title">4. ANCIENT RELICS</h4>
+                        <p class="rule-desc">Grab <strong>Crystal Shields</strong>, <strong>Magnets</strong>, and <strong>Slow-Mo Amber</strong>!</p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-start" class="btn-primary">
+                <span>▶ ENTER CAVERN</span>
+            </button>
+        </div>
+
+        <!-- PAUSE SCREEN -->
+        <div id="pause-screen" class="screen hidden">
+            <div class="game-title-box">
+                <h2 style="font-size: 2.4rem; font-weight: 900; color: #ffd166;">EXPEDITION PAUSED</h2>
+                <p style="color: #a8a29e;">Catch your breath before braving the subterranean depths.</p>
+            </div>
+            <div style="display: flex; gap: 14px; margin-top: 14px;">
+                <button id="btn-resume" class="btn-primary"><span>▶ RESUME</span></button>
+                <a href="/index.html" class="btn-secondary" style="text-decoration: none; display: flex; align-items: center;">🏠 EXIT TO HUB</a>
+            </div>
+        </div>
+
+        <!-- GAME OVER SCREEN -->
+        <div id="gameover-screen" class="screen hidden">
+            <div class="game-title-box">
+                <span class="danger-tag" style="background: #ef4444; color: white;">💀 CAVED IN</span>
+                <h2 style="font-size: 2.8rem; font-weight: 900; color: white;">EXPEDITION FAILED</h2>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box highlight">
+                    <div id="res-dist" class="stat-val">0m</div>
+                    <div class="stat-label">DEPTH REACHED</div>
+                </div>
+                <div class="stat-box">
+                    <div id="res-level" class="stat-val">Level 1</div>
+                    <div class="stat-label">CAVE BIOME</div>
+                </div>
+                <div class="stat-box">
+                    <div id="res-coins" class="stat-val">0</div>
+                    <div class="stat-label">GEMS MINED</div>
+                </div>
+                <div class="stat-box">
+                    <div id="res-combo" class="stat-val">1x</div>
+                    <div class="stat-label">MAX COMBO</div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 14px;">
+                <button id="btn-restart" class="btn-primary">
+                    <span>🔄 RETRY RUN (SPACE)</span>
+                </button>
+                <a href="/index.html" class="btn-secondary" style="text-decoration: none; display: flex; align-items: center;">
+                    <span>🏠 HUB</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="gravity-audio.js"></script>
+    <script src="gravity-game.js"></script>
+</body>
+</html>

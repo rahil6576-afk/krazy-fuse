@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dart Master — Krazio Games</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --wall-color-you: #e07a67;
+            --wall-stripe-you: #d96f5b;
+            --wall-color-bot: #5b9eb8;
+            --wall-stripe-bot: #4f91aa;
+            --floor-color: #8c4c3b;
+            --floor-stripe: #7b3e2e;
+            --you-color: #ff4757;
+            --bot-color: #2ed573;
+            --rival-blue: #00d2d3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: #0b0f19;
+            font-family: 'Fredoka', 'Outfit', sans-serif;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Fullscreen Responsive Arena for Laptop & Desktop */
+        #gameApp {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--wall-color-you) 0px,
+                var(--wall-color-you) 50px,
+                var(--wall-stripe-you) 50px,
+                var(--wall-stripe-you) 100px
+            );
+            transition: background 0.6s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #gameApp.turn-bot {
+            background: repeating-linear-gradient(
+                90deg,
+                var(--wall-color-bot) 0px,
+                var(--wall-color-bot) 50px,
+                var(--wall-stripe-bot) 50px,
+                var(--wall-stripe-bot) 100px
+            );
+        }
+
+        /* Wooden Floor at bottom */
+        .room-floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 18%;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--floor-color) 0px,
+                var(--floor-color) 60px,
+                var(--floor-stripe) 60px,
+                var(--floor-stripe) 120px
+            );
+            border-top: 12px solid #5a2c20;
+            z-index: 1;
+            box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Top HUD Bar */
+        .top-hud {
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 36px;
+            z-index: 30;
+        }
+
+        .hud-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(45, 52, 54, 0.55);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: transform 0.15s ease, background 0.2s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .hud-btn:hover {
+            transform: scale(1.08);
+            background: rgba(45, 52, 54, 0.8);
+        }
+
+        .hud-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Score Pill Center */
+        .score-pill-container {
+            display: flex;
+            align-items: center;
+            background: rgba(30, 39, 46, 0.75);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 9999px;
+            padding: 6px 24px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .score-pill-container:hover {
+            transform: scale(1.03);
+        }
+
+        .score-side {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+
+        .score-side-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.85);
+            text-transform: uppercase;
+        }
+
+        .score-side-val {
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+
+        .score-you .score-side-val { color: #ff5252; }
+        .score-bot .score-side-val { color: #00d2d3; }
+
+        .score-vs-divider {
+            margin: 0 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .score-vs-text {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: #fff;
+            border-bottom: 2px solid #fff;
+            padding: 0 4px;
+        }
+
+        /* Canvas Stage */
+        .canvas-container {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Turn Indicator Pill at bottom */
+        .turn-banner {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 25;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+
+        /* Help Icon Button */
+        .btn-help {
+            position: absolute;
+            bottom: 22%;
+            left: 36px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(45, 52, 54, 0.55);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 30;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Throw Tip Banner */
+        .throw-tip {
+            position: absolute;
+            bottom: 4%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 8px 24px;
+            border-radius: 9999px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            z-index: 30;
+            pointer-events: none;
+            backdrop-filter: blur(8px);
+        }
+
+        .throw-tip span {
+            color: #fbc531;
+        }
+
+        /* Mode & Settings Modal */
+        .modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 15, 25, 0.85);
+            backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            padding: 24px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: #1e293b;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 28px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            color: #fbc531;
+        }
+
+        .modal-sub {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            margin-bottom: 22px;
+        }
+
+        .mode-button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .mode-choice-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1.15rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .mode-choice-btn.active {
+            background: #ff4757;
+            border-color: #ff6b81;
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+        }
+
+        .score-choice-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 26px;
+        }
+
+        .score-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 12px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .score-btn.active {
+            background: #2ed573;
+            border-color: #7bed9f;
+        }
+
+        .btn-start-game {
+            width: 100%;
+            background: linear-gradient(135deg, #fbc531, #e1b12c);
+            color: #2f3640;
+            border: none;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(251, 197, 49, 0.4);
+            transition: transform 0.15s ease;
+        }
+
+        .btn-start-game:hover {
+            transform: scale(1.03);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gameApp">
+        <!-- Top HUD -->
+        <header class="top-hud">
+            <a href="../index.html" class="hud-btn" title="Back to Games">‹</a>
+
+            <div class="score-pill-container" id="btnOpenMenu" title="Change Mode & Settings">
+                <div class="score-side score-you">
+                    <span class="score-side-label" id="p1Label">YOU</span>
+                    <span class="score-side-val" id="p1Score">301</span>
+                </div>
+                <div class="score-vs-divider">
+                    <span class="score-vs-text">VS</span>
+                </div>
+                <div class="score-side score-bot">
+                    <span class="score-side-label" id="p2Label">BOT</span>
+                    <span class="score-side-val" id="p2Score">301</span>
+                </div>
+            </div>
+
+            <button class="hud-btn" id="btnRestart" title="Restart">↻</button>
+        </header>
+
+        <!-- Main Interactive Canvas Stage -->
+        <div class="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- Room Floor Perspective Baseboard -->
+        <div class="room-floor"></div>
+
+        <!-- Turn Announcement Text -->
+        <div class="turn-banner" id="turnBanner">YOUR TURN</div>
+
+        <!-- Help Info Button -->
+        <button class="btn-help" id="btnHelp" title="Settings / Help">?</button>
+
+        <!-- Throw Instructions -->
+        <div class="throw-tip">🎯 <span>CLICK / TAP:</span> Stop horizontal meter, then vertical meter to throw!</div>
+
+        <!-- Mode Select Modal -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-box">
+                <h2 class="modal-title">🎯 DART MASTER</h2>
+                <p class="modal-sub">Match Settings & Opponent</p>
+
+                <div class="mode-button-group">
+                    <button class="mode-choice-btn active" data-mode="bot">
+                        <span>🤖 Play vs Bot</span>
+                        <span>›</span>
+                    </button>
+                    <button class="mode-choice-btn" data-mode="pass">
+                        <span>👥 Pass & Play</span>
+                        <span>›</span>
+                    </button>
+                    <button class="mode-choice-btn" data-mode="multiplayer">
+                        <span>🌐 Multiplayer</span>
+                        <span>›</span>
+                    </button>
+                </div>
+
+                <div class="score-choice-row">
+                    <button class="score-btn active" data-score="301">301 Fast</button>
+                    <button class="score-btn" data-score="501">501 Official</button>
+                </div>
+
+                <button class="btn-start-game" id="btnStartGame">PLAY NOW</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Self-Contained Complete Dart Arcade Engine -->
+    <script>
+    (function() {
+        'use strict';
+
+        // Web Audio Synthesizer
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+            }
+            playThrow() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.16);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.16);
+            }
+            playHit(isBull = false) {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = isBull ? 'triangle' : 'sine';
+                osc.frequency.setValueAtTime(isBull ? 260 : 160, now);
+                osc.frequency.exponentialRampToValueAtTime(50, now + 0.14);
+                gain.gain.setValueAtTime(0.6, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.14);
+
+                if (isBull) {
+                    const bell = this.ctx.createOscillator();
+                    const bGain = this.ctx.createGain();
+                    bell.type = 'sine';
+                    bell.frequency.setValueAtTime(880, now + 0.02);
+                    bell.frequency.exponentialRampToValueAtTime(1320, now + 0.3);
+                    bGain.gain.setValueAtTime(0.3, now + 0.02);
+                    bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    bell.connect(bGain);
+                    bGain.connect(this.ctx.destination);
+                    bell.start(now + 0.02);
+                    bell.stop(now + 0.3);
+                }
+            }
+        }
+
+        const audio = new SoundEngine();
+
+        // 20 Sector Ordering (London standard clockwise from top 20)
+        const SECTORS = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
+        const ANGLE_SLICE = (Math.PI * 2) / 20;
+
+        class OfflineDartsGame {
+            constructor() {
+                this.app = document.getElementById('gameApp');
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+
+                // Board Configuration
+                this.board = {
+                    x: this.width / 2,
+                    y: this.height * 0.38,
+                    r: 160,
+                    rInnerBull: 8,
+                    rOuterBull: 19,
+                    rTrebleIn: 86,
+                    rTrebleOut: 100,
+                    rDoubleIn: 146,
+                    rDoubleOut: 160
+                };
+
+                // Dual Aim Sliders (Comfortable readable timing speed)
+                this.sliderV = {
+                    x: 0,
+                    y: 0,
+                    w: 12,
+                    h: 220,
+                    val: 0.5,
+                    speed: 0.011, // Smooth timing speed
+                    dir: 1
+                };
+
+                this.sliderH = {
+                    x: 0,
+                    y: 0,
+                    w: 220,
+                    h: 12,
+                    val: 0.5,
+                    speed: 0.013, // Smooth timing speed
+                    dir: 1
+                };
+
+                // Dynamic Camera Zoom System
+                this.camera = {
+                    zoom: 1,
+                    targetZoom: 1,
+                    focusX: this.board.x,
+                    focusY: this.board.y,
+                    targetFocusX: this.board.x,
+                    targetFocusY: this.board.y
+                };
+
+                // Game State
+                this.gameMode = 'bot';
+                this.startScore = 301;
+                this.p1 = { score: 301, name: 'YOU', color: '#ff4757', darts: [] };
+                this.p2 = { score: 301, name: 'BOT', color: '#00d2d3', darts: [] };
+                this.turn = 0; // 0 = P1, 1 = P2
+                this.turnThrowsLeft = 3;
+                this.flyingDart = null;
+                this.landedDarts = [];
+                this.gameOver = false;
+
+                // 0 = Both oscillating, 1 = H locked, 2 = V locked & throw
+                this.meterStep = 0;
+
+                this.resizeCanvas();
+                this.setupEvents();
+                this.updateUI();
+                this.loop();
+            }
+
+            resizeCanvas() {
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+
+                const dpr = window.devicePixelRatio || 1;
+                this.canvas.width = this.width * dpr;
+                this.canvas.height = this.height * dpr;
+                this.canvas.style.width = `${this.width}px`;
+                this.canvas.style.height = `${this.height}px`;
+
+                this.board.x = this.width / 2;
+                this.board.y = this.height * 0.38;
+                this.board.r = Math.min(this.width * 0.22, this.height * 0.25, 175);
+                this.board.rInnerBull = this.board.r * 0.052;
+                this.board.rOuterBull = this.board.r * 0.12;
+                this.board.rTrebleIn = this.board.r * 0.54;
+                this.board.rTrebleOut = this.board.r * 0.63;
+                this.board.rDoubleIn = this.board.r * 0.91;
+                this.board.rDoubleOut = this.board.r * 1.0;
+
+                // Sliders positioned relative to dartboard
+                this.sliderV.x = this.board.x - this.board.r - 45;
+                this.sliderV.y = this.board.y - this.board.r;
+                this.sliderV.w = 10;
+                this.sliderV.h = this.board.r * 2;
+
+                this.sliderH.x = this.board.x - this.board.r * 0.85;
+                this.sliderH.y = this.board.y + this.board.r + 42;
+                this.sliderH.w = this.board.r * 1.7;
+                this.sliderH.h = 10;
+
+                this.camera.focusX = this.board.x;
+                this.camera.focusY = this.board.y;
+                this.camera.targetFocusX = this.board.x;
+                this.camera.targetFocusY = this.board.y;
+            }
+
+            setupEvents() {
+                window.addEventListener('resize', () => this.resizeCanvas());
+
+                const handleTap = (e) => {
+                    if (this.gameOver || this.flyingDart || (this.turn === 1 && this.gameMode === 'bot')) return;
+                    audio.init();
+
+                    if (this.meterStep === 0) {
+                        this.meterStep = 1;
+                    } else if (this.meterStep === 1) {
+                        this.meterStep = 0;
+                        this.triggerPlayerThrow();
+                    }
+                };
+
+                this.canvas.addEventListener('pointerdown', handleTap);
+
+                const btnRestart = document.getElementById('btnRestart');
+                if (btnRestart) btnRestart.addEventListener('click', () => this.resetMatch());
+
+                const btnOpenMenu = document.getElementById('btnOpenMenu');
+                const btnHelp = document.getElementById('btnHelp');
+                const modal = document.getElementById('modalOverlay');
+                const btnStartGame = document.getElementById('btnStartGame');
+
+                if (btnOpenMenu && modal) {
+                    btnOpenMenu.addEventListener('click', () => modal.classList.add('active'));
+                }
+                if (btnHelp && modal) {
+                    btnHelp.addEventListener('click', () => modal.classList.add('active'));
+                }
+
+                const modeBtns = document.querySelectorAll('.mode-choice-btn');
+                modeBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        modeBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.gameMode = btn.getAttribute('data-mode');
+                    });
+                });
+
+                const scoreBtns = document.querySelectorAll('.score-btn');
+                scoreBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        scoreBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.startScore = parseInt(btn.getAttribute('data-score'), 10) || 301;
+                    });
+                });
+
+                if (btnStartGame && modal) {
+                    btnStartGame.addEventListener('click', () => {
+                        modal.classList.remove('active');
+                        this.resetMatch();
+                    });
+                }
+            }
+
+            resetMatch() {
+                this.p1.score = this.startScore;
+                this.p2.score = this.startScore;
+                this.p1.darts = [];
+                this.p2.darts = [];
+                this.landedDarts = [];
+                this.turn = 0;
+                this.turnThrowsLeft = 3;
+                this.gameOver = false;
+                this.flyingDart = null;
+                this.meterStep = 0;
+                this.camera.targetZoom = 1;
+                this.updateUI();
+            }
+
+            triggerPlayerThrow() {
+                const targetX = this.board.x + (this.sliderH.val - 0.5) * (this.board.r * 2.2);
+                const targetY = this.board.y + (this.sliderV.val - 0.5) * (this.board.r * 2.2);
+
+                this.launchDart(targetX, targetY);
+            }
+
+            triggerBotThrow() {
+                if (this.gameOver || this.turn !== 1 || this.gameMode !== 'bot') return;
+
+                setTimeout(() => {
+                    if (this.gameOver || this.turn !== 1) return;
+
+                    const targetSectorAngle = -Math.PI / 2;
+                    const trebleR = (this.board.rTrebleIn + this.board.rTrebleOut) / 2;
+                    const aimX = this.board.x + Math.cos(targetSectorAngle) * trebleR + (Math.random() - 0.5) * 40;
+                    const aimY = this.board.y + Math.sin(targetSectorAngle) * trebleR + (Math.random() - 0.5) * 40;
+
+                    this.launchDart(aimX, aimY);
+                }, 900);
+            }
+
+            launchDart(targetX, targetY) {
+                audio.playThrow();
+                const startX = this.width / 2;
+                const startY = this.height * 0.85;
+
+                this.flyingDart = {
+                    startX,
+                    startY,
+                    targetX,
+                    targetY,
+                    x: startX,
+                    y: startY,
+                    t: 0,
+                    speed: 0.055,
+                    isBot: this.turn === 1 && this.gameMode === 'bot'
+                };
+            }
+
+            scoreHit(x, y) {
+                const dx = x - this.board.x;
+                const dy = y - this.board.y;
+                const dist = Math.hypot(dx, dy);
+
+                let angle = Math.atan2(dy, dx) - (-Math.PI / 2);
+                if (angle < 0) angle += Math.PI * 2;
+
+                const sectorIdx = Math.floor((angle + ANGLE_SLICE / 2) / ANGLE_SLICE) % 20;
+                const baseNum = SECTORS[sectorIdx];
+
+                let points = 0;
+                let isBull = false;
+
+                if (dist <= this.board.rInnerBull) {
+                    points = 50;
+                    isBull = true;
+                } else if (dist <= this.board.rOuterBull) {
+                    points = 25;
+                    isBull = true;
+                } else if (dist > this.board.rTrebleIn && dist <= this.board.rTrebleOut) {
+                    points = baseNum * 3;
+                } else if (dist > this.board.rDoubleIn && dist <= this.board.rDoubleOut) {
+                    points = baseNum * 2;
+                } else if (dist <= this.board.rDoubleOut) {
+                    points = baseNum;
+                } else {
+                    points = 0;
+                }
+
+                return { points, isBull, x, y };
+            }
+
+            onDartLanded(hit) {
+                audio.playHit(hit.isBull);
+                const activePlayer = this.turn === 0 ? this.p1 : this.p2;
+
+                this.landedDarts.push({
+                    x: hit.x,
+                    y: hit.y,
+                    color: activePlayer.color,
+                    isBot: this.turn === 1
+                });
+
+                // Camera Zoom into Impact Spot
+                this.camera.targetZoom = 1.45;
+                this.camera.targetFocusX = hit.x;
+                this.camera.targetFocusY = hit.y;
+
+                activePlayer.score = Math.max(0, activePlayer.score - hit.points);
+                this.turnThrowsLeft--;
+                this.updateUI();
+
+                if (activePlayer.score === 0) {
+                    this.gameOver = true;
+                    document.getElementById('turnBanner').textContent = `${activePlayer.name} WINS!`;
+                    return;
+                }
+
+                setTimeout(() => {
+                    this.camera.targetZoom = 1.0;
+                    this.camera.targetFocusX = this.board.x;
+                    this.camera.targetFocusY = this.board.y;
+
+                    if (this.turnThrowsLeft <= 0) {
+                        this.turn = this.turn === 0 ? 1 : 0;
+                        this.turnThrowsLeft = 3;
+                        this.landedDarts = [];
+                        this.updateUI();
+
+                        if (this.turn === 1 && this.gameMode === 'bot') {
+                            this.triggerBotThrow();
+                        }
+                    } else {
+                        if (this.turn === 1 && this.gameMode === 'bot') {
+                            this.triggerBotThrow();
+                        }
+                    }
+                }, 850);
+            }
+
+            updateUI() {
+                const p1ScoreEl = document.getElementById('p1Score');
+                const p2ScoreEl = document.getElementById('p2Score');
+                const p1Label = document.getElementById('p1Label');
+                const p2Label = document.getElementById('p2Label');
+                const turnBanner = document.getElementById('turnBanner');
+
+                if (p1ScoreEl) p1ScoreEl.textContent = this.p1.score;
+                if (p2ScoreEl) p2ScoreEl.textContent = this.p2.score;
+
+                if (this.gameMode === 'pass') {
+                    p2Label.textContent = 'P2';
+                } else if (this.gameMode === 'multiplayer') {
+                    p2Label.textContent = 'RIVAL';
+                } else {
+                    p2Label.textContent = 'BOT';
+                }
+
+                if (this.turn === 0) {
+                    this.app.classList.remove('turn-bot');
+                    turnBanner.textContent = 'YOUR TURN';
+                } else {
+                    this.app.classList.add('turn-bot');
+                    turnBanner.textContent = this.gameMode === 'bot' ? 'BOTS TURN' : 'PLAYER 2 TURN';
+                }
+            }
+
+            updateMeters() {
+                if (this.meterStep === 0) {
+                    this.sliderH.val += this.sliderH.speed * this.sliderH.dir;
+                    if (this.sliderH.val >= 1) { this.sliderH.val = 1; this.sliderH.dir = -1; }
+                    if (this.sliderH.val <= 0) { this.sliderH.val = 0; this.sliderH.dir = 1; }
+                }
+
+                if (this.meterStep === 0 || this.meterStep === 1) {
+                    this.sliderV.val += this.sliderV.speed * this.sliderV.dir;
+                    if (this.sliderV.val >= 1) { this.sliderV.val = 1; this.sliderV.dir = -1; }
+                    if (this.sliderV.val <= 0) { this.sliderV.val = 0; this.sliderV.dir = 1; }
+                }
+            }
+
+            drawSliders() {
+                const ctx = this.ctx;
+
+                // Vertical Slider
+                const sv = this.sliderV;
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect(sv.x, sv.y, sv.w, sv.h, 5);
+                ctx.fillStyle = 'rgba(45, 52, 54, 0.45)';
+                ctx.fill();
+
+                const knobY = sv.y + sv.val * sv.h;
+                ctx.beginPath();
+                ctx.roundRect(sv.x - 8, knobY - 5, sv.w + 16, 10, 5);
+                ctx.fillStyle = '#2d3436';
+                ctx.fill();
+                ctx.restore();
+
+                // Horizontal Slider
+                const sh = this.sliderH;
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect(sh.x, sh.y, sh.w, sh.h, 5);
+                ctx.fillStyle = 'rgba(45, 52, 54, 0.45)';
+                ctx.fill();
+
+                const knobX = sh.x + sh.val * sh.w;
+                ctx.beginPath();
+                ctx.roundRect(knobX - 5, sh.y - 8, 10, sh.h + 16, 5);
+                ctx.fillStyle = '#2d3436';
+                ctx.fill();
+                ctx.restore();
+
+                // Projected Target Dot on Dartboard
+                if (!this.flyingDart && this.camera.zoom < 1.15) {
+                    const targetX = this.board.x + (this.sliderH.val - 0.5) * (this.board.r * 2.2);
+                    const targetY = this.board.y + (this.sliderV.val - 0.5) * (this.board.r * 2.2);
+                    const isBot = this.turn === 1 && this.gameMode === 'bot';
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(targetX, targetY, 7, 0, Math.PI * 2);
+                    ctx.fillStyle = isBot ? 'rgba(0, 210, 211, 0.85)' : 'rgba(255, 71, 87, 0.85)';
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#fff';
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            drawDartboard() {
+                const ctx = this.ctx;
+                const b = this.board;
+
+                ctx.save();
+
+                // Drop shadow
+                ctx.beginPath();
+                ctx.arc(b.x + 10, b.y + 14, b.r + 18, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fill();
+
+                // Outer Black Number Ring
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r + 18, 0, Math.PI * 2);
+                ctx.fillStyle = '#1e272e';
+                ctx.fill();
+
+                // 20 Alternating Sectors
+                for (let i = 0; i < 20; i++) {
+                    const startA = -Math.PI / 2 + (i - 0.5) * ANGLE_SLICE;
+                    const endA = startA + ANGLE_SLICE;
+                    const isEven = i % 2 === 0;
+
+                    // Single segment
+                    ctx.beginPath();
+                    ctx.moveTo(b.x, b.y);
+                    ctx.arc(b.x, b.y, b.rDoubleOut, startA, endA);
+                    ctx.closePath();
+                    ctx.fillStyle = isEven ? '#18181b' : '#f8f9fa';
+                    ctx.fill();
+
+                    // Double Ring
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.rDoubleOut, startA, endA);
+                    ctx.arc(b.x, b.y, b.rDoubleIn, endA, startA, true);
+                    ctx.closePath();
+                    ctx.fillStyle = isEven ? '#eb4d4b' : '#2ed573';
+                    ctx.fill();
+
+                    // Treble Ring
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.rTrebleOut, startA, endA);
+                    ctx.arc(b.x, b.y, b.rTrebleIn, endA, startA, true);
+                    ctx.closePath();
+                    ctx.fillStyle = isEven ? '#eb4d4b' : '#2ed573';
+                    ctx.fill();
+                }
+
+                // Outer Bull (Green 25)
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.rOuterBull, 0, Math.PI * 2);
+                ctx.fillStyle = '#2ed573';
+                ctx.fill();
+
+                // Inner Bull (Red 50 with white ring)
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.rInnerBull + 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.rInnerBull, 0, Math.PI * 2);
+                ctx.fillStyle = '#eb4d4b';
+                ctx.fill();
+
+                // Numbers Ring
+                ctx.font = `900 ${Math.round(b.r * 0.12)}px Outfit, sans-serif`;
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                for (let i = 0; i < 20; i++) {
+                    const a = -Math.PI / 2 + i * ANGLE_SLICE;
+                    const nx = b.x + Math.cos(a) * (b.r + 9);
+                    const ny = b.y + Math.sin(a) * (b.r + 9);
+                    ctx.fillText(SECTORS[i], nx, ny);
+                }
+
+                ctx.restore();
+            }
+
+            drawStylizedDart(x, y, scale = 1, isBot = false, shadow = true) {
+                const ctx = this.ctx;
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(scale, scale);
+
+                const primaryColor = isBot ? '#00d2d3' : '#ff4757';
+                const darkOutline = '#1e272e';
+
+                // Shadow
+                if (shadow) {
+                    ctx.beginPath();
+                    ctx.ellipse(14, 22, 16, 8, Math.PI / 5, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+                    ctx.fill();
+                }
+
+                // Flight Wing Fins (Cartoon Stylized X cross-wings)
+                ctx.beginPath();
+                ctx.moveTo(-22, -10);
+                ctx.lineTo(-28, 34);
+                ctx.lineTo(0, 22);
+                ctx.lineTo(28, 34);
+                ctx.lineTo(22, -10);
+                ctx.closePath();
+                ctx.fillStyle = primaryColor;
+                ctx.fill();
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = darkOutline;
+                ctx.stroke();
+
+                // Shaft Barrel
+                ctx.beginPath();
+                ctx.roundRect(-7, -34, 14, 42, 5);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = darkOutline;
+                ctx.stroke();
+
+                // Steel Tip
+                ctx.beginPath();
+                ctx.moveTo(-4, -34);
+                ctx.lineTo(0, -50);
+                ctx.lineTo(4, -34);
+                ctx.closePath();
+                ctx.fillStyle = '#718093';
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            drawLandedDarts() {
+                this.landedDarts.forEach(d => {
+                    this.drawStylizedDart(d.x, d.y, 0.52, d.isBot, true);
+                });
+            }
+
+            drawFlyingDart() {
+                if (!this.flyingDart) return;
+                const fd = this.flyingDart;
+                fd.t += fd.speed;
+
+                if (fd.t >= 1) {
+                    const hit = this.scoreHit(fd.targetX, fd.targetY);
+                    this.flyingDart = null;
+                    this.onDartLanded(hit);
+                    return;
+                }
+
+                const t = fd.t;
+                fd.x = fd.startX + (fd.targetX - fd.startX) * t;
+                const linearY = fd.startY + (fd.targetY - fd.startY) * t;
+                const arc = -Math.sin(t * Math.PI) * 70;
+                fd.y = linearY + arc;
+                const scale = 1.1 - t * 0.58;
+
+                this.drawStylizedDart(fd.x, fd.y, scale, fd.isBot, true);
+            }
+
+            drawDartInHand() {
+                if (this.flyingDart || this.gameOver) return;
+                const isBot = this.turn === 1 && this.gameMode === 'bot';
+                const handX = this.width / 2;
+                const handY = this.height * 0.82;
+
+                this.drawStylizedDart(handX, handY, 1.25, isBot, true);
+            }
+
+            render() {
+                const dpr = window.devicePixelRatio || 1;
+                this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                // Camera Zoom Interpolation
+                this.camera.zoom += (this.camera.targetZoom - this.camera.zoom) * 0.12;
+                this.camera.focusX += (this.camera.targetFocusX - this.camera.focusX) * 0.12;
+                this.camera.focusY += (this.camera.targetFocusY - this.camera.focusY) * 0.12;
+
+                this.ctx.save();
+                if (this.camera.zoom !== 1) {
+                    this.ctx.translate(this.board.x, this.board.y);
+                    this.ctx.scale(this.camera.zoom, this.camera.zoom);
+                    this.ctx.translate(-this.camera.focusX, -this.camera.focusY);
+                }
+
+                this.drawDartboard();
+                this.drawSliders();
+                this.drawLandedDarts();
+                this.drawFlyingDart();
+
+                this.ctx.restore();
+
+                if (this.camera.zoom < 1.15) {
+                    this.drawDartInHand();
+                }
+            }
+
+            loop() {
+                this.updateMeters();
+                this.render();
+                requestAnimationFrame(() => this.loop());
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.offlineDarts = new OfflineDartsGame();
+        });
+    })();
+    </script>
+</body>
+</html>

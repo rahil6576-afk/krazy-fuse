@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pop Up 🎈⚡ — krazio games</title>
+    <!-- Favicon -->
+    <link rel="icon" href="../krazio-icon.svg" type="image/svg+xml">
+    
+    <script>
+      // Automatically normalize trailing slash for subfolder route
+      if (window.location.pathname.endsWith('/popup-game')) {
+        window.location.replace(window.location.pathname + '/' + window.location.search + window.location.hash);
+      }
+    </script>
+    <script type="module" crossorigin src="./assets/index-CZasFVSt.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-beHtTdnW.css">
+
+    <style>
+      html, body, #root {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #060714;
+      }
+      #krazio-floating-back {
+        position: fixed;
+        top: 14px;
+        left: 16px;
+        z-index: 99999;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(99, 102, 241, 0.4);
+        color: #f8fafc;
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 0.85rem;
+        font-weight: 800;
+        padding: 8px 16px;
+        border-radius: 9999px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.3);
+        transition: all 0.2s ease;
+      }
+      #krazio-floating-back:hover {
+        background: rgba(79, 70, 229, 0.95);
+        border-color: #6366f1;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(79, 70, 229, 0.6);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Floating Back to Krazio Hub Button -->
+    <a href="../index.html" id="krazio-floating-back" title="Back to krazio games portal">
+      <img src="../krazio-icon.svg" alt="krazio" style="width: 20px; height: 20px; border-radius: 50%;">
+      <span>🏠 KRAZIO GAMES</span>
+    </a>
+    <div id="root"></div>
+  </body>
+</html>
