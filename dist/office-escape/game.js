@@ -1471,6 +1471,8 @@ class BossManager {
 let player = new Player();
 let bgManager = new BackgroundManager();
 let bossManager = new BossManager();
+let obstacles = [];
+let items = [];
 let baseSpeed = 3.2; // Smooth, readable, and enjoyable arcade runner pacing
 let gameSpeed = baseSpeed;
 let distance = 0;
