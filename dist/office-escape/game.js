@@ -36,98 +36,139 @@ const storage = {
 let totalCoins = storage.get('coins', 0);
 let bestSurvivalTime = storage.get('best_time', 0);
 let bestDistance = storage.get('best_dist', 0);
-let unlockedAvatars = storage.get('unlocked_avatars', ['devin', 'alex', 'zara']);
-let activeAvatarId = storage.get('selected_avatar', 'devin');
+let unlockedAvatars = storage.get('unlocked_avatars', ['dev']);
+let activeAvatarId = storage.get('selected_avatar', 'dev');
 
-// Upgrades
+// Upgrades (Bought flags)
 let upgrades = storage.get('upgrades', {
-    coffee_duration: 1, // level 1-5
-    shield_strength: 1,
-    magnet_duration: 1
+    coffee_duration: 0,
+    shield_strength: 0,
+    magnet_duration: 0
 });
 
-// Avatar Definitions
+// Avatar Definitions (Dev unlocked, others purchased with P)
 const AVATARS = {
-    devin: {
-        id: 'devin',
-        name: 'Devin',
-        role: 'Junior Dev',
-        emoji: '🧑💻',
-        perk: 'Double Jump + Coffee Boost',
+    dev: {
+        id: 'dev',
+        name: 'Dev',
+        role: 'Core Developer',
+        emoji: '💻',
+        perk: 'Double Jump + Fast Stamina',
         color: '#38bdf8',
+        skinColor: '#fed7aa',
         hairColor: '#f97316',
         shirtColor: '#0284c7',
         pantsColor: '#1e293b',
         cost: 0,
         hasDoubleJump: true,
-        coffeeBonus: 1.5,
+        coffeeBonus: 1.3,
         magnetBonus: 1.0,
-        dashBonus: 1.0
+        dashBonus: 1.2
     },
-    alex: {
-        id: 'alex',
-        name: 'Alex',
-        role: 'Overworked Intern',
-        emoji: '📋',
-        perk: 'Fast Stamina Dash Recharge',
+    og_man: {
+        id: 'og_man',
+        name: 'OG Man',
+        role: 'Senior Specialist',
+        emoji: '👨',
+        perk: 'Balanced Agility & Low Friction',
         color: '#10b981',
-        hairColor: '#eab308',
+        skinColor: '#fde047',
+        hairColor: '#451a03',
         shirtColor: '#10b981',
         pantsColor: '#334155',
-        cost: 0,
-        hasDoubleJump: false,
-        coffeeBonus: 1.0,
-        magnetBonus: 1.0,
-        dashBonus: 1.6
-    },
-    zara: {
-        id: 'zara',
-        name: 'Zara',
-        role: 'WFH Legend',
-        emoji: '🩳',
-        perk: '+75% Coin Magnet Range',
-        color: '#ec4899',
-        hairColor: '#a855f7',
-        shirtColor: '#ec4899',
-        pantsColor: '#f43f5e',
-        cost: 0,
-        hasDoubleJump: false,
-        coffeeBonus: 1.0,
-        magnetBonus: 1.75,
-        dashBonus: 1.0
-    },
-    morgan: {
-        id: 'morgan',
-        name: 'Morgan',
-        role: 'Quiet Quitter',
-        emoji: '🕶️',
-        perk: 'Tiny Hitbox & Speed Drift',
-        color: '#8b5cf6',
-        hairColor: '#475569',
-        shirtColor: '#334155',
-        pantsColor: '#0f172a',
-        cost: 80,
+        cost: 40,
         hasDoubleJump: false,
         coffeeBonus: 1.1,
-        magnetBonus: 1.1,
-        dashBonus: 1.2,
-        hitboxScale: 0.85
+        magnetBonus: 1.2,
+        dashBonus: 1.3
     },
-    chad: {
-        id: 'chad',
-        name: 'Chad',
-        role: 'Synergy VP',
-        emoji: '👔',
-        perk: 'Starts with 1 Delegation Shield',
+    og_woman: {
+        id: 'og_woman',
+        name: 'OG Woman',
+        role: 'Lead Strategist',
+        emoji: '👩',
+        perk: 'Extended Slide & Fast Dash Recharge',
+        color: '#ec4899',
+        skinColor: '#fed7aa',
+        hairColor: '#a855f7',
+        shirtColor: '#ec4899',
+        pantsColor: '#475569',
+        cost: 40,
+        hasDoubleJump: false,
+        coffeeBonus: 1.1,
+        magnetBonus: 1.3,
+        dashBonus: 1.4
+    },
+    black_man: {
+        id: 'black_man',
+        name: 'Black Man',
+        role: 'Chief Architect',
+        emoji: '👨🏿',
+        perk: 'Free Shield Every Run + 2x Point Coins',
+        color: '#8b5cf6',
+        skinColor: '#582f0e',
+        hairColor: '#1e1b4b',
+        shirtColor: '#8b5cf6',
+        pantsColor: '#0f172a',
+        cost: 60,
+        hasDoubleJump: false,
+        startShield: true,
+        coinMultiplier: 2.0,
+        coffeeBonus: 1.2,
+        magnetBonus: 1.3,
+        dashBonus: 1.2
+    },
+    black_woman: {
+        id: 'black_woman',
+        name: 'Black Woman',
+        role: 'Director of Ops',
+        emoji: '👩🏿',
+        perk: '+80% Point Magnet Range',
         color: '#f59e0b',
-        hairColor: '#e2e8f0',
+        skinColor: '#582f0e',
+        hairColor: '#020617',
         shirtColor: '#f59e0b',
-        pantsColor: '#1e3a8a',
-        cost: 150,
+        pantsColor: '#1e293b',
+        cost: 60,
         hasDoubleJump: false,
         coffeeBonus: 1.2,
+        magnetBonus: 1.8,
+        dashBonus: 1.2
+    },
+    muscular_man: {
+        id: 'muscular_man',
+        name: 'Muscular Man',
+        role: 'Fitness Director',
+        emoji: '🏋️‍♂️',
+        perk: 'Smash Obstacles on Dash',
+        color: '#ef4444',
+        skinColor: '#fed7aa',
+        hairColor: '#b45309',
+        shirtColor: '#ef4444',
+        pantsColor: '#1e3a8a',
+        cost: 80,
+        hasDoubleJump: false,
+        coffeeBonus: 1.4,
+        magnetBonus: 1.1,
+        dashBonus: 1.5,
+        startShield: true
+    },
+    muscular_woman: {
+        id: 'muscular_woman',
+        name: 'Muscular Woman',
+        role: 'Power Exec',
+        emoji: '🏋️‍♀️',
+        perk: 'Protective Shield + Double Jump',
+        color: '#06b6d4',
+        skinColor: '#582f0e',
+        hairColor: '#7c2d12',
+        shirtColor: '#06b6d4',
+        pantsColor: '#312e81',
+        cost: 80,
+        hasDoubleJump: true,
+        coffeeBonus: 1.3,
         magnetBonus: 1.2,
-        dashBonus: 1.1,
+        dashBonus: 1.3,
         startShield: true
     }
 };
@@ -165,22 +206,28 @@ class Player {
     }
 
     reset() {
-        const avatar = AVATARS[activeAvatarId] || AVATARS.devin;
+        let avatar = AVATARS[activeAvatarId];
+        if (!avatar) {
+            activeAvatarId = 'dev';
+            avatar = AVATARS.dev;
+            storage.set('selected_avatar', 'dev');
+        }
         this.avatar = avatar;
-        this.width = 46 * (avatar.hitboxScale || 1.0);
-        this.height = 70 * (avatar.hitboxScale || 1.0);
+        this.width = 44 * (avatar.hitboxScale || 1.0);
+        this.height = 68 * (avatar.hitboxScale || 1.0);
         this.standHeight = this.height;
-        this.slideHeight = 34 * (avatar.hitboxScale || 1.0);
+        this.slideHeight = 32 * (avatar.hitboxScale || 1.0);
         this.x = 120;
         this.groundY = 500 - this.standHeight;
         this.y = this.groundY;
         this.vy = 0;
-        this.gravity = 0.88;
-        this.jumpForce = -17.2; // Generous, satisfying jump clearance
+        this.gravity = 0.82; // Crisp, balanced Dino jump gravity
+        this.jumpForce = -15.6; // Responsive, punchy jump arc
         this.isGrounded = true;
         this.isSliding = false;
+        this.isHoldingDuck = false;
         this.slideTimer = 0;
-        this.slideDuration = 32; // frames
+        this.slideDuration = 30; // frames
         this.jumpCount = 0;
         this.maxJumps = avatar.hasDoubleJump ? 2 : 1;
         this.jumpBuffer = 0;
@@ -191,7 +238,7 @@ class Player {
         this.maxStamina = 100;
         this.isDashing = false;
         this.dashTimer = 0;
-        this.dashDuration = 18;
+        this.dashDuration = 16;
 
         // Buffs
         this.shield = avatar.startShield ? 1 : 0;
@@ -205,7 +252,7 @@ class Player {
     }
 
     jump() {
-        // If currently sliding, cancel slide instantly and jump
+        // If sliding/ducking, cancel slide and jump immediately
         if (this.isSliding) {
             this.isSliding = false;
             this.slideTimer = 0;
@@ -219,27 +266,43 @@ class Player {
             this.coyoteTimer = 0;
             this.jumpCount = 1;
             window.soundManager.playJump();
-            createDust(this.x + 20, this.y + this.height, 8);
+            createDust(this.x + 20, this.y + this.height, 6);
         } else if (this.jumpCount < this.maxJumps) {
             this.vy = this.jumpForce * 0.95;
             this.jumpCount++;
             window.soundManager.playDoubleJump();
             createJumpRings(this.x + 20, this.y + this.height);
         } else {
-            // Buffer the jump input so pressing slightly before landing registers
-            this.jumpBuffer = 10;
+            // Buffer jump input
+            this.jumpBuffer = 8;
+        }
+    }
+
+    duckStart() {
+        this.isHoldingDuck = true;
+        if (this.isGrounded) {
+            this.isSliding = true;
+            this.height = this.slideHeight;
+            this.y = 500 - this.slideHeight;
+            createSlideSparks(this.x + 10, 500);
+        } else {
+            // Fast drop while in air (Classic Chrome Dino mechanic!)
+            this.vy += 2.8;
+        }
+    }
+
+    duckEnd() {
+        this.isHoldingDuck = false;
+        if (this.isGrounded && this.slideTimer <= 0) {
+            this.isSliding = false;
+            this.height = this.standHeight;
+            this.y = 500 - this.standHeight;
         }
     }
 
     slide() {
-        if (this.isGrounded && !this.isSliding) {
-            this.isSliding = true;
-            this.slideTimer = this.slideDuration;
-            this.height = this.slideHeight;
-            this.y = 500 - this.slideHeight;
-            window.soundManager.playSlide();
-            createSlideSparks(this.x + 10, this.y + this.height);
-        }
+        this.duckStart();
+        this.slideTimer = this.slideDuration;
     }
 
     dash() {
@@ -249,7 +312,7 @@ class Player {
             this.dashTimer = this.dashDuration;
             this.invulnerableTimer = Math.max(this.invulnerableTimer, this.dashDuration);
             window.soundManager.playDash();
-            createDashShockwave(this.x + 20, this.y + 35);
+            createGhostTrail(this);
         }
     }
 
@@ -262,13 +325,13 @@ class Player {
             this.stamina = Math.min(this.maxStamina, this.stamina + rechargeRate);
         }
 
-        // Slide Timer
+        // Slide / Duck timer & state
         if (this.isSliding) {
-            this.slideTimer--;
-            if (this.animFrame % 4 === 0) {
+            if (this.slideTimer > 0) this.slideTimer--;
+            if (this.animFrame % 5 === 0) {
                 createSlideSparks(this.x + 5, 500);
             }
-            if (this.slideTimer <= 0) {
+            if (this.slideTimer <= 0 && !this.isHoldingDuck) {
                 this.isSliding = false;
                 this.height = this.standHeight;
                 this.y = 500 - this.standHeight;
@@ -293,17 +356,18 @@ class Player {
                 createCoffeeSteam(this.x + Math.random() * 30, this.y + 10);
             }
         }
-        if (this.ptoTimer > 0) {
-            this.ptoTimer--;
-        }
-        if (this.invulnerableTimer > 0) {
-            this.invulnerableTimer--;
-        }
+        if (this.ptoTimer > 0) this.ptoTimer--;
+        if (this.invulnerableTimer > 0) this.invulnerableTimer--;
 
-        // Gravity & Jump Physics with Coyote Time and Buffering
+        // Gravity & Jump Physics
         if (!this.isGrounded) {
             if (this.coyoteTimer > 0) this.coyoteTimer--;
-            this.vy += this.gravity;
+            // Extra fast fall if holding down in air
+            if (this.isHoldingDuck) {
+                this.vy += this.gravity * 1.6;
+            } else {
+                this.vy += this.gravity;
+            }
             this.y += this.vy;
 
             if (this.y >= 500 - this.height) {
@@ -312,17 +376,22 @@ class Player {
                 this.isGrounded = true;
                 this.jumpCount = 0;
                 this.coyoteTimer = 0;
-                createDust(this.x + 20, 500, 5);
+                createDust(this.x + 20, 500, 4);
 
-                // Fire buffered jump immediately if queued
+                if (this.isHoldingDuck) {
+                    this.isSliding = true;
+                    this.height = this.slideHeight;
+                    this.y = 500 - this.slideHeight;
+                }
+
                 if (this.jumpBuffer > 0) {
                     this.jumpBuffer = 0;
                     this.jump();
                 }
             }
         } else {
-            this.coyoteTimer = 6;
-            this.runCycle += this.isDashing ? 0.35 : (this.coffeeTimer > 0 ? 0.3 : 0.2);
+            this.coyoteTimer = 5;
+            this.runCycle += 0.2 + (gameSpeed * 0.025);
         }
 
         if (this.jumpBuffer > 0) {
@@ -343,124 +412,313 @@ class Player {
             ctx.save();
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 3;
-            ctx.shadowColor = '#38bdf8';
-            ctx.shadowBlur = 15;
             ctx.beginPath();
-            ctx.arc(this.x + this.width / 2, this.y + this.height / 2, 45, 0, Math.PI * 2);
+            ctx.arc(this.x + this.width / 2, this.y + this.height / 2, 44, 0, Math.PI * 2);
             ctx.stroke();
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.18)';
             ctx.fill();
-            // Headphones Icon on Shield
             ctx.font = '18px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('🎧', this.x + this.width / 2, this.y - 8);
             ctx.restore();
         }
 
-        // Coffee Rush Glow
-        if (this.coffeeTimer > 0) {
-            ctx.shadowColor = '#fbbf24';
-            ctx.shadowBlur = 20;
-        }
-
         const px = this.x;
         const py = this.y;
+        const skin = this.avatar.skinColor || '#fed7aa';
 
         if (this.isSliding) {
-            // Sliding character pose
-            // Torso angled
+            // --- ULTRA-SMOOTH ATHLETIC ACTION SLIDE ---
+            const slideProgress = 1 - (this.slideTimer / this.slideDuration);
+            const tiltAngle = Math.sin(slideProgress * Math.PI) * 0.15;
+
+            ctx.save();
+            ctx.translate(px + 24, py + 18);
+            ctx.rotate(tiltAngle);
+
+            // Torso leaned back
             ctx.fillStyle = this.avatar.shirtColor;
             ctx.beginPath();
-            ctx.roundRect(px, py + 10, 48, 22, 6);
+            ctx.roundRect(-24, -4, 46, 18, 5);
             ctx.fill();
 
-            // Head ducked
-            ctx.fillStyle = '#ffdfba';
+            // Tie trailing backward
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(-22, -2, 18, 3.5);
+
+            // Head ducked low
+            ctx.fillStyle = skin;
             ctx.beginPath();
-            ctx.arc(px + 42, py + 18, 12, 0, Math.PI * 2);
+            ctx.arc(16, 2, 11, 0, Math.PI * 2);
             ctx.fill();
 
-            // Hair
+            // Focused eye looking ahead
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(20, 1, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hair swept back
             ctx.fillStyle = this.avatar.hairColor;
             ctx.beginPath();
-            ctx.arc(px + 42, py + 14, 12, Math.PI, Math.PI * 2);
+            ctx.arc(14, -2, 11, Math.PI * 0.8, Math.PI * 2.1);
             ctx.fill();
 
-            // Legs extending behind
+            // Front Extended Sliding Leg
             ctx.fillStyle = this.avatar.pantsColor;
-            ctx.fillRect(px - 14, py + 16, 20, 12);
+            ctx.fillRect(10, 8, 26, 7);
+            ctx.fillStyle = '#0f172a'; // Shoe
+            ctx.fillRect(32, 7, 10, 8);
+
+            // Back Tucked Leg
+            ctx.fillStyle = this.avatar.pantsColor;
+            ctx.fillRect(-22, 6, 24, 8);
             ctx.fillStyle = '#0f172a';
-            ctx.fillRect(px - 20, py + 18, 8, 10); // Shoes
+            ctx.fillRect(-26, 7, 10, 8);
 
-            // Briefcase sliding alongside
-            ctx.fillStyle = '#92400e';
-            ctx.fillRect(px + 12, py + 14, 16, 12);
+            // Briefcase skimming the ground
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(-8, 7, 18, 10);
+            ctx.fillStyle = '#d97706';
+            ctx.fillRect(-4, 5, 10, 3);
+
+            ctx.restore();
         } else {
-            // Running or Jumping Character
-            const legOffset = Math.sin(this.runCycle) * 14;
+            // --- DYNAMIC VECTOR RUNNING / JUMPING CHARACTER ---
+            const legOffset = Math.sin(this.runCycle) * 16;
+            const armOffset = Math.cos(this.runCycle) * 12;
+            const bobY = this.isGrounded ? Math.abs(Math.sin(this.runCycle)) * 3 : 0;
 
-            // Legs
+            ctx.save();
+            ctx.translate(px, py - bobY);
+
+            // Running Body Tilt
+            const runTilt = this.isGrounded ? 0.08 : (this.vy < 0 ? -0.1 : 0.12);
+            ctx.rotate(runTilt);
+
+            // 1. Back Arm (Swinging)
+            ctx.fillStyle = this.avatar.shirtColor;
+            ctx.fillRect(12 - armOffset * 0.5, 22, 8, 16);
+            ctx.fillStyle = skin;
+            ctx.beginPath();
+            ctx.arc(16 - armOffset * 0.5, 38, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 2. Legs with Natural Kinematics
             ctx.fillStyle = this.avatar.pantsColor;
             if (this.isGrounded) {
-                // Left leg
-                ctx.fillRect(px + 10, py + 42, 10, 22 + legOffset * 0.4);
-                // Right leg
-                ctx.fillRect(px + 26, py + 42, 10, 22 - legOffset * 0.4);
+                // Back Leg
+                ctx.fillRect(8, 42, 11, 20 - legOffset * 0.45);
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(6, 60 - legOffset * 0.45, 15, 8);
 
-                // Shoes
+                // Front Leg
+                ctx.fillStyle = this.avatar.pantsColor;
+                ctx.fillRect(24, 42, 11, 20 + legOffset * 0.45);
                 ctx.fillStyle = '#0f172a';
-                ctx.fillRect(px + 8, py + 62 + legOffset * 0.4, 14, 8);
-                ctx.fillRect(px + 24, py + 62 - legOffset * 0.4, 14, 8);
+                ctx.fillRect(22, 60 + legOffset * 0.45, 15, 8);
             } else {
-                // Tucked jumping legs
-                ctx.fillRect(px + 10, py + 42, 10, 16);
-                ctx.fillRect(px + 24, py + 42, 10, 12);
+                // Tucked Jumping Pose
+                ctx.fillRect(10, 42, 11, 15);
+                ctx.fillRect(24, 42, 11, 10);
                 ctx.fillStyle = '#0f172a';
-                ctx.fillRect(px + 8, py + 56, 14, 8);
-                ctx.fillRect(px + 22, py + 52, 14, 8);
+                ctx.fillRect(8, 55, 14, 8);
+                ctx.fillRect(22, 50, 14, 8);
             }
 
-            // Torso (Shirt/Suit)
+            // 3. Torso & Build (Custom per avatar type)
+            const isMuscular = this.avatar.id.includes('muscular');
+            const isFemale = this.avatar.id.includes('woman');
+            const torsoW = isMuscular ? 36 : (isFemale ? 26 : 28);
+            const torsoX = isMuscular ? 4 : (isFemale ? 9 : 8);
+
             ctx.fillStyle = this.avatar.shirtColor;
             ctx.beginPath();
-            ctx.roundRect(px + 8, py + 18, 30, 28, 6);
+            ctx.roundRect(torsoX, 16, torsoW, 28, 6);
             ctx.fill();
 
-            // Tie or lanyard
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(px + 22, py + 22, 4, 18);
+            // Tie, sport stripe, or crop top styling
+            if (this.avatar.id === 'dev') {
+                // Hoodie zipper & pocket
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(21, 16, 2, 28);
+                ctx.fillStyle = '#0369a1';
+                ctx.fillRect(12, 34, 18, 8);
+            } else if (this.avatar.id === 'og_man') {
+                // White collared shirt + Red tie
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(20, 16, 6, 8);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(21, 20, 4, 18);
+            } else if (this.avatar.id === 'og_woman') {
+                // White v-neck + Gold brooch
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.moveTo(18, 16); ctx.lineTo(26, 16); ctx.lineTo(22, 24);
+                ctx.fill();
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.arc(22, 24, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (this.avatar.id === 'black_man') {
+                // Lavender tie + Lapel
+                ctx.fillStyle = '#c084fc';
+                ctx.fillRect(21, 19, 4, 18);
+                ctx.fillStyle = '#581c87';
+                ctx.fillRect(torsoX + 2, 16, 4, 20);
+            } else if (this.avatar.id === 'black_woman') {
+                // Gold collar line + Black top
+                ctx.fillStyle = '#020617';
+                ctx.fillRect(18, 16, 8, 10);
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillRect(17, 16, 10, 2);
+            } else if (this.avatar.id === 'muscular_man') {
+                // Athletic power stripe
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(torsoX + 3, 24, torsoW - 6, 3);
+            } else if (this.avatar.id === 'muscular_woman') {
+                // Athletic crop top (bare waistline)
+                ctx.fillStyle = skin;
+                ctx.fillRect(torsoX, 36, torsoW, 8);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.fillRect(torsoX + 2, 26, torsoW - 4, 2);
+            }
 
-            // Head
-            ctx.fillStyle = '#ffdfba';
+            // 4. Head & Face
+            ctx.fillStyle = skin;
             ctx.beginPath();
-            ctx.arc(px + 23, py + 12, 12, 0, Math.PI * 2);
+            ctx.arc(22, 10, 12, 0, Math.PI * 2);
             ctx.fill();
 
-            // Expressive Eyes
+            // Expressive Eye
             ctx.fillStyle = '#0f172a';
             ctx.beginPath();
-            ctx.arc(px + 28, py + 11, 2.5, 0, Math.PI * 2);
+            ctx.arc(26, 9, 2.3, 0, Math.PI * 2);
             ctx.fill();
 
-            // Sweat drop if running fast
-            if (this.isDashing || this.coffeeTimer > 0) {
-                ctx.fillStyle = '#38bdf8';
+            // Eye highlight
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(25.3, 8.2, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // --- AVATAR-SPECIFIC HAIRSTYLES, GLASSES & ACCESSORIES ---
+            ctx.fillStyle = this.avatar.hairColor;
+            if (this.avatar.id === 'dev') {
+                // Spiky Orange Dev Hair
                 ctx.beginPath();
-                ctx.arc(px + 34, py + 6, 2.5, 0, Math.PI * 2);
+                ctx.arc(21, 6, 13, Math.PI * 0.7, Math.PI * 2.3);
+                ctx.fill();
+                // Developer Glasses
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(23, 7, 7, 4);
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillRect(24, 8, 5, 2);
+                // Headset
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(12, 2, 4, 14);
+                ctx.beginPath();
+                ctx.arc(14, 10, 5, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (this.avatar.id === 'og_man') {
+                // Classic Business Hair + Mustache
+                ctx.beginPath();
+                ctx.arc(21, 6, 12, Math.PI * 0.8, Math.PI * 2.2);
+                ctx.fill();
+                // Mustache
+                ctx.fillStyle = this.avatar.hairColor;
+                ctx.fillRect(24, 13, 6, 2.5);
+            } else if (this.avatar.id === 'og_woman') {
+                // Long Hair + Flowing Ponytail
+                ctx.beginPath();
+                ctx.arc(21, 6, 12.5, Math.PI * 0.7, Math.PI * 2.3);
+                ctx.fill();
+                // Dynamic Ponytail
+                ctx.beginPath();
+                ctx.arc(8, 14 + (this.isGrounded ? legOffset * 0.25 : 0), 8, 0, Math.PI * 2);
+                ctx.fill();
+                // Gold Hair Clip & Pearl Earring
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillRect(11, 11, 3, 5);
+                ctx.beginPath();
+                ctx.arc(15, 12, 2, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (this.avatar.id === 'black_man') {
+                // Razor Fade Haircut + Neat Goatee
+                ctx.beginPath();
+                ctx.arc(21, 7, 11.5, Math.PI * 0.8, Math.PI * 2.2);
+                ctx.fill();
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(24, 14, 4, 3);
+            } else if (this.avatar.id === 'black_woman') {
+                // High Braided Bun + Gold Earring & Hair Ring
+                ctx.beginPath();
+                ctx.arc(21, 8, 11.5, Math.PI * 0.8, Math.PI * 2.2);
+                ctx.fill();
+                // Top Bun
+                ctx.beginPath();
+                ctx.arc(18, -2, 8, 0, Math.PI * 2);
+                ctx.fill();
+                // Gold Ring & Earring
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillRect(17, 3, 4, 2);
+                ctx.beginPath();
+                ctx.arc(15, 12, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (this.avatar.id === 'muscular_man') {
+                // Crew Cut + Red Headband
+                ctx.beginPath();
+                ctx.arc(21, 7, 11, Math.PI * 0.8, Math.PI * 2.2);
+                ctx.fill();
+                // Red Headband
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(14, 6, 16, 3);
+            } else if (this.avatar.id === 'muscular_woman') {
+                // Cyan Headband & Braided Ponytail
+                ctx.beginPath();
+                ctx.arc(21, 6, 12, Math.PI * 0.8, Math.PI * 2.2);
+                ctx.fill();
+                // Cyan Sports Headband
+                ctx.fillStyle = '#06b6d4';
+                ctx.fillRect(14, 5, 16, 3);
+                // Ponytail
+                ctx.fillStyle = this.avatar.hairColor;
+                ctx.beginPath();
+                ctx.arc(6, 10 + (this.isGrounded ? legOffset * 0.2 : 0), 7, 0, Math.PI * 2);
                 ctx.fill();
             }
 
-            // Hair
-            ctx.fillStyle = this.avatar.hairColor;
+            // 5. Front Arm (Muscular bare bicep or tailored sleeve)
+            ctx.fillStyle = isMuscular ? skin : this.avatar.shirtColor;
+            ctx.fillRect(22 + armOffset * 0.5, 22, isMuscular ? 11 : 8, 16);
+            ctx.fillStyle = skin;
             ctx.beginPath();
-            ctx.arc(px + 22, py + 8, 12, Math.PI * 0.8, Math.PI * 2.2);
+            ctx.arc(26 + armOffset * 0.5, 38, 4, 0, Math.PI * 2);
             ctx.fill();
 
-            // Briefcase / Laptop in hand
-            ctx.fillStyle = '#78350f';
-            ctx.fillRect(px + 2, py + 28 + (this.isGrounded ? legOffset * 0.2 : 0), 12, 10);
-            ctx.fillStyle = '#d97706';
-            ctx.fillRect(px + 6, py + 26 + (this.isGrounded ? legOffset * 0.2 : 0), 4, 3);
+            // 6. Custom Handheld Props per Avatar
+            if (this.avatar.id === 'dev') {
+                // Glowing Code Tablet
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(22 + armOffset * 0.7, 34, 16, 11);
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillRect(24 + armOffset * 0.7, 36, 12, 7);
+            } else if (isMuscular) {
+                // Dumbbell / Power Shaker
+                ctx.fillStyle = '#475569';
+                ctx.fillRect(24 + armOffset * 0.7, 32, 10, 16);
+                ctx.fillStyle = this.avatar.id === 'muscular_man' ? '#ef4444' : '#06b6d4';
+                ctx.fillRect(23 + armOffset * 0.7, 30, 12, 4);
+                ctx.fillRect(23 + armOffset * 0.7, 46, 12, 4);
+            } else {
+                // Classic Business Briefcase
+                ctx.fillStyle = '#78350f';
+                ctx.fillRect(22 + armOffset * 0.7, 34, 15, 12);
+                ctx.fillStyle = '#d97706';
+                ctx.fillRect(26 + armOffset * 0.7, 32, 7, 3);
+            }
+
+            ctx.restore();
         }
 
         ctx.restore();
@@ -470,30 +728,30 @@ class Player {
 // Particle System
 let particles = [];
 
-function createDust(x, y, count = 5) {
+function createDust(x, y, count = 4) {
     for (let i = 0; i < count; i++) {
         particles.push({
             x: x + (Math.random() - 0.5) * 16,
             y: y + (Math.random() - 0.5) * 4,
             vx: -gameSpeed * 0.4 - Math.random() * 2,
             vy: -Math.random() * 1.5,
-            size: 3 + Math.random() * 4,
-            color: 'rgba(203, 213, 225, 0.6)',
-            life: 18
+            size: 3 + Math.random() * 3,
+            color: 'rgba(203, 213, 225, 0.5)',
+            life: 14
         });
     }
 }
 
 function createSlideSparks(x, y) {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
         particles.push({
             x: x,
             y: y - 2,
             vx: -gameSpeed * 0.8 - Math.random() * 3,
             vy: -Math.random() * 2,
-            size: 2 + Math.random() * 3,
+            size: 2 + Math.random() * 2,
             color: Math.random() > 0.5 ? '#f59e0b' : '#38bdf8',
-            life: 14
+            life: 12
         });
     }
 }
@@ -504,20 +762,8 @@ function createJumpRings(x, y) {
         x: x,
         y: y,
         radius: 6,
-        maxRadius: 28,
+        maxRadius: 26,
         color: '#38bdf8',
-        life: 16
-    });
-}
-
-function createDashShockwave(x, y) {
-    particles.push({
-        type: 'shockwave',
-        x: x,
-        y: y,
-        radius: 10,
-        maxRadius: 60,
-        color: '#818cf8',
         life: 14
     });
 }
@@ -529,20 +775,37 @@ function createGhostTrail(player) {
         y: player.y,
         width: player.width,
         height: player.height,
-        color: player.avatar.color,
-        life: 10
+        color: player.coffeeTimer > 0 ? 'rgba(251, 191, 36, 0.4)' : 'rgba(56, 189, 248, 0.4)',
+        life: 8
     });
+}
+
+function createBlastConfetti(x, y) {
+    const colors = ['#f43f5e', '#38bdf8', '#fbbf24', '#34d399', '#a855f7'];
+    for (let i = 0; i < 16; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = 2 + Math.random() * 6;
+        particles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * spd,
+            vy: Math.sin(angle) * spd,
+            size: 3 + Math.random() * 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            life: 20
+        });
+    }
 }
 
 function createCoffeeSteam(x, y) {
     particles.push({
         x: x,
         y: y,
-        vx: -1 + Math.random() * 2,
-        vy: -1.5 - Math.random() * 1.5,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: -2 - Math.random() * 1.5,
         size: 3 + Math.random() * 3,
-        color: 'rgba(251, 191, 36, 0.7)',
-        life: 20
+        color: 'rgba(251, 191, 36, 0.4)',
+        life: 14
     });
 }
 
@@ -551,28 +814,11 @@ function createScorePopup(x, y, text, color = '#fbbf24') {
         type: 'text',
         x: x,
         y: y,
-        text: text,
         vy: -1.8,
+        text: text,
         color: color,
-        life: 35
+        life: 30
     });
-}
-
-function createBlastConfetti(x, y) {
-    const colors = ['#38bdf8', '#fbbf24', '#f43f5e', '#10b981', '#a855f7'];
-    for (let i = 0; i < 24; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 2 + Math.random() * 6;
-        particles.push({
-            x: x,
-            y: y,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            size: 4 + Math.random() * 4,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            life: 30
-        });
-    }
 }
 
 function updateAndDrawParticles() {
@@ -583,18 +829,16 @@ function updateAndDrawParticles() {
         if (p.type === 'text') {
             p.y += p.vy;
             ctx.save();
-            ctx.font = 'bold 18px Outfit, sans-serif';
+            ctx.font = '900 16px Outfit, sans-serif';
             ctx.fillStyle = p.color;
-            ctx.shadowColor = 'rgba(0,0,0,0.8)';
-            ctx.shadowBlur = 6;
             ctx.fillText(p.text, p.x, p.y);
             ctx.restore();
-        } else if (p.type === 'ring' || p.type === 'shockwave') {
+        } else if (p.type === 'ring') {
             p.radius += (p.maxRadius - p.radius) * 0.25;
             ctx.save();
             ctx.strokeStyle = p.color;
-            ctx.lineWidth = 2.5;
-            ctx.globalAlpha = p.life / 16;
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = p.life / 14;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.stroke();
@@ -602,7 +846,7 @@ function updateAndDrawParticles() {
         } else if (p.type === 'ghost') {
             ctx.save();
             ctx.fillStyle = p.color;
-            ctx.globalAlpha = (p.life / 10) * 0.4;
+            ctx.globalAlpha = (p.life / 8) * 0.35;
             ctx.fillRect(p.x, p.y, p.width, p.height);
             ctx.restore();
         } else {
@@ -622,493 +866,159 @@ function updateAndDrawParticles() {
     }
 }
 
-// Parallax Background Engine with Rich Office Details
+// Ultra-Fast Offscreen Cached Parallax Background Engine (Zero CPU Lag!)
 class BackgroundManager {
     constructor() {
-        this.layer1 = 0; // Skyline & Far Windows
-        this.layer2 = 0; // Glass Conference Rooms & Wall Art
-        this.layer3 = 0; // Cubicles, Desks, Monitors, Plants & Chairs
-        this.layer4 = 0; // Ceiling Lights & Floor Tiles
-        this.tick = 0;
+        this.layer1 = 0; // Skyline & Windows
+        this.layer2 = 0; // Wall Decor & Whiteboards
+        this.layer3 = 0; // Cubicles & Desks
+        this.layer4 = 0; // Floor & Ceiling
+        this.initOffscreenBuffers();
     }
 
-    update(speed) {
-        this.tick++;
-        this.layer1 = (this.layer1 - speed * 0.12) % 1200;
-        this.layer2 = (this.layer2 - speed * 0.38) % 1200;
-        this.layer3 = (this.layer3 - speed * 0.72) % 1200;
-        this.layer4 = (this.layer4 - speed * 1.0) % 1200;
-    }
+    initOffscreenBuffers() {
+        // 1. Buffer for Skyline Windows (Width 800px)
+        this.skylineCanvas = document.createElement('canvas');
+        this.skylineCanvas.width = 800;
+        this.skylineCanvas.height = 440;
+        const sCtx = this.skylineCanvas.getContext('2d');
 
-    draw(biome) {
-        this.drawCeiling(biome);
-        this.drawFarSkylineAndWalls(biome);
-        this.drawConferenceAndWallDecor(biome);
-        this.drawCubiclesDesksAndOfficeProps(biome);
-        this.drawFloorAndReflections(biome);
-        this.drawOverheadLightingAndExitSigns(biome);
-    }
+        // Draw static skyline pattern
+        sCtx.fillStyle = '#060a17';
+        sCtx.fillRect(0, 0, 800, 440);
 
-    // 1. Drop Ceiling & Architectural Header
-    drawCeiling(biome) {
-        // Ceiling Base
-        ctx.fillStyle = '#0b1120';
-        ctx.fillRect(0, 0, 1000, 70);
+        for (let i = 0; i < 2; i++) {
+            const bx = i * 400;
+            sCtx.fillStyle = '#03060c';
+            sCtx.fillRect(bx + 40, 40, 200, 180);
+            sCtx.fillStyle = 'rgba(56, 189, 248, 0.05)';
+            sCtx.fillRect(bx + 40, 40, 200, 180);
 
-        // Ceiling Acoustic Grid Tiles
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
-        ctx.lineWidth = 1.5;
-        for (let i = -1; i < 15; i++) {
-            const cx = (this.layer4 + i * 90) % 1350;
-            ctx.strokeRect(cx, 0, 90, 60);
-        }
+            // Skyscrapers
+            sCtx.fillStyle = '#0b1120';
+            sCtx.fillRect(bx + 50, 90, 40, 130);
+            sCtx.fillRect(bx + 95, 60, 55, 160);
+            sCtx.fillRect(bx + 155, 80, 45, 140);
 
-        // AC Ventilation Ducts
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(0, 58, 1000, 6);
-        ctx.fillStyle = '#334155';
-        ctx.fillRect(0, 64, 1000, 2);
-    }
-
-    // 2. Far Skyline & Corporate Windows (Layer 1)
-    drawFarSkylineAndWalls(biome) {
-        // Wall Gradient
-        const wallGrad = ctx.createLinearGradient(0, 60, 0, 500);
-        wallGrad.addColorStop(0, biome.bg1);
-        wallGrad.addColorStop(1, biome.bg2);
-        ctx.fillStyle = wallGrad;
-        ctx.fillRect(0, 60, 1000, 440);
-
-        ctx.save();
-        for (let i = -1; i < 3; i++) {
-            const bx = this.layer1 + i * 600;
-
-            // City Windows with Skyscrapers
-            ctx.fillStyle = '#070b14';
-            ctx.fillRect(bx + 40, 90, 220, 200);
-
-            // Window Glass Reflection
-            const winGrad = ctx.createLinearGradient(bx + 40, 90, bx + 260, 290);
-            winGrad.addColorStop(0, 'rgba(56, 189, 248, 0.08)');
-            winGrad.addColorStop(0.5, 'rgba(99, 102, 241, 0.04)');
-            winGrad.addColorStop(1, 'rgba(15, 23, 42, 0.6)');
-            ctx.fillStyle = winGrad;
-            ctx.fillRect(bx + 40, 90, 220, 200);
-
-            // Distant Skyscraper Silhouettes
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(bx + 50, 150, 45, 140);
-            ctx.fillRect(bx + 105, 120, 60, 170);
-            ctx.fillRect(bx + 175, 140, 45, 150);
-            ctx.fillRect(bx + 225, 170, 30, 120);
-
-            // Glowing City Window Dots
-            ctx.fillStyle = 'rgba(254, 240, 138, 0.4)';
-            for (let r = 0; r < 5; r++) {
-                for (let c = 0; c < 3; c++) {
-                    if ((r + c + i) % 2 === 0) {
-                        ctx.fillRect(bx + 115 + c * 16, 135 + r * 20, 6, 8);
-                    }
+            // Glowing window dots
+            sCtx.fillStyle = 'rgba(254, 240, 138, 0.3)';
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 2; c++) {
+                    sCtx.fillRect(bx + 105 + c * 16, 75 + r * 22, 6, 8);
                 }
             }
 
-            // Window Frame
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(bx + 40, 90, 220, 200);
-            ctx.beginPath();
-            ctx.moveTo(bx + 150, 90);
-            ctx.lineTo(bx + 150, 290);
-            ctx.moveTo(bx + 40, 190);
-            ctx.lineTo(bx + 260, 190);
-            ctx.stroke();
-
-            // Wall Company Logo Accent
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-            ctx.font = 'bold 16px Outfit, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('⚡ SYNAPSE CORP HQ', bx + 320, 130);
+            sCtx.strokeStyle = '#1e293b';
+            sCtx.lineWidth = 2;
+            sCtx.strokeRect(bx + 40, 40, 200, 180);
         }
-        ctx.restore();
+
+        // 2. Buffer for Cubicles & Props (Width 800px)
+        this.cubicleCanvas = document.createElement('canvas');
+        this.cubicleCanvas.width = 800;
+        this.cubicleCanvas.height = 260;
+        const cCtx = this.cubicleCanvas.getContext('2d');
+
+        for (let i = 0; i < 2; i++) {
+            const bx = i * 400;
+            // Cubicle partition
+            cCtx.fillStyle = '#1e293b';
+            cCtx.beginPath();
+            cCtx.roundRect(bx + 30, 40, 220, 180, [8, 8, 0, 0]);
+            cCtx.fill();
+
+            // Desk
+            cCtx.fillStyle = '#334155';
+            cCtx.fillRect(bx + 50, 130, 180, 14);
+            cCtx.fillStyle = '#475569';
+            cCtx.fillRect(bx + 60, 144, 8, 80);
+            cCtx.fillRect(bx + 210, 144, 8, 80);
+
+            // Dual Monitors
+            cCtx.fillStyle = '#050811';
+            cCtx.fillRect(bx + 70, 75, 55, 42);
+            cCtx.fillRect(bx + 135, 75, 55, 42);
+            cCtx.fillStyle = '#38bdf8';
+            cCtx.fillRect(bx + 76, 82, 22, 3);
+            cCtx.fillStyle = '#f472b6';
+            cCtx.fillRect(bx + 142, 82, 26, 3);
+        }
     }
 
-    // 3. Conference Rooms, Sticky Whiteboards & Wall Posters (Layer 2)
-    drawConferenceAndWallDecor(biome) {
-        ctx.save();
-        for (let i = -1; i < 3; i++) {
-            const bx = this.layer2 + i * 480;
+    update(speed) {
+        this.layer1 -= speed * 0.15;
+        while (this.layer1 <= -800) this.layer1 += 800;
 
-            // Glass Meeting Room Box
-            ctx.fillStyle = 'rgba(30, 41, 59, 0.65)';
-            ctx.fillRect(bx + 60, 180, 260, 210);
+        this.layer2 -= speed * 0.45;
+        while (this.layer2 <= -800) this.layer2 += 800;
 
-            // Frosted glass band
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.12)';
-            ctx.fillRect(bx + 60, 240, 260, 80);
-            ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(bx + 60, 180, 260, 210);
+        this.layer3 -= speed * 0.65;
+        while (this.layer3 <= -800) this.layer3 += 800;
 
-            // Conference Room Table & Chairs inside glass
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(bx + 100, 310, 180, 12);
-            ctx.fillStyle = '#334155';
-            ctx.fillRect(bx + 120, 322, 10, 35);
-            ctx.fillRect(bx + 250, 322, 10, 35);
-
-            // Meeting Room Projector Screen with Pie Chart
-            ctx.fillStyle = '#f8fafc';
-            ctx.fillRect(bx + 140, 200, 100, 65);
-            ctx.strokeStyle = '#0284c7';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(bx + 140, 200, 100, 65);
-
-            // Pie chart graphics
-            ctx.fillStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.arc(bx + 190, 232, 20, 0, Math.PI * 0.7);
-            ctx.lineTo(bx + 190, 232);
-            ctx.fill();
-            ctx.fillStyle = '#38bdf8';
-            ctx.beginPath();
-            ctx.arc(bx + 190, 232, 20, Math.PI * 0.7, Math.PI * 1.6);
-            ctx.lineTo(bx + 190, 232);
-            ctx.fill();
-            ctx.fillStyle = '#10b981';
-            ctx.beginPath();
-            ctx.arc(bx + 190, 232, 20, Math.PI * 1.6, Math.PI * 2);
-            ctx.lineTo(bx + 190, 232);
-            ctx.fill();
-
-            // Whiteboard with Agile Kanban Sticky Notes
-            ctx.fillStyle = '#f1f5f9';
-            ctx.fillRect(bx + 350, 200, 95, 75);
-            ctx.strokeStyle = '#94a3b8';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(bx + 350, 200, 95, 75);
-
-            // Sticky Notes (Yellow, Pink, Cyan, Green)
-            ctx.fillStyle = '#fde047';
-            ctx.fillRect(bx + 356, 210, 16, 16);
-            ctx.fillRect(bx + 356, 232, 16, 16);
-            ctx.fillStyle = '#f472b6';
-            ctx.fillRect(bx + 378, 210, 16, 16);
-            ctx.fillRect(bx + 378, 232, 16, 16);
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(bx + 400, 210, 16, 16);
-            ctx.fillStyle = '#4ade80';
-            ctx.fillRect(bx + 422, 210, 16, 16);
-            ctx.fillRect(bx + 422, 232, 16, 16);
-
-            // Framed Motivational Poster
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(bx + 40, 120, 80, 45);
-            ctx.strokeStyle = '#d97706';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(bx + 40, 120, 80, 45);
-            ctx.fillStyle = '#fbbf24';
-            ctx.font = 'bold 8px Outfit, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('🚀 INNOVATE', bx + 80, 140);
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '6px Outfit, sans-serif';
-            ctx.fillText('SHIP BEFORE 5PM', bx + 80, 152);
-
-            // Wall Clock with Ticking Hand
-            ctx.fillStyle = '#f8fafc';
-            ctx.beginPath();
-            ctx.arc(bx + 300, 130, 15, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.strokeStyle = '#ef4444';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(bx + 300, 130);
-            const handAngle = (this.tick * 0.02) % (Math.PI * 2);
-            ctx.lineTo(bx + 300 + Math.cos(handAngle) * 10, 130 + Math.sin(handAngle) * 10);
-            ctx.stroke();
-        }
-        ctx.restore();
+        this.layer4 -= speed;
+        while (this.layer4 <= -800) this.layer4 += 800;
     }
 
-    // 4. Cubicles, L-Desks, Dual Monitors, Plants & Office Chairs (Layer 3)
-    drawCubiclesDesksAndOfficeProps(biome) {
-        ctx.save();
-        for (let i = -1; i < 3; i++) {
-            const bx = this.layer3 + i * 500;
+    draw(biome) {
+        const l1 = Math.round(this.layer1);
+        const l3 = Math.round(this.layer3);
+        const l4 = Math.round(this.layer4);
 
-            // --- CUBICLE PARTITION WALL ---
-            ctx.fillStyle = '#334155';
-            ctx.beginPath();
-            ctx.roundRect(bx + 40, 290, 240, 210, [8, 8, 0, 0]);
-            ctx.fill();
-
-            // Fabric inset panel
-            ctx.fillStyle = '#1e293b';
-            ctx.beginPath();
-            ctx.roundRect(bx + 48, 298, 224, 110, 4);
-            ctx.fill();
-
-            // --- L-SHAPED OFFICE DESK ---
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(bx + 60, 390, 200, 16);
-            // Desk Wood Top edge
-            ctx.fillStyle = '#b45309';
-            ctx.fillRect(bx + 60, 390, 200, 4);
-            // Metal Desk Legs
-            ctx.fillStyle = '#64748b';
-            ctx.fillRect(bx + 75, 406, 10, 94);
-            ctx.fillRect(bx + 235, 406, 10, 94);
-
-            // --- DUAL MONITORS SETUP ---
-            // Monitor 1: Code Editor (Dark theme with syntax code lines)
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(bx + 85, 325, 68, 48);
-            ctx.strokeStyle = '#64748b';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(bx + 85, 325, 68, 48);
-            // Stand
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(bx + 114, 373, 10, 17);
-            ctx.fillRect(bx + 104, 388, 30, 3);
-            // Code Editor glowing lines
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(bx + 90, 332, 28, 3);
-            ctx.fillStyle = '#f472b6';
-            ctx.fillRect(bx + 122, 332, 22, 3);
-            ctx.fillStyle = '#4ade80';
-            ctx.fillRect(bx + 90, 340, 44, 3);
-            ctx.fillStyle = '#fbbf24';
-            ctx.fillRect(bx + 90, 348, 36, 3);
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(bx + 98, 356, 30, 3);
-
-            // Monitor 2: Live Metrics / Graph
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(bx + 160, 325, 62, 48);
-            ctx.strokeStyle = '#64748b';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(bx + 160, 325, 62, 48);
-            // Stand
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(bx + 186, 373, 10, 17);
-            ctx.fillRect(bx + 176, 388, 30, 3);
-            // Line Chart & Bars
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(bx + 168, 355, 8, 12);
-            ctx.fillStyle = '#fbbf24';
-            ctx.fillRect(bx + 180, 345, 8, 22);
-            ctx.fillStyle = '#10b981';
-            ctx.fillRect(bx + 192, 335, 8, 32);
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(bx + 204, 340, 8, 27);
-
-            // Keyboard & Mouse on Desk
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(bx + 100, 386, 45, 4);
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(bx + 155, 385, 8, 5);
-
-            // Ceramic Coffee Mug on Desk with Steam
-            ctx.fillStyle = '#f8fafc';
-            ctx.fillRect(bx + 215, 380, 10, 10);
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(bx + 217, 382, 6, 6);
-
-            // --- ERGONOMIC OFFICE CHAIR ---
-            // High-back mesh
-            ctx.fillStyle = '#0f172a';
-            ctx.beginPath();
-            ctx.roundRect(bx + 130, 360, 34, 52, 6);
-            ctx.fill();
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            // Chair Seat
-            ctx.fillStyle = '#1e293b';
-            ctx.beginPath();
-            ctx.roundRect(bx + 124, 408, 46, 12, 4);
-            ctx.fill();
-            // Chair Stem & 5-Star Wheeled Base
-            ctx.fillStyle = '#64748b';
-            ctx.fillRect(bx + 144, 420, 6, 26);
-            ctx.fillRect(bx + 128, 444, 38, 4);
-            // Wheels
-            ctx.fillStyle = '#0f172a';
-            ctx.beginPath();
-            ctx.arc(bx + 130, 450, 4, 0, Math.PI * 2);
-            ctx.arc(bx + 164, 450, 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            // --- POTTED OFFICE PLANT (Monstera / Fiddle Leaf) ---
-            const px = bx + 300;
-            // Terracotta Pot
-            ctx.fillStyle = '#ea580c';
-            ctx.beginPath();
-            ctx.moveTo(px, 450);
-            ctx.lineTo(px + 30, 450);
-            ctx.lineTo(px + 26, 498);
-            ctx.lineTo(px + 4, 498);
-            ctx.closePath();
-            ctx.fill();
-            // Soil rim
-            ctx.fillStyle = '#451a03';
-            ctx.fillRect(px - 2, 446, 34, 6);
-            // Lush Green Leaves
-            ctx.fillStyle = '#15803d';
-            ctx.beginPath();
-            ctx.ellipse(px + 5, 430, 14, 22, -0.4, 0, Math.PI * 2);
-            ctx.ellipse(px + 25, 425, 14, 24, 0.4, 0, Math.PI * 2);
-            ctx.ellipse(px + 15, 410, 16, 26, 0, 0, Math.PI * 2);
-            ctx.fill();
-            // Leaf vein highlights
-            ctx.strokeStyle = '#4ade80';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(px + 15, 436);
-            ctx.lineTo(px + 15, 395);
-            ctx.stroke();
-
-            // --- WATER COOLER WITH BUBBLING WATER ---
-            const wx = bx + 360;
-            // White body
-            ctx.fillStyle = '#e2e8f0';
-            ctx.beginPath();
-            ctx.roundRect(wx, 415, 32, 85, 4);
-            ctx.fill();
-            // Dispenser tray & levers (Blue cold / Red hot)
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(wx + 6, 440, 20, 18);
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(wx + 8, 442, 6, 6);
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(wx + 18, 442, 6, 6);
-            // Water Bottle (Translucent cyan with water level)
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.65)';
-            ctx.beginPath();
-            ctx.arc(wx + 16, 395, 16, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#0284c7';
-            ctx.fillRect(wx + 11, 407, 10, 8);
-            // Bubbles inside
-            if (this.tick % 60 < 30) {
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(wx + 14, 396, 2.5, 0, Math.PI * 2);
-                ctx.arc(wx + 19, 390, 2, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // --- 3-DRAWER STEEL FILING CABINET ---
-            const fx = bx + 420;
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(fx, 390, 42, 110);
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(fx, 390, 42, 110);
-            // 3 Drawers & Handles
-            for (let d = 0; d < 3; d++) {
-                const dy = 396 + d * 34;
-                ctx.strokeStyle = '#64748b';
-                ctx.strokeRect(fx + 3, dy, 36, 30);
-                // Handle
-                ctx.fillStyle = '#cbd5e1';
-                ctx.fillRect(fx + 14, dy + 12, 14, 4);
-                // Index card label
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(fx + 16, dy + 4, 10, 5);
-            }
+        // 1. Draw Cached Skyline Layer (Snapped to exact integer coordinates)
+        if (this.skylineCanvas) {
+            ctx.drawImage(this.skylineCanvas, l1, 60);
+            ctx.drawImage(this.skylineCanvas, l1 + 800, 60);
+            ctx.drawImage(this.skylineCanvas, l1 + 1600, 60);
         }
-        ctx.restore();
-    }
 
-    // 5. Floor Tiles, Linoleum & Reflections
-    drawFloorAndReflections(biome) {
-        // Floor Base
-        ctx.fillStyle = biome.floorColor;
+        // 2. Draw Cached Cubicles Layer
+        if (this.cubicleCanvas) {
+            ctx.save();
+            ctx.globalAlpha = 0.35;
+            ctx.drawImage(this.cubicleCanvas, l3, 240);
+            ctx.drawImage(this.cubicleCanvas, l3 + 800, 240);
+            ctx.drawImage(this.cubicleCanvas, l3 + 1600, 240);
+            ctx.restore();
+        }
+
+        // 3. Drop Ceiling
+        ctx.fillStyle = '#060913';
+        ctx.fillRect(0, 0, 1000, 70);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 64, 1000, 4);
+
+        // Ceiling Lights (Lightweight)
+        for (let i = 0; i < 6; i++) {
+            const lx = Math.round(((l4 + i * 180) % 1080 + 1080) % 1080);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(lx, 66, 60, 3);
+        }
+
+        // 4. Running Floor Base
+        ctx.fillStyle = '#090d18';
         ctx.fillRect(0, 500, 1000, 100);
 
-        // Baseboard Wooden Trim
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(0, 496, 1000, 6);
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(0, 500, 1000, 3);
+        // Vibrant Cyan Running Laser Track
+        ctx.strokeStyle = '#00f0ff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, 500);
+        ctx.lineTo(1000, 500);
+        ctx.stroke();
 
-        // Carpet Tile Grid & Diagonal Weave Lines
-        ctx.save();
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(0, 504, 1000, 2);
+
+        // Floor Grid Lines
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
-        ctx.lineWidth = 2;
-        for (let i = -1; i < 15; i++) {
-            const lx = (this.layer4 + i * 110) % 1300;
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < 16; i++) {
+            const fx = Math.round(((l4 + i * 70) % 1120 + 1120) % 1120);
             ctx.beginPath();
-            ctx.moveTo(lx, 502);
-            ctx.lineTo(lx - 70, 600);
+            ctx.moveTo(fx, 506);
+            ctx.lineTo(fx, 600);
             ctx.stroke();
-
-            // Horizontal tile seams
-            ctx.strokeRect(lx - 50, 530, 110, 35);
         }
-
-        // Ambient Soft Floor Glow under Overhead Lights
-        for (let i = -1; i < 6; i++) {
-            const lx = (this.layer4 + i * 260) % 1300;
-            const floorGlow = ctx.createRadialGradient(lx + 50, 505, 5, lx + 50, 505, 75);
-            floorGlow.addColorStop(0, 'rgba(56, 189, 248, 0.08)');
-            floorGlow.addColorStop(1, 'transparent');
-            ctx.fillStyle = floorGlow;
-            ctx.fillRect(lx - 30, 500, 160, 40);
-        }
-        ctx.restore();
-    }
-
-    // 6. Overhead Lighting & Illuminated Emergency Exit Signs
-    drawOverheadLightingAndExitSigns(biome) {
-        ctx.save();
-        for (let i = -1; i < 6; i++) {
-            const lx = (this.layer4 + i * 260) % 1300;
-
-            // Fluorescent Troffer Light Panel
-            ctx.fillStyle = '#f8fafc';
-            ctx.shadowColor = '#38bdf8';
-            ctx.shadowBlur = 18;
-            ctx.beginPath();
-            ctx.roundRect(lx, 16, 100, 10, 3);
-            ctx.fill();
-
-            // Soft Volumetric Cone
-            ctx.shadowBlur = 0;
-            const cone = ctx.createLinearGradient(0, 26, 0, 350);
-            cone.addColorStop(0, 'rgba(255, 255, 255, 0.07)');
-            cone.addColorStop(1, 'transparent');
-            ctx.fillStyle = cone;
-            ctx.beginPath();
-            ctx.moveTo(lx, 26);
-            ctx.lineTo(lx + 100, 26);
-            ctx.lineTo(lx + 140, 350);
-            ctx.lineTo(lx - 40, 350);
-            ctx.closePath();
-            ctx.fill();
-
-            // Emergency EXIT Sign (every 2nd light)
-            if (i % 2 === 0) {
-                ctx.fillStyle = '#065f46';
-                ctx.fillRect(lx + 150, 26, 44, 20);
-                ctx.strokeStyle = '#34d399';
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(lx + 150, 26, 44, 20);
-
-                ctx.fillStyle = '#34d399';
-                ctx.font = 'bold 9px Outfit, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.shadowColor = '#34d399';
-                ctx.shadowBlur = 8;
-                ctx.fillText('EXIT ➔', lx + 172, 40);
-                ctx.shadowBlur = 0;
-            }
-        }
-        ctx.restore();
     }
 }
 
@@ -1121,38 +1031,44 @@ class Obstacle {
         this.animFrame = 0;
 
         switch (type) {
+            case 'CHAIR':
+                // Ergonomic mesh rolling chair with caution stripes
+                this.width = 46;
+                this.height = 54;
+                this.y = 500 - this.height;
+                break;
             case 'CALENDAR':
                 // "Quick Sync?" Meeting block (Jump)
-                this.width = 52;
-                this.height = 48;
+                this.width = 54;
+                this.height = 50;
                 this.y = 500 - this.height;
                 this.title = 'SYNC?';
                 this.subtitle = '30m';
                 break;
             case 'LAPTOP':
-                // Tripping Laptop with blue sparking cords (Jump)
-                this.width = 44;
-                this.height = 26;
+                // Tripping Laptop with electric sparking cords (Jump)
+                this.width = 48;
+                this.height = 30;
                 this.y = 500 - this.height;
                 break;
             case 'COFFEE_SPILL':
-                // Coffee spill puddle (Jump or slide)
-                this.width = 60;
-                this.height = 14;
+                // Coffee spill puddle with caution hazard cone
+                this.width = 64;
+                this.height = 18;
                 this.y = 500 - this.height;
                 break;
             case 'FLYING_BUZZWORD':
                 // Flying laser buzzword projectile (Slide under!)
-                this.width = 84;
-                this.height = 28;
-                this.y = 405; // Floating at head height
+                this.width = 88;
+                this.height = 30;
+                this.y = 402;
                 this.buzzwords = ['SYNERGY!', 'CIRCLE BACK!', 'EOD ASAP!', 'DEEP DIVE!', 'PER MY EMAIL'];
                 this.text = this.buzzwords[Math.floor(Math.random() * this.buzzwords.length)];
                 break;
             case 'TASK_BOULDER':
                 // Rolling Giant "URGENT TASK" Boulder
-                this.width = 50;
-                this.height = 50;
+                this.width = 52;
+                this.height = 52;
                 this.y = 500 - this.height;
                 this.rot = 0;
                 break;
@@ -1172,106 +1088,269 @@ class Obstacle {
 
     draw() {
         ctx.save();
+        const pulse = 0.85 + Math.sin(this.animFrame * 0.15) * 0.2;
+
         switch (this.type) {
-            case 'CALENDAR':
-                // Red/White Calendar Block
-                ctx.fillStyle = '#ef4444';
+            case 'CHAIR':
+                // --- HIGH-VISIBILITY HAZARD ROLLING CHAIR ---
+                ctx.shadowColor = '#facc15';
+                ctx.shadowBlur = 18 * pulse;
+
+                // Glowing outer danger border
+                ctx.strokeStyle = '#facc15';
+                ctx.lineWidth = 2.5;
                 ctx.beginPath();
-                ctx.roundRect(this.x, this.y, this.width, 16, [6, 6, 0, 0]);
-                ctx.fill();
+                ctx.roundRect(this.x - 2, this.y - 2, this.width + 4, this.height + 4, 8);
+                ctx.stroke();
 
-                ctx.fillStyle = '#f8fafc';
-                ctx.beginPath();
-                ctx.roundRect(this.x, this.y + 16, this.width, this.height - 16, [0, 0, 6, 6]);
-                ctx.fill();
-
-                // Calendar bindings
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(this.x + 8, this.y - 3, 6, 6);
-                ctx.fillRect(this.x + this.width - 14, this.y - 3, 6, 6);
-
-                // Text
+                // High-back mesh with Black & Yellow Danger Stripes
                 ctx.fillStyle = '#0f172a';
-                ctx.font = 'bold 10px Outfit, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(this.title, this.x + this.width / 2, this.y + 29);
+                ctx.beginPath();
+                ctx.roundRect(this.x + 8, this.y + 4, 30, 26, 4);
+                ctx.fill();
 
+                // Yellow Hazard Stripes on Seat Back
+                ctx.fillStyle = '#facc15';
+                ctx.fillRect(this.x + 12, this.y + 8, 22, 4);
+                ctx.fillRect(this.x + 12, this.y + 16, 22, 4);
+                ctx.fillRect(this.x + 12, this.y + 24, 22, 4);
+
+                // Top Red Alert Flasher
                 ctx.fillStyle = '#ef4444';
-                ctx.font = 'bold 11px Outfit, sans-serif';
-                ctx.fillText('📅 ' + this.subtitle, this.x + this.width / 2, this.y + 42);
+                ctx.shadowColor = '#ef4444';
+                ctx.shadowBlur = 12;
+                ctx.beginPath();
+                ctx.arc(this.x + 23, this.y + 2, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Seat Cushion
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.roundRect(this.x + 4, this.y + 30, 38, 10, 3);
+                ctx.fill();
+                ctx.strokeStyle = '#facc15';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Chrome Stem & Wheeled Star Base
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillRect(this.x + 20, this.y + 40, 6, 8);
+                ctx.fillRect(this.x + 6, this.y + 47, 34, 3);
+
+                // Caster Wheels
+                ctx.fillStyle = '#fde047';
+                ctx.beginPath();
+                ctx.arc(this.x + 8, this.y + 51, 3.5, 0, Math.PI * 2);
+                ctx.arc(this.x + 38, this.y + 51, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+
+            case 'CALENDAR':
+                // --- HIGH-CONTRAST URGENT DEADLINE CALENDAR ---
+                ctx.shadowColor = 'rgba(239, 68, 68, 0.95)';
+                ctx.shadowBlur = 20 * pulse;
+
+                // Glowing outer red laser hazard border
+                ctx.strokeStyle = '#f87171';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.roundRect(this.x - 2, this.y - 2, this.width + 4, this.height + 4, 8);
+                ctx.stroke();
+
+                // Bold Fiery Red Header Block
+                ctx.fillStyle = '#dc2626';
+                ctx.beginPath();
+                ctx.roundRect(this.x, this.y, this.width, 20, [6, 6, 0, 0]);
+                ctx.fill();
+
+                // Crisp White Body
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.roundRect(this.x, this.y + 20, this.width, this.height - 20, [0, 0, 6, 6]);
+                ctx.fill();
+
+                // Binding Spirals
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(this.x + 8, this.y - 4, 6, 8);
+                ctx.fillRect(this.x + this.width - 14, this.y - 4, 6, 8);
+
+                // Top Alert Badge
+                ctx.fillStyle = '#fde047';
+                ctx.beginPath();
+                ctx.arc(this.x + this.width - 4, this.y + 2, 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 9px Outfit, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('!', this.x + this.width - 4, this.y + 5);
+
+                // Bold Text
+                ctx.fillStyle = '#0f172a';
+                ctx.font = '900 11px Outfit, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(this.title, this.x + this.width / 2, this.y + 33);
+
+                ctx.fillStyle = '#dc2626';
+                ctx.font = '900 11.5px Outfit, sans-serif';
+                ctx.fillText('🚨 ' + this.subtitle, this.x + this.width / 2, this.y + 45);
                 break;
 
             case 'LAPTOP':
-                // Laptop on Floor
-                ctx.fillStyle = '#475569';
-                ctx.fillRect(this.x, this.y + 16, this.width, 10);
-                // Glowing blue screen
-                ctx.fillStyle = '#38bdf8';
-                ctx.shadowColor = '#38bdf8';
-                ctx.shadowBlur = 10;
+                // --- NEON CYBER SPARKING LAPTOP ---
+                ctx.shadowColor = '#00f0ff';
+                ctx.shadowBlur = 22 * pulse;
+
+                // Base Hazard Neon Border
+                ctx.strokeStyle = '#00f0ff';
+                ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.moveTo(this.x + 6, this.y + 16);
-                ctx.lineTo(this.x + 14, this.y + 2);
-                ctx.lineTo(this.x + 38, this.y + 2);
-                ctx.lineTo(this.x + 38, this.y + 16);
+                ctx.roundRect(this.x - 3, this.y + 14, this.width + 6, 16, 4);
+                ctx.stroke();
+
+                // Laptop Base Chassis
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(this.x, this.y + 16, this.width, 12);
+
+                // Glowing Cyan-Magenta Display Screen
+                const scrGrad = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + 16);
+                scrGrad.addColorStop(0, '#00f0ff');
+                scrGrad.addColorStop(1, '#f43f5e');
+                ctx.fillStyle = scrGrad;
+                ctx.beginPath();
+                ctx.moveTo(this.x + 4, this.y + 16);
+                ctx.lineTo(this.x + 12, this.y);
+                ctx.lineTo(this.x + 44, this.y);
+                ctx.lineTo(this.x + 44, this.y + 16);
+                ctx.closePath();
                 ctx.fill();
 
-                // Tangled cords
+                // Screen warning text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 9px Outfit, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('⚡ CRASH', this.x + 28, this.y + 11);
+
+                // Tangled cords with animated electric sparks
                 ctx.strokeStyle = '#f59e0b';
-                ctx.lineWidth = 2.5;
+                ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.moveTo(this.x - 16, this.y + 22);
-                ctx.quadraticCurveTo(this.x - 8, this.y + 12, this.x, this.y + 18);
+                ctx.moveTo(this.x - 18, this.y + 22);
+                ctx.quadraticCurveTo(this.x - 8, this.y + 10, this.x, this.y + 18);
                 ctx.stroke();
+
+                // Electric spark dots
+                if (this.animFrame % 4 < 2) {
+                    ctx.fillStyle = '#fde047';
+                    ctx.beginPath();
+                    ctx.arc(this.x - 10, this.y + 12, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
                 break;
 
             case 'COFFEE_SPILL':
-                // Coffee spill puddle
-                ctx.fillStyle = '#451a03';
+                // --- HAZARD COFFEE SPILL WITH WET FLOOR CONE ---
+                ctx.shadowColor = '#ea580c';
+                ctx.shadowBlur = 18 * pulse;
+
+                // Glowing Orange Floor Puddle Outline
+                ctx.strokeStyle = '#f97316';
+                ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.ellipse(this.x + this.width / 2, this.y + 8, this.width / 2, 6, 0, 0, Math.PI * 2);
+                ctx.ellipse(this.x + this.width / 2, this.y + 10, this.width / 2 + 3, 9, 0, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Dark Hot Coffee Spill Puddle
+                ctx.fillStyle = '#291003';
+                ctx.beginPath();
+                ctx.ellipse(this.x + this.width / 2, this.y + 10, this.width / 2, 7, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Knocked mug
-                ctx.fillStyle = '#f8fafc';
-                ctx.fillRect(this.x + 6, this.y, 12, 10);
+                // Knocked Mug
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 0;
+                ctx.beginPath();
+                ctx.roundRect(this.x + 2, this.y, 14, 12, 3);
+                ctx.fill();
                 ctx.fillStyle = '#ef4444';
-                ctx.fillRect(this.x + 8, this.y + 2, 8, 3);
+                ctx.fillRect(this.x + 4, this.y + 2, 10, 4);
+
+                // Fluorescent Yellow Caution Triangle Sign
+                const tx = this.x + this.width - 12;
+                const ty = this.y - 14;
+                ctx.fillStyle = '#fde047';
+                ctx.shadowColor = '#fde047';
+                ctx.shadowBlur = 12;
+                ctx.beginPath();
+                ctx.moveTo(tx, ty);
+                ctx.lineTo(tx + 14, ty + 24);
+                ctx.lineTo(tx - 14, ty + 24);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#000000';
+                ctx.font = '900 11px Outfit, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('⚠️', tx, ty + 19);
                 break;
 
             case 'FLYING_BUZZWORD':
-                // Floating red/orange alert banner
-                ctx.fillStyle = 'rgba(239, 68, 68, 0.92)';
+                // --- LASER BUZZWORD BARRIER ---
                 ctx.shadowColor = '#ef4444';
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 24 * pulse;
+
+                // Outer High-Intensity Laser Border
+                ctx.strokeStyle = '#fca5a5';
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                ctx.roundRect(this.x - 3, this.y - 3, this.width + 6, this.height + 6, 8);
+                ctx.stroke();
+
+                // High-Intensity Red-Orange Body
+                const buzzGrad = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
+                buzzGrad.addColorStop(0, '#ef4444');
+                buzzGrad.addColorStop(1, '#b91c1c');
+                ctx.fillStyle = buzzGrad;
                 ctx.beginPath();
                 ctx.roundRect(this.x, this.y, this.width, this.height, 6);
                 ctx.fill();
 
+                // High-Contrast Warning Text
                 ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 11px Outfit, sans-serif';
+                ctx.font = '900 12.5px Outfit, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('⚠️ ' + this.text, this.x + this.width / 2, this.y + 18);
+                ctx.fillText('⚡ ' + this.text + ' ⚡', this.x + this.width / 2, this.y + 20);
                 break;
 
             case 'TASK_BOULDER':
-                // Giant Rolling Document Boulder
+                // --- ROLLING URGENT BOULDER ---
                 ctx.save();
                 ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
                 ctx.rotate(this.rot);
 
-                ctx.fillStyle = '#f8fafc';
                 ctx.shadowColor = '#f43f5e';
-                ctx.shadowBlur = 12;
+                ctx.shadowBlur = 24 * pulse;
+
+                // Outer Danger Ring
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(0, 0, this.width / 2 + 2, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
                 ctx.arc(0, 0, this.width / 2, 0, Math.PI * 2);
                 ctx.fill();
 
-                ctx.fillStyle = '#ef4444';
-                ctx.font = '900 11px Outfit, sans-serif';
+                // Red Caution Stamp
+                ctx.fillStyle = '#dc2626';
+                ctx.font = '900 12px Outfit, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('URGENT', 0, -4);
-                ctx.fillText('TASK', 0, 9);
+                ctx.fillText('🚨 URGENT', 0, -4);
+                ctx.fillText('TASK 🚨', 0, 11);
                 ctx.restore();
                 break;
         }
@@ -1319,18 +1398,19 @@ class Item {
 
         switch (this.type) {
             case 'COIN':
-                // Spinning Gold Equity Token
+                // Spinning Gold Point Token (P)
                 ctx.fillStyle = '#fbbf24';
-                ctx.shadowColor = '#fbbf24';
-                ctx.shadowBlur = 10;
                 ctx.beginPath();
                 ctx.ellipse(this.x + 16, floatY + 16, 14 * Math.abs(Math.cos(this.anim * 1.5)), 14, 0, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
 
                 ctx.fillStyle = '#78350f';
-                ctx.font = 'bold 14px Outfit, sans-serif';
+                ctx.font = '900 13px Outfit, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('$', this.x + 16, floatY + 21);
+                ctx.fillText('P', this.x + 16, floatY + 21);
                 break;
 
             case 'COFFEE':
@@ -1473,13 +1553,14 @@ let bgManager = new BackgroundManager();
 let bossManager = new BossManager();
 let obstacles = [];
 let items = [];
-let baseSpeed = 3.2; // Smooth, readable, and enjoyable arcade runner pacing
+let baseSpeed = 3.6; // Walking pace start (Classic Chrome Dinosaur pace)
 let gameSpeed = baseSpeed;
 let distance = 0;
 let runStartTime = 0;
 let survivalTime = 0;
 let runCoins = 0;
-let spawnTimer = 0;
+let spawnCooldown = 45;
+let itemCooldown = 30;
 let nextBossTriggerDist = 800;
 
 // Collision Detection with generous forgiving hitboxes
@@ -1528,7 +1609,8 @@ function startGame() {
     distance = 0;
     runCoins = 0;
     gameSpeed = baseSpeed;
-    spawnTimer = 75;
+    spawnCooldown = 50; // First obstacle arrives in <1 second!
+    itemCooldown = 25;
     nextBossTriggerDist = 800;
     runStartTime = performance.now();
     survivalTime = 0;
@@ -1568,7 +1650,7 @@ function gameOver(customReason) {
     document.getElementById('death-reason-text').textContent = `"${reasonText}"`;
     document.getElementById('stat-time-val').textContent = finalTime.toFixed(2) + 's';
     document.getElementById('stat-dist-val').textContent = finalDist + 'm';
-    document.getElementById('stat-coins-val').textContent = '+$' + runCoins;
+    document.getElementById('stat-coins-val').textContent = '+' + runCoins + ' P';
     document.getElementById('stat-best-val').textContent = bestSurvivalTime.toFixed(2) + 's';
 
     const recordTag = document.getElementById('new-record-tag');
@@ -1581,60 +1663,52 @@ function gameOver(customReason) {
     document.getElementById('gameover-screen').classList.remove('hidden');
 }
 
-// Spawner Logic — The further you go, the more obstacles and combinations appear!
-function updateSpawner() {
-    spawnTimer--;
-    if (spawnTimer <= 0) {
-        // Obstacle frequency scales progressively with distance and survival time
-        const distReduction = Math.min(26, distance * 0.012);
-        const interval = Math.max(32, Math.floor(64 - distReduction - (survivalTime * 0.04)));
-        spawnTimer = interval;
+// Spawner Logic — Dynamic Rhythmic Stream (Engaging, fair, zero dead time)
+function updateSpawner(effectiveSpeed) {
+    spawnCooldown--;
+    if (spawnCooldown <= 0 && obstacles.length < 5) {
+        // Compute dynamic cooldown: Starts around 80 frames, tightens down to 48 frames as speed increases
+        const speedBonus = Math.min(32, (effectiveSpeed - baseSpeed) * 8.5);
+        spawnCooldown = Math.max(48, Math.floor(82 - speedBonus + (Math.random() * 20 - 10)));
 
         const rand = Math.random();
-        if (rand < 0.30) {
-            obstacles.push(new Obstacle('CALENDAR', 1050));
-        } else if (rand < 0.52) {
-            obstacles.push(new Obstacle('LAPTOP', 1050));
-        } else if (rand < 0.72) {
+        if (distance > 150 && rand < 0.28) {
+            // Low-flying buzzword requiring ducking/sliding (like Dino Pterodactyl!)
             obstacles.push(new Obstacle('FLYING_BUZZWORD', 1050));
+        } else if (rand < 0.25) {
+            obstacles.push(new Obstacle('CHAIR', 1050));
+        } else if (rand < 0.50) {
+            obstacles.push(new Obstacle('CALENDAR', 1050));
+        } else if (rand < 0.72) {
+            obstacles.push(new Obstacle('LAPTOP', 1050));
         } else if (rand < 0.88) {
             obstacles.push(new Obstacle('COFFEE_SPILL', 1050));
         } else {
             obstacles.push(new Obstacle('TASK_BOULDER', 1050));
         }
+    }
 
-        // At higher distances (>350m), occasionally spawn a staggered follow-up obstacle!
-        if (distance > 350 && Math.random() < 0.28) {
-            setTimeout(() => {
-                if (currentState === GAME_STATE.PLAYING) {
-                    const extraType = Math.random() < 0.5 ? 'FLYING_BUZZWORD' : 'LAPTOP';
-                    obstacles.push(new Obstacle(extraType, 1180));
-                }
-            }, 250);
-        }
-
-        // Spawn Coins & Power-ups
-        if (Math.random() < 0.65) {
+    // Spawn Coins & Power-ups rhythmically
+    itemCooldown--;
+    if (itemCooldown <= 0 && items.length < 5) {
+        itemCooldown = Math.floor(65 + Math.random() * 40);
+        if (Math.random() < 0.68) {
             const coinY = Math.random() > 0.4 ? 460 : 380;
-            const coinCount = Math.floor(Math.random() * 3) + 2;
+            const coinCount = Math.floor(Math.random() * 2) + 1;
             for (let i = 0; i < coinCount; i++) {
-                items.push(new Item('COIN', 1150 + i * 40, coinY));
+                items.push(new Item('COIN', 1100 + i * 42, coinY));
             }
-        }
-
-        // Powerup Drops (Slightly more frequent during high-speed sections to reward skill)
-        const powerupChance = distance > 500 ? 0.25 : 0.18;
-        if (Math.random() < powerupChance) {
+        } else if (Math.random() < 0.4) {
             const powerups = ['COFFEE', 'HEADPHONES', 'PTO', 'OOO'];
             const chosen = powerups[Math.floor(Math.random() * powerups.length)];
-            items.push(new Item(chosen, 1200, 420));
+            items.push(new Item(chosen, 1150, 420));
         }
     }
 
     // Boss Battle Trigger (Scales with distance milestones)
     if (distance >= nextBossTriggerDist && !bossManager.active) {
         bossManager.trigger();
-        nextBossTriggerDist += 1000 + Math.random() * 400;
+        nextBossTriggerDist += 1000 + Math.random() * 300;
     }
 }
 
@@ -1648,23 +1722,25 @@ function getCurrentBiome() {
     return BIOMES[0];
 }
 
-// Main Game Loop
+// Main Game Loop — Smooth, gradual Dino scaling starting at gentle walking speed
 function updateGame() {
     if (currentState !== GAME_STATE.PLAYING) return;
 
     survivalTime = (performance.now() - runStartTime) / 1000;
 
-    // Progressive Speed Scaling: The further you go, the faster and more intense it gets!
-    const timeSpeedBonus = Math.min(2.0, survivalTime * 0.02); 
-    const distSpeedBonus = Math.min(3.8, distance * 0.0012);   
-    const currentBaseSpeed = baseSpeed + timeSpeedBonus + distSpeedBonus;
+    // Classic Chrome Dino gradual acceleration formula
+    const targetBaseSpeed = baseSpeed + Math.min(4.2, distance * 0.0012 + survivalTime * 0.012);
 
-    // Coffee & Dash speed boost multipliers
-    const speedBoost = player.coffeeTimer > 0 ? 1.25 : (player.isDashing ? 1.35 : 1.0);
-    const effectiveSpeed = currentBaseSpeed * speedBoost;
-    gameSpeed = currentBaseSpeed;
+    // Smooth speed boost multiplier (prevents sudden velocity spikes)
+    const targetBoost = player.coffeeTimer > 0 ? 1.15 : (player.isDashing ? 1.22 : 1.0);
+    const targetEffectiveSpeed = targetBaseSpeed * targetBoost;
 
-    distance += effectiveSpeed * 0.05;
+    if (typeof window.smoothSpeed === 'undefined') window.smoothSpeed = baseSpeed;
+    window.smoothSpeed += (targetEffectiveSpeed - window.smoothSpeed) * 0.06;
+    const effectiveSpeed = window.smoothSpeed;
+    gameSpeed = targetBaseSpeed;
+
+    distance += effectiveSpeed * 0.055;
 
     const currentBiome = getCurrentBiome();
 
@@ -1672,7 +1748,7 @@ function updateGame() {
     bgManager.update(effectiveSpeed);
     player.update();
     bossManager.update(effectiveSpeed);
-    updateSpawner();
+    updateSpawner(effectiveSpeed);
 
     // Update Obstacles & Check Collisions
     for (let i = obstacles.length - 1; i >= 0; i--) {
@@ -1684,20 +1760,44 @@ function updateGame() {
             if (player.invulnerableTimer > 0 || player.coffeeTimer > 0) {
                 obs.markedForDeletion = true;
                 createBlastConfetti(obs.x + obs.width / 2, obs.y + obs.height / 2);
-                createScorePopup(obs.x, obs.y, 'SMASHED! +50', '#10b981');
-                runCoins += 5;
+                createScorePopup(obs.x, obs.y, 'SMASHED! +2 P', '#10b981');
+                runCoins += 2;
                 window.soundManager.playBlast();
             } else if (player.shield > 0) {
-                // Shield break
+                // Shield break + point penalty
                 player.shield--;
-                player.invulnerableTimer = 40; // temporary invulnerability
+                player.invulnerableTimer = 45;
                 obs.markedForDeletion = true;
                 window.soundManager.playShieldBreak();
                 createBlastConfetti(obs.x, obs.y);
-                createScorePopup(player.x, player.y - 20, 'SHIELD BROKE!', '#38bdf8');
+                
+                // Point deduction on hit
+                const penalty = Math.min(10, totalCoins + runCoins);
+                if (runCoins >= penalty) {
+                    runCoins -= penalty;
+                } else {
+                    const rem = penalty - runCoins;
+                    runCoins = 0;
+                    totalCoins = Math.max(0, totalCoins - rem);
+                    storage.set('coins', totalCoins);
+                }
+                createScorePopup(player.x, player.y - 20, `SHIELD BROKE! -${penalty} P`, '#ff4757');
             } else {
+                // Point deduction on fatal hit
+                const penalty = Math.min(15, totalCoins + runCoins);
+                if (runCoins >= penalty) {
+                    runCoins -= penalty;
+                } else {
+                    const rem = penalty - runCoins;
+                    runCoins = 0;
+                    totalCoins = Math.max(0, totalCoins - rem);
+                    storage.set('coins', totalCoins);
+                }
+                createScorePopup(player.x, player.y - 30, `-${penalty} P`, '#ef4444');
+
                 // Game Over Collision
                 let specificReason = null;
+                if (obs.type === 'CHAIR') specificReason = "Smashed into a rogue ergonomic office chair in the hallway.";
                 if (obs.type === 'CALENDAR') specificReason = "Trapped in an unmovable 'Quick Sync' calendar block.";
                 if (obs.type === 'LAPTOP') specificReason = "Tripped over tangled laptop charger cords and crashed into HR.";
                 if (obs.type === 'FLYING_BUZZWORD') specificReason = "Hit in the face by a flying 'SYNERGY' initiative.";
@@ -1724,10 +1824,10 @@ function updateGame() {
                 case 'COIN':
                     runCoins += 1;
                     window.soundManager.playCoin();
-                    createScorePopup(item.x, item.y, '+$1', '#fbbf24');
+                    createScorePopup(item.x, item.y, '+1 P', '#fbbf24');
                     break;
                 case 'COFFEE':
-                    const durationFrames = Math.floor(240 * (upgrades.coffee_duration * 0.2 + 1) * (player.avatar.coffeeBonus || 1));
+                    const durationFrames = Math.floor(240 * (upgrades.coffee_duration * 0.4 + 1) * (player.avatar.coffeeBonus || 1));
                     player.coffeeTimer = durationFrames;
                     window.soundManager.playCoffeePowerup();
                     createScorePopup(player.x, player.y - 30, 'QUAD ESPRESSO! ☕', '#f59e0b');
@@ -1743,10 +1843,10 @@ function updateGame() {
                     window.soundManager.playCoin();
                     break;
                 case 'OOO':
-                    // Vaporize all on-screen obstacles
+                    // Vaporize on-screen obstacles
                     obstacles.forEach(o => {
                         createBlastConfetti(o.x + o.width / 2, o.y + o.height / 2);
-                        runCoins += 3;
+                        runCoins += 1;
                     });
                     obstacles = [];
                     window.soundManager.playBlast();
@@ -1812,7 +1912,7 @@ function render() {
 // HUD Updates
 function updateHUD(biome) {
     document.getElementById('hud-time').textContent = survivalTime.toFixed(1) + 's';
-    document.getElementById('hud-coins').textContent = '$' + (totalCoins + runCoins);
+    document.getElementById('hud-coins').textContent = (totalCoins + runCoins) + ' P';
     document.getElementById('hud-zone').textContent = biome.name;
     document.getElementById('stamina-fill').style.width = (player.stamina / player.maxStamina * 100) + '%';
 
@@ -1884,7 +1984,7 @@ function goHome() {
     updateShopUI();
 }
 
-// Input Handlers
+// Input Handlers (Classic Chrome Dinosaur Controls)
 window.addEventListener('keydown', (e) => {
     // Audio context resume on first user interaction
     window.soundManager.init();
@@ -1905,7 +2005,7 @@ window.addEventListener('keydown', (e) => {
             player.jump();
         } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
             e.preventDefault();
-            player.slide();
+            player.duckStart();
         } else if (e.key === 'Shift' || e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
             e.preventDefault();
             player.dash();
@@ -1915,6 +2015,12 @@ window.addEventListener('keydown', (e) => {
         resumeGame();
     } else if (currentState === GAME_STATE.GAMEOVER && e.code === 'Space') {
         startGame();
+    }
+});
+
+window.addEventListener('keyup', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        player.duckEnd();
     }
 });
 
@@ -1935,7 +2041,15 @@ function setupTouchControls() {
         slideBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             window.soundManager.init();
-            player.slide();
+            player.duckStart();
+        });
+        slideBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            player.duckEnd();
+        });
+        slideBtn.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            player.duckEnd();
         });
     }
     if (dashBtn) {
@@ -1966,6 +2080,8 @@ function setupTouchControls() {
 // Avatar Selection & Shop UI
 function renderAvatarSelection() {
     const container = document.getElementById('avatar-grid-container');
+    const menuCoins = document.getElementById('menu-coins-display');
+    if (menuCoins) menuCoins.textContent = `🪙 ${totalCoins} P`;
     container.innerHTML = '';
 
     Object.values(AVATARS).forEach(av => {
@@ -1975,7 +2091,7 @@ function renderAvatarSelection() {
 
         card.className = `avatar-card ${isSelected ? 'selected' : ''} ${!isUnlocked ? 'locked' : ''}`;
         card.innerHTML = `
-            ${!isUnlocked ? `<span class="avatar-lock-tag">🔒 $${av.cost}</span>` : ''}
+            ${!isUnlocked ? `<span class="avatar-lock-tag">🔒 ${av.cost} P BUY</span>` : (isSelected ? `<span class="avatar-lock-tag" style="background: rgba(56, 189, 248, 0.3); color: #38bdf8; border-color: #38bdf8;">EQUIPPED</span>` : `<span class="avatar-lock-tag" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: #10b981;">BOUGHT ✓</span>`)}
             <div class="avatar-preview">${av.emoji}</div>
             <div class="avatar-name">${av.name}</div>
             <div class="avatar-role">${av.role}</div>
@@ -1987,6 +2103,7 @@ function renderAvatarSelection() {
             if (isUnlocked) {
                 activeAvatarId = av.id;
                 storage.set('selected_avatar', activeAvatarId);
+                player.reset(); // Instantly update player entity with selected avatar!
                 renderAvatarSelection();
             } else if (totalCoins >= av.cost) {
                 // Buy avatar
@@ -1996,12 +2113,13 @@ function renderAvatarSelection() {
                 storage.set('unlocked_avatars', unlockedAvatars);
                 activeAvatarId = av.id;
                 storage.set('selected_avatar', activeAvatarId);
+                player.reset(); // Instantly update player entity with selected avatar!
                 window.soundManager.playShieldUp();
                 renderAvatarSelection();
                 updateShopUI();
             } else {
                 window.soundManager.playTone(200, 'square', 0.1, 0.2);
-                alert(`Need $${av.cost} Equity Coins to unlock ${av.name}!`);
+                alert(`Need ${av.cost} P Point Coins to unlock ${av.name}!`);
             }
         });
 
@@ -2010,23 +2128,97 @@ function renderAvatarSelection() {
 }
 
 function updateShopUI() {
-    document.getElementById('shop-total-coins').textContent = '$' + totalCoins;
+    const totalEl = document.getElementById('shop-total-coins');
+    if (totalEl) totalEl.textContent = `${totalCoins} P`;
+
+    const coffeeBtn = document.getElementById('shop-btn-coffee');
+    const shieldBtn = document.getElementById('shop-btn-shield');
+    const magnetBtn = document.getElementById('shop-btn-magnet');
+
+    if (coffeeBtn) {
+        if (upgrades.coffee_duration > 0) {
+            coffeeBtn.textContent = 'BOUGHT ✓';
+            coffeeBtn.className = 'shop-buy-btn bought';
+            coffeeBtn.disabled = true;
+        } else {
+            coffeeBtn.textContent = '40 P BUY';
+            coffeeBtn.className = 'shop-buy-btn';
+            coffeeBtn.disabled = false;
+        }
+    }
+
+    if (shieldBtn) {
+        if (upgrades.shield_strength > 0) {
+            shieldBtn.textContent = 'BOUGHT ✓';
+            shieldBtn.className = 'shop-buy-btn bought';
+            shieldBtn.disabled = true;
+        } else {
+            shieldBtn.textContent = '60 P BUY';
+            shieldBtn.className = 'shop-buy-btn';
+            shieldBtn.disabled = false;
+        }
+    }
+
+    if (magnetBtn) {
+        if (upgrades.magnet_duration > 0) {
+            magnetBtn.textContent = 'BOUGHT ✓';
+            magnetBtn.className = 'shop-buy-btn bought';
+            magnetBtn.disabled = true;
+        } else {
+            magnetBtn.textContent = '50 P BUY';
+            magnetBtn.className = 'shop-buy-btn';
+            magnetBtn.disabled = false;
+        }
+    }
 }
 
 // Global upgrade helper
 window.buyUpgrade = function(type, cost) {
+    if (upgrades[type] > 0) return; // already bought!
     if (totalCoins >= cost) {
         totalCoins -= cost;
         storage.set('coins', totalCoins);
-        upgrades[type] = (upgrades[type] || 1) + 1;
+        upgrades[type] = 1;
         storage.set('upgrades', upgrades);
         window.soundManager.playShieldUp();
         updateShopUI();
-        createScorePopup(canvas.width / 2, canvas.height / 2, 'PERK UPGRADED! ✨', '#10b981');
+        renderAvatarSelection();
+        createScorePopup(canvas.width / 2, canvas.height / 2, 'PERK BOUGHT! ✨', '#10b981');
     } else {
         window.soundManager.playTone(200, 'square', 0.1, 0.2);
+        alert(`Need ${cost} P Point Coins!`);
     }
 };
+
+function requestGameFullScreen() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+        const el = document.documentElement;
+        const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+        if (req) {
+            req.call(el).catch(() => {});
+        }
+    }
+}
+
+// Return to game home page
+function goHome() {
+    currentState = GAME_STATE.MENU;
+    window.soundManager.stopBGM();
+    document.getElementById('gameover-screen').classList.add('hidden');
+    document.getElementById('pause-screen').classList.add('hidden');
+    document.getElementById('shop-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    player.reset();
+    renderAvatarSelection();
+}
+
+function handleBackNavigation() {
+    if (currentState === GAME_STATE.PLAYING || currentState === GAME_STATE.PAUSED || currentState === GAME_STATE.GAMEOVER) {
+        goHome();
+    } else {
+        window.location.href = '../index.html';
+    }
+}
 
 // Initialization on DOM load
 window.addEventListener('DOMContentLoaded', () => {
@@ -2034,12 +2226,24 @@ window.addEventListener('DOMContentLoaded', () => {
     setupTouchControls();
     updateShopUI();
 
+    const portalBackBtn = document.getElementById('btn-portal-back');
+    if (portalBackBtn) {
+        portalBackBtn.addEventListener('click', (e) => {
+            if (currentState === GAME_STATE.PLAYING || currentState === GAME_STATE.PAUSED || currentState === GAME_STATE.GAMEOVER) {
+                e.preventDefault();
+                goHome();
+            }
+        });
+    }
+
     document.getElementById('btn-play').addEventListener('click', () => {
+        requestGameFullScreen();
         window.soundManager.init();
         startGame();
     });
 
     document.getElementById('btn-restart').addEventListener('click', () => {
+        requestGameFullScreen();
         window.soundManager.init();
         startGame();
     });

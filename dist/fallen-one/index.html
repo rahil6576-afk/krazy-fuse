@@ -14,36 +14,37 @@
         top: 14px;
         left: 16px;
         z-index: 99999;
+        width: 40px;
+        height: 40px;
         background: rgba(15, 23, 42, 0.85);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(99, 102, 241, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         color: #f8fafc;
-        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-        font-size: 0.85rem;
-        font-weight: 800;
-        padding: 8px 16px;
-        border-radius: 9999px;
+        border-radius: 50%;
         text-decoration: none;
         display: flex;
         align-items: center;
-        gap: 8px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.3);
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         transition: all 0.2s ease;
+        cursor: pointer;
       }
       #krazio-floating-back:hover {
-        background: rgba(79, 70, 229, 0.95);
-        border-color: #6366f1;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(79, 70, 229, 0.6);
+        background: rgba(249, 115, 22, 0.9);
+        border-color: #f97316;
+        color: #ffffff;
+        transform: translateX(-3px) scale(1.08);
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
       }
     </style>
 </head>
 <body>
 
-    <!-- Floating Back to Krazio Hub Button -->
-    <a href="../index.html" id="krazio-floating-back" title="Back to krazio games portal">
-      <img src="krazio-icon.svg" alt="krazio" style="width: 20px; height: 20px; border-radius: 50%;">
-      <span>🏠 KRAZIO GAMES</span>
+    <!-- Simple Backward Arrow Button -->
+    <a href="../index.html" id="krazio-floating-back" title="Back to Portal" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
     </a>
 
     <div id="game-container">
@@ -194,70 +195,45 @@
         </div>
 
         <!-- ==========================================================================
-             MAIN MENU SCREEN
+             MAIN MENU SCREEN (FALLEN ONE MASTER HOMEPAGE)
              ========================================================================== -->
-        <div id="main-menu-screen" class="menu-screen">
-            <div class="main-menu-content">
-                <div class="menu-title-area">
-                    <span class="game-subtitle">Next-Gen 2D Arcade Fighter</span>
-                    <h1 class="game-title">CYBER CLASH<br><span style="color: var(--primary);">PVP ARENA</span></h1>
-                    <p style="color: #94a3b8; font-size: 14px; max-width: 420px; line-height: 1.5;">
-                        Master martial arts, elemental forces and ultimate focus attacks in fast-paced 60 FPS competitive arcade fighting.
-                    </p>
-
-                    <!-- QUICK MOVES MANUAL PREVIEW ON HOMEPAGE -->
-                    <div class="homepage-move-manual">
-                        <div class="manual-header-row">
-                            <span class="manual-title">⚡ COMBAT MOVES MANUAL</span>
-                            <div id="manual-char-tabs" class="manual-char-tabs">
-                                <button class="char-tab active" data-char="AARAV">AARAV</button>
-                                <button class="char-tab" data-char="SOLAR">SOLAR</button>
-                                <button class="char-tab" data-char="FROST">FROST</button>
-                                <button class="char-tab" data-char="VOLT">VOLT</button>
-                                <button class="char-tab" data-char="SHADOW">SHADOW</button>
-                                <button class="char-tab" data-char="TERRA">TERRA</button>
-                            </div>
-                        </div>
-
-                        <div id="manual-skills-content" class="manual-skills-grid">
-                            <!-- Populated dynamically by MenuManager -->
-                        </div>
-                    </div>
+        <div id="main-menu-screen" class="menu-screen fallen-one-home">
+            <!-- 16:9 Responsive Master Stage -->
+            <div id="fo-home-stage" class="fo-home-stage">
+                
+                <!-- TOP NAVIGATION HOTSPOTS -->
+                <div class="fo-hotspot-nav">
+                    <button id="btn-nav-home" class="fo-hotspot-btn active" title="Home"></button>
+                    <button id="btn-nav-characters" class="fo-hotspot-btn" title="Character Roster"></button>
+                    <button id="btn-nav-modes" class="fo-hotspot-btn" title="Battle Modes"></button>
+                    <button id="btn-nav-manual" class="fo-hotspot-btn" title="Command Manual"></button>
+                    <button id="btn-nav-leaderboard" class="fo-hotspot-btn" title="Leaderboard"></button>
+                    <button id="btn-nav-news" class="fo-hotspot-btn" title="Latest News"></button>
                 </div>
+                <button id="btn-nav-settings-top" class="fo-hotspot-btn fo-top-setting-btn" title="Settings"></button>
+                <button id="btn-nav-profile" class="fo-hotspot-btn fo-top-profile-btn" title="Player Profile"></button>
 
-                <div class="menu-buttons">
-                    <button id="btn-mode-local" class="arcade-btn primary-btn">
-                        <span>LOCAL VS (1v1)</span>
-                        <span>➔</span>
-                    </button>
-                    <button id="btn-mode-ai" class="arcade-btn">
-                        <span>VS CPU (AI BATTLE)</span>
-                        <span>➔</span>
-                    </button>
-                    <button id="btn-mode-training" class="arcade-btn">
-                        <span>TRAINING DOJO</span>
-                        <span>➔</span>
-                    </button>
-                    <button id="btn-mode-online" class="arcade-btn">
-                        <span>ONLINE MULTIPLAYER</span>
-                        <span>➔</span>
-                    </button>
-                    <button id="btn-mode-tower" class="arcade-btn tower-btn">
-                        <span>🗼 TOWER CLIMB (10 FLOORS)</span>
-                        <span>➔</span>
-                    </button>
-                </div>
-            </div>
+                <!-- LEFT SIDE HOTSPOTS -->
+                <!-- Featured Tower Climb Banner -->
+                <button id="btn-tower-featured" class="fo-hotspot-btn fo-hotspot-tower-left" title="Conquer 10 Floors of Chaos in Tower Climb"></button>
+                
+                <!-- News Feed Links -->
+                <button id="btn-news-item-1" class="fo-hotspot-btn fo-news-link-1" title="Season 1 Ranked Mode (Online PvP)"></button>
+                <button id="btn-news-item-2" class="fo-hotspot-btn fo-news-link-2" title="New Fighter: Volt"></button>
+                <button id="btn-news-item-3" class="fo-hotspot-btn fo-news-link-3" title="Tower Climb Update"></button>
 
-            <div class="menu-footer">
-                <div>
-                    <span>Controls: [WASD] Move/Jump &bull; [J/K] Punch &bull; [U/I] Kick &bull; [L] Special &bull; [O] Ultimate &bull; [H] Block &bull; [Space] Dash</span>
-                </div>
-                <div>
-                    <button id="btn-toggle-fullscreen" class="footer-btn">⛶ FULLSCREEN</button>
-                    <button id="btn-open-moves" class="footer-btn">📖 FULL MANUAL</button>
-                    <button id="btn-open-settings" class="footer-btn">⚙️ SETTINGS</button>
-                </div>
+                <!-- RIGHT SIDE 4 ARCADE MODE BUTTONS -->
+                <button id="btn-mode-local" class="fo-hotspot-btn fo-mode-hotspot-1" title="Local VS (1v1) — Play on same device"></button>
+                <button id="btn-mode-ai" class="fo-hotspot-btn fo-mode-hotspot-2" title="VS CPU (AI Battle) — Challenge AI"></button>
+                <button id="btn-mode-training" class="fo-hotspot-btn fo-mode-hotspot-3" title="Training Dojo — Practice Combos & Skills"></button>
+                <button id="btn-mode-online" class="fo-hotspot-btn fo-mode-hotspot-4" title="Online Multiplayer — Fight Worldwide"></button>
+
+                <!-- Seamless Background Patches (Removing 5th Tower button and Bottom Fullscreen/Settings) -->
+                <div class="fo-stage-patch fo-patch-mode-tower"></div>
+                <div class="fo-stage-patch fo-patch-bottom-controls"></div>
+
+                <!-- BOTTOM RIGHT EXIT BUTTON -->
+                <button id="btn-exit-game" class="fo-hotspot-btn fo-bot-exit" title="Exit to Krazy Fuse Portal (🚪)"></button>
             </div>
         </div>
 
@@ -266,8 +242,11 @@
              ========================================================================== -->
         <div id="char-select-screen" class="menu-screen hidden">
             <div class="select-header">
+                <button id="btn-cs-back" class="arcade-btn back-btn" style="width: auto; padding: 10px 22px;">
+                    ← HOME
+                </button>
                 <h2 class="select-title">SELECT FIGHTER</h2>
-                <button id="btn-confirm-char" class="arcade-btn primary-btn" style="width: auto; padding: 8px 24px;">
+                <button id="btn-confirm-char" class="arcade-btn primary-btn" style="width: auto; padding: 10px 26px;">
                     CONFIRM ➔
                 </button>
             </div>
@@ -282,9 +261,9 @@
                     <div>
                         <div id="cs-p1-name" class="preview-name">AARAV</div>
                         <div id="cs-p1-title" class="preview-title">THE BALANCED FIGHTER</div>
-                        <div id="cs-p1-role" style="font-size: 13px; color: #94a3b8; margin-top: 2px;">All-Rounder</div>
+                        <div id="cs-p1-role" style="font-size: 14px; color: #fb923c; font-weight: 700; margin-top: 2px;">⚡ ALL-ROUNDER</div>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
                         <div class="stat-row">
                             <span class="stat-label">HEALTH</span>
                             <div class="stat-bar-bg"><div id="cs-p1-stat-hp" class="stat-bar-fill" style="width: 83%;"></div></div>
@@ -311,8 +290,11 @@
              ========================================================================== -->
         <div id="stage-select-screen" class="menu-screen hidden">
             <div class="select-header">
+                <button id="btn-stage-back" class="arcade-btn back-btn" style="width: auto; padding: 10px 22px;">
+                    ← FIGHTERS
+                </button>
                 <h2 class="select-title">SELECT BATTLE ARENA</h2>
-                <button id="btn-start-match" class="arcade-btn primary-btn" style="width: auto; padding: 8px 24px;">
+                <button id="btn-start-match" class="arcade-btn primary-btn" style="width: auto; padding: 10px 26px;">
                     FIGHT! ➔
                 </button>
             </div>
@@ -475,6 +457,73 @@
                     </div>
                     <div style="background: #1e293b; padding: 8px 12px; border-radius: 6px;">
                         <strong style="color: #cbd5e1;">Dash / Evade:</strong> <code>Space (Invincible startup dodge)</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ==========================================================================
+             LEADERBOARD MODAL
+             ========================================================================== -->
+        <div id="leaderboard-modal" class="modal-backdrop hidden">
+            <div class="modal-dialog" style="width: 540px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">🏆 GLOBAL RANKED LEADERBOARD</h3>
+                    <button class="btn-close-modal">&times;</button>
+                </div>
+                <div class="leaderboard-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                    <div class="lb-row" style="display: flex; justify-content: space-between; align-items: center; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); padding: 10px 14px; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 20px; font-weight: 900; color: #f59e0b;">#1 👑</span>
+                            <span style="font-weight: 800; color: #ffffff;">SHADOW_BLADE</span>
+                        </div>
+                        <span style="color: #f59e0b; font-weight: 800; font-family: var(--font-heading); font-size: 20px;">2,840 ELO</span>
+                    </div>
+                    <div class="lb-row" style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 14px; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px; font-weight: 900; color: #94a3b8;">#2 🥈</span>
+                            <span style="font-weight: 800; color: #ffffff;">VOLT_STRIKER</span>
+                        </div>
+                        <span style="color: #38bdf8; font-weight: 800; font-family: var(--font-heading); font-size: 20px;">2,695 ELO</span>
+                    </div>
+                    <div class="lb-row" style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 14px; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px; font-weight: 900; color: #d97706;">#3 🥉</span>
+                            <span style="font-weight: 800; color: #ffffff;">SOLAR_FLAME</span>
+                        </div>
+                        <span style="color: #f97316; font-weight: 800; font-family: var(--font-heading); font-size: 20px;">2,580 ELO</span>
+                    </div>
+                    <div class="lb-row" style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); padding: 10px 14px; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 16px; font-weight: 800; color: #64748b;">#4</span>
+                            <span style="font-weight: 700; color: #cbd5e1;">AARAV_PRIME</span>
+                        </div>
+                        <span style="color: #cbd5e1; font-weight: 800; font-family: var(--font-heading); font-size: 18px;">2,450 ELO</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================================
+             NEWS MODAL
+             ========================================================================== -->
+        <div id="news-modal" class="modal-backdrop hidden">
+            <div class="modal-dialog" style="width: 560px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">🔥 FALLEN ONE — LATEST NEWS</h3>
+                    <button class="btn-close-modal">&times;</button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+                    <div style="background: #1e293b; padding: 12px 14px; border-radius: 8px; border-left: 4px solid #f97316;">
+                        <h4 style="color: #f97316; font-size: 16px; margin-bottom: 4px;">Season 1 Ranked Mode Now Live!</h4>
+                        <p style="color: #94a3b8; font-size: 13px;">Compete in global ranked matchmaking, earn exclusive elemental banners, and climb to Grandmaster tier.</p>
+                    </div>
+                    <div style="background: #1e293b; padding: 12px 14px; border-radius: 8px; border-left: 4px solid #38bdf8;">
+                        <h4 style="color: #38bdf8; font-size: 16px; margin-bottom: 4px;">New Fighter: Volt</h4>
+                        <p style="color: #94a3b8; font-size: 13px;">Unleash the speed of lightning! Volt features ultra-fast teleport dashes and electric stun combo chains.</p>
+                    </div>
+                    <div style="background: #1e293b; padding: 12px 14px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                        <h4 style="color: #ef4444; font-size: 16px; margin-bottom: 4px;">Tower Climb Mode: 10 Floors of Chaos</h4>
+                        <p style="color: #94a3b8; font-size: 13px;">Face 10 escalating floors with tough AI fighters, concluding with the double-boss duel at Floor 10.</p>
                     </div>
                 </div>
             </div>

@@ -22,10 +22,15 @@ export class MenuManager {
                 charSelect: document.getElementById('char-select-screen'),
                 stageSelect: document.getElementById('stage-select-screen'),
                 inGameHud: document.getElementById('game-hud'),
-                resultsScreen: document.getElementById('results-screen'),
+                resultsScreen: document.getElementById('results-screen')
+            },
+            modals: {
                 onlineModal: document.getElementById('online-modal'),
                 settingsModal: document.getElementById('settings-modal'),
-                movesModal: document.getElementById('moves-modal')
+                movesModal: document.getElementById('moves-modal'),
+                leaderboardModal: document.getElementById('leaderboard-modal'),
+                newsModal: document.getElementById('news-modal'),
+                pauseModal: document.getElementById('pause-modal')
             },
             charGrid: document.getElementById('character-grid'),
             p1Preview: {
@@ -45,55 +50,12 @@ export class MenuManager {
                 score: document.getElementById('res-score'),
                 time: document.getElementById('res-time'),
                 xp: document.getElementById('res-xp')
-            },
-            homepageManualGrid: document.getElementById('manual-skills-content'),
-            homepageTabs: document.getElementById('manual-char-tabs')
+            }
         };
 
         this.initCharacterGrid();
         this.initStageGrid();
-        this.initHomepageMoveManual();
         this.bindMenuButtons();
-    }
-
-    initHomepageMoveManual() {
-        this.renderMoveManualForChar('AARAV');
-
-        // Tab click listeners
-        const tabs = this.dom.homepageTabs?.querySelectorAll('.char-tab');
-        tabs?.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                soundEngine.playMenuSelect();
-                this.renderMoveManualForChar(tab.dataset.char);
-            });
-        });
-    }
-
-    renderMoveManualForChar(charId) {
-        if (!this.dom.homepageManualGrid) return;
-        const char = ROSTER.find(c => c.id === charId) || ROSTER[0];
-        const moves = [
-            { name: 'Light Attack', key: 'J / U', desc: 'Fast jab / snap kick (chains)', isSuper: false },
-            { name: 'Heavy Attack', key: 'K / I', desc: 'Heavy straight / launcher', isSuper: false },
-            { name: char.attacks[ATTACK_TYPES.RISING_KICK]?.name || 'Rising Kick', key: 'S + I', desc: 'Anti-air upward launcher', isSuper: false },
-            { name: char.attacks[ATTACK_TYPES.SPECIAL_1]?.name || 'Special 1', key: 'L', desc: 'Armored signature punch/dash', isSuper: false },
-            { name: char.attacks[ATTACK_TYPES.SPECIAL_2]?.name || 'Special 2', key: 'S + U', desc: 'Elemental projectile / trap', isSuper: false },
-            { name: char.attacks[ATTACK_TYPES.SPECIAL_3]?.name || 'Special 3', key: 'S + L', desc: 'Ground shockwave / counter', isSuper: false },
-            { name: char.attacks[ATTACK_TYPES.ULTIMATE]?.name || 'Ultimate Super', key: 'O', desc: 'Massive full-screen super (100% meter)', isSuper: true },
-            { name: 'Block / Shield', key: 'H', desc: 'Hold to guard, tap for Parry', isSuper: false }
-        ];
-
-        this.dom.homepageManualGrid.innerHTML = moves.map(m => `
-            <div class="skill-pill">
-                <div class="skill-name-col">
-                    <span class="skill-name">${m.name}</span>
-                    <span class="skill-desc">${m.desc}</span>
-                </div>
-                <span class="skill-key-badge ${m.isSuper ? 'super-badge' : ''}">${m.key}</span>
-            </div>
-        `).join('');
     }
 
     initCharacterGrid() {
@@ -119,6 +81,9 @@ export class MenuManager {
 
             this.dom.charGrid.appendChild(card);
         });
+
+        // Initialize preview for initial character
+        this.updateP1Preview(ROSTER[0]);
     }
 
     initStageGrid() {
@@ -147,39 +112,109 @@ export class MenuManager {
     }
 
     bindMenuButtons() {
-        // Main Menu Buttons
-        document.getElementById('btn-mode-local')?.addEventListener('click', () => {
+        // Play hover sound for all buttons & hotspots
+        document.querySelectorAll('.fo-hotspot-btn, .arcade-btn, .fo-icon-btn, .hud-pause-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                soundEngine.playMenuHover();
+            });
+        });
+
+        // 1. TOP NAV LINKS
+        document.getElementById('btn-nav-home')?.addEventListener('click', () => {
             soundEngine.playMenuSelect();
+            this.showScreen('mainMenu');
+        });
+
+        document.getElementById('btn-nav-characters')?.addEventListener('click', () => {
+            soundEngine.playModeStart();
+            this.currentMode = GAME_MODES.LOCAL_VS;
+            this.showScreen('charSelect');
+        });
+
+        document.getElementById('btn-nav-modes')?.addEventListener('click', () => {
+            soundEngine.playModeStart();
+            this.currentMode = GAME_MODES.LOCAL_VS;
+            this.showScreen('charSelect');
+        });
+
+        document.getElementById('btn-nav-manual')?.addEventListener('click', () => {
+            soundEngine.playMenuSelect();
+            this.dom.modals.movesModal?.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-nav-leaderboard')?.addEventListener('click', () => {
+            soundEngine.playMenuSelect();
+            this.dom.modals.leaderboardModal?.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-nav-news')?.addEventListener('click', () => {
+            soundEngine.playMenuSelect();
+            this.dom.modals.newsModal?.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-nav-settings-top')?.addEventListener('click', () => {
+            soundEngine.playMenuSelect();
+            this.dom.modals.settingsModal?.classList.remove('hidden');
+        });
+
+        document.getElementById('btn-nav-profile')?.addEventListener('click', () => {
+            soundEngine.playMenuSelect();
+            this.dom.modals.leaderboardModal?.classList.remove('hidden');
+        });
+
+        // 2. RIGHT SIDE 5 MODE BUTTONS
+        document.getElementById('btn-mode-local')?.addEventListener('click', () => {
+            soundEngine.playModeStart();
             this.currentMode = GAME_MODES.LOCAL_VS;
             this.showScreen('charSelect');
         });
 
         document.getElementById('btn-mode-ai')?.addEventListener('click', () => {
-            soundEngine.playMenuSelect();
+            soundEngine.playModeStart();
             this.currentMode = GAME_MODES.AI_BATTLE;
             this.showScreen('charSelect');
         });
 
         document.getElementById('btn-mode-training')?.addEventListener('click', () => {
-            soundEngine.playMenuSelect();
+            soundEngine.playModeStart();
             this.currentMode = GAME_MODES.TRAINING;
             this.showScreen('charSelect');
         });
 
         document.getElementById('btn-mode-online')?.addEventListener('click', () => {
             soundEngine.playMenuSelect();
-            this.dom.screens.onlineModal.classList.remove('hidden');
+            this.dom.modals.onlineModal?.classList.remove('hidden');
         });
 
-        // TOWER CLIMB (10 FLOORS) BUTTON
-        document.getElementById('btn-mode-tower')?.addEventListener('click', () => {
-            soundEngine.playMenuSelect();
+        const startTowerClimb = () => {
+            soundEngine.playModeStart();
             this.currentMode = GAME_MODES.TOWER_CLIMB;
             towerManager.startTower();
             this.showScreen('charSelect');
+        };
+        document.getElementById('btn-mode-tower')?.addEventListener('click', startTowerClimb);
+        document.getElementById('btn-tower-featured')?.addEventListener('click', startTowerClimb);
+
+        // 3. LEFT NEWS LINKS
+        document.getElementById('btn-news-item-1')?.addEventListener('click', () => {
+            soundEngine.playMenuSelect();
+            this.dom.modals.onlineModal?.classList.remove('hidden');
         });
 
-        // FULLSCREEN TOGGLE BUTTON
+        document.getElementById('btn-news-item-2')?.addEventListener('click', () => {
+            soundEngine.playModeStart();
+            this.currentMode = GAME_MODES.AI_BATTLE;
+            // Find Volt in roster
+            const voltIdx = ROSTER.findIndex(c => c.id === 'VOLT');
+            if (voltIdx !== -1) {
+                this.selectCharacter(voltIdx, 'P1');
+            }
+            this.showScreen('charSelect');
+        });
+
+        document.getElementById('btn-news-item-3')?.addEventListener('click', startTowerClimb);
+
+        // 4. BOTTOM CONTROLS
         document.getElementById('btn-toggle-fullscreen')?.addEventListener('click', () => {
             soundEngine.playMenuSelect();
             if (!document.fullscreenElement) {
@@ -193,15 +228,25 @@ export class MenuManager {
             }
         });
 
-        // Footer Settings / Moves
         document.getElementById('btn-open-settings')?.addEventListener('click', () => {
             soundEngine.playMenuSelect();
-            this.dom.screens.settingsModal.classList.remove('hidden');
+            this.dom.modals.settingsModal?.classList.remove('hidden');
         });
 
-        document.getElementById('btn-open-moves')?.addEventListener('click', () => {
+        document.getElementById('btn-exit-game')?.addEventListener('click', () => {
             soundEngine.playMenuSelect();
-            this.dom.screens.movesModal.classList.remove('hidden');
+            window.location.href = '../index.html';
+        });
+
+        // 5. NAVIGATION BACK BUTTONS
+        document.getElementById('btn-cs-back')?.addEventListener('click', () => {
+            soundEngine.playMenuSelect();
+            this.showScreen('mainMenu');
+        });
+
+        document.getElementById('btn-stage-back')?.addEventListener('click', () => {
+            soundEngine.playMenuSelect();
+            this.showScreen('charSelect');
         });
 
         // Close Modals
@@ -212,9 +257,18 @@ export class MenuManager {
             });
         });
 
+        function ensureFullScreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                const el = document.documentElement;
+                const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+                if (req) req.call(el).catch(() => {});
+            }
+        }
+
         // Character Select Confirm -> Stage Select or Start Tower
         document.getElementById('btn-confirm-char')?.addEventListener('click', () => {
-            soundEngine.playMenuSelect();
+            ensureFullScreen();
+            soundEngine.playModeStart();
             if (this.currentMode === GAME_MODES.TOWER_CLIMB) {
                 towerManager.startTower(ROSTER[this.selectedP1Index].id);
                 this.game.startTowerMatch();
@@ -226,7 +280,8 @@ export class MenuManager {
 
         // Stage Select Confirm -> Start Game
         document.getElementById('btn-start-match')?.addEventListener('click', () => {
-            soundEngine.playMenuSelect();
+            ensureFullScreen();
+            soundEngine.playModeStart();
             arenaManager.setArena(ARENA_LIST[this.selectedStageIndex].id);
             this.game.startMatch(
                 ROSTER[this.selectedP1Index],
@@ -298,7 +353,7 @@ export class MenuManager {
             if (inputCode) {
                 networkManager.joinRoom(inputCode);
                 this.currentMode = GAME_MODES.ONLINE_PVP;
-                this.dom.screens.onlineModal.classList.add('hidden');
+                this.dom.modals.onlineModal?.classList.add('hidden');
                 this.showScreen('charSelect');
             }
         });
@@ -336,6 +391,10 @@ export class MenuManager {
     showScreen(screenKey) {
         Object.values(this.dom.screens).forEach(screen => {
             if (screen) screen.classList.add('hidden');
+        });
+
+        Object.values(this.dom.modals).forEach(modal => {
+            if (modal) modal.classList.add('hidden');
         });
 
         if (this.dom.screens[screenKey]) {

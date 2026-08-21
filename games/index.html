@@ -16,28 +16,28 @@
         top: 16px;
         left: 16px;
         z-index: 99999;
+        width: 40px;
+        height: 40px;
         background: rgba(15, 23, 42, 0.85);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(99, 102, 241, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         color: #f8fafc;
-        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-        font-size: 0.85rem;
-        font-weight: 800;
-        padding: 8px 16px;
-        border-radius: 9999px;
+        border-radius: 50%;
         text-decoration: none;
         display: flex;
         align-items: center;
-        gap: 8px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.3);
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         transition: all 0.2s ease;
+        cursor: pointer;
       }
       #krazio-floating-back:hover {
-        background: rgba(79, 70, 229, 0.95);
-        border-color: #6366f1;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(79, 70, 229, 0.6);
+        background: rgba(249, 115, 22, 0.9);
+        border-color: #f97316;
+        color: #ffffff;
+        transform: translateX(-3px) scale(1.08);
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
       }
       #pixi-ui-overlay {
         position: fixed;
@@ -63,10 +63,11 @@
 </head>
 
 <body>
-    <!-- Floating Back to Krazio Hub Button -->
-    <a href="../index.html" id="krazio-floating-back" title="Back to krazio games portal">
-      <img src="../../krazio-icon.svg" alt="krazio" style="width: 20px; height: 20px; border-radius: 50%;" onerror="this.src='/favicon.png'">
-      <span>🏠 KRAZIO GAMES</span>
+    <!-- Simple Backward Arrow Button -->
+    <a href="../index.html" id="krazio-floating-back" title="Back to Portal" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
     </a>
 
     <div id="pixi-ui-overlay">

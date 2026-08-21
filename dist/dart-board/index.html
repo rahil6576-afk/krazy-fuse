@@ -3,11 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dart Master — Krazio Games</title>
+    <base href="/dart-board/">
+    <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+      #krazio-floating-back {
+        position: fixed;
+        top: 14px;
+        left: 16px;
+        z-index: 99999;
+        width: 40px;
+        height: 40px;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f8fafc;
+        border-radius: 50%;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      #krazio-floating-back:hover {
+        background: rgba(249, 115, 22, 0.9);
+        border-color: #f97316;
+        color: #ffffff;
+        transform: translateX(-3px) scale(1.08);
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
+      }
+    </style>
     <style>
         :root {
             --wall-color-you: #e07a67;
@@ -376,16 +407,33 @@
         .btn-start-game:hover {
             transform: scale(1.03);
         }
+
+        .result-title.win {
+            color: #fbc531;
+            text-shadow: 0 0 25px rgba(251, 197, 49, 0.6);
+        }
+
+        .result-title.lose {
+            color: #ff4757;
+            text-shadow: 0 0 25px rgba(255, 71, 87, 0.6);
+        }
     </style>
 </head>
 <body>
 
+    <!-- Simple Backward Arrow Button -->
+    <a href="../index.html" id="krazio-floating-back" title="Back to Portal" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </a>
+
     <div id="gameApp">
         <!-- Top HUD -->
         <header class="top-hud">
-            <a href="../index.html" class="hud-btn" title="Back to Games">‹</a>
+            <button class="hud-btn" id="btnOpenMenu" title="Home Menu & Game Settings">📋</button>
 
-            <div class="score-pill-container" id="btnOpenMenu" title="Change Mode & Settings">
+            <div class="score-pill-container" id="scorePillHUD" title="Current Score">
                 <div class="score-side score-you">
                     <span class="score-side-label" id="p1Label">YOU</span>
                     <span class="score-side-val" id="p1Score">301</span>
@@ -399,7 +447,7 @@
                 </div>
             </div>
 
-            <button class="hud-btn" id="btnRestart" title="Restart">↻</button>
+            <button class="hud-btn" id="btnRestart" title="Restart Match">↻</button>
         </header>
 
         <!-- Main Interactive Canvas Stage -->
@@ -414,28 +462,28 @@
         <div class="turn-banner" id="turnBanner">YOUR TURN</div>
 
         <!-- Help Info Button -->
-        <button class="btn-help" id="btnHelp" title="Settings / Help">?</button>
+        <button class="btn-help" id="btnHelp" title="Settings / Help">⚙️</button>
 
         <!-- Throw Instructions -->
         <div class="throw-tip">🎯 <span>CLICK / TAP:</span> Stop horizontal meter, then vertical meter to throw!</div>
 
-        <!-- Mode Select Modal -->
-        <div class="modal-overlay" id="modalOverlay">
+        <!-- Dedicated Start / Home Screen Modal -->
+        <div class="modal-overlay active" id="modalOverlay">
             <div class="modal-box">
                 <h2 class="modal-title">🎯 DART MASTER</h2>
-                <p class="modal-sub">Match Settings & Opponent</p>
+                <p class="modal-sub">Select Game Mode & Opponent</p>
 
                 <div class="mode-button-group">
                     <button class="mode-choice-btn active" data-mode="bot">
-                        <span>🤖 Play vs Bot</span>
+                        <span>🤖 Play vs Bot (1v1 Turns)</span>
                         <span>›</span>
                     </button>
                     <button class="mode-choice-btn" data-mode="pass">
-                        <span>👥 Pass & Play</span>
+                        <span>👥 Pass & Play (2 Players)</span>
                         <span>›</span>
                     </button>
                     <button class="mode-choice-btn" data-mode="multiplayer">
-                        <span>🌐 Multiplayer</span>
+                        <span>🌐 Multiplayer Arena</span>
                         <span>›</span>
                     </button>
                 </div>
@@ -445,7 +493,41 @@
                     <button class="score-btn" data-score="501">501 Official</button>
                 </div>
 
-                <button class="btn-start-game" id="btnStartGame">PLAY NOW</button>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn-start-game" id="btnStartGame">🎯 START MATCH</button>
+                    <a href="../index.html" class="mode-choice-btn" style="text-decoration: none; justify-content: center; font-size: 1rem; border-color: rgba(99, 102, 241, 0.4); color: #818cf8;">
+                        <span>🌐 KRAZY FUSE HUB</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Result Modal (You Win / You Lose) -->
+        <div class="modal-overlay" id="resultModal">
+            <div class="modal-box" style="text-align: center;">
+                <h2 class="modal-title" id="resultTitle" style="font-size: 2.2rem;">YOU WIN! 🏆</h2>
+                <p class="modal-sub" id="resultSub" style="font-size: 0.95rem; color: #a4b0be;">You reached 0 points first!</p>
+
+                <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 14px; margin: 16px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <div style="font-size: 0.8rem; color: #a4b0be; font-weight: 800;">YOU</div>
+                        <div id="resP1Score" style="font-size: 1.6rem; font-weight: 900; color: #ff4757;">0</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: #a4b0be; font-weight: 800;" id="resP2Name">BOT</div>
+                        <div id="resP2Score" style="font-size: 1.6rem; font-weight: 900; color: #00d2d3;">142</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn-start-game" id="btnResultPlayAgain">🔄 PLAY AGAIN</button>
+                    <button class="mode-choice-btn" id="btnResultHome" style="justify-content: center; font-size: 1rem;">
+                        <span>🏠 MAIN MENU (HOME)</span>
+                    </button>
+                    <a href="../index.html" class="mode-choice-btn" style="text-decoration: none; justify-content: center; font-size: 1rem; border-color: rgba(99, 102, 241, 0.4); color: #818cf8;">
+                        <span>🌐 KRAZY FUSE HUB</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -574,15 +656,16 @@
                     targetFocusY: this.board.y
                 };
 
-                // Game State
+                // Game State (1-by-1 alternating turns)
                 this.gameMode = 'bot';
                 this.startScore = 301;
                 this.p1 = { score: 301, name: 'YOU', color: '#ff4757', darts: [] };
                 this.p2 = { score: 301, name: 'BOT', color: '#00d2d3', darts: [] };
                 this.turn = 0; // 0 = P1, 1 = P2
-                this.turnThrowsLeft = 3;
+                this.turnThrowsLeft = 1;
                 this.flyingDart = null;
                 this.landedDarts = [];
+                this.floatingPopups = [];
                 this.gameOver = false;
 
                 // 0 = Both oscillating, 1 = H locked, 2 = V locked & throw
@@ -656,11 +739,44 @@
                 const modal = document.getElementById('modalOverlay');
                 const btnStartGame = document.getElementById('btnStartGame');
 
+                const resultModal = document.getElementById('resultModal');
+                const btnResultPlayAgain = document.getElementById('btnResultPlayAgain');
+                const btnResultHome = document.getElementById('btnResultHome');
+
                 if (btnOpenMenu && modal) {
-                    btnOpenMenu.addEventListener('click', () => modal.classList.add('active'));
+                    btnOpenMenu.addEventListener('click', () => {
+                        if (resultModal) resultModal.classList.remove('active');
+                        modal.classList.add('active');
+                    });
                 }
                 if (btnHelp && modal) {
-                    btnHelp.addEventListener('click', () => modal.classList.add('active'));
+                    btnHelp.addEventListener('click', () => {
+                        if (resultModal) resultModal.classList.remove('active');
+                        modal.classList.add('active');
+                    });
+                }
+
+                function ensureFullScreen() {
+                    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                        const el = document.documentElement;
+                        const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+                        if (req) req.call(el).catch(() => {});
+                    }
+                }
+
+                if (btnResultPlayAgain) {
+                    btnResultPlayAgain.addEventListener('click', () => {
+                        ensureFullScreen();
+                        if (resultModal) resultModal.classList.remove('active');
+                        this.resetMatch();
+                    });
+                }
+
+                if (btnResultHome) {
+                    btnResultHome.addEventListener('click', () => {
+                        if (resultModal) resultModal.classList.remove('active');
+                        if (modal) modal.classList.add('active');
+                    });
                 }
 
                 const modeBtns = document.querySelectorAll('.mode-choice-btn');
@@ -683,7 +799,9 @@
 
                 if (btnStartGame && modal) {
                     btnStartGame.addEventListener('click', () => {
+                        ensureFullScreen();
                         modal.classList.remove('active');
+                        if (resultModal) resultModal.classList.remove('active');
                         this.resetMatch();
                     });
                 }
@@ -695,12 +813,15 @@
                 this.p1.darts = [];
                 this.p2.darts = [];
                 this.landedDarts = [];
+                this.floatingPopups = [];
                 this.turn = 0;
-                this.turnThrowsLeft = 3;
+                this.turnThrowsLeft = 1;
                 this.gameOver = false;
                 this.flyingDart = null;
                 this.meterStep = 0;
                 this.camera.targetZoom = 1;
+                const resultModal = document.getElementById('resultModal');
+                if (resultModal) resultModal.classList.remove('active');
                 this.updateUI();
             }
 
@@ -757,24 +878,38 @@
 
                 let points = 0;
                 let isBull = false;
+                let label = 'MISS (0 PTS)';
+                let badge = 'MISS';
 
                 if (dist <= this.board.rInnerBull) {
                     points = 50;
                     isBull = true;
+                    label = '+50 BULLSEYE! 🎯';
+                    badge = 'BULLSEYE 50';
                 } else if (dist <= this.board.rOuterBull) {
                     points = 25;
                     isBull = true;
+                    label = '+25 OUTER BULL 🎯';
+                    badge = 'BULL 25';
                 } else if (dist > this.board.rTrebleIn && dist <= this.board.rTrebleOut) {
                     points = baseNum * 3;
+                    label = `+${points} TRIPLE ${baseNum}! 🔥`;
+                    badge = `TRIPLE ${baseNum}`;
                 } else if (dist > this.board.rDoubleIn && dist <= this.board.rDoubleOut) {
                     points = baseNum * 2;
+                    label = `+${points} DOUBLE ${baseNum}! ⚡`;
+                    badge = `DOUBLE ${baseNum}`;
                 } else if (dist <= this.board.rDoubleOut) {
                     points = baseNum;
+                    label = `+${points} SINGLE ${baseNum}`;
+                    badge = `SINGLE ${baseNum}`;
                 } else {
                     points = 0;
+                    label = 'MISS (0 PTS)';
+                    badge = 'OUT OF BOARD';
                 }
 
-                return { points, isBull, x, y };
+                return { points, isBull, label, badge, x, y };
             }
 
             onDartLanded(hit) {
@@ -788,6 +923,20 @@
                     isBot: this.turn === 1
                 });
 
+                // Spawn floating score earned popup on the board
+                this.floatingPopups.push({
+                    x: hit.x,
+                    y: hit.y - 12,
+                    text: hit.label,
+                    badge: hit.badge,
+                    points: hit.points,
+                    color: hit.points > 0 ? (hit.isBull ? '#fbbf24' : (hit.points >= 40 ? '#00f0ff' : '#2ed573')) : '#ef4444',
+                    life: 85,
+                    maxLife: 85,
+                    vy: -1.4,
+                    scale: 0.25
+                });
+
                 // Camera Zoom into Impact Spot
                 this.camera.targetZoom = 1.45;
                 this.camera.targetFocusX = hit.x;
@@ -797,32 +946,89 @@
                 this.turnThrowsLeft--;
                 this.updateUI();
 
+                const turnBanner = document.getElementById('turnBanner');
+                if (turnBanner) {
+                    turnBanner.textContent = `${activePlayer.name}: ${hit.label}`;
+                }
+
                 if (activePlayer.score === 0) {
                     this.gameOver = true;
-                    document.getElementById('turnBanner').textContent = `${activePlayer.name} WINS!`;
+                    this.showGameResult(activePlayer);
                     return;
+                }
+
+                // 1-by-1 alternating turns: immediately switch to next player
+                setTimeout(() => {
+                    this.camera.targetZoom = 1.0;
+                    this.camera.targetFocusX = this.board.x;
+                    this.camera.targetFocusY = this.board.y;
+
+                    if (!this.gameOver) {
+                        this.turn = this.turn === 0 ? 1 : 0;
+                        this.turnThrowsLeft = 1;
+                        if (this.landedDarts.length > 3) {
+                            this.landedDarts = this.landedDarts.slice(-3);
+                        }
+                        this.updateUI();
+
+                        if (this.turn === 1 && this.gameMode === 'bot') {
+                            this.triggerBotThrow();
+                        }
+                    }
+                }, 950);
+            }
+
+            showGameResult(winner) {
+                const turnBanner = document.getElementById('turnBanner');
+                const resultModal = document.getElementById('resultModal');
+                const resultTitle = document.getElementById('resultTitle');
+                const resultSub = document.getElementById('resultSub');
+                const resP1Score = document.getElementById('resP1Score');
+                const resP2Score = document.getElementById('resP2Score');
+                const resP2Name = document.getElementById('resP2Name');
+
+                if (resP1Score) resP1Score.textContent = this.p1.score;
+                if (resP2Score) resP2Score.textContent = this.p2.score;
+                if (resP2Name) resP2Name.textContent = this.p2.name;
+
+                if (this.gameMode === 'bot') {
+                    if (winner === this.p1) {
+                        if (resultTitle) {
+                            resultTitle.textContent = 'YOU WIN! 🏆';
+                            resultTitle.className = 'modal-title result-title win';
+                        }
+                        if (resultSub) resultSub.textContent = 'Outstanding darts! You reached 0 first and defeated the Bot!';
+                        if (turnBanner) turnBanner.textContent = '🏆 YOU WIN! 🏆';
+                    } else {
+                        if (resultTitle) {
+                            resultTitle.textContent = 'YOU LOSE! 💀';
+                            resultTitle.className = 'modal-title result-title lose';
+                        }
+                        if (resultSub) resultSub.textContent = 'The Bot reached 0 points first! Better luck next match!';
+                        if (turnBanner) turnBanner.textContent = '💀 BOT WINS! 💀';
+                    }
+                } else if (this.gameMode === 'pass') {
+                    if (resultTitle) {
+                        resultTitle.textContent = `🏆 ${winner.name} WINS! 🏆`;
+                        resultTitle.className = 'modal-title result-title win';
+                    }
+                    if (resultSub) resultSub.textContent = `Match completed! ${winner.name} is the Dart Champion!`;
+                    if (turnBanner) turnBanner.textContent = `🏆 ${winner.name} WINS! 🏆`;
+                } else {
+                    if (resultTitle) {
+                        resultTitle.textContent = `🏆 ${winner.name} VICTORIOUS! 🏆`;
+                        resultTitle.className = 'modal-title result-title win';
+                    }
+                    if (resultSub) resultSub.textContent = 'Multiplayer Arena champion!';
+                    if (turnBanner) turnBanner.textContent = `🏆 ${winner.name} WINS! 🏆`;
                 }
 
                 setTimeout(() => {
                     this.camera.targetZoom = 1.0;
                     this.camera.targetFocusX = this.board.x;
                     this.camera.targetFocusY = this.board.y;
-
-                    if (this.turnThrowsLeft <= 0) {
-                        this.turn = this.turn === 0 ? 1 : 0;
-                        this.turnThrowsLeft = 3;
-                        this.landedDarts = [];
-                        this.updateUI();
-
-                        if (this.turn === 1 && this.gameMode === 'bot') {
-                            this.triggerBotThrow();
-                        }
-                    } else {
-                        if (this.turn === 1 && this.gameMode === 'bot') {
-                            this.triggerBotThrow();
-                        }
-                    }
-                }, 850);
+                    if (resultModal) resultModal.classList.add('active');
+                }, 800);
             }
 
             updateUI() {
@@ -1005,49 +1211,126 @@
                 ctx.translate(x, y);
                 ctx.scale(scale, scale);
 
-                const primaryColor = isBot ? '#00d2d3' : '#ff4757';
-                const darkOutline = '#1e272e';
+                const flightPrimary = isBot ? '#06b6d4' : '#ef4444';
+                const flightAccent = isBot ? '#a5f3fc' : '#fef08a';
+                const barrelMetal = isBot ? '#38bdf8' : '#f59e0b';
 
-                // Shadow
+                // 1. Realistic Soft 3D Drop Shadow
                 if (shadow) {
+                    ctx.save();
                     ctx.beginPath();
-                    ctx.ellipse(14, 22, 16, 8, Math.PI / 5, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+                    ctx.ellipse(10, 18, 14, 7, Math.PI / 4, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+                    ctx.filter = 'blur(2px)';
                     ctx.fill();
+                    ctx.restore();
                 }
 
-                // Flight Wing Fins (Cartoon Stylized X cross-wings)
+                // 2. Aerodynamic 3D Flight Fins (4-Fin Perspective)
+                // Left & Right Outer Wings
+                ctx.save();
                 ctx.beginPath();
-                ctx.moveTo(-22, -10);
-                ctx.lineTo(-28, 34);
-                ctx.lineTo(0, 22);
-                ctx.lineTo(28, 34);
-                ctx.lineTo(22, -10);
+                ctx.moveTo(-4, 0);
+                ctx.lineTo(-24, -8);
+                ctx.lineTo(-30, 32);
+                ctx.lineTo(0, 18);
+                ctx.lineTo(30, 32);
+                ctx.lineTo(24, -8);
+                ctx.lineTo(4, 0);
                 ctx.closePath();
-                ctx.fillStyle = primaryColor;
+
+                const flightGrad = ctx.createLinearGradient(-30, 0, 30, 0);
+                flightGrad.addColorStop(0, flightPrimary);
+                flightGrad.addColorStop(0.5, '#1e293b');
+                flightGrad.addColorStop(1, flightPrimary);
+                ctx.fillStyle = flightGrad;
                 ctx.fill();
-                ctx.lineWidth = 4;
-                ctx.strokeStyle = darkOutline;
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = '#0f172a';
                 ctx.stroke();
 
-                // Shaft Barrel
+                // Flight Wing Graphic Chevron
                 ctx.beginPath();
-                ctx.roundRect(-7, -34, 14, 42, 5);
-                ctx.fillStyle = '#fff';
+                ctx.moveTo(-18, 6);
+                ctx.lineTo(-24, 22);
+                ctx.lineTo(-6, 12);
+                ctx.moveTo(18, 6);
+                ctx.lineTo(24, 22);
+                ctx.lineTo(6, 12);
+                ctx.fillStyle = flightAccent;
                 ctx.fill();
-                ctx.lineWidth = 3.5;
-                ctx.strokeStyle = darkOutline;
+
+                // Center Vertical Fin Shading
+                ctx.beginPath();
+                ctx.moveTo(-4, -10);
+                ctx.lineTo(4, -10);
+                ctx.lineTo(3, 26);
+                ctx.lineTo(-3, 26);
+                ctx.closePath();
+                ctx.fillStyle = '#0f172a';
+                ctx.fill();
+                ctx.restore();
+
+                // 3. Aluminum Stem / Shaft
+                ctx.save();
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillRect(-3.5, -20, 7, 22);
+                ctx.strokeStyle = '#334155';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(-3.5, -20, 7, 22);
+
+                // Stem Accent Rings
+                ctx.fillStyle = '#64748b';
+                ctx.fillRect(-3.5, -12, 7, 2.5);
+                ctx.restore();
+
+                // 4. Knurled Tungsten / Brass Grip Barrel
+                ctx.save();
+                const barrelGrad = ctx.createLinearGradient(-7, 0, 7, 0);
+                barrelGrad.addColorStop(0, '#64748b');
+                barrelGrad.addColorStop(0.3, '#f8fafc');
+                barrelGrad.addColorStop(0.7, '#94a3b8');
+                barrelGrad.addColorStop(1, '#334155');
+
+                ctx.beginPath();
+                ctx.moveTo(-6, -20);
+                ctx.lineTo(6, -20);
+                ctx.lineTo(7, -42);
+                ctx.lineTo(4, -48);
+                ctx.lineTo(-4, -48);
+                ctx.lineTo(-7, -42);
+                ctx.closePath();
+                ctx.fillStyle = barrelGrad;
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#0f172a';
                 ctx.stroke();
 
-                // Steel Tip
+                // Knurling Grip Rings
+                ctx.fillStyle = barrelMetal;
+                ctx.fillRect(-6.5, -40, 13, 3);
+                ctx.fillRect(-6.5, -34, 13, 3);
+                ctx.fillRect(-6.5, -28, 13, 3);
+                ctx.restore();
+
+                // 5. Stainless Steel Needle Tip
+                ctx.save();
+                const tipGrad = ctx.createLinearGradient(-3, 0, 3, 0);
+                tipGrad.addColorStop(0, '#94a3b8');
+                tipGrad.addColorStop(0.5, '#ffffff');
+                tipGrad.addColorStop(1, '#475569');
+
                 ctx.beginPath();
-                ctx.moveTo(-4, -34);
-                ctx.lineTo(0, -50);
-                ctx.lineTo(4, -34);
+                ctx.moveTo(-3, -48);
+                ctx.lineTo(0, -66);
+                ctx.lineTo(3, -48);
                 ctx.closePath();
-                ctx.fillStyle = '#718093';
+                ctx.fillStyle = tipGrad;
                 ctx.fill();
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#0f172a';
                 ctx.stroke();
+                ctx.restore();
 
                 ctx.restore();
             }
@@ -1089,6 +1372,52 @@
                 this.drawStylizedDart(handX, handY, 1.25, isBot, true);
             }
 
+            drawFloatingPopups() {
+                const ctx = this.ctx;
+                for (let i = this.floatingPopups.length - 1; i >= 0; i--) {
+                    const p = this.floatingPopups[i];
+                    p.life--;
+                    p.y += p.vy;
+                    if (p.scale < 1.0) p.scale += 0.12;
+                    const progress = p.life / p.maxLife;
+                    const alpha = Math.min(1, progress * 1.6);
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.scale(p.scale, p.scale);
+                    ctx.globalAlpha = alpha;
+
+                    // Glowing pill background
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 16;
+                    ctx.fillStyle = '#0f172a';
+                    ctx.strokeStyle = p.color;
+                    ctx.lineWidth = 3;
+
+                    ctx.font = '900 15px Outfit, sans-serif';
+                    const textWidth = ctx.measureText(p.text).width;
+                    const boxW = textWidth + 24;
+                    const boxH = 30;
+
+                    ctx.beginPath();
+                    ctx.roundRect(-boxW / 2, -boxH / 2, boxW, boxH, 15);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = p.color;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.shadowBlur = 6;
+                    ctx.fillText(p.text, 0, 1);
+
+                    ctx.restore();
+
+                    if (p.life <= 0) {
+                        this.floatingPopups.splice(i, 1);
+                    }
+                }
+            }
+
             render() {
                 const dpr = window.devicePixelRatio || 1;
                 this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1110,6 +1439,7 @@
                 this.drawSliders();
                 this.drawLandedDarts();
                 this.drawFlyingDart();
+                this.drawFloatingPopups();
 
                 this.ctx.restore();
 

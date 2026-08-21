@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wild Swings: Stickman Hook Arcade 🕷️🐒 — krazio games</title>
+    <base href="/wild-swings/">
     <!-- Favicon -->
-    <link rel="icon" href="../krazio-icon.svg" type="image/svg+xml">
+    <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -490,10 +490,11 @@
         <!-- Top HUD Overlay (Cleanly Separated Left, Center & Right) -->
         <div id="hud-overlay">
             <div class="hud-left-group">
-                <!-- Floating Back Button (Integrated to prevent overlap) -->
-                <a href="../index.html" class="hud-pill krazio-home-pill" title="Back to krazio games portal">
-                    <img src="krazio-icon.svg" alt="krazio" style="width: 18px; height: 18px; border-radius: 50%;">
-                    <span>🏠 KRAZIO</span>
+                <!-- Simple Backward Arrow Button -->
+                <a href="../index.html" class="hud-btn" title="Back to Portal" aria-label="Back" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
                 </a>
                 <div class="hud-pill level-badge" id="hud-level-text">LEVEL 1 / 20</div>
                 <div class="hud-pill theme-badge" id="btn-open-themes" title="Change Theme">
@@ -516,6 +517,7 @@
             </div>
 
             <div class="hud-right-group">
+                <button class="hud-btn" id="btn-quick-restart" title="Restart Level (R)">🔄</button>
                 <button class="hud-btn" id="btn-sound-toggle" title="Toggle Sound">🔊</button>
                 <button class="hud-btn" id="btn-levels-open" title="Level Select">🗺️</button>
                 <button class="hud-btn" id="btn-pause-open" title="Pause Game">⏸️</button>
@@ -546,11 +548,11 @@
                             <p>Swing wild jungle vines across ancient ruins</p>
                         </div>
                     </div>
-                    <div class="theme-select-card" data-theme="human">
-                        <div class="theme-card-emoji">🥷</div>
+                    <div class="theme-select-card" data-theme="tarzan">
+                        <div class="theme-card-emoji">🌴</div>
                         <div class="theme-card-info">
-                            <h4>Acrobatic Ninja: Cyber Arena</h4>
-                            <p>Grapple high-tech neon rings & launch across platforms</p>
+                            <h4>Tarzan: Wild Jungle Canopy</h4>
+                            <p>Swing thick jungle lianas & leap across sunlit ancient ruins</p>
                         </div>
                     </div>
                 </div>
@@ -572,6 +574,37 @@
                 <button class="btn-secondary-link" id="btn-close-levels">
                     <span>BACK</span>
                 </button>
+            </div>
+        </div>
+
+        <!-- Main Start / Home Screen Modal -->
+        <div class="modal-overlay active" id="menu-modal">
+            <div class="modal-card" style="max-width: 480px;">
+                <div style="background: rgba(67, 83, 255, 0.15); border: 1px solid rgba(67, 83, 255, 0.4); color: #00f0ff; font-size: 0.78rem; font-weight: 900; letter-spacing: 1.5px; padding: 5px 14px; border-radius: 9999px; display: inline-block; margin-bottom: 10px;">
+                    🕷️ ACROBATIC HOOK ARCADE 🕷️
+                </div>
+                <h1 class="modal-title" style="font-size: 2.2rem; background: linear-gradient(135deg, #ffffff 0%, #00f0ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">WILD SWINGS</h1>
+                <p class="modal-subtitle" style="margin-bottom: 20px;">Sling ropes, bounce trampoline pads & launch across 20 escalating courses!</p>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                    <button class="btn-cta" id="btn-menu-play" style="font-size: 1.25rem; padding: 16px;">
+                        <span>🚀 PLAY GAME</span>
+                    </button>
+                    <button class="btn-secondary-link" id="btn-menu-levels" style="font-size: 1.05rem;">
+                        <span>🗺️ SELECT LEVEL (1-20)</span>
+                    </button>
+                    <button class="btn-secondary-link" id="btn-menu-theme" style="font-size: 1.05rem;">
+                        <span>🎨 CHOOSE CHARACTER THEME</span>
+                    </button>
+                    <a href="../index.html" class="btn-secondary-link" style="text-decoration: none; border-color: rgba(99, 102, 241, 0.4); color: #818cf8; font-size: 1.05rem;" title="Back to Krazio Games Portal">
+                        <img src="krazio-icon.svg" alt="krazio" style="width: 20px; height: 20px; border-radius: 50%; display: inline-block;">
+                        <span>🏠 KRAZY FUSE HUB</span>
+                    </a>
+                </div>
+
+                <div style="margin-top: 18px; font-size: 0.8rem; color: var(--text-muted); background: rgba(255,255,255,0.04); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                    💡 <strong>HOW TO PLAY:</strong> Click / Tap & Hold anywhere to latch onto nearby hooks. Release at maximum swing to fly high!
+                </div>
             </div>
         </div>
 
@@ -597,8 +630,14 @@
                     <span>NEXT LEVEL ➔</span>
                 </button>
                 <button class="btn-secondary-link" id="btn-vic-menu">
-                    <span>LEVEL SELECT</span>
+                    <span>🗺️ LEVEL SELECT</span>
                 </button>
+                <button class="btn-secondary-link" id="btn-vic-home">
+                    <span>🏠 MAIN MENU</span>
+                </button>
+                <a href="../index.html" class="btn-secondary-link" style="text-decoration: none;">
+                    <span>🌐 KRAZIO HUB</span>
+                </a>
             </div>
         </div>
 
@@ -617,6 +656,12 @@
                 <button class="btn-secondary-link" id="btn-pause-levels">
                     <span>🗺️ LEVEL SELECT</span>
                 </button>
+                <button class="btn-secondary-link" id="btn-pause-home">
+                    <span>🏠 MAIN MENU</span>
+                </button>
+                <a href="../index.html" class="btn-secondary-link" style="text-decoration: none; border-color: rgba(99, 102, 241, 0.4); color: #818cf8;">
+                    <span>🌐 KRAZIO HUB</span>
+                </a>
             </div>
         </div>
     </div>
@@ -673,11 +718,12 @@
             gain.gain.setValueAtTime(0.32, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
           } else {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(1200, now);
-            osc.frequency.exponentialRampToValueAtTime(380, now + 0.08);
-            gain.gain.setValueAtTime(0.25, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+            // Tarzan Jungle Liana Snap
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(520, now);
+            osc.frequency.exponentialRampToValueAtTime(160, now + 0.14);
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
           }
 
           osc.connect(gain);
@@ -785,7 +831,7 @@
           this.ctx = this.canvas.getContext('2d');
           this.dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-          this.gameState = 'playing';
+          this.gameState = 'menu';
           this.theme = localStorage.getItem('wild_swings_theme') || 'spiderman';
           this.currentLevel = parseInt(localStorage.getItem('wild_swings_level') || '1', 10);
           this.unlockedLevels = parseInt(localStorage.getItem('wild_swings_unlocked') || '1', 10);
@@ -876,28 +922,36 @@
             if (e.target.closest('.modal-overlay') || e.target.closest('.hud-btn') || e.target.closest('button') || e.target.closest('a')) return;
             this.isHolding = true;
             if (this.gameState === 'playing') {
-              this.tryHookNearest();
+              if (this.player.isHooked) {
+                // If already hooked and tapped again, allow quick release/re-hook
+                this.releaseHook();
+              } else {
+                this.tryHookNearest();
+              }
             }
           };
 
           const onRelease = (e) => {
             this.isHolding = false;
-            if (this.gameState === 'playing') {
+            if (this.gameState === 'playing' && this.player.isHooked) {
               this.releaseHook();
             }
           };
 
-          window.addEventListener('mousedown', onPress);
-          window.addEventListener('mouseup', onRelease);
-          window.addEventListener('touchstart', onPress, { passive: true });
-          window.addEventListener('touchend', onRelease, { passive: true });
+          window.addEventListener('pointerdown', onPress);
+          window.addEventListener('pointerup', onRelease);
+          window.addEventListener('pointercancel', onRelease);
+          window.addEventListener('blur', onRelease);
 
           window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
               e.preventDefault();
               if (!this.isHolding) {
                 this.isHolding = true;
-                if (this.gameState === 'playing') this.tryHookNearest();
+                if (this.gameState === 'playing') {
+                  if (this.player.isHooked) this.releaseHook();
+                  else this.tryHookNearest();
+                }
               }
             } else if (e.code === 'KeyR') {
               this.restartLevel();
@@ -909,7 +963,7 @@
           window.addEventListener('keyup', (e) => {
             if (e.code === 'Space') {
               this.isHolding = false;
-              if (this.gameState === 'playing') this.releaseHook();
+              if (this.gameState === 'playing' && this.player.isHooked) this.releaseHook();
             }
           });
         }
@@ -926,15 +980,15 @@
           const names = {
             spiderman: '🕷️ SPIDER-MAN',
             monkey: '🐒 JUNGLE MONKEY',
-            human: '🥷 ACROBATIC NINJA',
+            tarzan: '🌴 TARZAN',
           };
           const emojis = {
             spiderman: '🕷️',
             monkey: '🐒',
-            human: '🥷',
+            tarzan: '🌴',
           };
-          if (badge) badge.textContent = names[this.theme] || 'THEME';
-          if (avatar) avatar.textContent = emojis[this.theme] || '🕷️';
+          if (badge) badge.textContent = names[this.theme] || '🌴 TARZAN';
+          if (avatar) avatar.textContent = emojis[this.theme] || '🌴';
         }
 
         findNearestAnchor() {
@@ -947,7 +1001,7 @@
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist <= this.hookMaxRange) {
-              const forwardBias = dist - (dx > 0 ? 100 : -20);
+              const forwardBias = dist - (dx > 0 ? 110 : -20);
               if (forwardBias < minScore) {
                 minScore = forwardBias;
                 best = a;
@@ -964,7 +1018,7 @@
 
           const dx = this.player.x - target.x;
           const dy = this.player.y - target.y;
-          const length = Math.max(45, Math.sqrt(dx * dx + dy * dy));
+          const length = Math.max(50, Math.sqrt(dx * dx + dy * dy));
 
           this.player.isHooked = true;
           this.player.hookTarget = target;
@@ -973,16 +1027,15 @@
           this.player.mode = 'stickman';
           this.player.swingsCount++;
 
-          // Tangential swing momentum (Smoother, controlled rate)
+          // Tangential swing momentum with guaranteed forward drive
           const tangentialVel = (-Math.sin(this.player.hookAngle) * this.player.vx + Math.cos(this.player.hookAngle) * this.player.vy);
-          this.player.hookAngularVel = tangentialVel / this.player.hookLength;
+          let initialAngVel = tangentialVel / length;
 
-          // Clamp angular velocity for gentle swing control
-          this.player.hookAngularVel = Math.max(-0.04, Math.min(0.04, this.player.hookAngularVel));
-
-          if (!Number.isFinite(this.player.hookAngularVel) || Math.abs(this.player.hookAngularVel) < 0.02) {
-            this.player.hookAngularVel = this.player.vx >= 0 ? 0.03 : -0.03;
+          // Never start with zero swing speed
+          if (initialAngVel <= 0.02) {
+            initialAngVel = 0.055;
           }
+          this.player.hookAngularVel = Math.max(-0.08, Math.min(0.08, initialAngVel));
 
           audio.playHook(this.theme);
           this.spawnSparks(target.x, target.y);
@@ -990,13 +1043,17 @@
 
         releaseHook() {
           if (!this.player.isHooked) return;
-          const angSpeed = Number.isFinite(this.player.hookAngularVel) ? this.player.hookAngularVel : 0.03;
+          const angSpeed = Number.isFinite(this.player.hookAngularVel) ? this.player.hookAngularVel : 0.05;
           const r = this.player.hookLength || 100;
           const theta = this.player.hookAngle || 0;
 
           // Controlled momentum launch on release
-          let vx = -r * Math.sin(theta) * angSpeed * 0.98;
-          let vy = r * Math.cos(theta) * angSpeed * 0.98;
+          let vx = -r * Math.sin(theta) * angSpeed * 1.35;
+          let vy = r * Math.cos(theta) * angSpeed * 1.35;
+
+          // Ensure strong forward launch impulse so player never stalls
+          if (vx < 4.5) vx = 4.5;
+          if (vy > 0 && vy < 1.5) vy = -2.8;
 
           const speed = Math.sqrt(vx * vx + vy * vy);
           if (speed > this.maxSpeed) {
@@ -1005,8 +1062,8 @@
             vy *= scale;
           }
 
-          this.player.vx = Number.isFinite(vx) ? vx : 4;
-          this.player.vy = Number.isFinite(vy) ? vy : -1.5;
+          this.player.vx = Number.isFinite(vx) ? vx : 5;
+          this.player.vy = Number.isFinite(vy) ? vy : -2;
           this.player.isHooked = false;
           this.player.hookTarget = null;
           this.player.mode = 'ball';
@@ -1023,8 +1080,8 @@
           this.startPlatform = { x: 30, y: 340, width: 130, height: 26 };
           this.player.x = 85;
           this.player.y = 314;
-          this.player.vx = 2.4;
-          this.player.vy = -0.9;
+          this.player.vx = 2.8;
+          this.player.vy = -1.2;
           this.player.rollAngle = 0;
           this.player.mode = 'ball';
           this.player.isHooked = false;
@@ -1080,21 +1137,40 @@
             curX += 240 + Math.random() * 40;
             idx++;
           }
+
+          // Guaranteed final booster trampoline right before finish line
+          this.trampolines.push({
+            x: levelLength - 180,
+            y: 490,
+            width: 110,
+            height: 24,
+            bouncePower: 14.5,
+            squish: 0,
+          });
         }
 
         update(dt) {
           this.levelTime = (performance.now() - this.levelStartTime) / 1000;
 
-          if (this.gameState === 'playing') {
+          if (this.gameState === 'playing' || this.gameState === 'level_cleared') {
             // 1. Physics: Hooked Pendulum vs Free Flight Ball
-            if (this.player.isHooked && this.player.hookTarget) {
+            if (this.player.isHooked && this.player.hookTarget && this.gameState === 'playing') {
               const a = this.player.hookTarget;
               const r = this.player.hookLength;
 
-              // Gentle Pendulum Swing: a = (-g / r) * cos(theta) * 0.85
-              const angularAcc = (-this.gravity / r) * Math.cos(this.player.hookAngle) * 0.85;
+              // Smooth dynamic pendulum torque
+              const angularAcc = (-this.gravity / r) * Math.cos(this.player.hookAngle);
               this.player.hookAngularVel += angularAcc;
-              this.player.hookAngularVel *= 0.995; // Smooth arc dampening
+
+              // Arc pumping: keep forward swing alive, never dampen to zero
+              if (this.player.hookAngularVel > 0 && this.player.hookAngularVel < 0.052) {
+                this.player.hookAngularVel = 0.052;
+              } else if (this.player.hookAngularVel < 0 && this.player.hookAngularVel > -0.04) {
+                this.player.hookAngularVel = -0.04;
+              }
+
+              // Clamp maximum angular speed
+              this.player.hookAngularVel = Math.max(-0.085, Math.min(0.085, this.player.hookAngularVel));
               this.player.hookAngle += this.player.hookAngularVel;
 
               this.player.x = a.x + r * Math.cos(this.player.hookAngle);
@@ -1102,7 +1178,7 @@
               this.player.vx = -r * Math.sin(this.player.hookAngle) * this.player.hookAngularVel;
               this.player.vy = r * Math.cos(this.player.hookAngle) * this.player.hookAngularVel;
             } else {
-              // Free flight: Ball Mode with gentle gravity
+              // Free flight: Ball Mode with smooth gravity
               this.player.vy += this.gravity;
               this.player.vx *= this.airResistance;
               this.player.vy *= this.airResistance;
@@ -1114,7 +1190,7 @@
             }
 
             // Motion speed trail
-            if (Math.hypot(this.player.vx, this.player.vy) > 6) {
+            if (Math.hypot(this.player.vx, this.player.vy) > 5) {
               this.player.trail.push({ x: this.player.x, y: this.player.y, alpha: 0.6 });
               if (this.player.trail.length > 8) this.player.trail.shift();
             } else if (this.player.trail.length > 0) {
@@ -1145,13 +1221,13 @@
               if (
                 px >= pad.x &&
                 px <= pad.x + pad.width &&
-                py >= pad.y - 10 &&
+                py >= pad.y - 12 &&
                 py <= pad.y + pad.height &&
                 this.player.vy > 0
               ) {
                 this.player.y = pad.y - this.player.radius - 2;
                 this.player.vy = -pad.bouncePower;
-                this.player.vx = Math.max(this.player.vx * 1.1, 5);
+                this.player.vx = Math.max(this.player.vx * 1.1, 5.5);
                 pad.squish = 12;
 
                 audio.playBounce();
@@ -1161,13 +1237,13 @@
             }
 
             // 4. Fall Death Check
-            if (this.player.y > 660 || this.player.y > this.height + 250) {
+            if (this.gameState === 'playing' && (this.player.y > 660 || this.player.y > this.height + 250)) {
               this.killPlayer();
               return;
             }
 
             // 5. Finish Line Check
-            if (this.player.x >= this.finishLine.x) {
+            if (this.player.x >= this.finishLine.x && this.gameState === 'playing') {
               this.completeLevel();
             }
           }
@@ -1215,6 +1291,16 @@
         completeLevel() {
           if (this.gameState === 'level_cleared') return;
           this.gameState = 'level_cleared';
+
+          // Auto unhook if attached and launch celebratory arc
+          if (this.player.isHooked) {
+            this.player.isHooked = false;
+            this.player.hookTarget = null;
+            this.player.mode = 'ball';
+            this.player.vx = Math.max(this.player.vx, 4.5);
+            this.player.vy = -3.2;
+          }
+
           audio.playVictory();
           this.spawnConfetti(this.finishLine.x, this.finishLine.y);
 
@@ -1355,41 +1441,82 @@
               this.ctx.setLineDash([6, 6]);
               this.ctx.moveTo(this.player.x, this.player.y);
               this.ctx.lineTo(nearest.x, nearest.y);
-              this.ctx.strokeStyle = this.theme === 'spiderman' ? 'rgba(255,255,255,0.6)' : this.theme === 'monkey' ? 'rgba(16, 185, 129, 0.7)' : 'rgba(0, 240, 255, 0.7)';
-              this.ctx.lineWidth = 2;
+              this.ctx.strokeStyle = this.theme === 'spiderman' ? 'rgba(255,255,255,0.75)' : this.theme === 'monkey' ? 'rgba(34, 197, 94, 0.8)' : 'rgba(245, 158, 11, 0.8)';
+              this.ctx.lineWidth = 2.5;
               this.ctx.stroke();
 
               // Glowing Target Lock Ring
               this.ctx.beginPath();
               this.ctx.arc(nearest.x, nearest.y, nearest.radius + 12, 0, Math.PI * 2);
-              this.ctx.strokeStyle = '#00f0ff';
+              this.ctx.strokeStyle = this.theme === 'spiderman' ? '#38bdf8' : this.theme === 'monkey' ? '#4ade80' : '#f59e0b';
               this.ctx.lineWidth = 2.5;
               this.ctx.stroke();
               this.ctx.restore();
             }
           }
 
-          // 3. Active Hook Rope
+          // 3. Active Hook Rope (Web for Spidey, Vine for Monkey, Liana for Tarzan)
           if (this.player.isHooked && this.player.hookTarget) {
             this.ctx.save();
+            const tx = this.player.hookTarget.x;
+            const ty = this.player.hookTarget.y;
+            const px = this.player.x;
+            const py = this.player.y;
+
             if (this.theme === 'spiderman') {
+              // High-tensile glowing Spider-Web
               this.ctx.strokeStyle = '#ffffff';
-              this.ctx.lineWidth = 3;
-              this.ctx.shadowColor = '#00f0ff';
-              this.ctx.shadowBlur = 10;
-            } else if (this.theme === 'monkey') {
-              this.ctx.strokeStyle = '#10b981';
               this.ctx.lineWidth = 3.5;
+              this.ctx.shadowColor = '#38bdf8';
+              this.ctx.shadowBlur = 12;
+              this.ctx.beginPath();
+              this.ctx.moveTo(px, py);
+              this.ctx.lineTo(tx, ty);
+              this.ctx.stroke();
+
+              // Web knots along line
+              for (let f = 0.25; f <= 0.75; f += 0.25) {
+                const wx = px + (tx - px) * f;
+                const wy = py + (ty - py) * f;
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.beginPath();
+                this.ctx.arc(wx, wy, 2.5, 0, Math.PI * 2);
+                this.ctx.fill();
+              }
+            } else if (this.theme === 'monkey') {
+              // Leafy Green Jungle Vine
+              this.ctx.strokeStyle = '#16a34a';
+              this.ctx.lineWidth = 4;
+              this.ctx.beginPath();
+              this.ctx.moveTo(px, py);
+              this.ctx.lineTo(tx, ty);
+              this.ctx.stroke();
+
+              // Vine Leaves
+              for (let f = 0.2; f <= 0.8; f += 0.3) {
+                const lx = px + (tx - px) * f;
+                const ly = py + (ty - py) * f;
+                this.ctx.fillStyle = '#22c55e';
+                this.ctx.beginPath();
+                this.ctx.ellipse(lx + 4, ly, 6, 3, 0.4, 0, Math.PI * 2);
+                this.ctx.fill();
+              }
             } else {
-              this.ctx.strokeStyle = '#00f0ff';
-              this.ctx.lineWidth = 3;
-              this.ctx.shadowColor = '#00f0ff';
-              this.ctx.shadowBlur = 10;
+              // Tarzan Thick Twisted Jungle Liana
+              this.ctx.strokeStyle = '#854d0e';
+              this.ctx.lineWidth = 4.5;
+              this.ctx.beginPath();
+              this.ctx.moveTo(px, py);
+              this.ctx.lineTo(tx, ty);
+              this.ctx.stroke();
+
+              this.ctx.strokeStyle = '#d97706';
+              this.ctx.lineWidth = 1.5;
+              this.ctx.beginPath();
+              this.ctx.moveTo(px, py);
+              this.ctx.lineTo(tx, ty);
+              this.ctx.stroke();
             }
-            this.ctx.beginPath();
-            this.ctx.moveTo(this.player.x, this.player.y);
-            this.ctx.lineTo(this.player.hookTarget.x, this.player.hookTarget.y);
-            this.ctx.stroke();
             this.ctx.restore();
           }
 
@@ -1406,35 +1533,41 @@
             this.ctx.stroke();
 
             if (this.theme === 'spiderman') {
-              this.ctx.fillStyle = '#ff2a55';
-              this.ctx.shadowColor = '#ff2a55';
+              // Spider Beacon
+              this.ctx.fillStyle = '#e11d48';
+              this.ctx.shadowColor = '#e11d48';
               this.ctx.shadowBlur = 12;
               this.ctx.beginPath();
               this.ctx.arc(0, 0, a.radius, 0, Math.PI * 2);
               this.ctx.fill();
+
               this.ctx.fillStyle = '#ffffff';
-              this.ctx.beginPath();
-              this.ctx.arc(0, 0, 5, 0, Math.PI * 2);
-              this.ctx.fill();
+              this.ctx.font = '14px sans-serif';
+              this.ctx.textAlign = 'center';
+              this.ctx.textBaseline = 'middle';
+              this.ctx.fillText('🕷️', 0, 0);
             } else if (this.theme === 'monkey') {
+              // Banana Tree Anchor
               this.ctx.fillStyle = '#f59e0b';
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, a.radius, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.font = '15px sans-serif';
+              this.ctx.textAlign = 'center';
+              this.ctx.textBaseline = 'middle';
+              this.ctx.fillText('🍌', 0, 0);
+            } else {
+              // Tarzan Ancient Jungle Moss Ring
+              this.ctx.fillStyle = '#334155';
+              this.ctx.shadowColor = '#22c55e';
+              this.ctx.shadowBlur = 8;
               this.ctx.beginPath();
               this.ctx.arc(0, 0, a.radius, 0, Math.PI * 2);
               this.ctx.fill();
               this.ctx.font = '14px sans-serif';
               this.ctx.textAlign = 'center';
               this.ctx.textBaseline = 'middle';
-              this.ctx.fillText('🍌', 0, 0);
-            } else {
-              this.ctx.strokeStyle = '#00f0ff';
-              this.ctx.lineWidth = 3;
-              this.ctx.beginPath();
-              this.ctx.arc(0, 0, a.radius, 0, Math.PI * 2);
-              this.ctx.stroke();
-              this.ctx.fillStyle = '#ffffff';
-              this.ctx.beginPath();
-              this.ctx.arc(0, 0, 4, 0, Math.PI * 2);
-              this.ctx.fill();
+              this.ctx.fillText('🌿', 0, 0);
             }
             this.ctx.restore();
           }
@@ -1509,122 +1642,312 @@
           const r = this.player.radius;
 
           if (this.player.mode === 'ball') {
-            // Ball Mode (Rolling)
+            // Ball Mode (Rolling with rich character art)
             this.ctx.rotate(this.player.rollAngle);
 
             if (this.theme === 'spiderman') {
-              this.ctx.fillStyle = '#ff2a55';
-              this.ctx.shadowColor = 'rgba(255, 42, 85, 0.6)';
-              this.ctx.shadowBlur = 12;
+              // Spider-Man Ball
+              this.ctx.save();
+              // Red head base
+              this.ctx.fillStyle = '#e11d48';
+              this.ctx.shadowColor = 'rgba(225, 29, 72, 0.6)';
+              this.ctx.shadowBlur = 10;
               this.ctx.beginPath();
               this.ctx.arc(0, 0, r, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              // Blue sides
+              this.ctx.fillStyle = '#1d4ed8';
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, r, Math.PI * 0.45, Math.PI * 0.85);
+              this.ctx.arc(0, 0, r, Math.PI * 1.15, Math.PI * 1.55);
+              this.ctx.fill();
+
+              // Black web gridlines
+              this.ctx.strokeStyle = '#0f172a';
+              this.ctx.lineWidth = 1.2;
+              this.ctx.beginPath();
+              this.ctx.moveTo(-r, 0); this.ctx.lineTo(r, 0);
+              this.ctx.moveTo(0, -r); this.ctx.lineTo(0, r);
+              this.ctx.moveTo(-r * 0.7, -r * 0.7); this.ctx.lineTo(r * 0.7, r * 0.7);
+              this.ctx.moveTo(-r * 0.7, r * 0.7); this.ctx.lineTo(r * 0.7, -r * 0.7);
+              this.ctx.stroke();
+
+              // Spider Eyes
+              this.ctx.fillStyle = '#0f172a';
+              this.ctx.beginPath();
+              this.ctx.ellipse(r * 0.35, -r * 0.28, r * 0.42, r * 0.28, 0.45, 0, Math.PI * 2);
+              this.ctx.ellipse(r * 0.35, r * 0.28, r * 0.42, r * 0.28, -0.45, 0, Math.PI * 2);
               this.ctx.fill();
 
               this.ctx.fillStyle = '#ffffff';
               this.ctx.beginPath();
-              this.ctx.ellipse(r * 0.35, -r * 0.25, r * 0.4, r * 0.25, 0.4, 0, Math.PI * 2);
-              this.ctx.ellipse(r * 0.35, r * 0.25, r * 0.4, r * 0.25, -0.4, 0, Math.PI * 2);
+              this.ctx.ellipse(r * 0.35, -r * 0.28, r * 0.32, r * 0.2, 0.45, 0, Math.PI * 2);
+              this.ctx.ellipse(r * 0.35, r * 0.28, r * 0.32, r * 0.2, -0.45, 0, Math.PI * 2);
               this.ctx.fill();
+              this.ctx.restore();
             } else if (this.theme === 'monkey') {
-              this.ctx.fillStyle = '#854d0e';
+              // Monkey Ball
+              this.ctx.save();
+              // Brown fur base
+              this.ctx.fillStyle = '#78350f';
               this.ctx.beginPath();
               this.ctx.arc(0, 0, r, 0, Math.PI * 2);
               this.ctx.fill();
 
+              // Ears
+              this.ctx.fillStyle = '#78350f';
+              this.ctx.beginPath();
+              this.ctx.arc(-r * 0.8, -r * 0.6, r * 0.35, 0, Math.PI * 2);
+              this.ctx.arc(-r * 0.8, r * 0.6, r * 0.35, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.fillStyle = '#f472b6';
+              this.ctx.beginPath();
+              this.ctx.arc(-r * 0.8, -r * 0.6, r * 0.2, 0, Math.PI * 2);
+              this.ctx.arc(-r * 0.8, r * 0.6, r * 0.2, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              // Peach muzzle face
               this.ctx.fillStyle = '#fed7aa';
               this.ctx.beginPath();
-              this.ctx.arc(r * 0.2, 0, r * 0.6, 0, Math.PI * 2);
+              this.ctx.ellipse(r * 0.25, 0, r * 0.65, r * 0.55, 0, 0, Math.PI * 2);
               this.ctx.fill();
-            } else {
+
+              // Eyes & Nose
               this.ctx.fillStyle = '#1e293b';
-              this.ctx.shadowColor = '#00f0ff';
-              this.ctx.shadowBlur = 12;
+              this.ctx.beginPath();
+              this.ctx.arc(r * 0.35, -r * 0.22, 2.5, 0, Math.PI * 2);
+              this.ctx.arc(r * 0.35, r * 0.22, 2.5, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.fillRect(r * 0.55, -2, 3, 4);
+
+              // Tail
+              this.ctx.strokeStyle = '#78350f';
+              this.ctx.lineWidth = 3;
+              this.ctx.beginPath();
+              this.ctx.arc(-r * 0.9, 0, r * 0.5, 0.5, Math.PI * 1.5);
+              this.ctx.stroke();
+              this.ctx.restore();
+            } else {
+              // Tarzan Ball
+              this.ctx.save();
+              // Tanned muscular hero base
+              this.ctx.fillStyle = '#d97706';
               this.ctx.beginPath();
               this.ctx.arc(0, 0, r, 0, Math.PI * 2);
               this.ctx.fill();
 
-              this.ctx.fillStyle = '#00f0ff';
-              this.ctx.fillRect(r * 0.1, -r * 0.25, r * 0.6, r * 0.5);
+              // Wild Dark Hair
+              this.ctx.fillStyle = '#451a03';
+              this.ctx.beginPath();
+              this.ctx.arc(-r * 0.3, 0, r * 0.95, Math.PI * 0.5, Math.PI * 1.5);
+              this.ctx.fill();
+
+              // Leopard print band
+              this.ctx.fillStyle = '#f59e0b';
+              this.ctx.fillRect(-r * 0.4, -r * 0.7, r * 0.8, r * 0.4);
+              this.ctx.fillStyle = '#451a03';
+              this.ctx.fillRect(-r * 0.2, -r * 0.6, 3, 3);
+              this.ctx.fillRect(r * 0.1, -r * 0.55, 3, 3);
+
+              // Face features
+              this.ctx.fillStyle = '#1e293b';
+              this.ctx.beginPath();
+              this.ctx.arc(r * 0.4, -r * 0.2, 2.5, 0, Math.PI * 2);
+              this.ctx.arc(r * 0.4, r * 0.2, 2.5, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.restore();
             }
           } else {
-            // Stickman Swing Mode
+            // Stickman / Acrobat Swing Mode
             this.ctx.rotate(this.player.hookAngle + Math.PI / 2);
 
             if (this.theme === 'spiderman') {
-              this.ctx.strokeStyle = '#ff2a55';
-              this.ctx.lineWidth = 4;
-              this.ctx.lineCap = 'round';
-
-              this.ctx.fillStyle = '#ff2a55';
+              // Detailed Spider-Man Acrobat
+              this.ctx.save();
+              // Mask Head
+              this.ctx.fillStyle = '#e11d48';
               this.ctx.beginPath();
-              this.ctx.arc(0, -18, 7, 0, Math.PI * 2);
+              this.ctx.ellipse(0, -18, 9, 10, 0, 0, Math.PI * 2);
               this.ctx.fill();
 
+              // Spidey Eyes
+              this.ctx.fillStyle = '#0f172a';
               this.ctx.beginPath();
-              this.ctx.moveTo(0, -11);
-              this.ctx.lineTo(0, 8);
+              this.ctx.ellipse(-3, -19, 4, 2.5, -0.3, 0, Math.PI * 2);
+              this.ctx.ellipse(3, -19, 4, 2.5, 0.3, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.fillStyle = '#ffffff';
+              this.ctx.beginPath();
+              this.ctx.ellipse(-3, -19, 3, 1.8, -0.3, 0, Math.PI * 2);
+              this.ctx.ellipse(3, -19, 3, 1.8, 0.3, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              // Red & Blue Torso with Spider Logo
+              this.ctx.fillStyle = '#e11d48';
+              this.ctx.beginPath();
+              this.ctx.roundRect(-7, -8, 14, 18, 4);
+              this.ctx.fill();
+              this.ctx.fillStyle = '#1d4ed8';
+              this.ctx.fillRect(-7, -4, 3, 10);
+              this.ctx.fillRect(4, -4, 3, 10);
+
+              // Spider Emblem on chest
+              this.ctx.fillStyle = '#0f172a';
+              this.ctx.beginPath();
+              this.ctx.arc(0, -2, 2, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              // Reaching Arms (Red with white web cuffs)
+              this.ctx.strokeStyle = '#e11d48';
+              this.ctx.lineWidth = 4;
+              this.ctx.lineCap = 'round';
+              this.ctx.beginPath();
+              this.ctx.moveTo(-5, -6); this.ctx.lineTo(-12, -22);
+              this.ctx.moveTo(5, -6); this.ctx.lineTo(12, -22);
               this.ctx.stroke();
 
+              // Acrobatic Legs (Blue thighs with red boots)
+              this.ctx.strokeStyle = '#1d4ed8';
+              this.ctx.lineWidth = 4.5;
               this.ctx.beginPath();
-              this.ctx.moveTo(0, -8);
-              this.ctx.lineTo(-10, -22);
-              this.ctx.moveTo(0, -8);
-              this.ctx.lineTo(10, -22);
+              this.ctx.moveTo(-4, 9); this.ctx.lineTo(-9, 21);
+              this.ctx.moveTo(4, 9); this.ctx.lineTo(10, 18);
               this.ctx.stroke();
 
-              this.ctx.strokeStyle = '#3b82f6';
+              this.ctx.strokeStyle = '#e11d48';
+              this.ctx.lineWidth = 4.5;
               this.ctx.beginPath();
-              this.ctx.moveTo(0, 8);
-              this.ctx.lineTo(-8, 20);
-              this.ctx.moveTo(0, 8);
-              this.ctx.lineTo(8, 16);
+              this.ctx.moveTo(-9, 18); this.ctx.lineTo(-12, 26);
+              this.ctx.moveTo(10, 15); this.ctx.lineTo(14, 22);
               this.ctx.stroke();
+              this.ctx.restore();
             } else if (this.theme === 'monkey') {
-              this.ctx.strokeStyle = '#854d0e';
-              this.ctx.lineWidth = 4;
-              this.ctx.lineCap = 'round';
-
-              this.ctx.fillStyle = '#854d0e';
+              // Detailed Jungle Monkey
+              this.ctx.save();
+              // Head
+              this.ctx.fillStyle = '#78350f';
               this.ctx.beginPath();
-              this.ctx.arc(0, -18, 7, 0, Math.PI * 2);
+              this.ctx.arc(0, -18, 9, 0, Math.PI * 2);
               this.ctx.fill();
 
+              // Round Ears
+              this.ctx.fillStyle = '#78350f';
               this.ctx.beginPath();
-              this.ctx.moveTo(0, -11);
-              this.ctx.lineTo(0, 8);
-              this.ctx.stroke();
+              this.ctx.arc(-9, -19, 4, 0, Math.PI * 2);
+              this.ctx.arc(9, -19, 4, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.fillStyle = '#f472b6';
+              this.ctx.beginPath();
+              this.ctx.arc(-9, -19, 2, 0, Math.PI * 2);
+              this.ctx.arc(9, -19, 2, 0, Math.PI * 2);
+              this.ctx.fill();
 
+              // Peach Muzzle
+              this.ctx.fillStyle = '#fed7aa';
               this.ctx.beginPath();
-              this.ctx.moveTo(0, -8);
-              this.ctx.lineTo(-11, -22);
-              this.ctx.moveTo(0, -8);
-              this.ctx.lineTo(11, -22);
-              this.ctx.stroke();
+              this.ctx.ellipse(0, -15, 6, 4, 0, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.fillStyle = '#1e293b';
+              this.ctx.arc(0, -16, 1.5, 0, Math.PI * 2);
+              this.ctx.fill();
 
+              // Brown Furry Torso with Peach Belly
+              this.ctx.fillStyle = '#78350f';
               this.ctx.beginPath();
-              this.ctx.arc(-8, 4, 10, 0.5, Math.PI * 1.5, false);
-              this.ctx.stroke();
-            } else {
-              this.ctx.strokeStyle = '#00f0ff';
-              this.ctx.lineWidth = 3.5;
+              this.ctx.roundRect(-6, -8, 12, 17, 4);
+              this.ctx.fill();
+              this.ctx.fillStyle = '#fed7aa';
+              this.ctx.beginPath();
+              this.ctx.ellipse(0, 0, 4, 6, 0, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              // Long Grasping Arms
+              this.ctx.strokeStyle = '#78350f';
+              this.ctx.lineWidth = 4;
               this.ctx.lineCap = 'round';
+              this.ctx.beginPath();
+              this.ctx.moveTo(-5, -6); this.ctx.lineTo(-13, -22);
+              this.ctx.moveTo(5, -6); this.ctx.lineTo(13, -22);
+              this.ctx.stroke();
 
+              // Curled Tail
+              this.ctx.strokeStyle = '#78350f';
+              this.ctx.lineWidth = 3.5;
+              this.ctx.beginPath();
+              this.ctx.arc(-10, 6, 12, 0.4, Math.PI * 1.6, false);
+              this.ctx.stroke();
+
+              // Legs
+              this.ctx.strokeStyle = '#78350f';
+              this.ctx.lineWidth = 4;
+              this.ctx.beginPath();
+              this.ctx.moveTo(-4, 8); this.ctx.lineTo(-8, 22);
+              this.ctx.moveTo(4, 8); this.ctx.lineTo(9, 18);
+              this.ctx.stroke();
+              this.ctx.restore();
+            } else {
+              // Detailed Tarzan Character
+              this.ctx.save();
+              // Head with Tanned Skin
+              this.ctx.fillStyle = '#d97706';
+              this.ctx.beginPath();
+              this.ctx.arc(0, -18, 8, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              // Wild Flowing Hair
+              this.ctx.fillStyle = '#451a03';
+              this.ctx.beginPath();
+              this.ctx.moveTo(-7, -24);
+              this.ctx.lineTo(7, -24);
+              this.ctx.lineTo(11, -12);
+              this.ctx.lineTo(-11, -12);
+              this.ctx.closePath();
+              this.ctx.fill();
+
+              // Eyes & Determined Expression
               this.ctx.fillStyle = '#1e293b';
               this.ctx.beginPath();
-              this.ctx.arc(0, -18, 7, 0, Math.PI * 2);
+              this.ctx.arc(-3, -18, 1.5, 0, Math.PI * 2);
+              this.ctx.arc(3, -18, 1.5, 0, Math.PI * 2);
               this.ctx.fill();
 
+              // Muscular Tanned Torso
+              this.ctx.fillStyle = '#d97706';
               this.ctx.beginPath();
-              this.ctx.moveTo(0, -11);
-              this.ctx.lineTo(0, 8);
+              this.ctx.roundRect(-6, -9, 12, 18, 4);
+              this.ctx.fill();
+
+              // Leopard Loincloth
+              this.ctx.fillStyle = '#f59e0b';
+              this.ctx.beginPath();
+              this.ctx.moveTo(-7, 3);
+              this.ctx.lineTo(7, 3);
+              this.ctx.lineTo(5, 12);
+              this.ctx.lineTo(-5, 12);
+              this.ctx.closePath();
+              this.ctx.fill();
+              this.ctx.fillStyle = '#451a03';
+              this.ctx.fillRect(-2, 5, 2.5, 2.5);
+              this.ctx.fillRect(2, 8, 2.5, 2.5);
+
+              // Muscular Tanned Arms Reaching to Liana
+              this.ctx.strokeStyle = '#d97706';
+              this.ctx.lineWidth = 4.5;
+              this.ctx.lineCap = 'round';
+              this.ctx.beginPath();
+              this.ctx.moveTo(-5, -6); this.ctx.lineTo(-12, -22);
+              this.ctx.moveTo(5, -6); this.ctx.lineTo(12, -22);
               this.ctx.stroke();
 
+              // Muscular Legs in Agile Swing
+              this.ctx.strokeStyle = '#d97706';
+              this.ctx.lineWidth = 4.5;
               this.ctx.beginPath();
-              this.ctx.moveTo(0, -8);
-              this.ctx.lineTo(-10, -22);
-              this.ctx.moveTo(0, -8);
-              this.ctx.lineTo(10, -22);
+              this.ctx.moveTo(-4, 10); this.ctx.lineTo(-9, 23);
+              this.ctx.moveTo(4, 10); this.ctx.lineTo(10, 19);
               this.ctx.stroke();
+              this.ctx.restore();
             }
           }
 
@@ -1664,18 +1987,38 @@
             }
           } else if (this.theme === 'monkey') {
             const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
-            grad.addColorStop(0, '#032615');
-            grad.addColorStop(0.5, '#054433');
-            grad.addColorStop(1, '#012019');
+            grad.addColorStop(0, '#022c22');
+            grad.addColorStop(0.5, '#064e3b');
+            grad.addColorStop(1, '#021e17');
             this.ctx.fillStyle = grad;
             this.ctx.fillRect(0, 0, this.width, this.height);
+
+            // Tropical Jungle Bamboo Trunks
+            for (let i = 0; i < 15; i++) {
+              const jx = ((i * 180 - camX * 0.15) % (this.width + 300) + this.width + 300) % (this.width + 300) - 150;
+              this.ctx.fillStyle = 'rgba(6, 78, 59, 0.45)';
+              this.ctx.fillRect(jx, 0, 18, this.height);
+            }
           } else {
+            // Tarzan Sunlit Tropical Canopy & Ancient Ruins
             const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
-            grad.addColorStop(0, '#0c0418');
-            grad.addColorStop(0.5, '#160830');
-            grad.addColorStop(1, '#070210');
+            grad.addColorStop(0, '#78350f');
+            grad.addColorStop(0.4, '#b45309');
+            grad.addColorStop(1, '#064e3b');
             this.ctx.fillStyle = grad;
             this.ctx.fillRect(0, 0, this.width, this.height);
+
+            // Sunbeams & Ancient Ruins
+            for (let i = 0; i < 12; i++) {
+              const rx = ((i * 220 - camX * 0.18) % (this.width + 400) + this.width + 400) % (this.width + 400) - 200;
+              this.ctx.fillStyle = 'rgba(251, 191, 36, 0.12)';
+              this.ctx.beginPath();
+              this.ctx.moveTo(rx - 30, 0);
+              this.ctx.lineTo(rx + 50, 0);
+              this.ctx.lineTo(rx + 120, this.height);
+              this.ctx.lineTo(rx - 80, this.height);
+              this.ctx.fill();
+            }
           }
         }
 
@@ -1689,7 +2032,24 @@
 
         startGame() {
           this.gameState = 'playing';
+          const menuModal = document.getElementById('menu-modal');
+          if (menuModal) menuModal.classList.remove('active');
           this.loadLevel(this.currentLevel);
+        }
+
+        openMenu() {
+          this.gameState = 'menu';
+          const pauseModal = document.getElementById('pause-modal');
+          const vicModal = document.getElementById('victory-modal');
+          const levelsModal = document.getElementById('levels-modal');
+          const themeModal = document.getElementById('theme-modal');
+          const menuModal = document.getElementById('menu-modal');
+
+          if (pauseModal) pauseModal.classList.remove('active');
+          if (vicModal) vicModal.classList.remove('active');
+          if (levelsModal) levelsModal.classList.remove('active');
+          if (themeModal) themeModal.classList.remove('active');
+          if (menuModal) menuModal.classList.add('active');
         }
 
         restartLevel() {
@@ -1723,6 +2083,12 @@
       document.addEventListener('DOMContentLoaded', () => {
         window.stickmanGame = new StickmanHookGame();
 
+        const menuPlayBtn = document.getElementById('btn-menu-play');
+        const menuLevelsBtn = document.getElementById('btn-menu-levels');
+        const menuThemeBtn = document.getElementById('btn-menu-theme');
+        const pauseHomeBtn = document.getElementById('btn-pause-home');
+        const vicHomeBtn = document.getElementById('btn-vic-home');
+
         const themeBadge = document.getElementById('btn-open-themes');
         const themeModal = document.getElementById('theme-modal');
         const closeThemeBtn = document.getElementById('btn-close-themes');
@@ -1736,6 +2102,33 @@
         const nextLvlBtn = document.getElementById('btn-next-level');
         const vicMenuBtn = document.getElementById('btn-vic-menu');
         const pauseRestartBtn = document.getElementById('btn-pause-restart');
+
+        function ensureFullScreen() {
+          if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+            const el = document.documentElement;
+            const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+            if (req) req.call(el).catch(() => {});
+          }
+        }
+
+        if (menuPlayBtn) {
+          menuPlayBtn.addEventListener('click', () => {
+            ensureFullScreen();
+            if (window.stickmanGame) window.stickmanGame.startGame();
+          });
+        }
+
+        if (pauseHomeBtn) {
+          pauseHomeBtn.addEventListener('click', () => {
+            if (window.stickmanGame) window.stickmanGame.openMenu();
+          });
+        }
+
+        if (vicHomeBtn) {
+          vicHomeBtn.addEventListener('click', () => {
+            if (window.stickmanGame) window.stickmanGame.openMenu();
+          });
+        }
 
         const refreshThemeCards = (activeTheme) => {
           document.querySelectorAll('.theme-select-card').forEach(card => {
@@ -1757,6 +2150,10 @@
           themeBadge.addEventListener('click', () => themeModal.classList.add('active'));
         }
 
+        if (menuThemeBtn && themeModal) {
+          menuThemeBtn.addEventListener('click', () => themeModal.classList.add('active'));
+        }
+
         if (closeThemeBtn && themeModal) {
           closeThemeBtn.addEventListener('click', () => themeModal.classList.remove('active'));
         }
@@ -1773,6 +2170,9 @@
             if (i <= unlocked) {
               btn.addEventListener('click', () => {
                 window.stickmanGame.loadLevel(i);
+                window.stickmanGame.gameState = 'playing';
+                const menuModal = document.getElementById('menu-modal');
+                if (menuModal) menuModal.classList.remove('active');
                 levelsModal.classList.remove('active');
               });
             }
@@ -1787,8 +2187,22 @@
           });
         }
 
+        if (menuLevelsBtn && levelsModal) {
+          menuLevelsBtn.addEventListener('click', () => {
+            buildLevelsGrid();
+            levelsModal.classList.add('active');
+          });
+        }
+
         if (closeLevelsBtn && levelsModal) {
           closeLevelsBtn.addEventListener('click', () => levelsModal.classList.remove('active'));
+        }
+
+        const quickRestartBtn = document.getElementById('btn-quick-restart');
+        if (quickRestartBtn) {
+          quickRestartBtn.addEventListener('click', () => {
+            if (window.stickmanGame) window.stickmanGame.restartLevel();
+          });
         }
 
         if (soundBtn) {

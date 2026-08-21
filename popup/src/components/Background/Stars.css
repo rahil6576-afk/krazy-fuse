@@ -122,7 +122,7 @@
 .beach-art-backdrop {
   position: absolute;
   inset: 0;
-  background-image: url('./beach_theme_bg.jpg');
+  background-image: url('../../assets/beach_theme_bg.jpg');
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
@@ -344,7 +344,7 @@
 .dystopia-glitch-layer {
   position: absolute;
   inset: 0;
-  background-image: url('./dystopia_dynamic.gif');
+  background-image: url('../../assets/dystopia_dynamic.gif');
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -583,7 +583,7 @@
 .salman-desert-backdrop {
   position: absolute;
   inset: 0;
-  background-image: url('./bhai_theme_bg.jpg');
+  background-image: url('../../assets/bhai_theme_bg.jpg');
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;

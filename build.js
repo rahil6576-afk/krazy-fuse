@@ -26,6 +26,13 @@ const itemsToCopy = [
   'assets'
 ];
 
+// If popup dist exists, ensure latest build is copied to popup-game
+const popupDist = path.join(__dirname, 'popup', 'dist');
+const popupGame = path.join(__dirname, 'popup-game');
+if (fs.existsSync(popupDist)) {
+  fs.cpSync(popupDist, popupGame, { recursive: true });
+}
+
 for (const item of itemsToCopy) {
   const src = path.join(__dirname, item);
   const dest = path.join(dist, item);

@@ -76,20 +76,20 @@ class WildAudioEngine {
       osc.start(now);
       osc.stop(now + 0.11);
     } else {
-      // High-tech magnetic grappling ring latch
+      // Tarzan Wild Jungle Liana Snap "THWACK-SWOOSH"
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(1400, now);
-      osc.frequency.exponentialRampToValueAtTime(500, now + 0.08);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(160, now + 0.14);
 
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+      gain.gain.setValueAtTime(0.42, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start(now);
-      osc.stop(now + 0.1);
+      osc.stop(now + 0.15);
     }
   }
 

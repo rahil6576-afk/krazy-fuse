@@ -3,69 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>krazio games 🎮⚡ — Wild & Addictive Web Arcade</title>
+    <title>Krazy Fuse 🎮⚡ — Live to Play Web Arcade</title>
     <!-- Favicon -->
     <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Lilita One (Headings/Logo/Play) + Rubik (UI/Nav/Meta) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="portal.css">
-    <!-- PixiJS v8 WebGL Accelerated 2D Engine -->
-    <script src="https://pixijs.download/v8.8.1/pixi.min.js"></script>
 </head>
 <body>
 
-
     <!-- Top Navigation Bar -->
     <header class="navbar">
-        <a href="index.html" class="logo-container" title="krazio games homepage">
-            <img src="krazio-logo.svg" alt="krazio games" class="brand-logo-img" style="height: 42px; width: auto; display: block;">
-        </a>
+        <div class="nav-left">
+            <a href="index.html" class="logo-container" title="Krazy Fuse — Live to Play">
+                <img src="krazio-icon.svg" alt="Krazy Fuse Emblem" class="brand-icon-img">
+                <div class="brand-title-wrap">
+                    <span class="brand-main-krazy">Krazy</span>
+                    <div class="brand-fuse-column">
+                        <span class="brand-main-fuse">Fuse</span>
+                        <span class="brand-sub-title">live to play</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Fast Category Shortcuts -->
+            <nav class="nav-shortcuts">
+                <button class="nav-shortcut-btn active" data-category="all">🎮 All</button>
+                <button class="nav-shortcut-btn" data-category="trending">🔥 Popular</button>
+                <button class="nav-shortcut-btn" data-category="new">🆕 New</button>
+                <button class="nav-shortcut-btn" data-category="multiplayer">🏆 Multiplayer</button>
+                <button class="nav-shortcut-btn" data-category="action">⚡ Action</button>
+            </nav>
+        </div>
 
         <div class="nav-actions">
+            <div class="nav-search-wrap">
+                <span class="nav-search-icon">🔍</span>
+                <input type="text" id="nav-search-input" class="nav-search-input" placeholder="Search games...">
+            </div>
             <button id="btn-theme-toggle" class="btn-theme" title="Toggle Day/Night Theme">
                 <span>☀️ Day</span>
             </button>
-            <a href="office-escape/index.html" class="nav-btn nav-btn-highlight">
-                <span>🏃 PLAY OFFICE ESCAPE</span>
-            </a>
             <button id="btn-open-suggest" class="nav-btn">
-                <span>💡 Suggest Game</span>
+                <span>💡 Pitch Idea</span>
             </button>
         </div>
     </header>
 
-    <!-- Hero Sequential Game Carousel Slider -->
-    <section class="hero-section">
-        <div class="hero-carousel-container" id="hero-carousel-container">
-            <div class="hero-carousel-track" id="hero-carousel-track">
-                <!-- Injected dynamically from GAMES_CATALOG -->
+    <!-- Arcade Hero Section -->
+    <section class="arcade-hero">
+        <!-- Subtle Background Game Glyphs -->
+        <div class="hero-bg-glyphs" aria-hidden="true">
+            <span class="glyph glyph-1">✦</span>
+            <span class="glyph glyph-2">●</span>
+            <span class="glyph glyph-3">🎮</span>
+            <span class="glyph glyph-4">⚡</span>
+            <span class="glyph glyph-5">✦</span>
+            <span class="glyph glyph-6">●</span>
+        </div>
+
+        <div class="hero-content-wrap">
+            <div class="hero-brand-badge">
+                <span class="hero-badge-fire">🔥</span>
+                <span>PLAY SOMETHING AWESOME</span>
+            </div>
+            <h1 class="hero-big-title">KRAZY FUSE</h1>
+            <p class="hero-subtitle">Fast, chaotic, instant-play browser games with zero downloads.</p>
+
+            <!-- Big Center Search Bar -->
+            <div class="hero-search-box">
+                <span class="hero-search-icon">🔍</span>
+                <input type="text" id="search-games-input" class="hero-search-input" placeholder="Search 10+ krazy arcade games...">
+                <button class="hero-search-btn" id="btn-search-go"><span>FIND GAME</span></button>
+            </div>
+
+            <!-- Filter Category Tabs -->
+            <div class="category-tabs-row" id="category-tabs">
+                <button class="category-pill active" data-category="all">🎮 All Games</button>
+                <button class="category-pill" data-category="trending">🔥 Trending</button>
+                <button class="category-pill" data-category="new">🆕 New & Hot</button>
+                <button class="category-pill" data-category="multiplayer">👥 Multiplayer</button>
+                <button class="category-pill" data-category="runner">🏃 Runners</button>
+                <button class="category-pill" data-category="arcade">🎈 Arcade</button>
+                <button class="category-pill" data-category="pvp">⚔️ PvP Combat</button>
             </div>
         </div>
     </section>
 
-    <!-- Main Game Catalog Section -->
+    <!-- Main Game Portal Content Container -->
     <main class="main-content">
-        <!-- Filter & Search Controls -->
-        <div class="filter-bar-container">
-            <div class="category-tabs">
-                <button class="category-pill active" data-category="all">🎮 All Games</button>
-                <button class="category-pill" data-category="runner">🏃 Endless Runner</button>
-                <button class="category-pill" data-category="action">🛗 Party Survival</button>
-                <button class="category-pill" data-category="arcade">🎈 Arcade & Shooter</button>
-                <button class="category-pill" data-category="pvp">⚔️ PvP Fighting</button>
-                <button class="category-pill" data-category="reflex">⚡ Reflex Runner</button>
-            </div>
+        <!-- Dynamic Section Container: Populated by portal.js -->
+        <div id="portal-sections-container">
+            <!-- Filter / Search Results Grid (when searching/filtering) -->
+            <section id="filtered-section" class="game-section hidden">
+                <div class="section-header-row">
+                    <h2 class="section-title" id="filtered-title">⚡ FILTERED GAMES</h2>
+                    <span class="section-count-badge" id="filtered-count">0 games</span>
+                </div>
+                <div id="filtered-grid" class="games-grid"></div>
+            </section>
 
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="search-games-input" class="search-input" placeholder="Search krazy games...">
-            </div>
+            <!-- Standard Section 1: Trending Now -->
+            <section id="section-trending" class="game-section">
+                <div class="section-header-row">
+                    <div class="section-title-wrap">
+                        <span class="section-emoji">🔥</span>
+                        <h2 class="section-title">TRENDING NOW</h2>
+                    </div>
+                    <span class="section-tag-sub">Most played this week</span>
+                </div>
+                <div id="trending-grid" class="games-grid"></div>
+            </section>
+
+            <!-- Standard Section 2: New & Hot Games -->
+            <section id="section-new" class="game-section">
+                <div class="section-header-row">
+                    <div class="section-title-wrap">
+                        <span class="section-emoji">🆕</span>
+                        <h2 class="section-title">NEW RELEASES</h2>
+                    </div>
+                    <span class="section-tag-sub">Fresh drops & updates</span>
+                </div>
+                <div id="new-grid" class="games-grid"></div>
+            </section>
+
+            <!-- Standard Section 3: Multiplayer & 1v1 -->
+            <section id="section-multiplayer" class="game-section">
+                <div class="section-header-row">
+                    <div class="section-title-wrap">
+                        <span class="section-emoji">👥</span>
+                        <h2 class="section-title">MULTIPLAYER & PVP</h2>
+                    </div>
+                    <span class="section-tag-sub">Play with friends & smart bots</span>
+                </div>
+                <div id="multiplayer-grid" class="games-grid"></div>
+            </section>
+
+            <!-- Standard Section 4: All Games Catalog -->
+            <section id="section-all" class="game-section">
+                <div class="section-header-row">
+                    <div class="section-title-wrap">
+                        <span class="section-emoji">🎮</span>
+                        <h2 class="section-title">ALL KRAZY GAMES</h2>
+                    </div>
+                    <span class="section-tag-sub">Complete instant-play arcade</span>
+                </div>
+                <div id="all-games-grid" class="games-grid"></div>
+            </section>
         </div>
-
-        <!-- Games Grid (Populated by portal.js) -->
-        <div id="games-grid" class="games-grid"></div>
 
         <!-- Suggest a Game Banner -->
         <section class="suggest-banner">
@@ -73,12 +160,12 @@
                 <h3>💡 Have a Krazy Game Idea?</h3>
                 <p>We are constantly building and adding new indie web games. Pitch your kraziest game concept!</p>
             </div>
-            <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="suggest-actions">
                 <button id="btn-view-stored" class="nav-btn" title="View previously submitted ideas">
                     <span>📋 View Pitches</span>
                 </button>
-                <button id="btn-open-suggest-2" class="btn-suggest" onclick="document.getElementById('suggest-modal').classList.add('active')">
-                    <span>🚀 Pitch Your Idea</span>
+                <button id="btn-open-suggest-2" class="btn-arcade-cta" onclick="document.getElementById('suggest-modal').classList.add('active')">
+                    <span>🚀 PITCH YOUR IDEA</span>
                 </button>
             </div>
         </section>
@@ -87,28 +174,36 @@
     <!-- Interactive Game Suggestion Modal -->
     <div id="suggest-modal" class="modal-backdrop">
         <div class="modal-box">
-            <h3 class="modal-title">💡 Pitch a Game to Krazio Games</h3>
-            <p style="color: var(--text-secondary); font-size: 0.88rem;">What kind of hilarious or addictive game should we build next?</p>
+            <h3 class="modal-title">💡 Pitch a Game to Krazy Fuse</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">What kind of hilarious or addictive game should we build next?</p>
 
             <textarea id="idea-input" class="modal-input" rows="4" placeholder="e.g. A game where you play as an overly aggressive barista fighting off caffeinated zombies..."></textarea>
 
-            <div id="stored-ideas-list" style="display: none; max-height: 180px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.25); border-radius: 12px; padding: 12px; margin-top: 10px; font-size: 0.88rem;"></div>
+            <div id="stored-ideas-list" style="display: none; max-height: 180px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-top: 10px; font-size: 0.88rem;"></div>
 
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px;">
-                <button id="btn-toggle-saved" class="nav-btn" style="font-size: 0.8rem;">📋 View Saved (<span id="saved-ideas-count">0</span>)</button>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px;">
+                <button id="btn-toggle-saved" class="nav-btn" style="font-size: 0.82rem;">📋 Saved (<span id="saved-ideas-count">0</span>)</button>
                 <button id="btn-close-modal" class="nav-btn">Cancel</button>
-                <button id="btn-submit-idea" class="btn-suggest" style="padding: 8px 20px;">Submit Concept</button>
+                <button id="btn-submit-idea" class="btn-arcade-cta" style="padding: 8px 20px; font-size: 1rem;">SUBMIT CONCEPT</button>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
     <footer class="footer">
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 12px;">
-            <img src="krazio-logo.svg" alt="krazio games" style="height: 32px; width: auto; opacity: 0.9;">
-            <span style="font-size: 0.85rem; color: #818cf8; letter-spacing: 0.5px; font-weight: 600;">Let’s Connect Experience</span>
+        <div class="footer-brand">
+            <div class="logo-container" style="justify-content: center; pointer-events: none;">
+                <img src="krazio-icon.svg" alt="Krazy Fuse Emblem" class="brand-icon-img" style="width: 32px; height: 32px;">
+                <div class="brand-title-wrap">
+                    <span class="brand-main-krazy" style="font-size: 1.35rem;">Krazy</span>
+                    <div class="brand-fuse-column">
+                        <span class="brand-main-fuse" style="font-size: 1.35rem;">Fuse</span>
+                        <span class="brand-sub-title" style="font-size: 0.58rem;">live to play</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p>© 2026 krazio games • Wild, Addictive Indie Web Games • More games dropping regularly!</p>
+        <p class="footer-desc">© 2026 Krazy Fuse • Fast, Playful & Chaotic Web Arcade • New games dropping regularly!</p>
     </footer>
 
     <!-- Portal Scripts -->

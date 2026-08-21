@@ -665,9 +665,19 @@ canvas#gameCanvas {
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.shop-buy-btn:hover:not(:disabled) {
+.shop-buy-btn:hover:not(:disabled):not(.bought) {
     transform: scale(1.05);
     box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+}
+
+.shop-buy-btn.bought {
+    background: #334155 !important;
+    color: #94a3b8 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+    cursor: default !important;
+    transform: none !important;
+    opacity: 0.75;
 }
 
 .shop-buy-btn:disabled {

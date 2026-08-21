@@ -99,6 +99,7 @@ class CaveGravityRunner {
             runCycle: 0, // Leg animation cycle
             scarfPoints: [], // Scarf physics trail
             shield: false,
+            invulnerableTimer: 0,
             magnetTimer: 0,
             slowMoTimer: 0,
             headlampAngle: 0.15
@@ -183,6 +184,11 @@ class CaveGravityRunner {
     }
 
     startGame() {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+            const el = document.documentElement;
+            const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+            if (req) req.call(el).catch(() => {});
+        }
         window.gravityAudio.init();
         window.gravityAudio.startBGM();
 
@@ -202,6 +208,7 @@ class CaveGravityRunner {
         this.player.gravDir = 1;
         this.player.isGrounded = true;
         this.player.shield = false;
+        this.player.invulnerableTimer = 0;
         this.player.magnetTimer = 0;
         this.player.slowMoTimer = 0;
         this.player.angle = 0;
@@ -241,12 +248,15 @@ class CaveGravityRunner {
     }
 
     die(reason) {
+        if (this.player.invulnerableTimer > 0) return;
+
         if (this.player.shield) {
-            // Crystal Shield absorbs fatal rock crash
+            // Chrono/Crystal Shield absorbs fatal rock crash
             this.player.shield = false;
+            this.player.invulnerableTimer = 60;
             this.shakeTimer = 20;
             this.createRockExplosion(this.player.x, this.player.y, '#38bdf8');
-            this.addFloatingText('CRYSTAL SHIELD BROKEN!', this.player.x, this.player.y - 20, '#38bdf8');
+            this.addFloatingText('CHRONO SHIELD SAVED YOU! 🛡️', this.player.x, this.player.y - 25, '#38bdf8', 18);
             window.gravityAudio.playShieldBreak();
             this.updatePowerupHUD();
             return;
@@ -369,7 +379,9 @@ class CaveGravityRunner {
         }
 
         // Timers
+        if (this.player.invulnerableTimer > 0) this.player.invulnerableTimer--;
         if (this.player.magnetTimer > 0) this.player.magnetTimer--;
+        if (this.player.slowMoTimer > 0) this.player.slowMoTimer--;
 
         // Spawn Procedural Cave Obstacles (Ramps up with speed and time)
         this.spawnTimer--;
@@ -379,7 +391,7 @@ class CaveGravityRunner {
             this.spawnTimer = Math.max(34, Math.floor(82 - timeReduction - this.level * 5));
         }
 
-        // Update Obstacles (Stalagmites, Stalactites, Falling Boulders, Crystal Traps)
+        // Update Obstacles (Stalagmites, Stalactites, Falling Boulders, Lasers, Magma Jets, Saws, Crushers)
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
             const obs = this.obstacles[i];
             obs.x -= this.speed;
@@ -401,9 +413,42 @@ class CaveGravityRunner {
                 }
             }
 
-            // Pendulum Swing Animation
-            if (obs.type === 'PENDULUM') {
-                obs.swingAngle = Math.sin(Date.now() * 0.003) * 0.7;
+            // Rotating Saw Blade Spin
+            if (obs.type === 'ROTATING_SAW') {
+                obs.rot = (obs.rot || 0) + 0.14;
+            }
+
+            // Magma Jet Flame Pulse
+            if (obs.type === 'MAGMA_JET') {
+                obs.pulsePhase = (obs.pulsePhase || 0) + 0.08;
+                if (Math.random() < 0.3) {
+                    this.particles.push({
+                        x: obs.x + obs.w / 2 + (Math.random() - 0.5) * 16,
+                        y: obs.dir === 'up' ? obs.y : obs.y + obs.h,
+                        vx: (Math.random() - 0.5) * 3,
+                        vy: obs.dir === 'up' ? -Math.random() * 4 - 2 : Math.random() * 4 + 2,
+                        life: 20,
+                        color: Math.random() > 0.5 ? '#f97316' : '#ef4444',
+                        size: Math.random() * 3 + 2
+                    });
+                }
+            }
+
+            // Runic Crusher Compression Cycle
+            if (obs.type === 'RUNIC_CRUSHER') {
+                obs.phase = (obs.phase || 0) + 0.04;
+                const shift = Math.sin(obs.phase) * 18;
+                if (obs.dir === 'top') {
+                    obs.h = obs.baseH + shift;
+                } else {
+                    obs.h = obs.baseH + shift;
+                    obs.y = this.floorY - obs.h;
+                }
+            }
+
+            // Laser Barrier Spark Arcs
+            if (obs.type === 'LASER_BARRIER') {
+                obs.laserTimer = (obs.laserTimer || 0) + 1;
             }
 
             // Remove off-screen obstacles
@@ -412,10 +457,26 @@ class CaveGravityRunner {
                 continue;
             }
 
-            // Check Player Collision with Spikes
+            // Check Player Collision with Spikes / Obstacles
             if (this.checkCollision(this.player, obs)) {
-                this.die('Obstacle Collision');
-                return;
+                if (this.player.invulnerableTimer > 0) {
+                    continue;
+                }
+                if (this.player.shield) {
+                    // Chrono Shield absorbs hit, shatters the obstacle, grants 60 frames of invulnerability!
+                    this.player.shield = false;
+                    this.player.invulnerableTimer = 60;
+                    this.shakeTimer = 20;
+                    this.createRockExplosion(obs.x + obs.w / 2, obs.y + obs.h / 2, '#38bdf8');
+                    this.addFloatingText('CHRONO SHIELD SAVED YOU! 🛡️', this.player.x, this.player.y - 25, '#38bdf8', 18);
+                    window.gravityAudio.playShieldBreak();
+                    this.updatePowerupHUD();
+                    this.obstacles.splice(i, 1);
+                    continue;
+                } else {
+                    this.die('Obstacle Collision');
+                    return;
+                }
             }
         }
 
@@ -446,7 +507,7 @@ class CaveGravityRunner {
                     window.gravityAudio.playCoin();
                 } else if (item.type === 'SHIELD') {
                     this.player.shield = true;
-                    this.addFloatingText('CRYSTAL SHIELD! 🛡️', item.x, item.y - 20, '#38bdf8', 18);
+                    this.addFloatingText('CHRONO SHIELD! 🛡️', item.x, item.y - 20, '#38bdf8', 18);
                     window.gravityAudio.playShield();
                     this.updatePowerupHUD();
                 } else if (item.type === 'MAGNET') {
@@ -493,41 +554,96 @@ class CaveGravityRunner {
     spawnProceduralCavePattern() {
         const rand = Math.random();
         const startX = CANVAS_WIDTH + 40;
+        const lvl = this.level;
 
-        if (rand < 0.35) {
-            // Pattern 1: Floor Stalagmite spike -> Gems safely placed on CEILING path
+        // Higher levels unlock more intense & varied hazard patterns!
+        if (lvl >= 5 && rand < 0.22) {
+            // Level 5+ Hazard: Dual Ancient Runic Compressors
+            this.obstacles.push({
+                type: 'RUNIC_CRUSHER',
+                x: startX,
+                y: this.ceilY,
+                w: 48,
+                h: 60,
+                baseH: 60,
+                dir: 'top',
+                phase: 0
+            });
+            this.obstacles.push({
+                type: 'RUNIC_CRUSHER',
+                x: startX + 170,
+                y: this.floorY - 60,
+                w: 48,
+                h: 60,
+                baseH: 60,
+                dir: 'bottom',
+                phase: Math.PI
+            });
+            this.spawnGemArc(startX + 80, (this.floorY + this.ceilY) / 2, 3);
+            this.spawnRelic(startX + 220, this.floorY - 30);
+        } else if (lvl >= 4 && rand < 0.38) {
+            // Level 4+ Hazard: Rotating Energy Saw Blade in Mid-Cavern
+            this.obstacles.push({
+                type: 'ROTATING_SAW',
+                x: startX,
+                y: (this.floorY + this.ceilY) / 2 - 26,
+                w: 52,
+                h: 52,
+                rot: 0
+            });
+            // Safe running paths exist on ceiling or floor
+            if (Math.random() < 0.5) {
+                this.spawnGemArc(startX - 20, this.ceilY + 8, 3);
+            } else {
+                this.spawnGemArc(startX - 20, this.floorY - 30, 3);
+            }
+        } else if (lvl >= 3 && rand < 0.52) {
+            // Level 3+ Hazard: Erupting Magma Flame Jet
+            const isFloor = Math.random() < 0.5;
+            this.obstacles.push({
+                type: 'MAGMA_JET',
+                x: startX,
+                y: isFloor ? this.floorY - 65 : this.ceilY,
+                w: 38,
+                h: 65,
+                dir: isFloor ? 'up' : 'down'
+            });
+            // Gems on safe opposite surface
+            this.spawnGemArc(startX, isFloor ? this.ceilY + 8 : this.floorY - 30, 3);
+        } else if (lvl >= 2 && rand < 0.68) {
+            // Level 2+ Hazard: Pulsing Electric Laser Barrier with flip gap
+            const isFloorBeam = Math.random() < 0.5;
+            this.obstacles.push({
+                type: 'LASER_BARRIER',
+                x: startX,
+                y: isFloorBeam ? this.floorY - 95 : this.ceilY,
+                w: 32,
+                h: 95,
+                laserTimer: 0,
+                side: isFloorBeam ? 'floor' : 'ceiling'
+            });
+            this.spawnGemArc(startX, isFloorBeam ? this.ceilY + 8 : this.floorY - 30, 3);
+            if (Math.random() < 0.35) {
+                this.spawnRelic(startX + 90, (this.floorY + this.ceilY) / 2);
+            }
+        } else if (rand < 0.82) {
+            // Standard Pattern 1: Stalagmites or Stalactites
+            const isCeil = Math.random() < 0.5;
             const count = Math.random() < 0.5 ? 1 : 2;
             for (let i = 0; i < count; i++) {
                 const height = Math.floor(Math.random() * 25) + 40;
                 this.obstacles.push({
-                    type: 'STALAGMITE',
+                    type: isCeil ? 'STALACTITE' : 'STALAGMITE',
                     x: startX + i * 36,
-                    y: this.floorY - height,
+                    y: isCeil ? this.ceilY : this.floorY - height,
                     w: 36,
                     h: height,
                     shapeSeed: Math.random()
                 });
             }
-            // Gems appear along the safe ceiling running surface (Player flips to ceiling to collect)
-            this.spawnGemArc(startX, this.ceilY + 6, 3);
-        } else if (rand < 0.65) {
-            // Pattern 2: Ceiling Stalactite spike -> Gems safely placed on FLOOR path
-            const count = Math.random() < 0.5 ? 1 : 2;
-            for (let i = 0; i < count; i++) {
-                const height = Math.floor(Math.random() * 25) + 40;
-                this.obstacles.push({
-                    type: 'STALACTITE',
-                    x: startX + i * 36,
-                    y: this.ceilY,
-                    w: 36,
-                    h: height,
-                    shapeSeed: Math.random()
-                });
-            }
-            // Gems appear along the safe floor running surface (Player runs on floor to collect)
-            this.spawnGemArc(startX, this.floorY - 32, 3);
-        } else if (rand < 0.85) {
-            // Pattern 3: Dual Staggered Pinch (Floor spike at start, ceiling spike 150px later)
+            this.spawnGemArc(startX, isCeil ? this.floorY - 32 : this.ceilY + 8, 3);
+        } else {
+            // Standard Pattern 2: Dual Staggered Pinch
             this.obstacles.push({
                 type: 'STALAGMITE',
                 x: startX,
@@ -544,22 +660,8 @@ class CaveGravityRunner {
                 h: 50,
                 shapeSeed: 0.8
             });
-            // Relic / Gems spawn in the safe mid-air arch between flips
             this.spawnRelic(startX + 80, (this.floorY + this.ceilY) / 2);
             this.spawnGemArc(startX + 40, (this.floorY + this.ceilY) / 2 - 12, 2);
-        } else {
-            // Pattern 4: Falling Stalactite Rock with safe central crystal pathway
-            this.obstacles.push({
-                type: 'FALLING_STALACTITE',
-                x: startX,
-                y: this.ceilY,
-                w: 32,
-                h: 50,
-                vy: 0,
-                falling: false,
-                shapeSeed: 0.5
-            });
-            this.spawnGemArc(startX - 60, this.floorY - 32, 3);
         }
     }
 
@@ -687,7 +789,7 @@ class CaveGravityRunner {
         const strip = document.getElementById('powerup-status-strip');
         strip.innerHTML = '';
         if (this.player.shield) {
-            strip.innerHTML += `<span class="status-badge">🛡️ CRYSTAL SHIELD</span>`;
+            strip.innerHTML += `<span class="status-badge" style="border-color: #38bdf8; color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);">🛡️ CHRONO SHIELD</span>`;
         }
         if (this.player.magnetTimer > 0) {
             strip.innerHTML += `<span class="status-badge" style="border-color: #ffd166; color: #ffd166;">🧲 RELIC MAGNET</span>`;
@@ -917,6 +1019,130 @@ class CaveGravityRunner {
             this.ctx.moveTo(obs.x + obs.w / 2, obs.y + obs.h);
             this.ctx.lineTo(obs.x + obs.w / 2, obs.y);
             this.ctx.stroke();
+        } else if (obs.type === 'LASER_BARRIER') {
+            // High-voltage laser emitter posts & pulsing energy beam
+            const isFloor = obs.side === 'floor';
+            const nodeY = isFloor ? this.floorY - 14 : this.ceilY;
+
+            // Emitter Post Node
+            this.ctx.fillStyle = '#0f172a';
+            this.ctx.fillRect(obs.x + 4, nodeY, obs.w - 8, 14);
+            this.ctx.strokeStyle = '#38bdf8';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(obs.x + 4, nodeY, obs.w - 8, 14);
+
+            // Pulsing Laser Energy Beam
+            this.ctx.shadowColor = '#00f0ff';
+            this.ctx.shadowBlur = 18;
+            this.ctx.fillStyle = '#38bdf8';
+            this.ctx.fillRect(obs.x + obs.w / 2 - 4, obs.y, 8, obs.h);
+
+            // Inner Core Laser Wire
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillRect(obs.x + obs.w / 2 - 1.5, obs.y, 3, obs.h);
+
+            // Top/Bottom Hazard Pips
+            this.ctx.fillStyle = '#fde047';
+            this.ctx.beginPath();
+            this.ctx.arc(obs.x + obs.w / 2, isFloor ? nodeY + 7 : nodeY + 7, 4, 0, Math.PI * 2);
+            this.ctx.fill();
+        } else if (obs.type === 'MAGMA_JET') {
+            // Volcanic Magma Jet Erupter
+            const isUp = obs.dir === 'up';
+            const baseY = isUp ? this.floorY - 12 : this.ceilY;
+
+            // Volcanic vent nozzle
+            this.ctx.fillStyle = '#262626';
+            this.ctx.fillRect(obs.x + 2, baseY, obs.w - 4, 12);
+            this.ctx.strokeStyle = '#f97316';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(obs.x + 2, baseY, obs.w - 4, 12);
+
+            // Erupting Magma Flame Jet
+            this.ctx.shadowColor = '#ea580c';
+            this.ctx.shadowBlur = 22;
+            const jetGrad = this.ctx.createLinearGradient(obs.x, obs.y, obs.x, obs.y + obs.h);
+            if (isUp) {
+                jetGrad.addColorStop(0, '#fef08a');
+                jetGrad.addColorStop(0.3, '#f97316');
+                jetGrad.addColorStop(1, '#dc2626');
+            } else {
+                jetGrad.addColorStop(0, '#dc2626');
+                jetGrad.addColorStop(0.7, '#f97316');
+                jetGrad.addColorStop(1, '#fef08a');
+            }
+            this.ctx.fillStyle = jetGrad;
+
+            // Jagged flame tongue shape
+            this.ctx.beginPath();
+            if (isUp) {
+                this.ctx.moveTo(obs.x + 4, obs.y + obs.h);
+                this.ctx.lineTo(obs.x + obs.w / 2, obs.y);
+                this.ctx.lineTo(obs.x + obs.w - 4, obs.y + obs.h);
+            } else {
+                this.ctx.moveTo(obs.x + 4, obs.y);
+                this.ctx.lineTo(obs.x + obs.w / 2, obs.y + obs.h);
+                this.ctx.lineTo(obs.x + obs.w - 4, obs.y);
+            }
+            this.ctx.closePath();
+            this.ctx.fill();
+        } else if (obs.type === 'ROTATING_SAW') {
+            // Spinning Circular Energy Saw Blade
+            const cx = obs.x + obs.w / 2;
+            const cy = obs.y + obs.h / 2;
+            const radius = obs.w / 2;
+
+            this.ctx.save();
+            this.ctx.translate(cx, cy);
+            this.ctx.rotate(obs.rot || 0);
+
+            this.ctx.shadowColor = '#f43f5e';
+            this.ctx.shadowBlur = 18;
+
+            // Saw Blade Teeth
+            this.ctx.fillStyle = '#475569';
+            this.ctx.strokeStyle = '#ef4444';
+            this.ctx.lineWidth = 2;
+            const teeth = 8;
+            this.ctx.beginPath();
+            for (let t = 0; t < teeth; t++) {
+                const a1 = (t / teeth) * Math.PI * 2;
+                const a2 = ((t + 0.5) / teeth) * Math.PI * 2;
+                this.ctx.lineTo(Math.cos(a1) * radius, Math.sin(a1) * radius);
+                this.ctx.lineTo(Math.cos(a2) * (radius - 8), Math.sin(a2) * (radius - 8));
+            }
+            this.ctx.closePath();
+            this.ctx.fill();
+            this.ctx.stroke();
+
+            // Inner Core
+            this.ctx.fillStyle = '#f43f5e';
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, 9, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, 4, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            this.ctx.restore();
+        } else if (obs.type === 'RUNIC_CRUSHER') {
+            // Massive Ancient Runic Crusher Block
+            this.ctx.shadowColor = '#c084fc';
+            this.ctx.shadowBlur = 16;
+
+            // Carved Slate Block
+            this.ctx.fillStyle = '#1e1b4b';
+            this.ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+            this.ctx.strokeStyle = '#a855f7';
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+
+            // Glowing Arcane Rune Emblem
+            this.ctx.fillStyle = '#e879f9';
+            this.ctx.font = 'bold 16px sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('ᚱ', obs.x + obs.w / 2, obs.y + obs.h / 2 + 6);
         } else if (obs.type === 'PENDULUM') {
             // Hanging chain & heavy glowing rune crystal
             this.ctx.strokeStyle = '#64748b';
@@ -939,6 +1165,12 @@ class CaveGravityRunner {
     // 2D ANIMATED CHARACTER: Spelunker Cave Runner with Headlamp Beam & Running Legs
     drawCharacter(theme) {
         const p = this.player;
+
+        // Invulnerability Flash (Flicker when recovering from shield break)
+        if (p.invulnerableTimer > 0 && Math.floor(p.invulnerableTimer / 4) % 2 === 0) {
+            return;
+        }
+
         this.ctx.save();
         this.ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
         this.ctx.rotate(p.angle);
@@ -966,15 +1198,24 @@ class CaveGravityRunner {
         this.ctx.closePath();
         this.ctx.fill();
 
-        // 2. Crystal Shield Barrier
+        // 2. Chrono Shield Barrier (Multi-layer Pulsing Cyber Energy Shield)
         if (p.shield) {
-            this.ctx.strokeStyle = '#38bdf8';
-            this.ctx.shadowColor = '#38bdf8';
-            this.ctx.shadowBlur = 18;
-            this.ctx.lineWidth = 2.5;
+            const pulse = 0.88 + Math.sin(Date.now() * 0.008) * 0.12;
+            this.ctx.save();
+            this.ctx.strokeStyle = '#00f0ff';
+            this.ctx.shadowColor = '#00f0ff';
+            this.ctx.shadowBlur = 20 * pulse;
+            this.ctx.lineWidth = 3;
             this.ctx.beginPath();
-            this.ctx.arc(cx, cy, 30, 0, Math.PI * 2);
+            this.ctx.arc(cx, cy, 32 * pulse, 0, Math.PI * 2);
             this.ctx.stroke();
+
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            this.ctx.lineWidth = 1.5;
+            this.ctx.beginPath();
+            this.ctx.arc(cx, cy, 26 * pulse, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.restore();
         }
 
         // 3. Flowing Scarf / Cloak Trail
@@ -1050,4 +1291,20 @@ class CaveGravityRunner {
 
 window.addEventListener('DOMContentLoaded', () => {
     window.game = new CaveGravityRunner();
+
+    const portalBackBtn = document.getElementById('krazio-floating-back');
+    if (portalBackBtn) {
+        portalBackBtn.addEventListener('click', (e) => {
+            if (window.game && (window.game.gameState === STATE.PLAYING || window.game.gameState === STATE.PAUSED || window.game.gameState === STATE.GAMEOVER)) {
+                e.preventDefault();
+                window.game.gameState = STATE.MENU;
+                if (window.gravityAudio) window.gravityAudio.stopBGM();
+                document.getElementById('pause-screen').classList.add('hidden');
+                document.getElementById('gameover-screen').classList.add('hidden');
+                document.getElementById('start-screen').classList.remove('hidden');
+            } else {
+                window.location.href = '../index.html';
+            }
+        });
+    }
 });

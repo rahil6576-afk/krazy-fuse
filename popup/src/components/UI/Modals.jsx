@@ -30,6 +30,11 @@ export function StartScreenModal({ onStart, onOpenScoreboard, onOpenThemes, play
   };
 
   const handleStart = () => {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+      const el = document.documentElement;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if (req) req.call(el).catch(() => {});
+    }
     const trimmedName = name.trim() || 'Player';
     try {
       localStorage.setItem('float_player_name', trimmedName);

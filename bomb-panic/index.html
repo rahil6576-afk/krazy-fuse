@@ -3,11 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bomb Panic: Hot Potato Arena 💣💥 — Krazio Games</title>
+    <base href="/bomb-panic/">
+    <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Fredoka:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+      #krazio-floating-back {
+        position: fixed;
+        top: 14px;
+        left: 16px;
+        z-index: 99999;
+        width: 40px;
+        height: 40px;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f8fafc;
+        border-radius: 50%;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      #krazio-floating-back:hover {
+        background: rgba(249, 115, 22, 0.9);
+        border-color: #f97316;
+        color: #ffffff;
+        transform: translateX(-3px) scale(1.08);
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
+      }
+    </style>
     <style>
         :root {
             --bg-dark: #0b0f19;
@@ -112,9 +143,21 @@
             animation: pulsePill 1.2s infinite ease-in-out;
         }
 
+        .fuse-pill.danger {
+            border-color: #ff0055;
+            background: rgba(255, 0, 85, 0.2);
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.6);
+            animation: fastPulse 0.3s infinite alternate;
+        }
+
         @keyframes pulsePill {
             0%, 100% { border-color: rgba(239, 68, 68, 0.5); transform: scale(1); }
             50% { border-color: rgba(255, 71, 87, 1); transform: scale(1.03); }
+        }
+
+        @keyframes fastPulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.08); }
         }
 
         .fuse-icon {
@@ -164,7 +207,7 @@
             bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fff;
             padding: 8px 24px;
@@ -177,6 +220,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
 
         .action-banner span {
@@ -255,7 +299,7 @@
         .modal-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(8, 12, 22, 0.85);
+            background: rgba(8, 12, 22, 0.88);
             backdrop-filter: blur(14px);
             display: flex;
             align-items: center;
@@ -265,6 +309,7 @@
             pointer-events: none;
             transition: opacity 0.25s ease;
             padding: 20px;
+            overflow-y: auto;
         }
 
         .modal-overlay.active {
@@ -278,53 +323,186 @@
             border-radius: 24px;
             padding: 28px;
             width: 100%;
-            max-width: 440px;
+            max-width: 520px;
             text-align: center;
             color: #fff;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
         }
 
         .modal-title {
-            font-size: 2.2rem;
+            font-size: 2.3rem;
             font-weight: 900;
             color: #ff4757;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             text-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
         }
 
         .modal-sub {
             font-size: 0.95rem;
             color: #94a3b8;
-            margin-bottom: 22px;
+            margin-bottom: 12px;
         }
 
-        .mode-list {
+        /* How to Play Card */
+        .how-to-play-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            text-align: left;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .htp-title {
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: #fbc531;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 22px;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .htp-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .htp-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 6px 8px;
+            border-radius: 8px;
+        }
+
+        .htp-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .htp-desc strong {
+            display: block;
+            font-size: 0.78rem;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .htp-desc small {
+            display: block;
+            font-size: 0.72rem;
+            color: #94a3b8;
+            line-height: 1.25;
+        }
+
+        .htp-desc b {
+            color: #38bdf8;
+        }
+
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px 0 6px 0;
+            text-align: left;
+        }
+
+        /* Mode Selection Grid */
+        .mode-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
         }
 
         .btn-mode {
             background: rgba(255, 255, 255, 0.08);
             border: 2px solid rgba(255, 255, 255, 0.15);
-            border-radius: 16px;
-            padding: 14px 18px;
+            border-radius: 14px;
+            padding: 12px;
             color: #fff;
             font-family: inherit;
-            font-size: 1.15rem;
+            font-size: 0.95rem;
             font-weight: 800;
             cursor: pointer;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            gap: 4px;
             transition: all 0.2s ease;
         }
 
         .btn-mode.active {
             background: #ff4757;
             border-color: #ff6b81;
-            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        }
+
+        /* Arena Theme Pickers */
+        .arena-list {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .btn-arena {
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 8px 4px;
+            color: #cbd5e1;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-arena.active {
+            background: #00d2d3;
+            color: #0b0f19;
+            border-color: #48dbfb;
+            box-shadow: 0 4px 15px rgba(0, 210, 211, 0.4);
+        }
+
+        /* Avatar Picker */
+        .avatar-list {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .avatar-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.2s ease;
+        }
+
+        .avatar-btn.active {
+            border-color: #fbc531;
+            background: rgba(251, 197, 49, 0.25);
+            transform: scale(1.15);
+            box-shadow: 0 0 15px rgba(251, 197, 49, 0.5);
         }
 
         .btn-start {
@@ -364,17 +542,23 @@
 </head>
 <body>
 
+    <!-- Simple Backward Arrow Button -->
+    <button type="button" id="krazio-floating-back" style="position: fixed; top: 16px; left: 16px; z-index: 9999; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); border: 1.5px solid rgba(255, 255, 255, 0.18); color: #ffffff; cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);" title="Back" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </button>
+
     <div id="gameWrapper">
         <!-- Top HUD -->
         <header class="top-hud">
             <div class="hud-left">
-                <a href="../index.html" class="btn-hud" title="Back to Games">‹</a>
-                <button class="btn-hud" id="btnSettings" title="Lobby / Modes">⚙️</button>
+                <button class="btn-hud" id="btnSettings" title="Lobby / Settings">⚙️</button>
             </div>
 
             <!-- Fuse Pill Indicator -->
             <div class="fuse-pill" id="fusePill">
-                <span class="fuse-icon">💣</span>
+                <span class="fuse-icon" id="fuseIcon">💣</span>
                 <span class="fuse-timer-text" id="fuseTimer">10.0s</span>
             </div>
 
@@ -400,7 +584,7 @@
 
         <!-- Action Hint -->
         <div class="action-banner">
-            🎯 <span>WASD / ARROWS:</span> Move &nbsp;|&nbsp; <span>SPACE / CLICK:</span> Throw Bomb!
+            🎯 <span>WASD / ARROWS:</span> Move &nbsp;|&nbsp; <span>SPACE / CLICK:</span> Throw Bomb! &nbsp;|&nbsp; <span>ITEMS:</span> ⚡ 🛡️ ❄️ 🍌 🌀
         </div>
 
         <!-- Flash Effect -->
@@ -408,36 +592,120 @@
 
         <!-- Game Lobby / Game Over Modal -->
         <div class="modal-overlay active" id="modalOverlay">
-            <div class="modal-box">
+                <div class="modal-box" style="max-width: 560px;">
                 <h2 class="modal-title" id="modalTitle">💣 BOMB PANIC</h2>
-                <p class="modal-sub" id="modalSub">PASS → RUN → THROW → SURVIVE</p>
+                <p class="modal-sub" id="modalSub">PASS → DODGE → THROW → SURVIVE</p>
 
+                <!-- Tutorial & Explanation Guide Card -->
+                <div class="how-to-play-card">
+                    <div class="htp-title">📖 HOW TO PLAY</div>
+                    <div class="htp-grid">
+                        <div class="htp-item">
+                            <span class="htp-icon">🏃</span>
+                            <div class="htp-desc">
+                                <strong>1. MOVE & FLEE</strong>
+                                <small>Use <b>WASD</b> or <b>Arrow Keys</b> (or touch joystick) to steer clear of the bomb holder.</small>
+                            </div>
+                        </div>
+                        <div class="htp-item">
+                            <span class="htp-icon">💣</span>
+                            <div class="htp-desc">
+                                <strong>2. PASS OR THROW</strong>
+                                <small>If you have the bomb, tag someone or press <b>SPACE / CLICK</b> to throw it before time hits 0.0s!</small>
+                            </div>
+                        </div>
+                        <div class="htp-item">
+                            <span class="htp-icon">✨</span>
+                            <div class="htp-desc">
+                                <strong>3. GRAB POWER-UPS</strong>
+                                <small>Collect <b>⚡ Speed</b>, <b>🛡️ Shield</b>, <b>❄️ Freeze</b>, <b>🍌 Banana</b> & <b>🌀 Portals</b>.</small>
+                            </div>
+                        </div>
+                        <div class="htp-item">
+                            <span class="htp-icon">🏆</span>
+                            <div class="htp-desc">
+                                <strong>4. SURVIVE ROUNDS</strong>
+                                <small>Each explosion eliminates one player. Be the last survivor standing to win!</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">🎮 Choose Mode</div>
                 <div class="mode-list">
                     <button class="btn-mode active" data-mode="solo">
-                        <span>🤖 Solo vs 4 Smart Bots</span>
-                        <span>›</span>
+                        <span>🤖 Classic Solo</span>
+                        <small style="font-size: 0.75rem; opacity: 0.8;">vs 4 Smart Bots (20s Rounds)</small>
                     </button>
                     <button class="btn-mode" data-mode="chaos">
-                        <span>🔥 8-Player Mega Chaos</span>
-                        <span>›</span>
+                        <span>🔥 Mega Chaos</span>
+                        <small style="font-size: 0.75rem; opacity: 0.8;">8 Players + Dual Bombs</small>
+                    </button>
+                    <button class="btn-mode" data-mode="suddendeath">
+                        <span>⏱️ Sudden Death</span>
+                        <small style="font-size: 0.75rem; opacity: 0.8;">Rapid 10s Hot Potato</small>
                     </button>
                     <button class="btn-mode" data-mode="local">
-                        <span>👥 Local 2-Player Split</span>
-                        <span>›</span>
+                        <span>👥 Local 2-Player</span>
+                        <small style="font-size: 0.75rem; opacity: 0.8;">P1 WASD vs P2 Arrows</small>
                     </button>
+                </div>
+
+                <div class="section-label">🏟️ Arena Theme</div>
+                <div class="arena-list">
+                    <button class="btn-arena active" data-arena="cyber">⚡ Cyber</button>
+                    <button class="btn-arena" data-arena="volcano">🌋 Volcano</button>
+                    <button class="btn-arena" data-arena="pirate">🏴‍☠️ Pirate</button>
+                    <button class="btn-arena" data-arena="dungeon">🏰 Dungeon</button>
+                </div>
+
+                <div class="section-label">😎 Pick Your Avatar</div>
+                <div class="avatar-list">
+                    <button class="avatar-btn active" data-emoji="😎">😎</button>
+                    <button class="avatar-btn" data-emoji="🤖">🤖</button>
+                    <button class="avatar-btn" data-emoji="🐱">🐱</button>
+                    <button class="avatar-btn" data-emoji="😈">😈</button>
+                    <button class="avatar-btn" data-emoji="🦊">🦊</button>
+                    <button class="avatar-btn" data-emoji="👽">👽</button>
+                    <button class="avatar-btn" data-emoji="👑">👑</button>
+                    <button class="avatar-btn" data-emoji="💀">💀</button>
                 </div>
 
                 <button class="btn-start" id="btnStartGame">ENTER ARENA</button>
             </div>
         </div>
+
+        <!-- Universal Pause Modal Overlay -->
+        <div class="modal-overlay" id="pauseOverlay">
+            <div class="modal-box" style="max-width: 440px;">
+                <div style="display: inline-block; border: 2.5px solid #38bdf8; color: #38bdf8; font-weight: 900; font-size: 1.1rem; padding: 4px 16px; border-radius: 8px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;">⏸️ PAUSED</div>
+                <h2 class="modal-title" style="color: #fff; font-size: 1.8rem; margin-bottom: 6px;">Game Paused</h2>
+                <p class="modal-sub" style="margin-bottom: 20px;">Taking a quick tactical breather...</p>
+
+                <div style="display: flex; flex-direction: column; gap: 12px; max-width: 280px; margin: 0 auto; width: 100%;">
+                    <button class="btn-start" id="btnResumeGame" style="padding: 12px 20px; font-size: 1.1rem;">
+                        <span>▶️ RESUME (ESC)</span>
+                    </button>
+                    <button class="btn-mode" id="btnPauseRestart" style="justify-content: center; width: 100%; font-size: 0.95rem; padding: 12px 20px; text-align: center;">
+                        <span>🔄 RESTART MATCH</span>
+                    </button>
+                    <button class="btn-mode" id="btnPauseLobby" style="justify-content: center; width: 100%; font-size: 0.95rem; padding: 12px 20px; text-align: center;">
+                        <span>🏠 LOBBY & SETTINGS</span>
+                    </button>
+                    <a href="../index.html" class="btn-mode" style="justify-content: center; width: 100%; font-size: 0.95rem; padding: 12px 20px; text-align: center; text-decoration: none; border-color: rgba(239, 68, 68, 0.4); color: #fca5a5;">
+                        <span>🌐 KRAZIO PORTAL</span>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Complete Bomb Panic Physics, AI & Web Audio Synthesizer -->
+    <!-- Complete Enhanced Bomb Panic Physics, AI, Multiple Bombs & Web Audio -->
     <script>
     (function() {
         'use strict';
 
-        // 1. Web Audio Synthesizer
+        // 1. Procedural Web Audio Synthesizer
         class BombAudio {
             constructor() {
                 this.ctx = null;
@@ -463,13 +731,30 @@
                 const gain = this.ctx.createGain();
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(pitch, now);
-                osc.frequency.exponentialRampToValueAtTime(120, now + 0.06);
+                osc.frequency.exponentialRampToValueAtTime(120, now + 0.05);
                 gain.gain.setValueAtTime(0.35, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
                 osc.start(now);
-                osc.stop(now + 0.06);
+                osc.stop(now + 0.05);
+            }
+            playHeartbeat() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(80, now);
+                osc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
+                gain.gain.setValueAtTime(0.6, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.12);
             }
             playPass() {
                 if (this.muted) return;
@@ -479,8 +764,8 @@
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(220, now);
-                osc.frequency.exponentialRampToValueAtTime(540, now + 0.12);
+                osc.frequency.setValueAtTime(240, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.12);
                 gain.gain.setValueAtTime(0.5, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
                 osc.connect(gain);
@@ -497,8 +782,8 @@
                 const gain = this.ctx.createGain();
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(350, now);
-                osc.frequency.exponentialRampToValueAtTime(850, now + 0.15);
-                gain.gain.setValueAtTime(0.3, now);
+                osc.frequency.exponentialRampToValueAtTime(900, now + 0.15);
+                gain.gain.setValueAtTime(0.35, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
@@ -513,9 +798,9 @@
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(140, now);
-                osc.frequency.exponentialRampToValueAtTime(20, now + 0.6);
-                gain.gain.setValueAtTime(0.9, now);
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.exponentialRampToValueAtTime(15, now + 0.6);
+                gain.gain.setValueAtTime(0.95, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
@@ -531,14 +816,65 @@
                 const gain = this.ctx.createGain();
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(523.25, now);
-                osc.frequency.setValueAtTime(659.25, now + 0.08);
-                osc.frequency.setValueAtTime(783.99, now + 0.16);
+                osc.frequency.setValueAtTime(659.25, now + 0.07);
+                osc.frequency.setValueAtTime(783.99, now + 0.14);
                 gain.gain.setValueAtTime(0.4, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
                 osc.start(now);
-                osc.stop(now + 0.3);
+                osc.stop(now + 0.28);
+            }
+            playShieldDeflect() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+                gain.gain.setValueAtTime(0.6, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            }
+            playSlip() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(180, now + 0.25);
+                gain.gain.setValueAtTime(0.45, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+            playWarp() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(900, now + 0.2);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.2);
             }
         }
 
@@ -552,8 +888,8 @@
             { id: 'bot3', name: 'Luna', emoji: '🐱', color: '#a55eea', isPlayer: false },
             { id: 'bot4', name: 'Dash', emoji: '🦊', color: '#ffa502', isPlayer: false },
             { id: 'bot5', name: 'Vortex', emoji: '👽', color: '#00d2d3', isPlayer: false },
-            { id: 'bot6', name: 'Rex', emoji: '🦖', color: '#eb4d4b', isPlayer: false },
-            { id: 'bot7', name: 'Ghost', emoji: '👻', color: '#dfe4ea', isPlayer: false }
+            { id: 'bot6', name: 'King Pin', emoji: '👑', color: '#fbc531', isPlayer: false },
+            { id: 'bot7', name: 'Grim', emoji: '💀', color: '#dfe4ea', isPlayer: false }
         ];
 
         // 3. Player Character Entity
@@ -570,16 +906,22 @@
                 this.radius = 22;
                 this.vx = 0;
                 this.vy = 0;
-                this.speed = 3.6; // Accessible, smooth evasion speed
+                this.speed = 3.6;
                 this.facingAngle = 0;
                 this.alive = true;
                 this.hasBomb = false;
+                this.bombType = 'NORMAL'; // 'NORMAL' | 'TURBO' | 'CRYO'
+
+                // Buffs & Status Timers
                 this.speedBuffTimer = 0;
+                this.shieldTimer = 0;
                 this.frozenTimer = 0;
-                this.immunityTimer = 0; // Brief pass immunity
+                this.slipTimer = 0;
+                this.immunityTimer = 0;
                 this.animCycle = 0;
                 this.bark = '';
                 this.barkTimer = 0;
+                this.trails = [];
             }
 
             say(text) {
@@ -587,27 +929,55 @@
                 this.barkTimer = 90;
             }
 
-            update(arena, players, airborneBomb) {
+            update(arena, players, airborneBombs) {
                 if (!this.alive) return;
 
                 if (this.barkTimer > 0) this.barkTimer--;
                 if (this.immunityTimer > 0) this.immunityTimer--;
                 if (this.speedBuffTimer > 0) this.speedBuffTimer--;
+                if (this.shieldTimer > 0) this.shieldTimer--;
 
+                // Frozen in Ice
                 if (this.frozenTimer > 0) {
                     this.frozenTimer--;
                     return;
                 }
 
-                const currentSpeed = this.speed * (this.speedBuffTimer > 0 ? 1.35 : 1.0) * (this.hasBomb ? 1.05 : 1.0);
+                // Slipped on Banana
+                if (this.slipTimer > 0) {
+                    this.slipTimer--;
+                    this.facingAngle += 0.4;
+                    this.x += this.vx * 2;
+                    this.y += this.vy * 2;
+                    return;
+                }
 
-                // Movement execution
+                const speedMultiplier = (this.speedBuffTimer > 0 ? 1.4 : 1.0) * (this.hasBomb ? 1.06 : 1.0) * (this.bombType === 'CRYO' && this.hasBomb ? 0.85 : 1.0);
+                const currentSpeed = this.speed * speedMultiplier;
+
+                // Movement Execution
                 this.x += this.vx * currentSpeed;
                 this.y += this.vy * currentSpeed;
 
                 if (Math.hypot(this.vx, this.vy) > 0.1) {
                     this.facingAngle = Math.atan2(this.vy, this.vx);
                     this.animCycle += 0.25;
+
+                    // Add particle trails
+                    if (this.speedBuffTimer > 0 || this.hasBomb) {
+                        this.trails.push({
+                            x: this.x,
+                            y: this.y,
+                            life: 14,
+                            color: this.speedBuffTimer > 0 ? '#fbc531' : '#ff4757'
+                        });
+                    }
+                }
+
+                // Fade trails
+                for (let i = this.trails.length - 1; i >= 0; i--) {
+                    this.trails[i].life--;
+                    if (this.trails[i].life <= 0) this.trails.splice(i, 1);
                 }
 
                 // Arena Boundary Enclosure
@@ -622,21 +992,22 @@
                 if (this.y > maxY) { this.y = maxY; this.vy = 0; }
             }
 
-            aiBehavior(arena, players, airborneBomb) {
-                if (!this.alive || this.isPlayer || this.frozenTimer > 0) return;
+            aiBehavior(arena, players, airborneBombs, powerups) {
+                if (!this.alive || this.isPlayer || this.frozenTimer > 0 || this.slipTimer > 0) return;
 
-                const bombHolder = players.find(p => p.hasBomb && p.alive);
+                const bombHolders = players.filter(p => p.hasBomb && p.alive);
 
                 if (this.hasBomb) {
-                    // HAS BOMB: Chase nearest living victim to pass it!
+                    // HAS BOMB: Chase nearest vulnerable opponent without active shield
                     let nearest = null;
                     let minDist = Infinity;
 
                     players.forEach(p => {
                         if (p !== this && p.alive && p.immunityTimer <= 0) {
                             const d = Math.hypot(p.x - this.x, p.y - this.y);
-                            if (d < minDist) {
-                                minDist = d;
+                            const penalty = p.shieldTimer > 0 ? 300 : 0; // Avoid shielded players
+                            if (d + penalty < minDist) {
+                                minDist = d + penalty;
                                 nearest = p;
                             }
                         }
@@ -647,19 +1018,38 @@
                         this.vx = Math.cos(angle);
                         this.vy = Math.sin(angle);
 
-                        // Randomly throw if in range and line of sight
-                        if (minDist < 260 && Math.random() < 0.04) {
+                        // Throw bomb if in range and line of sight
+                        if (minDist < 280 && Math.random() < 0.04) {
                             return { action: 'throw', targetX: nearest.x, targetY: nearest.y };
                         }
                     }
                 } else {
-                    // FLEE: Run away from the bomb holder or airborne bomb!
-                    let dangerX = bombHolder ? bombHolder.x : arena.x + arena.w / 2;
-                    let dangerY = bombHolder ? bombHolder.y : arena.y + arena.h / 2;
+                    // FLEE: Run away from the nearest bomb holder or airborne bomb
+                    let dangerX = arena.x + arena.w / 2;
+                    let dangerY = arena.y + arena.h / 2;
+                    let minDist = Infinity;
 
-                    if (airborneBomb) {
-                        dangerX = airborneBomb.targetX;
-                        dangerY = airborneBomb.targetY;
+                    bombHolders.forEach(bh => {
+                        const d = Math.hypot(bh.x - this.x, bh.y - this.y);
+                        if (d < minDist) {
+                            minDist = d;
+                            dangerX = bh.x;
+                            dangerY = bh.y;
+                        }
+                    });
+
+                    if (airborneBombs && airborneBombs.length > 0) {
+                        dangerX = airborneBombs[0].targetX;
+                        dangerY = airborneBombs[0].targetY;
+                    }
+
+                    // Look for nearby powerups if safe
+                    if (minDist > 200 && powerups && powerups.length > 0) {
+                        const nearestPw = powerups[0];
+                        const angleToPw = Math.atan2(nearestPw.y - this.y, nearestPw.x - this.x);
+                        this.vx = Math.cos(angleToPw);
+                        this.vy = Math.sin(angleToPw);
+                        return null;
                     }
 
                     // Vector away from danger
@@ -693,27 +1083,31 @@
                 this.width = window.innerWidth;
                 this.height = window.innerHeight;
 
-                // Arena Shrinking State
                 this.arena = {
                     x: 100,
                     y: 80,
                     w: 800,
                     h: 600,
                     targetW: 800,
-                    targetH: 600
+                    targetH: 600,
+                    theme: 'cyber' // 'cyber' | 'volcano' | 'pirate' | 'dungeon'
                 };
 
                 this.players = [];
-                this.airborneBomb = null;
+                this.airborneBombs = [];
                 this.powerups = [];
+                this.traps = []; // Bananas, Portals
+                this.portals = [];
                 this.particles = [];
+                this.screenShake = 0;
 
-                // Fuse Timer (Random 8 - 14s)
                 this.fuseTime = 10.0;
                 this.maxFuse = 10.0;
                 this.lastTickTime = 0;
-                this.state = 'LOBBY'; // 'LOBBY' | 'PLAYING' | 'GAMEOVER'
-                this.mode = 'solo'; // 'solo' | 'chaos' | 'local'
+                this.lastHeartbeatTime = 0;
+                this.state = 'LOBBY';
+                this.mode = 'solo'; // 'solo' | 'chaos' | 'suddendeath' | 'local'
+                this.selectedAvatar = '😎';
 
                 this.keys = {};
                 this.mouse = { x: 0, y: 0 };
@@ -750,9 +1144,24 @@
 
                 window.addEventListener('keydown', (e) => {
                     this.keys[e.code] = true;
+
+                    if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+                        e.preventDefault();
+                        this.togglePause();
+                        return;
+                    }
+
                     if (e.code === 'Space' || e.code === 'KeyE') {
                         e.preventDefault();
-                        this.tryPlayerThrow();
+                        if (this.state === 'PAUSED') {
+                            this.togglePause();
+                        } else {
+                            this.tryPlayerThrow('p1');
+                        }
+                    }
+                    if (e.code === 'Enter' || e.code === 'Numpad0') {
+                        e.preventDefault();
+                        this.tryPlayerThrow('bot1'); // Player 2 in local mode
                     }
                 });
 
@@ -768,7 +1177,7 @@
                 this.canvas.addEventListener('pointerdown', (e) => {
                     audio.init();
                     if (this.state === 'PLAYING') {
-                        this.tryPlayerThrow(e.clientX, e.clientY);
+                        this.tryPlayerThrow('p1', e.clientX, e.clientY);
                     }
                 });
 
@@ -792,47 +1201,118 @@
                         const touch = e.touches[0];
                         const dx = touch.clientX - startX;
                         const dy = touch.clientY - startY;
-                        const dist = Math.min(45, Math.hypot(dx, dy));
+                        const dist = Math.hypot(dx, dy);
+                        const maxDist = 45;
+
+                        const clampedDist = Math.min(dist, maxDist);
                         const angle = Math.atan2(dy, dx);
+                        const kx = Math.cos(angle) * clampedDist;
+                        const ky = Math.sin(angle) * clampedDist;
 
-                        this.joystick.vx = Math.cos(angle) * (dist / 45);
-                        this.joystick.vy = Math.sin(angle) * (dist / 45);
-
-                        knob.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px)`;
+                        knob.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
+                        this.joystick.vx = kx / maxDist;
+                        this.joystick.vy = ky / maxDist;
                     });
 
-                    const resetJoystick = () => {
+                    const resetKnob = () => {
                         this.joystick.active = false;
                         this.joystick.vx = 0;
                         this.joystick.vy = 0;
-                        knob.style.transform = `translate(0, 0)`;
+                        knob.style.transform = 'translate(-50%, -50%)';
                     };
 
-                    zone.addEventListener('touchend', resetJoystick);
-                    zone.addEventListener('touchcancel', resetJoystick);
+                    zone.addEventListener('touchend', resetKnob);
+                    zone.addEventListener('touchcancel', resetKnob);
                 }
 
                 if (btnThrowMobile) {
                     btnThrowMobile.addEventListener('touchstart', (e) => {
                         e.preventDefault();
                         audio.init();
-                        this.tryPlayerThrow();
+                        this.tryPlayerThrow('p1');
                     });
+                }
+            }
+
+            togglePause() {
+                const pauseModal = document.getElementById('pauseOverlay');
+                if (this.state === 'PLAYING') {
+                    this.state = 'PAUSED';
+                    if (pauseModal) pauseModal.classList.add('active');
+                } else if (this.state === 'PAUSED') {
+                    this.state = 'PLAYING';
+                    if (pauseModal) pauseModal.classList.remove('active');
                 }
             }
 
             setupUI() {
                 const modal = document.getElementById('modalOverlay');
+                const pauseModal = document.getElementById('pauseOverlay');
                 const btnStart = document.getElementById('btnStartGame');
                 const btnSettings = document.getElementById('btnSettings');
                 const btnMute = document.getElementById('btnMute');
                 const modeBtns = document.querySelectorAll('.btn-mode');
+                const arenaBtns = document.querySelectorAll('.btn-arena');
+                const avatarBtns = document.querySelectorAll('.avatar-btn');
+
+                const btnResume = document.getElementById('btnResumeGame');
+                const btnPauseRestart = document.getElementById('btnPauseRestart');
+                const btnPauseLobby = document.getElementById('btnPauseLobby');
+
+                if (btnResume) {
+                    btnResume.addEventListener('click', () => {
+                        this.togglePause();
+                    });
+                }
+
+                if (btnPauseRestart) {
+                    btnPauseRestart.addEventListener('click', () => {
+                        if (pauseModal) pauseModal.classList.remove('active');
+                        this.startMatch();
+                    });
+                }
+
+                if (btnPauseLobby) {
+                    btnPauseLobby.addEventListener('click', () => {
+                        if (pauseModal) pauseModal.classList.remove('active');
+                        this.state = 'LOBBY';
+                        if (modal) modal.classList.add('active');
+                    });
+                }
+
+                const portalBackBtn = document.getElementById('krazio-floating-back');
+                if (portalBackBtn) {
+                    portalBackBtn.addEventListener('click', (e) => {
+                        if (this.state === 'PLAYING' || this.state === 'PAUSED' || this.state === 'GAMEOVER') {
+                            e.preventDefault();
+                            if (pauseModal) pauseModal.classList.remove('active');
+                            this.state = 'LOBBY';
+                            if (modal) modal.classList.add('active');
+                        }
+                    });
+                }
 
                 modeBtns.forEach(btn => {
                     btn.addEventListener('click', () => {
                         modeBtns.forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                         this.mode = btn.getAttribute('data-mode');
+                    });
+                });
+
+                arenaBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        arenaBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.arena.theme = btn.getAttribute('data-arena');
+                    });
+                });
+
+                avatarBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        avatarBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.selectedAvatar = btn.getAttribute('data-emoji');
                     });
                 });
 
@@ -863,20 +1343,27 @@
                 this.resize();
                 this.particles = [];
                 this.powerups = [];
-                this.airborneBomb = null;
+                this.traps = [];
+                this.airborneBombs = [];
+                this.screenShake = 0;
 
                 const playerCount = this.mode === 'chaos' ? 8 : (this.mode === 'local' ? 4 : 5);
                 const activeRoster = ROSTER.slice(0, playerCount);
 
+                // Set selected avatar for Player 1
+                activeRoster[0].emoji = this.selectedAvatar;
+
                 if (this.mode === 'local') {
                     activeRoster[1].name = 'P2 (Arrows)';
                     activeRoster[1].isPlayer = true;
+                } else {
+                    activeRoster[1].isPlayer = false;
                 }
 
                 // Spawn players along circle
                 const centerX = this.arena.x + this.arena.w / 2;
                 const centerY = this.arena.y + this.arena.h / 2;
-                const spawnRadius = Math.min(this.arena.w, this.arena.h) * 0.35;
+                const spawnRadius = Math.min(this.arena.w, this.arena.h) * 0.36;
 
                 this.players = activeRoster.map((info, idx) => {
                     const angle = (idx / playerCount) * Math.PI * 2;
@@ -885,50 +1372,74 @@
                     return new Player(info, x, y);
                 });
 
-                // Pick random starting bomb holder (Give to bot on start)
+                // Spawn 1 or 2 initial bombs
                 const startHolderIdx = Math.floor(Math.random() * (this.players.length - 1)) + 1;
                 this.players[startHolderIdx].hasBomb = true;
+                this.players[startHolderIdx].bombType = this.mode === 'suddendeath' ? 'TURBO' : 'NORMAL';
                 this.players[startHolderIdx].say('I GOT THE BOMB!');
 
+                if (this.mode === 'chaos') {
+                    // Second bomb in 8-player mode
+                    let secondHolder = (startHolderIdx + 4) % this.players.length;
+                    this.players[secondHolder].hasBomb = true;
+                    this.players[secondHolder].bombType = 'CRYO';
+                    this.players[secondHolder].say('DUAL BOMB CHAOS!');
+                }
+
+                // Generate 2 linked teleport portals
+                this.portals = [
+                    { x: this.arena.x + 80, y: this.arena.y + 80, targetIdx: 1, radius: 24 },
+                    { x: this.arena.x + this.arena.w - 80, y: this.arena.y + this.arena.h - 80, targetIdx: 0, radius: 24 }
+                ];
+
+                this.countdownTimer = 2.8; // 2.8s intro countdown before fuse starts
                 this.resetFuseTimer();
                 this.updateHUD();
             }
 
             resetFuseTimer() {
-                // Random 7.5 to 13.0s fuse
-                this.maxFuse = 7.5 + Math.random() * 5.5;
+                if (this.mode === 'suddendeath') {
+                    this.maxFuse = 10.0 + Math.random() * 4.0;
+                } else if (this.mode === 'chaos') {
+                    this.maxFuse = 20.0 + Math.random() * 6.0;
+                } else {
+                    this.maxFuse = 18.0 + Math.random() * 7.0; // 18s to 25s per round
+                }
                 this.fuseTime = this.maxFuse;
                 this.lastTickTime = performance.now();
             }
 
-            tryPlayerThrow(targetX, targetY) {
-                const player = this.players.find(p => p.isPlayer && p.hasBomb && p.alive);
+            tryPlayerThrow(playerId, targetX, targetY) {
+                const player = this.players.find(p => p.id === playerId && p.hasBomb && p.alive);
                 if (!player) return;
 
-                let tx = targetX || (player.x + Math.cos(player.facingAngle) * 220);
-                let ty = targetY || (player.y + Math.sin(player.facingAngle) * 220);
+                let tx = targetX || (player.x + Math.cos(player.facingAngle) * 230);
+                let ty = targetY || (player.y + Math.sin(player.facingAngle) * 230);
 
                 this.launchBomb(player, tx, ty);
             }
 
             launchBomb(thrower, targetX, targetY) {
                 audio.playThrow();
+                const bType = thrower.bombType || 'NORMAL';
                 thrower.hasBomb = false;
-                thrower.immunityTimer = 45; // Brief immunity after throw
+                thrower.immunityTimer = 45;
 
-                this.airborneBomb = {
+                this.airborneBombs.push({
                     startX: thrower.x,
                     startY: thrower.y,
                     targetX: Math.max(this.arena.x + 20, Math.min(this.arena.x + this.arena.w - 20, targetX)),
                     targetY: Math.max(this.arena.y + 20, Math.min(this.arena.y + this.arena.h - 20, targetY)),
                     t: 0,
-                    speed: 0.055,
-                    throwerId: thrower.id
-                };
+                    speed: bType === 'TURBO' ? 0.075 : 0.055,
+                    throwerId: thrower.id,
+                    type: bType
+                });
             }
 
             triggerExplosion(victim) {
                 audio.playBoom();
+                this.screenShake = 18;
 
                 // Screen Flash
                 const flash = document.getElementById('flashOverlay');
@@ -938,17 +1449,17 @@
                 }
 
                 // Blast Particles
-                for (let i = 0; i < 40; i++) {
+                for (let i = 0; i < 50; i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = 3 + Math.random() * 8;
+                    const speed = 4 + Math.random() * 9;
                     this.particles.push({
                         x: victim.x,
                         y: victim.y,
                         vx: Math.cos(angle) * speed,
                         vy: Math.sin(angle) * speed,
-                        size: 4 + Math.random() * 6,
-                        color: Math.random() > 0.4 ? '#ff4757' : (Math.random() > 0.5 ? '#ffa502' : '#2f3542'),
-                        life: 35
+                        size: 4 + Math.random() * 7,
+                        color: Math.random() > 0.4 ? '#ff4757' : (Math.random() > 0.5 ? '#ffa502' : '#fbc531'),
+                        life: 40
                     });
                 }
 
@@ -958,38 +1469,51 @@
                 const aliveSurvivors = this.players.filter(p => p.alive);
                 this.updateHUD();
 
-                // Check Victory
+                // Check Victory Condition
                 if (aliveSurvivors.length <= 1) {
                     this.state = 'GAMEOVER';
                     const winner = aliveSurvivors[0] || victim;
+                    const playerWon = winner && winner.isPlayer;
                     setTimeout(() => {
                         const modal = document.getElementById('modalOverlay');
-                        document.getElementById('modalTitle').textContent = `🏆 ${winner.name} WINS!`;
-                        document.getElementById('modalSub').textContent = `${winner.name} survived the Bomb Panic!`;
+                        const titleEl = document.getElementById('modalTitle');
+                        const subEl = document.getElementById('modalSub');
+
+                        if (playerWon) {
+                            titleEl.innerHTML = '🏆 YOU WIN!';
+                            subEl.innerHTML = '<span style="color: #2ed573; font-weight: 800; font-size: 1.2rem;">👑 You are the Ultimate Bomb Panic Champion!</span>';
+                        } else {
+                            titleEl.innerHTML = `🏆 ${winner.name} WINS!`;
+                            subEl.innerHTML = '<span style="color: #ff4757; font-weight: 800; font-size: 1.2rem;">💀 YOU LOSE! Better luck next round!</span>';
+                        }
+
                         document.getElementById('btnStartGame').textContent = 'PLAY AGAIN';
                         modal.classList.add('active');
-                    }, 800);
+                    }, 900);
                     return;
                 }
 
-                // SHRINK ARENA BY 15% AFTER EACH ELIMINATION
+                // Arena Shrinking by 15%
                 this.arena.targetW = Math.max(340, this.arena.targetW * 0.85);
                 this.arena.targetH = Math.max(260, this.arena.targetH * 0.85);
 
-                // Pass bomb to random survivor
-                const nextLucky = aliveSurvivors[Math.floor(Math.random() * aliveSurvivors.length)];
-                nextLucky.hasBomb = true;
-                nextLucky.say('NEW BOMB SPAWNED!');
-                this.resetFuseTimer();
+                // Pass bomb to random survivor if no bomb in arena
+                if (!this.players.some(p => p.hasBomb && p.alive)) {
+                    const nextLucky = aliveSurvivors[Math.floor(Math.random() * aliveSurvivors.length)];
+                    nextLucky.hasBomb = true;
+                    nextLucky.bombType = Math.random() > 0.6 ? 'TURBO' : (Math.random() > 0.5 ? 'CRYO' : 'NORMAL');
+                    nextLucky.say('NEW BOMB SPAWNED!');
+                    this.resetFuseTimer();
+                }
 
-                // Spawn power-up in arena
-                if (Math.random() < 0.8) {
+                // Spawn random power-up in arena
+                if (Math.random() < 0.85) {
                     this.spawnPowerup();
                 }
             }
 
             spawnPowerup() {
-                const types = ['SPEED', 'FREEZE'];
+                const types = ['SPEED', 'SHIELD', 'FREEZE', 'BANANA'];
                 const type = types[Math.floor(Math.random() * types.length)];
                 const x = this.arena.x + 40 + Math.random() * (this.arena.w - 80);
                 const y = this.arena.y + 40 + Math.random() * (this.arena.h - 80);
@@ -999,26 +1523,53 @@
             update() {
                 if (this.state !== 'PLAYING') return;
 
-                // Smooth Arena Shrink Interpolation
+                // Screen shake decay
+                if (this.screenShake > 0) this.screenShake *= 0.88;
+
+                // Smooth Arena Shrink
                 this.arena.w += (this.arena.targetW - this.arena.w) * 0.05;
                 this.arena.h += (this.arena.targetH - this.arena.h) * 0.05;
                 this.arena.x = (this.width - this.arena.w) / 2;
                 this.arena.y = (this.height - this.arena.h) / 2;
 
+                // Round Intro Countdown
+                if (this.countdownTimer > 0) {
+                    this.countdownTimer -= 0.016;
+                    document.getElementById('fuseTimer').textContent = `READY: ${Math.ceil(this.countdownTimer)}s`;
+                    return;
+                }
+
                 // Update Fuse Timer
                 this.fuseTime = Math.max(0, this.fuseTime - 0.016);
-                document.getElementById('fuseTimer').textContent = `${this.fuseTime.toFixed(1)}s`;
+                const timerEl = document.getElementById('fuseTimer');
+                const pillEl = document.getElementById('fusePill');
+                timerEl.textContent = `${this.fuseTime.toFixed(1)}s`;
 
-                // Ticking Audio rate increases as timer drops
+                if (this.fuseTime < 3.0) {
+                    pillEl.classList.add('danger');
+                } else {
+                    pillEl.classList.remove('danger');
+                }
+
+                // Ticking & Heartbeat Audio
                 const now = performance.now();
-                const tickInterval = Math.max(120, (this.fuseTime / this.maxFuse) * 800);
+                const tickInterval = Math.max(100, (this.fuseTime / this.maxFuse) * 750);
                 if (now - this.lastTickTime > tickInterval) {
                     this.lastTickTime = now;
-                    const pitch = 500 + (1 - this.fuseTime / this.maxFuse) * 500;
+                    const pitch = 500 + (1 - this.fuseTime / this.maxFuse) * 550;
                     audio.playTick(pitch);
                 }
 
-                // Bomb Detonation at 0.0s!
+                // Heartbeat pulse if local player has the bomb
+                const p1 = this.players[0];
+                if (p1 && p1.hasBomb && this.fuseTime < 4.0) {
+                    if (now - this.lastHeartbeatTime > 400) {
+                        this.lastHeartbeatTime = now;
+                        audio.playHeartbeat();
+                    }
+                }
+
+                // Detonation
                 if (this.fuseTime <= 0) {
                     const bombHolder = this.players.find(p => p.hasBomb && p.alive);
                     if (bombHolder) {
@@ -1028,13 +1579,19 @@
                 }
 
                 // Player 1 Input
-                const p1 = this.players[0];
                 if (p1 && p1.alive && p1.isPlayer) {
                     let moveX = 0, moveY = 0;
-                    if (this.keys['KeyA'] || this.keys['ArrowLeft']) moveX -= 1;
-                    if (this.keys['KeyD'] || this.keys['ArrowRight']) moveX += 1;
-                    if (this.keys['KeyW'] || this.keys['ArrowUp']) moveY -= 1;
-                    if (this.keys['KeyS'] || this.keys['ArrowDown']) moveY += 1;
+                    if (this.keys['KeyA']) moveX -= 1;
+                    if (this.keys['KeyD']) moveX += 1;
+                    if (this.keys['KeyW']) moveY -= 1;
+                    if (this.keys['KeyS']) moveY += 1;
+
+                    if (this.mode !== 'local') {
+                        if (this.keys['ArrowLeft']) moveX -= 1;
+                        if (this.keys['ArrowRight']) moveX += 1;
+                        if (this.keys['ArrowUp']) moveY -= 1;
+                        if (this.keys['ArrowDown']) moveY += 1;
+                    }
 
                     if (this.joystick.active) {
                         moveX = this.joystick.vx;
@@ -1051,43 +1608,109 @@
                     }
                 }
 
-                // Update all players & run AI
+                // Player 2 Input (Local Mode)
+                if (this.mode === 'local' && this.players[1] && this.players[1].alive) {
+                    const p2 = this.players[1];
+                    let moveX = 0, moveY = 0;
+                    if (this.keys['ArrowLeft']) moveX -= 1;
+                    if (this.keys['ArrowRight']) moveX += 1;
+                    if (this.keys['ArrowUp']) moveY -= 1;
+                    if (this.keys['ArrowDown']) moveY += 1;
+
+                    const len = Math.hypot(moveX, moveY);
+                    if (len > 0.05) {
+                        p2.vx = moveX / Math.max(1, len);
+                        p2.vy = moveY / Math.max(1, len);
+                    } else {
+                        p2.vx = 0;
+                        p2.vy = 0;
+                    }
+                }
+
+                // Update players & AI
                 this.players.forEach(p => {
-                    const aiAction = p.aiBehavior(this.arena, this.players, this.airborneBomb);
+                    const aiAction = p.aiBehavior(this.arena, this.players, this.airborneBombs, this.powerups);
                     if (aiAction && aiAction.action === 'throw') {
                         this.launchBomb(p, aiAction.targetX, aiAction.targetY);
                     }
-                    p.update(this.arena, this.players, this.airborneBomb);
+                    p.update(this.arena, this.players, this.airborneBombs);
                 });
 
-                // Airborne Bomb Flight & Catching
-                if (this.airborneBomb) {
-                    const ab = this.airborneBomb;
+                // Dynamic Portals always anchored inside shrinking arena
+                this.portals = [
+                    { x: this.arena.x + this.arena.w * 0.16, y: this.arena.y + this.arena.h * 0.22, targetIdx: 1, radius: 26 },
+                    { x: this.arena.x + this.arena.w * 0.84, y: this.arena.y + this.arena.h * 0.78, targetIdx: 0, radius: 26 }
+                ];
+
+                // Check Portals Warping
+                this.portals.forEach((pt, pIdx) => {
+                    this.players.forEach(p => {
+                        if (p.alive && Math.hypot(p.x - pt.x, p.y - pt.y) < pt.radius + 6 && p.immunityTimer <= 0) {
+                            const dest = this.portals[pt.targetIdx];
+                            p.x = dest.x;
+                            p.y = dest.y;
+                            p.immunityTimer = 55; // 1s cooldown to prevent instant loop
+                            audio.playWarp();
+                            p.say('WARPED! 🌀');
+
+                            // Portal swirl particles
+                            for (let i = 0; i < 18; i++) {
+                                const angle = Math.random() * Math.PI * 2;
+                                const spd = 2 + Math.random() * 4;
+                                this.particles.push({
+                                    x: dest.x,
+                                    y: dest.y,
+                                    vx: Math.cos(angle) * spd,
+                                    vy: Math.sin(angle) * spd,
+                                    size: 3 + Math.random() * 4,
+                                    color: '#c084fc',
+                                    life: 25
+                                });
+                            }
+                        }
+                    });
+                });
+
+                // Update Airborne Bombs
+                for (let i = this.airborneBombs.length - 1; i >= 0; i--) {
+                    const ab = this.airborneBombs[i];
                     ab.t += ab.speed;
 
                     const curX = ab.startX + (ab.targetX - ab.startX) * ab.t;
                     const linearY = ab.startY + (ab.targetY - ab.startY) * ab.t;
-                    const arc = -Math.sin(ab.t * Math.PI) * 55;
+                    const arc = -Math.sin(ab.t * Math.PI) * 60;
                     const curY = linearY + arc;
 
-                    // Check mid-air interception by any other player
-                    if (ab.t > 0.3) {
+                    // Interception Check
+                    if (ab.t > 0.25) {
                         for (const p of this.players) {
                             if (p.alive && p.immunityTimer <= 0) {
-                                if (Math.hypot(p.x - curX, p.y - curY) < p.radius + 15) {
+                                if (Math.hypot(p.x - curX, p.y - curY) < p.radius + 16) {
+                                    // If shielded, deflect!
+                                    if (p.shieldTimer > 0) {
+                                        audio.playShieldDeflect();
+                                        p.say('SHIELD DEFLECT! 🛡️');
+                                        ab.startX = p.x;
+                                        ab.startY = p.y;
+                                        ab.targetX = this.arena.x + Math.random() * this.arena.w;
+                                        ab.targetY = this.arena.y + Math.random() * this.arena.h;
+                                        ab.t = 0;
+                                        break;
+                                    }
+
                                     audio.playPass();
                                     p.hasBomb = true;
-                                    p.say('INTERCEPTED!');
-                                    this.airborneBomb = null;
+                                    p.bombType = ab.type;
+                                    p.say('CAUGHT BOMB!');
+                                    this.airborneBombs.splice(i, 1);
                                     break;
                                 }
                             }
                         }
                     }
 
-                    // Landed on ground
-                    if (this.airborneBomb && ab.t >= 1) {
-                        // Nearest player picks it up
+                    // Land on ground
+                    if (ab.t >= 1) {
                         let nearest = null;
                         let minDist = Infinity;
                         this.players.forEach(p => {
@@ -1100,37 +1723,49 @@
                         if (nearest) {
                             audio.playPass();
                             nearest.hasBomb = true;
-                            nearest.say('CAUGHT IT!');
+                            nearest.bombType = ab.type;
+                            nearest.say('PICKED UP!');
                         }
-                        this.airborneBomb = null;
+                        this.airborneBombs.splice(i, 1);
                     }
                 }
 
-                // Physical Tag Collisions (Player-to-Player Bomb Transfer)
-                const bombGuy = this.players.find(p => p.hasBomb && p.alive);
-                if (bombGuy) {
+                // Tag Collisions
+                const bombGuys = this.players.filter(p => p.hasBomb && p.alive);
+                bombGuys.forEach(bombGuy => {
                     for (const victim of this.players) {
                         if (victim !== bombGuy && victim.alive && victim.immunityTimer <= 0) {
                             const dist = Math.hypot(bombGuy.x - victim.x, bombGuy.y - victim.y);
                             if (dist < bombGuy.radius + victim.radius) {
+                                // If victim has shield, bounce tagger away!
+                                if (victim.shieldTimer > 0) {
+                                    audio.playShieldDeflect();
+                                    victim.say('BLOCKED! 🛡️');
+                                    const angle = Math.atan2(bombGuy.y - victim.y, bombGuy.x - victim.x);
+                                    bombGuy.x += Math.cos(angle) * 40;
+                                    bombGuy.y += Math.sin(angle) * 40;
+                                    bombGuy.immunityTimer = 30;
+                                    break;
+                                }
+
                                 // PASS THE BOMB!
                                 audio.playPass();
-                                bombGuy.hasBomb = false;
-                                bombGuy.immunityTimer = 40;
                                 victim.hasBomb = true;
+                                victim.bombType = bombGuy.bombType;
+                                bombGuy.hasBomb = false;
+                                bombGuy.immunityTimer = 35;
                                 victim.say('TAGGED! RUN!');
 
-                                // Knockback impulse
                                 const angle = Math.atan2(victim.y - bombGuy.y, victim.x - bombGuy.x);
-                                victim.x += Math.cos(angle) * 15;
-                                victim.y += Math.sin(angle) * 15;
+                                victim.x += Math.cos(angle) * 16;
+                                victim.y += Math.sin(angle) * 16;
                                 break;
                             }
                         }
                     }
-                }
+                });
 
-                // Power-up Pickups
+                // Power-up Pickups (Both Bots and Players can acquire)
                 for (let i = this.powerups.length - 1; i >= 0; i--) {
                     const pw = this.powerups[i];
                     pw.life--;
@@ -1139,15 +1774,21 @@
                         if (p.alive && Math.hypot(p.x - pw.x, p.y - pw.y) < p.radius + pw.radius) {
                             audio.playPowerup();
                             if (pw.type === 'SPEED') {
-                                p.speedBuffTimer = 240;
-                                p.say('SPEED BOOST!');
+                                p.speedBuffTimer = 300; // 5 seconds
+                                p.say('SPEED BOOST! ⚡');
+                            } else if (pw.type === 'SHIELD') {
+                                p.shieldTimer = 360; // 6 seconds
+                                p.say('FORCEFIELD 🛡️');
                             } else if (pw.type === 'FREEZE') {
                                 this.players.forEach(other => {
                                     if (other !== p && other.alive) {
-                                        other.frozenTimer = 90;
-                                        other.say('FROZEN!');
+                                        other.frozenTimer = 110;
+                                        other.say('FROZEN! ❄️');
                                     }
                                 });
+                            } else if (pw.type === 'BANANA') {
+                                this.traps.push({ x: p.x - Math.cos(p.facingAngle) * 32, y: p.y - Math.sin(p.facingAngle) * 32, radius: 16 });
+                                p.say('DROPPED BANANA! 🍌');
                             }
                             this.powerups.splice(i, 1);
                             break;
@@ -1155,6 +1796,20 @@
                     }
 
                     if (pw.life <= 0) this.powerups.splice(i, 1);
+                }
+
+                // Check Banana Traps (Affects both bots & players)
+                for (let i = this.traps.length - 1; i >= 0; i--) {
+                    const trap = this.traps[i];
+                    for (const p of this.players) {
+                        if (p.alive && p.slipTimer <= 0 && Math.hypot(p.x - trap.x, p.y - trap.y) < p.radius + trap.radius) {
+                            audio.playSlip();
+                            p.slipTimer = 85;
+                            p.say('SLIPPED! 🍌');
+                            this.traps.splice(i, 1);
+                            break;
+                        }
+                    }
                 }
 
                 // Update Particles
@@ -1179,63 +1834,210 @@
 
                 const ctx = this.ctx;
                 const a = this.arena;
+                const theme = this.arena.theme;
 
-                // 1. Toxic Danger Storm Border (Outside Arena)
-                ctx.fillStyle = 'rgba(239, 68, 68, 0.18)';
-                ctx.fillRect(0, 0, this.width, this.height);
-
-                // 2. Arena Safe Floor
                 ctx.save();
-                ctx.fillStyle = '#111827';
+                if (this.screenShake > 0) {
+                    const shakeX = (Math.random() - 0.5) * this.screenShake;
+                    const shakeY = (Math.random() - 0.5) * this.screenShake;
+                    ctx.translate(shakeX, shakeY);
+                }
+
+                // 1. OUTSIDE DANGER STORM (Distinct Per Theme)
+                if (theme === 'volcano') {
+                    // Lava Bubbling Ocean
+                    ctx.fillStyle = '#450a0a';
+                    ctx.fillRect(0, 0, this.width, this.height);
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
+                    for (let x = 20; x < this.width; x += 60) {
+                        const wave = Math.sin(Date.now() * 0.003 + x) * 12;
+                        ctx.beginPath();
+                        ctx.arc(x, (Date.now() * 0.05 + x * 2) % this.height, 8 + (x % 6), 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else if (theme === 'pirate') {
+                    // Rolling Deep Ocean Waves
+                    ctx.fillStyle = '#082f49';
+                    ctx.fillRect(0, 0, this.width, this.height);
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+                    ctx.lineWidth = 3;
+                    for (let y = 30; y < this.height; y += 40) {
+                        ctx.beginPath();
+                        for (let x = 0; x < this.width; x += 20) {
+                            const waveY = y + Math.sin((x * 0.03) + (Date.now() * 0.004)) * 8;
+                            if (x === 0) ctx.moveTo(x, waveY);
+                            else ctx.lineTo(x, waveY);
+                        }
+                        ctx.stroke();
+                    }
+                } else if (theme === 'dungeon') {
+                    // Cursed Dark Mist
+                    ctx.fillStyle = '#022c22';
+                    ctx.fillRect(0, 0, this.width, this.height);
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+                    for (let i = 0; i < 12; i++) {
+                        const mx = (i * 120 + Date.now() * 0.02) % this.width;
+                        const my = (i * 90 + Math.sin(i + Date.now() * 0.002) * 40) % this.height;
+                        ctx.beginPath();
+                        ctx.arc(mx, my, 45, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else {
+                    // Cyber Matrix Void
+                    ctx.fillStyle = '#020617';
+                    ctx.fillRect(0, 0, this.width, this.height);
+                    ctx.strokeStyle = 'rgba(168, 85, 247, 0.15)';
+                    ctx.lineWidth = 1;
+                    for (let x = 0; x < this.width; x += 50) {
+                        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, this.height); ctx.stroke();
+                    }
+                }
+
+                // 2. SAFE ARENA FLOOR
+                ctx.save();
+                if (theme === 'volcano') {
+                    ctx.fillStyle = '#1c0a0a';
+                } else if (theme === 'pirate') {
+                    ctx.fillStyle = '#451a03'; // Wooden deck base
+                } else if (theme === 'dungeon') {
+                    ctx.fillStyle = '#064e3b';
+                } else {
+                    ctx.fillStyle = '#0f172a';
+                }
                 ctx.beginPath();
                 ctx.roundRect(a.x, a.y, a.w, a.h, 24);
                 ctx.fill();
 
-                // Arena Grid Lines
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-                ctx.lineWidth = 1.5;
-                for (let x = a.x; x < a.x + a.w; x += 40) {
-                    ctx.beginPath();
-                    ctx.moveTo(x, a.y);
-                    ctx.lineTo(x, a.y + a.h);
-                    ctx.stroke();
-                }
-                for (let y = a.y; y < a.y + a.h; y += 40) {
-                    ctx.beginPath();
-                    ctx.moveTo(a.x, y);
-                    ctx.lineTo(a.x + a.w, y);
-                    ctx.stroke();
+                // Floor Textures & Detail
+                if (theme === 'pirate') {
+                    // Wooden Deck Planks
+                    ctx.strokeStyle = 'rgba(120, 53, 15, 0.8)';
+                    ctx.lineWidth = 2;
+                    for (let y = a.y; y < a.y + a.h; y += 32) {
+                        ctx.beginPath();
+                        ctx.moveTo(a.x, y);
+                        ctx.lineTo(a.x + a.w, y);
+                        ctx.stroke();
+
+                        // Brass rivets
+                        ctx.fillStyle = 'rgba(245, 158, 11, 0.4)';
+                        for (let x = a.x + 20; x < a.x + a.w; x += 80) {
+                            ctx.beginPath();
+                            ctx.arc(x, y + 16, 2.5, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                } else if (theme === 'volcano') {
+                    // Magma Veins
+                    ctx.strokeStyle = 'rgba(249, 115, 22, 0.35)';
+                    ctx.lineWidth = 2;
+                    for (let x = a.x; x < a.x + a.w; x += 55) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, a.y);
+                        ctx.lineTo(x + 15, a.y + a.h / 2);
+                        ctx.lineTo(x - 10, a.y + a.h);
+                        ctx.stroke();
+                    }
+                } else if (theme === 'dungeon') {
+                    // Stone Cobblestone Grid
+                    ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
+                    ctx.lineWidth = 1.5;
+                    for (let x = a.x; x < a.x + a.w; x += 48) {
+                        ctx.beginPath(); ctx.moveTo(x, a.y); ctx.lineTo(x, a.y + a.h); ctx.stroke();
+                    }
+                    for (let y = a.y; y < a.y + a.h; y += 48) {
+                        ctx.beginPath(); ctx.moveTo(a.x, y); ctx.lineTo(a.x + a.w, y); ctx.stroke();
+                    }
+                } else {
+                    // Cyber Neon Grid
+                    ctx.strokeStyle = 'rgba(0, 210, 211, 0.15)';
+                    ctx.lineWidth = 1.5;
+                    for (let x = a.x; x < a.x + a.w; x += 45) {
+                        ctx.beginPath(); ctx.moveTo(x, a.y); ctx.lineTo(x, a.y + a.h); ctx.stroke();
+                    }
+                    for (let y = a.y; y < a.y + a.h; y += 45) {
+                        ctx.beginPath(); ctx.moveTo(a.x, y); ctx.lineTo(a.x + a.w, y); ctx.stroke();
+                    }
                 }
 
-                // Electric Pulsing Arena Wall
-                ctx.strokeStyle = '#ef4444';
+                // Arena Wall Glowing Border
+                const wallColors = {
+                    volcano: '#f97316',
+                    pirate: '#eab308',
+                    dungeon: '#10b981',
+                    cyber: '#00d2d3'
+                };
+                ctx.strokeStyle = wallColors[theme] || '#ef4444';
                 ctx.lineWidth = 4;
-                ctx.shadowColor = '#ef4444';
-                ctx.shadowBlur = 16;
+                ctx.shadowColor = ctx.strokeStyle;
+                ctx.shadowBlur = 18;
                 ctx.stroke();
                 ctx.restore();
 
-                // 3. Power-ups
+                // 3. Portals
+                this.portals.forEach(pt => {
+                    ctx.save();
+                    ctx.translate(pt.x, pt.y);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, pt.radius + Math.sin(Date.now() * 0.01) * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(168, 85, 247, 0.35)';
+                    ctx.strokeStyle = '#c084fc';
+                    ctx.lineWidth = 3;
+                    ctx.shadowColor = '#c084fc';
+                    ctx.shadowBlur = 12;
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.font = '16px Outfit';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🌀', 0, 0);
+                    ctx.restore();
+                });
+
+                // 4. Banana Traps
+                this.traps.forEach(trap => {
+                    ctx.save();
+                    ctx.font = '22px Outfit';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🍌', trap.x, trap.y);
+                    ctx.restore();
+                });
+
+                // 5. Power-ups
                 this.powerups.forEach(pw => {
                     ctx.save();
                     ctx.translate(pw.x, pw.y);
                     ctx.beginPath();
                     ctx.arc(0, 0, pw.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = pw.type === 'SPEED' ? '#fbc531' : '#00d2d3';
+                    const colors = { SPEED: '#fbc531', SHIELD: '#38bdf8', FREEZE: '#00d2d3', BANANA: '#eab308' };
+                    ctx.fillStyle = colors[pw.type] || '#fff';
                     ctx.shadowColor = ctx.fillStyle;
-                    ctx.shadowBlur = 12;
+                    ctx.shadowBlur = 14;
                     ctx.fill();
 
-                    ctx.font = '16px Outfit, sans-serif';
+                    const icons = { SPEED: '⚡', SHIELD: '🛡️', FREEZE: '❄️', BANANA: '🍌' };
+                    ctx.font = '16px Outfit';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(pw.type === 'SPEED' ? '⚡' : '❄️', 0, 1);
+                    ctx.fillText(icons[pw.type] || '✨', 0, 1);
                     ctx.restore();
                 });
 
-                // 4. Players
+                // 6. Players
                 this.players.forEach(p => {
                     if (!p.alive) return;
+
+                    // Particle trails
+                    p.trails.forEach(t => {
+                        ctx.save();
+                        ctx.globalAlpha = t.life / 14;
+                        ctx.beginPath();
+                        ctx.arc(t.x, t.y, 7, 0, Math.PI * 2);
+                        ctx.fillStyle = t.color;
+                        ctx.fill();
+                        ctx.restore();
+                    });
 
                     ctx.save();
                     ctx.translate(p.x, p.y);
@@ -1243,21 +2045,35 @@
                     // Warning Radius if holding bomb
                     if (p.hasBomb) {
                         ctx.beginPath();
-                        ctx.arc(0, 0, p.radius + 12 + Math.sin(Date.now() * 0.02) * 4, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+                        ctx.arc(0, 0, p.radius + 14 + Math.sin(Date.now() * 0.02) * 5, 0, Math.PI * 2);
+                        ctx.fillStyle = p.bombType === 'CRYO' ? 'rgba(0, 210, 211, 0.25)' : 'rgba(239, 68, 68, 0.25)';
                         ctx.fill();
-                        ctx.strokeStyle = '#ef4444';
-                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = p.bombType === 'CRYO' ? '#00d2d3' : '#ef4444';
+                        ctx.lineWidth = 2.5;
+                        ctx.stroke();
+                    }
+
+                    // Shield Bubble
+                    if (p.shieldTimer > 0) {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, p.radius + 10, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+                        ctx.strokeStyle = '#38bdf8';
+                        ctx.lineWidth = 3;
+                        ctx.shadowColor = '#38bdf8';
+                        ctx.shadowBlur = 12;
+                        ctx.fill();
                         ctx.stroke();
                     }
 
                     // Frozen Ice Shell
                     if (p.frozenTimer > 0) {
                         ctx.beginPath();
-                        ctx.arc(0, 0, p.radius + 6, 0, Math.PI * 2);
+                        ctx.arc(0, 0, p.radius + 8, 0, Math.PI * 2);
                         ctx.fillStyle = 'rgba(0, 210, 211, 0.45)';
-                        ctx.fill();
                         ctx.strokeStyle = '#38bdf8';
+                        ctx.lineWidth = 2.5;
+                        ctx.fill();
                         ctx.stroke();
                     }
 
@@ -1266,7 +2082,7 @@
                     ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
                     ctx.fillStyle = p.color;
                     ctx.shadowColor = p.color;
-                    ctx.shadowBlur = p.isPlayer ? 14 : 4;
+                    ctx.shadowBlur = p.isPlayer ? 16 : 4;
                     ctx.fill();
                     ctx.lineWidth = 2.5;
                     ctx.strokeStyle = '#1e293b';
@@ -1286,8 +2102,9 @@
                     // Held Bomb Animated on Head
                     if (p.hasBomb) {
                         const bombBounce = Math.sin(Date.now() * 0.02) * 5;
-                        ctx.font = '26px Outfit';
-                        ctx.fillText('💣', 0, -p.radius - 24 + bombBounce);
+                        const bombEmoji = p.bombType === 'TURBO' ? '⚡💣' : (p.bombType === 'CRYO' ? '❄️💣' : '💣');
+                        ctx.font = '24px Outfit';
+                        ctx.fillText(bombEmoji, 0, -p.radius - 24 + bombBounce);
                     }
 
                     // Bark Speech Bubble
@@ -1305,12 +2122,11 @@
                     ctx.restore();
                 });
 
-                // 5. Airborne Lobbed Bomb
-                if (this.airborneBomb) {
-                    const ab = this.airborneBomb;
+                // 7. Airborne Lobbed Bombs
+                this.airborneBombs.forEach(ab => {
                     const curX = ab.startX + (ab.targetX - ab.startX) * ab.t;
                     const linearY = ab.startY + (ab.targetY - ab.startY) * ab.t;
-                    const arc = -Math.sin(ab.t * Math.PI) * 55;
+                    const arc = -Math.sin(ab.t * Math.PI) * 60;
                     const curY = linearY + arc;
 
                     ctx.save();
@@ -1320,18 +2136,52 @@
                     ctx.textBaseline = 'middle';
                     ctx.fillText('💣', 0, 0);
                     ctx.restore();
-                }
+                });
 
-                // 6. Blast Particles
+                // 8. Blast Particles
                 this.particles.forEach(pt => {
                     ctx.save();
-                    ctx.globalAlpha = pt.life / 35;
+                    ctx.globalAlpha = pt.life / 40;
                     ctx.beginPath();
                     ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
                     ctx.fillStyle = pt.color;
                     ctx.fill();
                     ctx.restore();
                 });
+
+                // 9. Round Start Countdown Overlay
+                if (this.countdownTimer > 0) {
+                    ctx.save();
+                    const centerX = this.arena.x + this.arena.w / 2;
+                    const centerY = this.arena.y + this.arena.h / 2;
+
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+                    ctx.beginPath();
+                    ctx.roundRect(centerX - 180, centerY - 55, 360, 110, 20);
+                    ctx.fill();
+                    ctx.strokeStyle = '#fbc531';
+                    ctx.lineWidth = 3;
+                    ctx.shadowColor = '#fbc531';
+                    ctx.shadowBlur = 18;
+                    ctx.stroke();
+
+                    ctx.font = '900 16px Outfit, sans-serif';
+                    ctx.fillStyle = '#cbd5e1';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('💣 GET READY! STARTING IN...', centerX, centerY - 20);
+
+                    ctx.font = '900 36px Outfit, sans-serif';
+                    ctx.fillStyle = '#ff4757';
+                    ctx.fillText(`${Math.ceil(this.countdownTimer)}`, centerX, centerY + 22);
+
+                    ctx.font = '800 12px Outfit, sans-serif';
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.fillText('PASS OR DODGE BEFORE TIME RUNS OUT!', centerX, centerY + 42);
+
+                    ctx.restore();
+                }
+
+                ctx.restore();
             }
 
             loop() {
