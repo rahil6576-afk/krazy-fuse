@@ -578,6 +578,623 @@
             letter-spacing: 1px;
             text-align: center;
         }
+
+        /* Smooth 60fps Paused Portal Transition System */
+        #game-view-wrapper {
+            width: 100vw;
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #060a14;
+            overflow: hidden;
+            transition: padding 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.35s ease;
+        }
+
+        #portal-paused-body {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portal-center-col {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            transition: padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Default Fullscreen Game Frame */
+        #gameWrapper {
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+            border-radius: 0px;
+            border: 1.5px solid transparent;
+            box-shadow: none;
+            position: relative;
+            overflow: hidden;
+            transition: max-width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        height 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        border-radius 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Portal UI Elements (Fixed and Hardware Accelerated) */
+        .portal-topbar {
+            height: 60px;
+            background: rgba(11, 18, 32, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            gap: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            font-family: 'Fredoka', 'Outfit', sans-serif;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+        }
+
+        .portal-sidebar {
+            width: 70px;
+            background: rgba(8, 14, 26, 0.92);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 16px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            z-index: 990;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+        }
+
+        .portal-rec-col {
+            width: 280px;
+            background: rgba(8, 14, 26, 0.92);
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 18px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            position: fixed;
+            top: 60px;
+            right: 0;
+            bottom: 0;
+            z-index: 990;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+            overflow-y: auto;
+        }
+
+        .game-meta-bar {
+            width: 100%;
+            max-width: 440px;
+            margin-top: 14px;
+            background: rgba(14, 23, 38, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            font-family: 'Fredoka', 'Outfit', sans-serif;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+        }
+
+        .pause-modal-card {
+            position: absolute !important;
+            inset: 0 !important;
+            background: rgba(4, 8, 16, 0.78) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 9999 !important;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.92);
+            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Active Paused State */
+        body.portal-paused {
+            overflow: hidden !important;
+        }
+
+        body.portal-paused .portal-topbar {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        body.portal-paused .portal-sidebar {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        body.portal-paused .portal-rec-col {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        body.portal-paused .game-meta-bar {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        body.portal-paused .pause-modal-card {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: scale(1) !important;
+        }
+
+        body.portal-paused #game-view-wrapper {
+            padding-top: 60px;
+        }
+
+        body.portal-paused .portal-center-col {
+            padding: 16px 300px 24px 90px;
+        }
+
+        body.portal-paused #gameWrapper {
+            max-width: 440px !important;
+            height: 600px !important;
+            max-height: 600px !important;
+            border-radius: 18px !important;
+            border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.25) !important;
+        }
+
+        .portal-topbar {
+            height: 60px;
+            background: rgba(11, 18, 32, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .portal-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+            max-width: 520px;
+        }
+
+        .portal-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 900;
+        }
+
+        .portal-brand-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #0284c7, #6366f1);
+            display: grid;
+            place-items: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+        }
+
+        .portal-brand span {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+
+        .portal-brand b {
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .portal-brand small {
+            font-size: 0.52rem;
+            color: #38bdf8;
+            letter-spacing: 1.5px;
+            font-weight: 800;
+            margin-top: 2px;
+        }
+
+        .portal-search-box {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .portal-search-box .search-icon {
+            position: absolute;
+            left: 12px;
+            font-size: 0.85rem;
+            color: #64748b;
+            pointer-events: none;
+        }
+
+        .portal-search-box input {
+            width: 100%;
+            height: 38px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            padding: 0 16px 0 36px;
+            color: #f8fafc;
+            font-size: 0.82rem;
+            font-family: inherit;
+            outline: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .portal-search-box input:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .portal-nav-pills {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-pill {
+            padding: 6px 13px;
+            border-radius: 999px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            transition: 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .nav-pill:hover, .nav-pill.active {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+        }
+
+        .portal-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .portal-bank-badge {
+            padding: 6px 13px;
+            background: rgba(251, 191, 36, 0.15);
+            border: 1.5px solid rgba(251, 191, 36, 0.4);
+            color: #fbbf24;
+            border-radius: 999px;
+            font-weight: 900;
+            font-size: 0.78rem;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .portal-resume-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-radius: 999px;
+            color: #fff;
+            font-weight: 900;
+            font-size: 0.78rem;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+            transition: 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .portal-resume-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.6);
+        }
+
+        .portal-sidebar {
+            width: 68px;
+            background: #080d19;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 0;
+            gap: 10px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .side-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: 0.2s;
+            background: transparent;
+        }
+
+        .side-btn span {
+            font-size: 1.15rem;
+        }
+
+        .side-btn small {
+            font-size: 0.55rem;
+            font-weight: 800;
+            margin-top: 2px;
+        }
+
+        .side-btn:hover, .side-btn.active {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .game-meta-bar {
+            width: 100%;
+            max-width: 440px;
+            margin-top: 12px;
+            padding: 14px 18px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .game-meta-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .game-avatar-icon {
+            font-size: 1.8rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.8);
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .game-meta-info h3 {
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: #f8fafc;
+            margin: 0 0 3px 0;
+        }
+
+        .game-meta-tags {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag-badge {
+            padding: 2px 7px;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border-radius: 5px;
+            font-size: 0.65rem;
+            font-weight: 800;
+        }
+
+        .meta-rating {
+            font-size: 0.72rem;
+            color: #fbbf24;
+            font-weight: 800;
+        }
+
+        .game-meta-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .meta-btn {
+            padding: 7px 12px;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #cbd5e1;
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: inherit;
+        }
+
+        .meta-btn:hover, .meta-btn.active {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: rgba(56, 189, 248, 0.5);
+            color: #38bdf8;
+        }
+
+        .portal-rec-col {
+            width: 290px;
+            background: #080d19;
+            border-left: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 16px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .rec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.68rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+
+        .rec-header a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-size: 0.65rem;
+        }
+
+        .rec-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .rec-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rec-card:hover {
+            transform: translateX(4px);
+            border-color: rgba(56, 189, 248, 0.5);
+            background: rgba(30, 41, 59, 0.9);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .rec-preview {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(30, 41, 59, 0.8);
+            display: grid;
+            place-items: center;
+            font-size: 1.4rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .rec-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .rec-info b {
+            font-size: 0.85rem;
+            color: #f8fafc;
+        }
+
+        .rec-info small {
+            font-size: 0.68rem;
+            color: #94a3b8;
+        }
+
+        .rec-badge {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            font-size: 0.52rem;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        /* Frosted Pause Screen Inside Game Container */
+        .pause-modal-card {
+            position: absolute;
+            inset: 0;
+            background: rgba(7, 13, 24, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 20px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body.portal-paused .pause-modal-card {
+            display: flex;
+        }
     </style>
 </head>
 <body>
@@ -589,135 +1206,283 @@
       </svg>
     </a>
 
-    <div id="gameWrapper">
-        <!-- Top Navigation -->
-        <header class="top-bar" style="justify-content: flex-end; padding-right: 20px;">
-            <button class="btn-icon" id="btnMute" title="Toggle Sound">🔊</button>
-        </header>
-
-        <!-- Big Running Score -->
-        <div class="score-hud" id="scoreHUD">0 / 5</div>
-
-        <!-- Level Indicator HUD -->
-        <div class="level-hud-badge" id="levelBadgeHUD">⭐ METROPOLIS • LEVEL 1/10 (GOAL: 5)</div>
-
-        <!-- Get Ready Screen with Theme & Level Pickers -->
-        <div class="get-ready-panel" id="getReadyPanel">
-            <h1 class="title-badge" style="font-size: 2.0rem; margin-bottom: 4px;">🦸 FLAPPY HEROES 🚀</h1>
-            
-            <div class="selection-section">
-                <div class="selection-title">1. CHOOSE HERO THEME:</div>
-                <div class="theme-pills-row">
-                    <button class="theme-pill-btn active" data-theme="superman">🏙️ Superman</button>
-                    <button class="theme-pill-btn" data-theme="ironman">🦾 Iron Man</button>
-                    <button class="theme-pill-btn" data-theme="batman">🦇 Batman</button>
-                    <button class="theme-pill-btn" data-theme="hanumanji">🚩 Hanumanji</button>
-                </div>
-            </div>
-
-            <div class="selection-section" style="margin-top: 10px;">
-                <div class="selection-title">2. SELECT LEVEL (1 - 10):</div>
-                <div class="level-pills-grid">
-                    <button class="level-select-btn active" data-level="1">LVL 1</button>
-                    <button class="level-select-btn" data-level="2">LVL 2</button>
-                    <button class="level-select-btn" data-level="3">LVL 3</button>
-                    <button class="level-select-btn" data-level="4">LVL 4</button>
-                    <button class="level-select-btn" data-level="5">LVL 5</button>
-                    <button class="level-select-btn" data-level="6">LVL 6</button>
-                    <button class="level-select-btn" data-level="7">LVL 7</button>
-                    <button class="level-select-btn" data-level="8">LVL 8</button>
-                    <button class="level-select-btn" data-level="9">LVL 9</button>
-                    <button class="level-select-btn" data-level="10">LVL 10</button>
-                </div>
-            </div>
-
-            <button class="btn-start-fly" id="btnStartGame" style="margin-top: 12px;">
-                <span>🚀 FLY NOW • START GAME</span>
-            </button>
-
-            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); font-weight: 700; margin-top: 4px;">
-                💡 Tap / Click / Spacebar to Flap & Fly
-            </div>
-
-            <div style="font-size: 0.82rem; color: #fff; font-weight: 800; margin-top: 4px; background: rgba(0,0,0,0.35); padding: 3px 12px; border-radius: 20px;">
-                🏆 BEST OVERALL: <span id="readyBestScore">0</span>
-            </div>
+    <!-- Master Game View Wrapper -->
+    <div id="game-view-wrapper" style="width: 100vw; height: 100vh;">
+      <!-- Topbar for Paused Portal Mode -->
+      <header id="portal-paused-topbar" class="portal-topbar">
+        <div class="portal-nav-left">
+          <a class="portal-brand" href="../index.html" title="Krazy Fuse Arcade Portal">
+            <span class="portal-brand-icon">⚡</span>
+            <span><b>KRAZY FUSE</b><small>ARCADE PORTAL</small></span>
+          </a>
+          <div class="portal-search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search 250+ free arcade games..." readonly onclick="window.location.href='../index.html'">
+          </div>
         </div>
 
-        <!-- Interactive Canvas Stage -->
-        <canvas id="gameCanvas"></canvas>
+        <div class="portal-nav-pills">
+          <a href="../index.html" class="nav-pill active">🔥 HOT</a>
+          <a href="../dart-board/index.html" class="nav-pill">🎯 2-PLAYER</a>
+          <a href="../office-escape/index.html" class="nav-pill">🏃 RUNNER</a>
+          <a href="../wild-swings/index.html" class="nav-pill">🕸️ ACTION</a>
+          <a href="../bomb-panic/index.html" class="nav-pill">💣 PARTY</a>
+        </div>
 
-        <!-- Level Cleared Success Modal -->
-        <div class="levelclear-modal" id="levelClearModal">
-            <div class="levelclear-title" id="levelClearTitle">🎉 LEVEL 1 CLEARED!</div>
-            <div style="font-size: 0.95rem; font-weight: 800; color: #fde047;" id="levelClearSubtitle">GOAL ACHIEVED! ⭐⭐⭐</div>
+        <div class="portal-nav-right">
+          <div class="portal-bank-badge" id="portal-top-bank">🪙 70 P</div>
+          <button id="btn-portal-maximize" class="portal-resume-btn" onclick="resumeFlappyGame()">
+            <span>▶️ RESUME (ESC)</span>
+          </button>
+        </div>
+      </header>
 
-            <div class="score-summary-card" style="width: 100%; margin: 4px 0;">
-                <div class="medal-box">
-                    <span class="medal-label">MEDAL</span>
-                    <span class="medal-icon" id="clearMedalIcon">🏆</span>
-                </div>
-                <div class="stats-col">
-                    <div>
-                        <div class="stat-item-label">PIPES CLEARED</div>
-                        <div class="stat-item-val" id="clearPipesVal">5</div>
+      <div id="portal-paused-body" class="portal-layout-body">
+        <!-- Left Sidebar Navigation -->
+        <aside class="portal-sidebar">
+          <a href="../index.html" class="side-btn active" title="Home"><span>🏠</span><small>Home</small></a>
+          <a href="../index.html" class="side-btn" title="Trending"><span>🔥</span><small>Hot</small></a>
+          <a href="../dart-board/index.html" class="side-btn" title="2 Player"><span>👥</span><small>2-Player</small></a>
+          <a href="../flappy-man/index.html" class="side-btn" title="Arcade"><span>🕹️</span><small>Arcade</small></a>
+          <a href="../wild-swings/index.html" class="side-btn" title="Action"><span>⚡</span><small>Action</small></a>
+          <a href="../bomb-panic/index.html" class="side-btn" title="Party"><span>💣</span><small>Party</small></a>
+          <a href="../gravity-flip/index.html" class="side-btn" title="Reflex"><span>🔄</span><small>Reflex</small></a>
+        </aside>
+
+        <!-- Center Column -->
+        <main class="portal-center-col">
+          <div id="gameWrapper">
+            <!-- Top Navigation -->
+            <header class="top-bar" style="justify-content: flex-end; padding-right: 20px;">
+                <button class="btn-icon" id="btnMute" title="Toggle Sound">🔊</button>
+            </header>
+
+            <!-- Big Running Score -->
+            <div class="score-hud" id="scoreHUD">0 / 5</div>
+
+            <!-- Level Indicator HUD -->
+            <div class="level-hud-badge" id="levelBadgeHUD">⭐ METROPOLIS • LEVEL 1/10 (GOAL: 5)</div>
+
+            <!-- Get Ready Screen with Theme & Level Pickers -->
+            <div class="get-ready-panel" id="getReadyPanel">
+                <h1 class="title-badge" style="font-size: 2.0rem; margin-bottom: 4px;">🦸 FLAPPY HEROES 🚀</h1>
+                
+                <div class="selection-section">
+                    <div class="selection-title">1. CHOOSE HERO THEME:</div>
+                    <div class="theme-pills-row">
+                        <button class="theme-pill-btn active" data-theme="superman">🏙️ Superman</button>
+                        <button class="theme-pill-btn" data-theme="ironman">🦾 Iron Man</button>
+                        <button class="theme-pill-btn" data-theme="batman">🦇 Batman</button>
+                        <button class="theme-pill-btn" data-theme="hanumanji">🚩 Hanumanji</button>
                     </div>
-                    <div>
-                        <div class="stat-item-label">NEXT LEVEL</div>
-                        <div class="stat-item-val" id="clearNextLvlVal" style="color: #38bdf8;">LVL 2</div>
+                </div>
+
+                <div class="selection-section" style="margin-top: 10px;">
+                    <div class="selection-title">2. SELECT LEVEL (1 - 10):</div>
+                    <div class="level-pills-grid">
+                        <button class="level-select-btn active" data-level="1">LVL 1</button>
+                        <button class="level-select-btn" data-level="2">LVL 2</button>
+                        <button class="level-select-btn" data-level="3">LVL 3</button>
+                        <button class="level-select-btn" data-level="4">LVL 4</button>
+                        <button class="level-select-btn" data-level="5">LVL 5</button>
+                        <button class="level-select-btn" data-level="6">LVL 6</button>
+                        <button class="level-select-btn" data-level="7">LVL 7</button>
+                        <button class="level-select-btn" data-level="8">LVL 8</button>
+                        <button class="level-select-btn" data-level="9">LVL 9</button>
+                        <button class="level-select-btn" data-level="10">LVL 10</button>
+                    </div>
+                </div>
+
+                <button class="btn-start-fly" id="btnStartGame" style="margin-top: 12px;">
+                    <span>🚀 FLY NOW • START GAME</span>
+                </button>
+
+                <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); font-weight: 700; margin-top: 4px;">
+                    💡 Tap / Click / Spacebar to Flap & Fly
+                </div>
+
+                <div style="font-size: 0.82rem; color: #fff; font-weight: 800; margin-top: 4px; background: rgba(0,0,0,0.35); padding: 3px 12px; border-radius: 20px;">
+                    🏆 BEST OVERALL: <span id="readyBestScore">0</span>
+                </div>
+            </div>
+
+            <!-- Interactive Canvas Stage -->
+            <canvas id="gameCanvas"></canvas>
+
+            <!-- Level Cleared Success Modal -->
+            <div class="levelclear-modal" id="levelClearModal">
+                <div class="levelclear-title" id="levelClearTitle">🎉 LEVEL 1 CLEARED!</div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: #fde047;" id="levelClearSubtitle">GOAL ACHIEVED! ⭐⭐⭐</div>
+
+                <div class="score-summary-card" style="width: 100%; margin: 4px 0;">
+                    <div class="medal-box">
+                        <span class="medal-label">MEDAL</span>
+                        <span class="medal-icon" id="clearMedalIcon">🏆</span>
+                    </div>
+                    <div class="stats-col">
+                        <div>
+                            <div class="stat-item-label">PIPES CLEARED</div>
+                            <div class="stat-item-val" id="clearPipesVal">5</div>
+                        </div>
+                        <div>
+                            <div class="stat-item-label">NEXT LEVEL</div>
+                            <div class="stat-item-val" id="clearNextLvlVal" style="color: #38bdf8;">LVL 2</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons-group" style="flex-direction: column; width: 100%; gap: 8px;">
+                    <button class="btn-action-primary" id="btnNextLevel" style="width: 100%;">
+                        <span>▶ NEXT LEVEL</span>
+                    </button>
+                    <div style="display: flex; gap: 8px; width: 100%;">
+                        <button class="btn-action-secondary" id="btnRetryLevelClear" style="flex: 1;">
+                            <span>🔄 REPLAY</span>
+                        </button>
+                        <a href="../index.html" class="btn-action-secondary" style="flex: 1; text-align: center; text-decoration: none;" title="Back to Krazio Games">
+                            <span>🏠 HOME</span>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <div class="action-buttons-group" style="flex-direction: column; width: 100%; gap: 8px;">
-                <button class="btn-action-primary" id="btnNextLevel" style="width: 100%;">
-                    <span>▶ NEXT LEVEL</span>
-                </button>
-                <div style="display: flex; gap: 8px; width: 100%;">
-                    <button class="btn-action-secondary" id="btnRetryLevelClear" style="flex: 1;">
-                        <span>🔄 REPLAY</span>
+            <!-- Level Failed / Game Over Summary Card -->
+            <div class="gameover-modal" id="gameoverModal">
+                <div class="gameover-title" id="gameOverTitle">💀 LEVEL 1 FAILED!</div>
+
+                <div class="score-summary-card">
+                    <div class="medal-box">
+                        <span class="medal-label">PROGRESS</span>
+                        <span class="medal-icon" id="medalIcon">💥</span>
+                    </div>
+                    <div class="stats-col">
+                        <div>
+                            <div class="stat-item-label">PIPES PASSED</div>
+                            <div class="stat-item-val" id="finalScoreVal">0</div>
+                        </div>
+                        <div>
+                            <div class="stat-item-label">LEVEL GOAL</div>
+                            <div class="stat-item-val" id="levelGoalVal">5</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons-group">
+                    <button class="btn-action-primary" id="btnPlayAgain">
+                        <span>🔄 RETRY LEVEL</span>
                     </button>
-                    <a href="../index.html" class="btn-action-secondary" style="flex: 1; text-align: center; text-decoration: none;" title="Back to Krazio Games">
+                    <a href="../index.html" class="btn-action-secondary" title="Back to Krazio Games">
                         <span>🏠 HOME</span>
                     </a>
                 </div>
             </div>
-        </div>
 
-        <!-- Level Failed / Game Over Summary Card -->
-        <div class="gameover-modal" id="gameoverModal">
-            <div class="gameover-title" id="gameOverTitle">💀 LEVEL 1 FAILED!</div>
+            <!-- Screen Flash Overlay on Death -->
+            <div id="flashOverlay" class="flash-overlay"></div>
 
-            <div class="score-summary-card">
-                <div class="medal-box">
-                    <span class="medal-label">PROGRESS</span>
-                    <span class="medal-icon" id="medalIcon">💥</span>
-                </div>
-                <div class="stats-col">
-                    <div>
-                        <div class="stat-item-label">PIPES PASSED</div>
-                        <div class="stat-item-val" id="finalScoreVal">0</div>
-                    </div>
-                    <div>
-                        <div class="stat-item-label">LEVEL GOAL</div>
-                        <div class="stat-item-val" id="levelGoalVal">5</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="action-buttons-group">
-                <button class="btn-action-primary" id="btnPlayAgain">
-                    <span>🔄 RETRY LEVEL</span>
-                </button>
-                <a href="../index.html" class="btn-action-secondary" title="Back to Krazio Games">
+            <!-- Universal Paused Screen Overlay -->
+            <div class="pause-modal-card">
+              <div style="background: rgba(14, 23, 38, 0.96); border: 2.5px solid rgba(56, 189, 248, 0.4); border-radius: 24px; padding: 28px 32px; text-align: center; max-width: 440px; width: 90%; box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 35px rgba(56,189,248,0.3); backdrop-filter: blur(16px); font-family: 'Outfit', sans-serif;">
+                <div style="display: inline-block; border: 2.5px solid #38bdf8; color: #38bdf8; font-weight: 900; font-size: 1.1rem; padding: 4px 16px; border-radius: 8px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">⏸️ PAUSED</div>
+                <h2 style="font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 6px;">Game Paused</h2>
+                <p style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 20px;">Taking a quick tactical breather...</p>
+                <div style="display: flex; flex-direction: column; gap: 10px; max-width: 280px; margin: 0 auto; width: 100%;">
+                  <button class="portal-resume-btn" onclick="resumeFlappyGame()" style="justify-content: center; width: 100%; font-size: 1.05rem; padding: 12px 20px; background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56,189,248,0.4); border-radius: 999px; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.4);">
+                    <span>▶️ RESUME (ESC)</span>
+                  </button>
+                  <button onclick="resumeFlappyGame(); if(window.flappyGame){ window.flappyGame.reset(); window.flappyGame.startGame(); }" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
+                    <span>🔄 RESTART RUN</span>
+                  </button>
+                  <a href="../index.html" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; text-decoration: none; text-align: center; display: inline-block;">
                     <span>🏠 HOME</span>
-                </a>
+                  </a>
+                </div>
+              </div>
             </div>
-        </div>
+          </div>
 
-        <!-- Screen Flash Overlay on Death -->
-        <div id="flashOverlay" class="flash-overlay"></div>
-    </div>
+      <!-- Under-Game Meta Action Bar -->
+      <div id="game-meta-bar" class="game-meta-bar">
+        <div class="game-meta-info">
+          <div class="game-avatar-icon">🦸‍♂️🚀</div>
+          <div>
+            <h3>Flappy Man: Superhero Flight</h3>
+            <div class="game-meta-tags">
+              <span class="tag-badge">Arcade</span>
+              <span class="tag-badge">Superhero</span>
+              <span class="tag-badge">60 FPS</span>
+              <span class="meta-rating">⭐ 4.9 (42.1k votes)</span>
+            </div>
+          </div>
+        </div>
+        <div class="game-meta-actions">
+          <button class="meta-btn" id="btn-meta-like" onclick="this.classList.toggle('active')">
+            👍 <span>42.1k</span>
+          </button>
+          <button class="meta-btn" id="btn-meta-fav" onclick="this.classList.toggle('active')">
+            ⭐ Favorite
+          </button>
+          <button class="meta-btn" id="btn-meta-expand" onclick="resumeFlappyGame()">
+            ⛶ Expand (ESC)
+          </button>
+          <button class="meta-btn" id="btn-meta-share" onclick="if(navigator.clipboard){navigator.clipboard.writeText(window.location.href); alert('Game link copied!');}">
+            🔗 Share
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Column: Recommended Games Grid -->
+    <aside id="portal-rec-col" class="portal-rec-col">
+      <div class="rec-header">
+        <span>🔥 RECOMMENDED GAMES</span>
+        <a href="../index.html">ALL <span>→</span></a>
+      </div>
+      <div class="rec-grid">
+        <a href="../office-escape/index.html" class="rec-card">
+          <div class="rec-badge">⚡ SPRINT</div>
+          <div class="rec-preview">🏃💼</div>
+          <div class="rec-info">
+            <b>Office Escape</b>
+            <small>Runner • Satire</small>
+          </div>
+        </a>
+        <a href="../dart-board/index.html" class="rec-card">
+          <div class="rec-badge">🎯 BULLSEYE</div>
+          <div class="rec-preview">🎯🍺</div>
+          <div class="rec-info">
+            <b>Dart Master</b>
+            <small>PvP • 2-Player</small>
+          </div>
+        </a>
+        <a href="../wild-swings/index.html" class="rec-card">
+          <div class="rec-badge">🕸️ PHYSICS</div>
+          <div class="rec-preview">🕸️🐒</div>
+          <div class="rec-info">
+            <b>Wild Swings</b>
+            <small>Action • 20 Levels</small>
+          </div>
+        </a>
+        <a href="../bomb-panic/index.html" class="rec-card">
+          <div class="rec-badge">💣 MULTI</div>
+          <div class="rec-preview">💣💥</div>
+          <div class="rec-info">
+            <b>Bomb Panic</b>
+            <small>Party • Hot Potato</small>
+          </div>
+        </a>
+        <a href="../gravity-flip/index.html" class="rec-card">
+          <div class="rec-badge">⛏️ CAVERN</div>
+          <div class="rec-preview">⛏️🔄</div>
+          <div class="rec-info">
+            <b>Gravity Flip</b>
+            <small>Runner • Reflex</small>
+          </div>
+        </a>
+      </div>
+    </aside>
+  </div>
+</div>
 
     <!-- Arcade Sound Engine Synthesizer & Game Scripts -->
     <script>
@@ -1070,6 +1835,7 @@
 
                 window.addEventListener('keydown', (e) => {
                     if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'Enter') {
+                        if (this.state === 'PAUSED') return;
                         e.preventDefault();
                         ensureFullScreen();
                         if (this.state === 'READY') {
@@ -1081,6 +1847,7 @@
                 });
 
                 this.canvas.addEventListener('pointerdown', (e) => {
+                    if (this.state === 'PAUSED') return;
                     e.preventDefault();
                     ensureFullScreen();
                     if (this.state === 'PLAYING') {
@@ -1155,6 +1922,8 @@
             reset() {
                 this.state = 'READY';
                 this.score = 0;
+                this.pipesSpawned = 0;
+                this.finishLine = null;
                 this.pipes = [];
                 this.particles = [];
                 this.applyLevelAndTheme();
@@ -1253,6 +2022,10 @@
             }
 
             spawnPipe() {
+                if (this.pipesSpawned >= this.targetGoal) {
+                    return;
+                }
+
                 const minH = 70;
                 const maxH = this.height - this.groundHeight - this.pipeGap - minH;
                 const topH = minH + Math.random() * (maxH - minH);
@@ -1273,6 +2046,18 @@
                     oscSpeed: lvlCfg.oscSpeed || 0.03,
                     oscAmp: lvlCfg.oscAmp || 30
                 });
+                this.pipesSpawned++;
+
+                // When the final pipe is spawned, schedule the finish line right after it!
+                if (this.pipesSpawned === this.targetGoal && !this.finishLine) {
+                    const finishSpacing = Math.max(260, this.width * 0.32);
+                    this.finishLine = {
+                        x: this.width + 40 + finishSpacing,
+                        width: 50,
+                        passed: false,
+                        brokenRibbon: false
+                    };
+                }
             }
 
             triggerGameOver() {
@@ -1319,6 +2104,10 @@
                     if (p.life <= 0) this.particles.splice(i, 1);
                 }
 
+                if (this.state === 'PAUSED') {
+                    return;
+                }
+
                 if (this.state === 'READY') {
                     this.man.hoverTime += 0.08;
                     this.man.y = (this.height * 0.42) + Math.sin(this.man.hoverTime) * 10;
@@ -1327,10 +2116,24 @@
                 }
 
                 if (this.state === 'LEVELCLEAR') {
-                    // Hero hovers proudly in place
+                    // Hero glides forward celebrating victory
                     this.man.hoverTime += 0.08;
                     this.man.y = (this.height * 0.42) + Math.sin(this.man.hoverTime) * 6;
-                    this.man.angle = 0;
+                    this.man.angle = -0.15;
+                    this.man.x = Math.min(this.width * 0.8, this.man.x + 3.5);
+
+                    // Continuous victory confetti sparks
+                    if (Math.random() < 0.4) {
+                        this.particles.push({
+                            x: this.man.x - 20,
+                            y: this.man.y + (Math.random() - 0.5) * 20,
+                            vx: -3 - Math.random() * 3,
+                            vy: (Math.random() - 0.5) * 4,
+                            size: 3 + Math.random() * 4,
+                            color: ['#fbc531', '#00d2d3', '#e84118', '#4cd137', '#ffffff'][Math.floor(Math.random() * 5)],
+                            life: 30
+                        });
+                    }
                     return;
                 }
 
@@ -1351,8 +2154,23 @@
 
                     // Pipe Spawning with comfortable runway
                     const pipeSpacing = Math.max(220, Math.min(300, this.width * 0.26));
-                    if (this.pipes.length === 0 || this.pipes[this.pipes.length - 1].x < this.width - pipeSpacing) {
-                        this.spawnPipe();
+                    if (this.pipesSpawned < this.targetGoal) {
+                        if (this.pipes.length === 0 || this.pipes[this.pipes.length - 1].x < this.width - pipeSpacing) {
+                            this.spawnPipe();
+                        }
+                    }
+
+                    // Update Finish Line Gate
+                    if (this.finishLine) {
+                        this.finishLine.x -= this.pipeSpeed;
+
+                        // When player crosses finish line gate!
+                        if (!this.finishLine.passed && this.man.x >= this.finishLine.x + 15) {
+                            this.finishLine.passed = true;
+                            this.finishLine.brokenRibbon = true;
+                            this.triggerLevelClear();
+                            return;
+                        }
                     }
 
                     const manBox = {
@@ -1383,18 +2201,12 @@
                             p.bottomH = this.height - this.groundHeight - p.bottomY;
                         }
 
-                        // Score Pass & Goal Check
+                        // Score Pass Count
                         if (!p.passed && p.x + this.pipeWidth < this.man.x) {
                             p.passed = true;
                             this.score++;
                             audio.playScore();
                             document.getElementById('scoreHUD').textContent = `${this.score} / ${this.targetGoal}`;
-                            
-                            // Check if level goal reached!
-                            if (this.score >= this.targetGoal) {
-                                this.triggerLevelClear();
-                                return;
-                            }
                         }
 
                         // Pipe Collision Check
@@ -2271,6 +3083,128 @@
                 });
             }
 
+            drawFinishLine() {
+                if (!this.finishLine) return;
+                const ctx = this.ctx;
+                const fn = this.finishLine;
+                const floorY = this.height - this.groundHeight;
+
+                ctx.save();
+
+                // 1. Dual Golden Checkered Gate Pillars
+                const pillarW = 16;
+                const archLeft = fn.x;
+                const archRight = fn.x + 40;
+
+                [archLeft, archRight].forEach((px) => {
+                    // Checkered Pillar
+                    for (let y = 0; y < floorY; y += 16) {
+                        ctx.fillStyle = ((Math.floor(y / 16) % 2 === 0) ? '#f59e0b' : '#ffffff');
+                        ctx.fillRect(px, y, pillarW, 16);
+                    }
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(px, 0, pillarW, floorY);
+
+                    // Golden Finial Sphere
+                    ctx.beginPath();
+                    ctx.arc(px + pillarW / 2, 8, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.shadowColor = '#f59e0b';
+                    ctx.shadowBlur = 12;
+                    ctx.fill();
+                    ctx.stroke();
+                });
+
+                // 2. Overhead Arched Finish Banner
+                ctx.beginPath();
+                ctx.roundRect(fn.x - 24, 22, 104, 38, 10);
+                ctx.fillStyle = '#0f172a';
+                ctx.shadowColor = '#38bdf8';
+                ctx.shadowBlur = 20;
+                ctx.fill();
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                // Checkered Banner Trim
+                for (let cx = fn.x - 20; cx < fn.x + 76; cx += 12) {
+                    ctx.fillStyle = (Math.floor(cx / 12) % 2 === 0) ? '#ffffff' : '#000000';
+                    ctx.fillRect(cx, 26, 12, 5);
+                }
+
+                ctx.font = '900 13px "Outfit", sans-serif';
+                ctx.fillStyle = '#fbbf24';
+                ctx.textAlign = 'center';
+                ctx.shadowColor = '#f59e0b';
+                ctx.shadowBlur = 8;
+                ctx.fillText('🏁 FINISH 🏁', fn.x + 28, 48);
+
+                // 3. Finish Line Red & White Checkered Ribbon (or Snapped fluttering pieces)
+                if (!fn.brokenRibbon) {
+                    // Solid checkered ribbon across the middle
+                    const ribbonY = floorY * 0.45;
+                    ctx.beginPath();
+                    ctx.rect(archLeft + pillarW, ribbonY - 14, (archRight - archLeft - pillarW), 28);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.shadowColor = '#ef4444';
+                    ctx.shadowBlur = 14;
+                    ctx.fill();
+
+                    // Checkered pattern on ribbon
+                    for (let rx = archLeft + pillarW; rx < archRight; rx += 8) {
+                        for (let ry = ribbonY - 14; ry < ribbonY + 14; ry += 8) {
+                            if ((Math.floor(rx / 8) + Math.floor(ry / 8)) % 2 === 0) {
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fillRect(rx, ry, 8, 8);
+                            }
+                        }
+                    }
+
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(archLeft + pillarW, ribbonY - 14, (archRight - archLeft - pillarW), 28);
+                } else {
+                    // Broken Ribbon fluttering on both sides
+                    const ribbonY = floorY * 0.45;
+                    // Left piece
+                    ctx.fillStyle = '#ef4444';
+                    ctx.beginPath();
+                    ctx.moveTo(archLeft + pillarW, ribbonY - 14);
+                    ctx.lineTo(archLeft + pillarW + 14, ribbonY - 22);
+                    ctx.lineTo(archLeft + pillarW + 10, ribbonY + 6);
+                    ctx.lineTo(archLeft + pillarW, ribbonY + 14);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Right piece
+                    ctx.beginPath();
+                    ctx.moveTo(archRight, ribbonY - 14);
+                    ctx.lineTo(archRight - 14, ribbonY - 4);
+                    ctx.lineTo(archRight - 12, ribbonY + 22);
+                    ctx.lineTo(archRight, ribbonY + 14);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                // 4. Floating Decorative Balloons at Top
+                const time = performance.now() * 0.003;
+                const bY1 = 12 + Math.sin(time) * 4;
+                const bY2 = 16 + Math.cos(time + 1) * 4;
+
+                ctx.beginPath();
+                ctx.arc(fn.x - 14, bY1, 8, 0, Math.PI * 2);
+                ctx.fillStyle = '#ef4444';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(fn.x + 70, bY2, 8, 0, Math.PI * 2);
+                ctx.fillStyle = '#3b82f6';
+                ctx.fill();
+
+                ctx.restore();
+            }
+
             render() {
                 const dpr = window.devicePixelRatio || 1;
                 this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -2278,6 +3212,7 @@
 
                 this.drawBackground();
                 this.drawPipes();
+                this.drawFinishLine();
                 this.drawGround();
                 this.drawParticles();
                 this.drawFlappyMan();
@@ -2289,6 +3224,38 @@
                 requestAnimationFrame(() => this.loop());
             }
         }
+
+        window.pauseFlappyGame = function() {
+            if (window.flappyGame) {
+                if (window.flappyGame.state === 'PLAYING' || window.flappyGame.state === 'READY') {
+                    window.flappyGame.previousState = window.flappyGame.state;
+                    window.flappyGame.state = 'PAUSED';
+                }
+                document.body.classList.add('portal-paused');
+                const bankBadge = document.getElementById('portal-top-bank');
+                if (bankBadge) bankBadge.textContent = `🪙 ${localStorage.getItem('coins') || 70} P`;
+            }
+        };
+
+        window.resumeFlappyGame = function() {
+            if (window.flappyGame) {
+                if (window.flappyGame.state === 'PAUSED') {
+                    window.flappyGame.state = window.flappyGame.previousState || 'PLAYING';
+                }
+                document.body.classList.remove('portal-paused');
+            }
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+                if (document.body.classList.contains('portal-paused')) {
+                    window.resumeFlappyGame();
+                } else {
+                    window.pauseFlappyGame();
+                }
+            }
+        });
 
         window.addEventListener('DOMContentLoaded', () => {
             window.flappyGame = new FlappyManGame();

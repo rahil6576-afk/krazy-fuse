@@ -199,6 +199,13 @@ class SoundManager {
         this.playTone(500, 'sawtooth', 0.15, 0.3, -300);
     }
 
+    playMilestone() {
+        this.init();
+        if (this.isMuted || !this.ctx) return;
+        this.playTone(880, 'sine', 0.08, 0.32, 0);
+        setTimeout(() => this.playTone(1760, 'sine', 0.12, 0.36, 0), 85);
+    }
+
     playBossAlert() {
         this.init();
         if (this.isMuted || !this.ctx) return;

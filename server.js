@@ -44,22 +44,43 @@ const server = http.createServer((req, res) => {
 
     fs.stat(filePath, (err, stats) => {
         if (!err && stats.isDirectory()) {
+            if (!cleanUrl.endsWith('/')) {
+                const query = req.url.includes('?') ? '?' + req.url.split('?')[1] : '';
+                res.writeHead(301, { 'Location': cleanUrl + '/' + query });
+                res.end();
+                return;
+            }
             filePath = path.join(filePath, 'index.html');
         }
 
         fs.readFile(filePath, (err, data) => {
             if (err) {
                 // If not found at direct path, try dist/
-                const distPath = path.join(PUBLIC_DIR, 'dist', cleanUrl);
-                fs.readFile(distPath, (distErr, distData) => {
-                    if (distErr) {
-                        res.writeHead(404, { 'Content-Type': 'text/plain' });
-                        res.end('404 Not Found');
-                    } else {
-                        const ext = path.extname(distPath).toLowerCase();
-                        res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
-                        res.end(distData);
+                let distPath = path.join(PUBLIC_DIR, 'dist', cleanUrl);
+                fs.stat(distPath, (dStatErr, dStats) => {
+                    if (!dStatErr && dStats.isDirectory()) {
+                        if (!cleanUrl.endsWith('/')) {
+                            const query = req.url.includes('?') ? '?' + req.url.split('?')[1] : '';
+                            res.writeHead(301, { 'Location': cleanUrl + '/' + query });
+                            res.end();
+                            return;
+                        }
+                        distPath = path.join(distPath, 'index.html');
                     }
+
+                    fs.readFile(distPath, (distErr, distData) => {
+                        if (distErr) {
+                            res.writeHead(404, { 'Content-Type': 'text/plain' });
+                            res.end('404 Not Found');
+                        } else {
+                            const ext = path.extname(distPath).toLowerCase();
+                            res.writeHead(200, {
+                                'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
+                                'Access-Control-Allow-Origin': '*'
+                            });
+                            res.end(distData);
+                        }
+                    });
                 });
                 return;
             }
@@ -74,17 +95,34 @@ const server = http.createServer((req, res) => {
     });
 });
 
-server.listen(PORT, () => {
-    const url = `http://localhost:${PORT}`;
-    console.log(`\n⚡ Krazio Games Local Server is live at: ${url}`);
-    console.log(`🚀 Opening Google Chrome...\n`);
+function startServer(port) {
+    server.removeAllListeners('error');
+    server.removeAllListeners('listening');
 
-    // Open Chrome automatically AFTER the server is ready
-    if (process.platform === 'win32') {
-        exec(`start chrome ${url}`);
-    } else if (process.platform === 'darwin') {
-        exec(`open -a "Google Chrome" ${url} || open ${url}`);
-    } else {
-        exec(`google-chrome ${url} || xdg-open ${url}`);
-    }
-});
+    server.once('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            console.log(`⚠️ Port ${port} is already in use, trying port ${port + 1}...`);
+            startServer(port + 1);
+        } else {
+            console.error('Server error:', err);
+        }
+    });
+
+    server.listen(port, () => {
+        const url = `http://localhost:${port}`;
+        console.log(`\n⚡ Krazio Games Local Server is live at: ${url}`);
+        console.log(`🚀 Opening Google Chrome...\n`);
+
+        // Open Chrome automatically AFTER the server is ready
+        if (process.platform === 'win32') {
+            exec(`start chrome ${url}`);
+        } else if (process.platform === 'darwin') {
+            exec(`open -a "Google Chrome" ${url} || open ${url}`);
+        } else {
+            exec(`google-chrome ${url} || xdg-open ${url}`);
+        }
+    });
+}
+
+startServer(Number(PORT));
+

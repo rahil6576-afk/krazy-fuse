@@ -479,11 +479,742 @@
         .modal-card { padding: 24px 18px; }
         .levels-grid { grid-template-columns: repeat(4, 1fr); }
       }
+
+      /* =============================================
+         Rhino Boss QTE Overlay
+         ============================================= */
+      #rhino-kick-prompt {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.18s ease;
+        background: radial-gradient(ellipse at center,
+          rgba(255,42,85,0.10) 0%,
+          rgba(5,7,20,0.22) 100%);
+      }
+      #rhino-kick-prompt.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .rhino-qte-inner {
+        text-align: center;
+        animation: rhinoPulse 0.44s infinite alternate ease-in-out;
+        filter: drop-shadow(0 0 28px rgba(255,42,85,0.55));
+      }
+      .rhino-qte-icon {
+        font-size: 5.5rem;
+        line-height: 1;
+        display: block;
+        margin-bottom: 8px;
+      }
+      .rhino-qte-title {
+        font-size: 1.65rem;
+        font-weight: 900;
+        color: #ff2a55;
+        text-shadow: 0 0 22px rgba(255,42,85,0.95), 0 2px 6px rgba(0,0,0,0.9);
+        letter-spacing: 3px;
+        margin-bottom: 10px;
+      }
+      .rhino-qte-cta {
+        font-size: 2.3rem;
+        font-weight: 900;
+        color: #fff;
+        text-shadow: 0 0 28px rgba(255,42,85,0.8), 0 3px 10px rgba(0,0,0,0.95);
+        letter-spacing: 4px;
+        padding: 10px 30px;
+        border: 3px solid rgba(255,42,85,0.75);
+        border-radius: 18px;
+        background: rgba(255,42,85,0.16);
+        display: inline-block;
+      }
+      @keyframes rhinoPulse {
+        from { transform: scale(0.93); }
+        to   { transform: scale(1.07); }
+      }
+
+      /* Smooth 60fps Paused Portal Transition System */
+      #game-view-wrapper {
+          width: 100vw;
+          min-height: 100vh;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          background: #060a14;
+          overflow: hidden;
+          transition: padding 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.35s ease;
+      }
+
+      #portal-paused-body {
+          width: 100%;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: relative;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .portal-center-col {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 0;
+          margin: 0;
+          transition: padding 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      /* Default Fullscreen Game Frame */
+      #game-container {
+          width: 100vw;
+          height: 100vh;
+          max-width: 100vw;
+          max-height: 100vh;
+          border-radius: 0px;
+          border: 1.5px solid transparent;
+          box-shadow: none;
+          position: relative;
+          overflow: hidden;
+          transition: max-width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                      height 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                      max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                      border-radius 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                      border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                      box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      /* Portal UI Elements (Fixed and Hardware Accelerated) */
+      .portal-topbar {
+          height: 60px;
+          background: rgba(11, 18, 32, 0.95);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 24px;
+          gap: 20px;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+          font-family: 'Outfit', sans-serif;
+          opacity: 0;
+          pointer-events: none;
+          transform: translateY(-100%);
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+      }
+
+      .portal-sidebar {
+          width: 70px;
+          background: rgba(8, 14, 26, 0.92);
+          border-right: 1px solid rgba(255, 255, 255, 0.08);
+          padding: 16px 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          align-items: center;
+          position: fixed;
+          top: 60px;
+          left: 0;
+          bottom: 0;
+          z-index: 990;
+          opacity: 0;
+          pointer-events: none;
+          transform: translateX(-100%);
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+      }
+
+      .portal-rec-col {
+          width: 280px;
+          background: rgba(8, 14, 26, 0.92);
+          border-left: 1px solid rgba(255, 255, 255, 0.08);
+          padding: 18px 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          position: fixed;
+          top: 60px;
+          right: 0;
+          bottom: 0;
+          z-index: 990;
+          opacity: 0;
+          pointer-events: none;
+          transform: translateX(100%);
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+          overflow-y: auto;
+      }
+
+      .game-meta-bar {
+          width: 100%;
+          max-width: 860px;
+          margin-top: 14px;
+          background: rgba(14, 23, 38, 0.85);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 16px;
+          padding: 12px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+          font-family: 'Outfit', sans-serif;
+          opacity: 0;
+          pointer-events: none;
+          transform: translateY(20px);
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+      }
+
+      .pause-modal-card {
+          position: absolute !important;
+          inset: 0 !important;
+          background: rgba(4, 8, 16, 0.78) !important;
+          backdrop-filter: blur(8px) !important;
+          -webkit-backdrop-filter: blur(8px) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          z-index: 9999 !important;
+          opacity: 0;
+          pointer-events: none;
+          transform: scale(0.92);
+          transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      /* Active Paused State */
+      body.portal-paused {
+          overflow: hidden !important;
+      }
+
+      body.portal-paused .portal-topbar {
+          opacity: 1;
+          pointer-events: auto;
+          transform: translateY(0);
+      }
+
+      body.portal-paused .portal-sidebar {
+          opacity: 1;
+          pointer-events: auto;
+          transform: translateX(0);
+      }
+
+      body.portal-paused .portal-rec-col {
+          opacity: 1;
+          pointer-events: auto;
+          transform: translateX(0);
+      }
+
+      body.portal-paused .game-meta-bar {
+          opacity: 1;
+          pointer-events: auto;
+          transform: translateY(0);
+      }
+
+      body.portal-paused .pause-modal-card {
+          opacity: 1 !important;
+          pointer-events: auto !important;
+          transform: scale(1) !important;
+      }
+
+      body.portal-paused #game-view-wrapper {
+          padding-top: 60px;
+      }
+
+      body.portal-paused .portal-center-col {
+          padding: 16px 300px 24px 90px;
+      }
+
+      body.portal-paused #game-container {
+          max-width: 860px !important;
+          height: 520px !important;
+          max-height: 520px !important;
+          border-radius: 18px !important;
+          border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
+          box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.25) !important;
+      }
+
+      body.portal-paused .game-meta-bar {
+          display: flex !important;
+      }
+
+      body.portal-paused .portal-rec-col {
+          display: flex !important;
+      }
+
+      body.portal-paused .pause-modal-card {
+          display: flex !important;
+      }
+
+      .portal-topbar {
+          height: 60px;
+          background: rgba(11, 18, 32, 0.95);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 24px;
+          gap: 20px;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          font-family: 'Outfit', sans-serif;
+      }
+
+      .portal-nav-left {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          flex: 1;
+          max-width: 520px;
+      }
+
+      .portal-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: #fff;
+          text-decoration: none;
+          font-weight: 900;
+      }
+
+      .portal-brand-icon {
+          width: 34px;
+          height: 34px;
+          border-radius: 9px;
+          background: linear-gradient(135deg, #0284c7, #6366f1);
+          display: grid;
+          place-items: center;
+          font-size: 1.2rem;
+          box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+      }
+
+      .portal-brand span {
+          display: flex;
+          flex-direction: column;
+          line-height: 1;
+      }
+
+      .portal-brand b {
+          font-size: 0.95rem;
+          letter-spacing: 0.5px;
+      }
+
+      .portal-brand small {
+          font-size: 0.52rem;
+          color: #38bdf8;
+          letter-spacing: 1.5px;
+          font-weight: 800;
+          margin-top: 2px;
+      }
+
+      .portal-search-box {
+          flex: 1;
+          position: relative;
+          display: flex;
+          align-items: center;
+      }
+
+      .portal-search-box .search-icon {
+          position: absolute;
+          left: 12px;
+          font-size: 0.85rem;
+          color: #64748b;
+          pointer-events: none;
+      }
+
+      .portal-search-box input {
+          width: 100%;
+          height: 38px;
+          background: rgba(15, 23, 42, 0.85);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 999px;
+          padding: 0 16px 0 36px;
+          color: #f8fafc;
+          font-size: 0.82rem;
+          font-family: inherit;
+          outline: none;
+          cursor: pointer;
+          transition: 0.2s;
+      }
+
+      .portal-search-box input:hover {
+          border-color: rgba(56, 189, 248, 0.4);
+          background: rgba(15, 23, 42, 0.95);
+      }
+
+      .portal-nav-pills {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+      }
+
+      .nav-pill {
+          padding: 6px 13px;
+          border-radius: 999px;
+          background: rgba(30, 41, 59, 0.6);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          color: #94a3b8;
+          text-decoration: none;
+          font-size: 0.72rem;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          transition: 0.2s;
+          font-family: 'Outfit', sans-serif;
+      }
+
+      .nav-pill:hover, .nav-pill.active {
+          background: rgba(56, 189, 248, 0.15);
+          border-color: rgba(56, 189, 248, 0.4);
+          color: #38bdf8;
+      }
+
+      .portal-nav-right {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+      }
+
+      .portal-bank-badge {
+          padding: 6px 13px;
+          background: rgba(251, 191, 36, 0.15);
+          border: 1.5px solid rgba(251, 191, 36, 0.4);
+          color: #fbbf24;
+          border-radius: 999px;
+          font-weight: 900;
+          font-size: 0.78rem;
+          font-family: 'Outfit', sans-serif;
+      }
+
+      .portal-resume-btn {
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 16px;
+          background: linear-gradient(135deg, #0284c7, #2563eb);
+          border: 1px solid rgba(56, 189, 248, 0.4);
+          border-radius: 999px;
+          color: #fff;
+          font-weight: 900;
+          font-size: 0.78rem;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+          transition: 0.2s;
+          font-family: 'Outfit', sans-serif;
+      }
+
+      .portal-resume-btn:hover {
+          transform: scale(1.04);
+          box-shadow: 0 6px 20px rgba(2, 132, 199, 0.6);
+      }
+
+      .portal-sidebar {
+          width: 68px;
+          background: #080d19;
+          border-right: 1px solid rgba(255, 255, 255, 0.06);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 16px 0;
+          gap: 10px;
+          font-family: 'Outfit', sans-serif;
+      }
+
+      .side-btn {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: #94a3b8;
+          text-decoration: none;
+          transition: 0.2s;
+          background: transparent;
+      }
+
+      .side-btn span {
+          font-size: 1.15rem;
+      }
+
+      .side-btn small {
+          font-size: 0.55rem;
+          font-weight: 800;
+          margin-top: 2px;
+      }
+
+      .side-btn:hover, .side-btn.active {
+          background: rgba(56, 189, 248, 0.15);
+          color: #38bdf8;
+          border: 1px solid rgba(56, 189, 248, 0.3);
+      }
+
+      .game-meta-bar {
+          width: 100%;
+          max-width: 860px;
+          margin-top: 12px;
+          padding: 14px 18px;
+          background: rgba(15, 23, 42, 0.85);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+          font-family: 'Outfit', sans-serif;
+      }
+
+      .game-meta-info {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+      }
+
+      .game-avatar-icon {
+          font-size: 1.8rem;
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          background: rgba(30, 41, 59, 0.8);
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .game-meta-info h3 {
+          font-size: 1.05rem;
+          font-weight: 900;
+          color: #f8fafc;
+          margin: 0 0 3px 0;
+      }
+
+      .game-meta-tags {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+      }
+
+      .tag-badge {
+          padding: 2px 7px;
+          background: rgba(56, 189, 248, 0.15);
+          color: #38bdf8;
+          border-radius: 5px;
+          font-size: 0.65rem;
+          font-weight: 800;
+      }
+
+      .meta-rating {
+          font-size: 0.72rem;
+          color: #fbbf24;
+          font-weight: 800;
+      }
+
+      .game-meta-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+      }
+
+      .meta-btn {
+          padding: 7px 12px;
+          background: rgba(30, 41, 59, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          color: #cbd5e1;
+          font-size: 0.75rem;
+          font-weight: 800;
+          cursor: pointer;
+          transition: 0.2s;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          font-family: inherit;
+      }
+
+      .meta-btn:hover, .meta-btn.active {
+          background: rgba(56, 189, 248, 0.2);
+          border-color: rgba(56, 189, 248, 0.5);
+          color: #38bdf8;
+      }
+
+      .portal-rec-col {
+          width: 290px;
+          background: #080d19;
+          border-left: 1px solid rgba(255, 255, 255, 0.06);
+          padding: 16px 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          font-family: 'Outfit', sans-serif;
+      }
+
+      .rec-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 0.68rem;
+          font-weight: 900;
+          letter-spacing: 1px;
+          color: #94a3b8;
+          margin-bottom: 4px;
+      }
+
+      .rec-header a {
+          color: #38bdf8;
+          text-decoration: none;
+          font-size: 0.65rem;
+      }
+
+      .rec-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+      }
+
+      .rec-card {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 12px;
+          background: rgba(15, 23, 42, 0.75);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 12px;
+          text-decoration: none;
+          color: inherit;
+          transition: 0.2s;
+          position: relative;
+          overflow: hidden;
+      }
+
+      .rec-card:hover {
+          transform: translateX(4px);
+          border-color: rgba(56, 189, 248, 0.5);
+          background: rgba(30, 41, 59, 0.9);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      .rec-preview {
+          width: 42px;
+          height: 42px;
+          border-radius: 10px;
+          background: rgba(30, 41, 59, 0.8);
+          display: grid;
+          place-items: center;
+          font-size: 1.4rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .rec-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+      }
+
+      .rec-info b {
+          font-size: 0.85rem;
+          color: #f8fafc;
+      }
+
+      .rec-info small {
+          font-size: 0.68rem;
+          color: #94a3b8;
+      }
+
+      .rec-badge {
+          position: absolute;
+          right: 8px;
+          top: 8px;
+          font-size: 0.52rem;
+          font-weight: 900;
+          padding: 2px 6px;
+          border-radius: 4px;
+          background: rgba(56, 189, 248, 0.15);
+          color: #38bdf8;
+          border: 1px solid rgba(56, 189, 248, 0.3);
+      }
+
+      /* Frosted Pause Screen Inside Game Container */
+      .pause-modal-card {
+          position: absolute;
+          inset: 0;
+          background: rgba(7, 13, 24, 0.88);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          display: none;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          z-index: 50;
+          padding: 20px;
+          font-family: 'Outfit', sans-serif;
+      }
+
+      body.portal-paused .pause-modal-card {
+          display: flex;
+      }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
+    <!-- Master Game View Wrapper -->
+    <div id="game-view-wrapper">
+      <!-- Topbar for Paused Portal Mode -->
+      <header id="portal-paused-topbar" class="portal-topbar">
+        <div class="portal-nav-left">
+          <a class="portal-brand" href="../index.html" title="Krazy Fuse Arcade Portal">
+            <span class="portal-brand-icon">⚡</span>
+            <span><b>KRAZY FUSE</b><small>ARCADE PORTAL</small></span>
+          </a>
+          <div class="portal-search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search 250+ free arcade games..." readonly onclick="window.location.href='../index.html'">
+          </div>
+        </div>
+
+        <div class="portal-nav-pills">
+          <a href="../index.html" class="nav-pill active">🔥 HOT</a>
+          <a href="../dart-board/index.html" class="nav-pill">🎯 2-PLAYER</a>
+          <a href="../office-escape/index.html" class="nav-pill">🏃 RUNNER</a>
+          <a href="../flappy-man/index.html" class="nav-pill">🦸 SUPERHERO</a>
+          <a href="../bomb-panic/index.html" class="nav-pill">💣 PARTY</a>
+        </div>
+
+        <div class="portal-nav-right">
+          <div class="portal-bank-badge" id="portal-top-bank">🪙 70 P</div>
+          <button id="btn-portal-maximize" class="portal-resume-btn" onclick="resumeSwingsGame()">
+            <span>▶️ RESUME (ESC)</span>
+          </button>
+        </div>
+      </header>
+
+      <div id="portal-paused-body" class="portal-layout-body">
+        <!-- Left Sidebar Navigation -->
+        <aside class="portal-sidebar">
+          <a href="../index.html" class="side-btn active" title="Home"><span>🏠</span><small>Home</small></a>
+          <a href="../index.html" class="side-btn" title="Trending"><span>🔥</span><small>Hot</small></a>
+          <a href="../dart-board/index.html" class="side-btn" title="2 Player"><span>👥</span><small>2-Player</small></a>
+          <a href="../flappy-man/index.html" class="side-btn" title="Arcade"><span>🕹️</span><small>Arcade</small></a>
+          <a href="../wild-swings/index.html" class="side-btn" title="Action"><span>⚡</span><small>Action</small></a>
+          <a href="../bomb-panic/index.html" class="side-btn" title="Party"><span>💣</span><small>Party</small></a>
+          <a href="../gravity-flip/index.html" class="side-btn" title="Reflex"><span>🔄</span><small>Reflex</small></a>
+        </aside>
+
+        <!-- Center Column -->
+        <main class="portal-center-col">
+          <div id="game-container">
         <!-- 60FPS Stickman Hook Physics Canvas -->
         <canvas id="gameCanvas"></canvas>
 
@@ -664,7 +1395,119 @@
                 </a>
             </div>
         </div>
-    </div>
+
+        <!-- Universal Paused Screen Overlay -->
+        <div class="pause-modal-card">
+          <div style="background: rgba(14, 23, 38, 0.96); border: 2.5px solid rgba(56, 189, 248, 0.4); border-radius: 24px; padding: 28px 32px; text-align: center; max-width: 440px; width: 90%; box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 35px rgba(56,189,248,0.3); backdrop-filter: blur(16px); font-family: 'Outfit', sans-serif;">
+            <div style="display: inline-block; border: 2.5px solid #38bdf8; color: #38bdf8; font-weight: 900; font-size: 1.1rem; padding: 4px 16px; border-radius: 8px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">⏸️ PAUSED</div>
+            <h2 style="font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 6px;">Game Paused</h2>
+            <p style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 20px;">Taking a quick tactical breather...</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; max-width: 280px; margin: 0 auto; width: 100%;">
+              <button class="portal-resume-btn" onclick="resumeSwingsGame()" style="justify-content: center; width: 100%; font-size: 1.05rem; padding: 12px 20px; background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56,189,248,0.4); border-radius: 999px; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.4);">
+                <span>▶️ RESUME (ESC)</span>
+              </button>
+              <button onclick="resumeSwingsGame(); if(window.stickmanGame) window.stickmanGame.restartLevel();" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
+                <span>🔄 RESTART RUN</span>
+              </button>
+              <a href="../index.html" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; text-decoration: none; text-align: center; display: inline-block;">
+                <span>🏠 HOME</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rhino Boss QTE Prompt (level 20 only) -->
+        <div id="rhino-kick-prompt">
+            <div class="rhino-qte-inner">
+                <span class="rhino-qte-icon">🦏</span>
+                <div class="rhino-qte-title">RHINO INCOMING!</div>
+                <div class="rhino-qte-cta">⚡ TAP / CLICK TO KICK! ⚡</div>
+            </div>
+        </div>
+      </div>
+
+      <!-- Under-Game Meta Action Bar -->
+      <div id="game-meta-bar" class="game-meta-bar">
+        <div class="game-meta-info">
+          <div class="game-avatar-icon">🕸️🐒</div>
+          <div>
+            <h3>Wild Swings: Hook & Flight</h3>
+            <div class="game-meta-tags">
+              <span class="tag-badge">Physics</span>
+              <span class="tag-badge">Swinging</span>
+              <span class="tag-badge">20 Levels</span>
+              <span class="meta-rating">⭐ 5.0 (31.8k votes)</span>
+            </div>
+          </div>
+        </div>
+        <div class="game-meta-actions">
+          <button class="meta-btn" id="btn-meta-like" onclick="this.classList.toggle('active')">
+            👍 <span>31.8k</span>
+          </button>
+          <button class="meta-btn" id="btn-meta-fav" onclick="this.classList.toggle('active')">
+            ⭐ Favorite
+          </button>
+          <button class="meta-btn" id="btn-meta-expand" onclick="resumeSwingsGame()">
+            ⛶ Expand (ESC)
+          </button>
+          <button class="meta-btn" id="btn-meta-share" onclick="if(navigator.clipboard){navigator.clipboard.writeText(window.location.href); alert('Game link copied!');}">
+            🔗 Share
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Column: Recommended Games Grid -->
+    <aside id="portal-rec-col" class="portal-rec-col">
+      <div class="rec-header">
+        <span>🔥 RECOMMENDED GAMES</span>
+        <a href="../index.html">ALL <span>→</span></a>
+      </div>
+      <div class="rec-grid">
+        <a href="../office-escape/index.html" class="rec-card">
+          <div class="rec-badge">⚡ SPRINT</div>
+          <div class="rec-preview">🏃💼</div>
+          <div class="rec-info">
+            <b>Office Escape</b>
+            <small>Runner • Satire</small>
+          </div>
+        </a>
+        <a href="../dart-board/index.html" class="rec-card">
+          <div class="rec-badge">🎯 BULLSEYE</div>
+          <div class="rec-preview">🎯🍺</div>
+          <div class="rec-info">
+            <b>Dart Master</b>
+            <small>PvP • 2-Player</small>
+          </div>
+        </a>
+        <a href="../flappy-man/index.html" class="rec-card">
+          <div class="rec-badge">🦸 SUPERHERO</div>
+          <div class="rec-preview">🦸‍♂️🚀</div>
+          <div class="rec-info">
+            <b>Flappy Man</b>
+            <small>Arcade • 10 Levels</small>
+          </div>
+        </a>
+        <a href="../bomb-panic/index.html" class="rec-card">
+          <div class="rec-badge">💣 MULTI</div>
+          <div class="rec-preview">💣💥</div>
+          <div class="rec-info">
+            <b>Bomb Panic</b>
+            <small>Party • Hot Potato</small>
+          </div>
+        </a>
+        <a href="../gravity-flip/index.html" class="rec-card">
+          <div class="rec-badge">⛏️ CAVERN</div>
+          <div class="rec-preview">⛏️🔄</div>
+          <div class="rec-info">
+            <b>Gravity Flip</b>
+            <small>Runner • Reflex</small>
+          </div>
+        </a>
+      </div>
+    </aside>
+  </div>
+</div>
 
     <!-- Complete Authentic Stickman Hook Engine -->
     <script>
@@ -818,6 +1661,121 @@
             osc.stop(noteTime + 0.36);
           });
         }
+
+        // ---- Boss Kick Impact SFX ----
+        playKickSFX() {
+          if (this.muted) return;
+          this.ensure();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          // Heavy low-end thud
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = 'sine';
+          o.frequency.setValueAtTime(145, now);
+          o.frequency.exponentialRampToValueAtTime(26, now + 0.18);
+          g.gain.setValueAtTime(0.68, now);
+          g.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(now); o.stop(now + 0.23);
+          // Crunch noise burst
+          try {
+            const sz = Math.floor(this.ctx.sampleRate * 0.09);
+            const buf = this.ctx.createBuffer(1, sz, this.ctx.sampleRate);
+            const d = buf.getChannelData(0);
+            for (let i = 0; i < sz; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / sz);
+            const noise = this.ctx.createBufferSource(), ng = this.ctx.createGain();
+            noise.buffer = buf;
+            ng.gain.setValueAtTime(0.42, now + 0.02);
+            ng.gain.exponentialRampToValueAtTime(0.01, now + 0.11);
+            noise.connect(ng); ng.connect(this.ctx.destination);
+            noise.start(now + 0.02);
+          } catch(e) {}
+        }
+
+        // ---- Boss Beat Drum Loop ----
+        playBossBeat() {
+          if (this.muted) return;
+          this.ensure();
+          if (!this.ctx) return;
+          this._bossBeatActive = true;
+          this._bossBeatNextTime = this.ctx.currentTime + 0.08;
+          this._scheduleBossBeat();
+        }
+
+        _scheduleBossBeat() {
+          if (!this._bossBeatActive || !this.ctx) return;
+          const bpm = 138;
+          const beat = 60 / bpm;
+          const t = this._bossBeatNextTime;
+          // Kick on 1 & 3, snare on 2 & 4, 8th-note hi-hats, bass synth on 1 & 3
+          this._bKick(t);
+          this._bKick(t + beat * 2);
+          this._bSnare(t + beat);
+          this._bSnare(t + beat * 3);
+          for (let i = 0; i < 8; i++) this._bHat(t + beat * 0.5 * i);
+          this._bBass(t);
+          this._bBass(t + beat * 2);
+          const barLen = beat * 4;
+          this._bossBeatNextTime = t + barLen;
+          this._bossBeatTimeout = setTimeout(() => this._scheduleBossBeat(), (barLen - 0.09) * 1000);
+        }
+
+        _bKick(t) {
+          if (!this.ctx) return;
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = 'sine';
+          o.frequency.setValueAtTime(158, t);
+          o.frequency.exponentialRampToValueAtTime(26, t + 0.13);
+          g.gain.setValueAtTime(0.52, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.17);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(t); o.stop(t + 0.18);
+        }
+
+        _bSnare(t) {
+          if (!this.ctx) return;
+          try {
+            const sz = Math.floor(this.ctx.sampleRate * 0.065);
+            const buf = this.ctx.createBuffer(1, sz, this.ctx.sampleRate);
+            const d = buf.getChannelData(0);
+            for (let i = 0; i < sz; i++) d[i] = Math.random() * 2 - 1;
+            const n = this.ctx.createBufferSource(), g = this.ctx.createGain();
+            n.buffer = buf; g.gain.setValueAtTime(0.26, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+            n.connect(g); g.connect(this.ctx.destination); n.start(t);
+          } catch(e) {}
+          const o = this.ctx.createOscillator(), g2 = this.ctx.createGain();
+          o.type = 'triangle'; o.frequency.setValueAtTime(188, t);
+          g2.gain.setValueAtTime(0.11, t); g2.gain.exponentialRampToValueAtTime(0.01, t + 0.065);
+          o.connect(g2); g2.connect(this.ctx.destination); o.start(t); o.stop(t + 0.07);
+        }
+
+        _bHat(t) {
+          if (!this.ctx) return;
+          try {
+            const sz = Math.floor(this.ctx.sampleRate * 0.022);
+            const buf = this.ctx.createBuffer(1, sz, this.ctx.sampleRate);
+            const d = buf.getChannelData(0);
+            for (let i = 0; i < sz; i++) d[i] = Math.random() * 2 - 1;
+            const n = this.ctx.createBufferSource();
+            const hpf = this.ctx.createBiquadFilter();
+            hpf.type = 'highpass'; hpf.frequency.value = 8500;
+            const g = this.ctx.createGain();
+            n.buffer = buf; g.gain.setValueAtTime(0.08, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.025);
+            n.connect(hpf); hpf.connect(g); g.connect(this.ctx.destination); n.start(t);
+          } catch(e) {}
+        }
+
+        _bBass(t) {
+          if (!this.ctx) return;
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = 'sawtooth'; o.frequency.setValueAtTime(52, t);
+          g.gain.setValueAtTime(0.20, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.16);
+          o.connect(g); g.connect(this.ctx.destination); o.start(t); o.stop(t + 0.17);
+        }
+
+        stopBossBeat() {
+          this._bossBeatActive = false;
+          if (this._bossBeatTimeout) clearTimeout(this._bossBeatTimeout);
+        }
       }
 
       const audio = new StickmanAudio();
@@ -873,6 +1831,19 @@
           this.bgStars = [];
           this.buildings = [];
 
+          // 4-layer parallax building arrays (Spider-Man theme)
+          this.buildingsFar = [];
+          this.buildingsMid = [];
+          this.buildingsNear = [];
+          this.buildingsFg = [];
+
+          // Wind drift & boss fight state
+          this.windForce = 0;
+          this.bossState = null; // null | 'approaching' | 'qte' | 'kick_anim' | 'stagger' | 'done'
+          this.rhinoX = 0;
+          this.bossKickTimer = 0;
+          this.bossStaggerTimer = 0;
+
           this.levelStartTime = performance.now();
           this.levelTime = 0;
 
@@ -886,23 +1857,79 @@
         }
 
         initDecorations() {
-          this.buildings = [];
-          for (let i = 0; i < 40; i++) {
-            this.buildings.push({
-              x: i * 200 + (Math.random() * 80 - 40),
-              width: 120 + Math.random() * 90,
-              height: 280 + Math.random() * 360,
-              layer: (i % 3) + 1,
+          this.buildings = []; // kept for compat
+
+          // --- FAR layer (0.12x) — hazy muted silhouettes ---
+          this.buildingsFar = [];
+          for (let i = 0; i < 36; i++) {
+            this.buildingsFar.push({
+              x: i * 240 + Math.random() * 100,
+              width: 85 + Math.random() * 115,
+              height: 120 + Math.random() * 210,
             });
           }
 
+          // --- MID layer (0.30x) — taller, dim windows ---
+          this.buildingsMid = [];
+          for (let i = 0; i < 42; i++) {
+            const h = 195 + Math.random() * 290;
+            const w = 88 + Math.random() * 125;
+            const wins = [];
+            for (let j = 0; j < 8 + Math.floor(Math.random() * 12); j++) {
+              wins.push({
+                rx: 0.08 + Math.random() * 0.78,
+                ry: 0.08 + Math.random() * 0.78,
+                lit: Math.random() > 0.42,
+                warm: Math.random() > 0.48,
+              });
+            }
+            this.buildingsMid.push({ x: i * 218 + Math.random() * 75, width: w, height: h, windows: wins });
+          }
+
+          // --- NEAR layer (0.60x) — sharp, neon windows, billboards ---
+          this.buildingsNear = [];
+          const billboardLabels = ['OSCORP','STARK TOWER','DAILY BUGLE','FISK IND','AVENGERS','HORIZON LAB','ALCHEMAX','PARKER IND'];
+          const billboardColors = ['#ff2a55','#00f0ff','#ffd700','#ff6b35','#a855f7','#10b981','#f97316','#e879f9'];
+          const winColors = ['#ffe8a0','#00f0ff','#ffd700','#ff9f43','#a29bfe','#7bed9f','#ff6b81'];
+          for (let i = 0; i < 46; i++) {
+            const h = 255 + Math.random() * 395;
+            const w = 115 + Math.random() * 115;
+            const wins = [];
+            for (let j = 0; j < 14 + Math.floor(Math.random() * 16); j++) {
+              wins.push({
+                rx: 0.06 + Math.random() * 0.82,
+                ry: 0.06 + Math.random() * 0.82,
+                lit: Math.random() > 0.30,
+                color: winColors[Math.floor(Math.random() * winColors.length)],
+              });
+            }
+            this.buildingsNear.push({
+              x: i * 192 + Math.random() * 62, width: w, height: h, windows: wins,
+              hasBillboard: Math.random() > 0.48,
+              billboardColor: billboardColors[i % billboardColors.length],
+              billboardText: billboardLabels[i % billboardLabels.length],
+            });
+          }
+
+          // --- FOREGROUND silhouettes (0.88x) — fire escapes, water towers ---
+          this.buildingsFg = [];
+          for (let i = 0; i < 24; i++) {
+            this.buildingsFg.push({
+              x: i * 355 + Math.random() * 160,
+              type: Math.random() > 0.5 ? 'fire_escape' : 'water_tower',
+              h: 52 + Math.random() * 96,
+            });
+          }
+
+          // --- Stars with twinkle phase ---
           this.bgStars = [];
-          for (let i = 0; i < 100; i++) {
+          for (let i = 0; i < 135; i++) {
             this.bgStars.push({
-              x: Math.random() * 4000,
-              y: Math.random() * 1200,
-              radius: 0.8 + Math.random() * 1.5,
-              opacity: 0.25 + Math.random() * 0.7,
+              x: Math.random() * 9200,
+              y: Math.random() * 490,
+              radius: 0.45 + Math.random() * 2.1,
+              opacity: 0.18 + Math.random() * 0.88,
+              twinkle: Math.random() * Math.PI * 2,
             });
           }
         }
@@ -921,6 +1948,11 @@
           const onPress = (e) => {
             if (e.target.closest('.modal-overlay') || e.target.closest('.hud-btn') || e.target.closest('button') || e.target.closest('a')) return;
             this.isHolding = true;
+            // Boss QTE intercept — tap triggers the kick
+            if (this.bossState === 'qte') {
+              this.triggerBossKick();
+              return;
+            }
             if (this.gameState === 'playing') {
               if (this.player.isHooked) {
                 // If already hooked and tapped again, allow quick release/re-hook
@@ -1106,21 +2138,43 @@
         buildLevel(lvl) {
           this.anchors = [];
           this.trampolines = [];
+          this.bossState = null;
 
           const levelLength = 1400 + lvl * 320;
           this.finishLine = { x: levelLength, y: 100, width: 35, height: 550 };
+
+          // === Scaling difficulty knobs ===
+          // Wind: starts level 5, grows gently to ~0.018 at level 20
+          this.windForce = lvl >= 5 ? Math.min((lvl - 4) * 0.0014, 0.018) : 0;
+          // Anchor size shrinks each level (visual challenge)
+          const anchorSize = Math.max(10, 18 - Math.floor(lvl * 0.44));
+          // Moving drone anchors introduced at level 10 (Spider-Man theme)
+          const useMoving = lvl >= 10 && this.theme === 'spiderman';
+          // Tighter horizontal gaps at higher levels
+          const gapBase = Math.max(172, 258 - lvl * 4);
 
           let curX = 240;
           let idx = 0;
 
           while (curX < levelLength - 160) {
-            const anchorY = 170 + Math.sin(idx * 1.2) * 75;
+            // Sin-wave height with increasing amplitude per level
+            const amp = Math.min(72 + lvl * 3, 135);
+            const anchorY = 170 + Math.sin(idx * 1.2) * amp;
+
+            // Every 3rd anchor is a moving drone at level 10+
+            const isMoving = useMoving && (idx % 3 === 2);
 
             this.anchors.push({
               id: `a-${idx}`,
               x: curX,
               y: anchorY,
-              radius: 16,
+              baseX: curX,
+              baseY: anchorY,
+              radius: anchorSize,
+              moving: isMoving,
+              speed: 0.42 + Math.random() * 0.56,
+              range: isMoving ? 32 + Math.random() * 48 : 0,
+              isDrone: isMoving,
             });
 
             if (idx % 2 === 1 || lvl <= 4) {
@@ -1134,7 +2188,7 @@
               });
             }
 
-            curX += 240 + Math.random() * 40;
+            curX += gapBase + Math.random() * 26;
             idx++;
           }
 
@@ -1182,6 +2236,11 @@
               this.player.vy += this.gravity;
               this.player.vx *= this.airResistance;
               this.player.vy *= this.airResistance;
+
+              // Wind drift (Spider-Man theme, levels 5+)
+              if (this.windForce > 0 && this.theme === 'spiderman') {
+                this.player.vx += this.windForce * Math.sin(this.levelTime * 0.85 + 1.3);
+              }
 
               this.player.x += this.player.vx;
               this.player.y += this.player.vy;
@@ -1274,6 +2333,32 @@
             if (c.alpha <= 0) this.confetti.splice(i, 1);
           }
 
+          // Moving anchor tick (drone/helicopter anchors)
+          for (const a of this.anchors) {
+            if (a.moving) {
+              a.x = a.baseX + Math.sin(this.levelTime * a.speed) * a.range;
+              a.y = a.baseY + Math.cos(this.levelTime * a.speed * 0.62) * 22;
+            }
+          }
+
+          // Boss state machine updates
+          if (this.bossState === 'kick_anim') {
+            this.bossKickTimer += dt;
+            if (this.bossKickTimer > 0.65) {
+              this.bossState = 'stagger';
+              this.bossStaggerTimer = 0;
+            }
+          }
+          if (this.bossState === 'stagger') {
+            this.bossStaggerTimer += dt;
+            this.rhinoX += 3.8; // Rhino stumbles backward
+            if (this.bossStaggerTimer > 1.3) {
+              this.bossState = 'done';
+              audio.stopBossBeat();
+              this._showRhinoVictory();
+            }
+          }
+
           this.updateHUD();
         }
 
@@ -1289,7 +2374,37 @@
         }
 
         completeLevel() {
-          if (this.gameState === 'level_cleared') return;
+          if (this.gameState === 'level_cleared' || this.gameState === 'boss') return;
+
+          // === Level 20: Rhino Boss encounter ===
+          if (this.currentLevel === 20 && this.bossState === null) {
+            this.gameState = 'boss';
+            this.bossState = 'approaching';
+            this.rhinoX = this.finishLine.x + 55;
+
+            // Freeze player at finish
+            if (this.player.isHooked) {
+              this.player.isHooked = false;
+              this.player.hookTarget = null;
+              this.player.mode = 'ball';
+            }
+            this.player.vx = 0;
+            this.player.vy = 0;
+
+            audio.ensure();
+            audio.playBossBeat();
+
+            // Show QTE prompt after 1.1s dramatic build-up
+            setTimeout(() => {
+              if (this.bossState === 'approaching') {
+                this.bossState = 'qte';
+                const prompt = document.getElementById('rhino-kick-prompt');
+                if (prompt) prompt.classList.add('active');
+              }
+            }, 1100);
+            return;
+          }
+
           this.gameState = 'level_cleared';
 
           // Auto unhook if attached and launch celebratory arc
@@ -1315,6 +2430,33 @@
             const timeVal = document.getElementById('vic-time');
             const swingsVal = document.getElementById('vic-swings');
             if (title) title.textContent = `LEVEL ${this.currentLevel} CLEARED!`;
+            if (timeVal) timeVal.textContent = `${this.levelTime.toFixed(1)}s`;
+            if (swingsVal) swingsVal.textContent = `${this.player.swingsCount} Swings`;
+            modal.classList.add('active');
+          }
+        }
+
+        triggerBossKick() {
+          if (this.bossState !== 'qte') return;
+          this.bossState = 'kick_anim';
+          this.bossKickTimer = 0;
+          const prompt = document.getElementById('rhino-kick-prompt');
+          if (prompt) prompt.classList.remove('active');
+          audio.playKickSFX();
+        }
+
+        _showRhinoVictory() {
+          this.gameState = 'level_cleared';
+          audio.playVictory();
+          this.spawnConfetti(this.rhinoX, this.finishLine.y + this.finishLine.height * 0.5);
+          this.unlockedLevels = 20;
+          localStorage.setItem('wild_swings_unlocked', '20');
+          const modal = document.getElementById('victory-modal');
+          if (modal) {
+            const title = document.getElementById('vic-title');
+            const timeVal = document.getElementById('vic-time');
+            const swingsVal = document.getElementById('vic-swings');
+            if (title) title.textContent = '🦏 RHINO DEFEATED! ALL LEVELS COMPLETE! 🦏';
             if (timeVal) timeVal.textContent = `${this.levelTime.toFixed(1)}s`;
             if (swingsVal) swingsVal.textContent = `${this.player.swingsCount} Swings`;
             modal.classList.add('active');
@@ -1632,7 +2774,12 @@
             this.ctx.restore();
           }
 
-          this.ctx.restore();
+          // Rhino Boss — rendered in world-space (level 20)
+          if (this.currentLevel === 20 && this.bossState && this.bossState !== 'done') {
+            this.renderRhinoBoss();
+          }
+
+          this.ctx.restore(); // un-translate camera
         }
 
         renderCharacter() {
@@ -1954,37 +3101,337 @@
           this.ctx.restore();
         }
 
+        // =============================================
+        // Rhino Boss Sprite + Kick Animation
+        // =============================================
+        renderRhinoBoss() {
+          if (!this.bossState || this.bossState === 'done') return;
+          this.ctx.save();
+
+          // Already in world-space — draw at (rhinoX, finishLine mid)
+          const rY = this.finishLine.y + this.finishLine.height * 0.55;
+          this.ctx.translate(this.rhinoX, rY);
+
+          const now = performance.now() / 1000;
+          const s = 1.15; // scale factor
+
+          // Stagger wobble + fade
+          if (this.bossState === 'stagger') {
+            this.ctx.rotate(Math.sin(this.bossStaggerTimer * 20) * 0.20);
+            this.ctx.globalAlpha = Math.max(0, 1 - this.bossStaggerTimer * 0.72);
+          }
+
+          // === QTE pulse ring ===
+          if (this.bossState === 'qte') {
+            const pulseR = 92 + Math.sin(now * 7.5) * 14;
+            const pulseA = 0.38 + 0.38 * Math.sin(now * 7.5);
+            this.ctx.strokeStyle = `rgba(255,42,85,${pulseA})`;
+            this.ctx.lineWidth = 5;
+            this.ctx.shadowColor = '#ff2a55';
+            this.ctx.shadowBlur = 22;
+            this.ctx.beginPath();
+            this.ctx.arc(18, 0, pulseR, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.shadowBlur = 0;
+          }
+
+          // === Body — massive armoured tank ===
+          const bodyGrad = this.ctx.createRadialGradient(-10, -10, 5, 0, 0, 65 * s);
+          bodyGrad.addColorStop(0, '#5a6578');
+          bodyGrad.addColorStop(1, '#2d3748');
+          this.ctx.fillStyle = bodyGrad;
+          this.ctx.beginPath();
+          this.ctx.ellipse(0, 0, 56 * s, 40 * s, 0, 0, Math.PI * 2);
+          this.ctx.fill();
+
+          // Armour plates
+          this.ctx.fillStyle = '#1e2535';
+          this.ctx.fillRect(-42 * s, -22 * s, 27 * s, 44 * s);
+          this.ctx.fillRect(16 * s, -22 * s, 27 * s, 44 * s);
+          // Plate rivets
+          this.ctx.fillStyle = '#8898aa';
+          for (const [px, py] of [[-34*s,-14*s],[-34*s,0],[-34*s,14*s],[23*s,-14*s],[23*s,0],[23*s,14*s]]) {
+            this.ctx.beginPath();
+            this.ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+            this.ctx.fill();
+          }
+
+          // === Head ===
+          const headGrad = this.ctx.createRadialGradient(55*s, -12*s, 4, 52*s, -8*s, 32*s);
+          headGrad.addColorStop(0, '#8898aa');
+          headGrad.addColorStop(1, '#4a5568');
+          this.ctx.fillStyle = headGrad;
+          this.ctx.shadowColor = this.bossState === 'qte' ? '#ff2a55' : 'transparent';
+          this.ctx.shadowBlur = this.bossState === 'qte' ? 14 : 0;
+          this.ctx.beginPath();
+          this.ctx.ellipse(52 * s, -9 * s, 31 * s, 26 * s, -0.22, 0, Math.PI * 2);
+          this.ctx.fill();
+          this.ctx.shadowBlur = 0;
+
+          // === Horn ===
+          const hornGrad = this.ctx.createLinearGradient(74*s, -20*s, 108*s, -42*s);
+          hornGrad.addColorStop(0, '#d4dce8');
+          hornGrad.addColorStop(1, '#f0f4f8');
+          this.ctx.fillStyle = hornGrad;
+          this.ctx.beginPath();
+          this.ctx.moveTo(75 * s, -19 * s);
+          this.ctx.lineTo(110 * s, -40 * s);
+          this.ctx.lineTo(82 * s, -8 * s);
+          this.ctx.closePath();
+          this.ctx.fill();
+          this.ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+          this.ctx.lineWidth = 1.2;
+          this.ctx.beginPath();
+          this.ctx.moveTo(82 * s, -14 * s);
+          this.ctx.lineTo(104 * s, -36 * s);
+          this.ctx.stroke();
+
+          // === Angry eye ===
+          this.ctx.fillStyle = '#ff2a55';
+          this.ctx.shadowColor = '#ff2a55';
+          this.ctx.shadowBlur = 12;
+          this.ctx.beginPath();
+          this.ctx.arc(71 * s, -15 * s, 6.5 * s, 0, Math.PI * 2);
+          this.ctx.fill();
+          this.ctx.fillStyle = '#0f172a';
+          this.ctx.shadowBlur = 0;
+          this.ctx.beginPath();
+          this.ctx.arc(73 * s, -16 * s, 3.2 * s, 0, Math.PI * 2);
+          this.ctx.fill();
+          // Angry brow
+          this.ctx.strokeStyle = '#0f172a';
+          this.ctx.lineWidth = 3;
+          this.ctx.lineCap = 'round';
+          this.ctx.beginPath();
+          this.ctx.moveTo(64 * s, -22 * s);
+          this.ctx.lineTo(78 * s, -19 * s);
+          this.ctx.stroke();
+
+          // === Legs ===
+          this.ctx.fillStyle = '#3d4a5c';
+          this.ctx.fillRect(-36 * s, 32 * s, 20 * s, 36 * s);
+          this.ctx.fillRect(-4 * s, 34 * s, 20 * s, 32 * s);
+          this.ctx.fillRect(24 * s, 32 * s, 20 * s, 36 * s);
+          // Hooves
+          this.ctx.fillStyle = '#111827';
+          this.ctx.fillRect(-39 * s, 63 * s, 26 * s, 9 * s);
+          this.ctx.fillRect(-7 * s, 61 * s, 26 * s, 9 * s);
+          this.ctx.fillRect(21 * s, 63 * s, 26 * s, 9 * s);
+
+          // === Kick animation — Spider-Man boot slamming in ===
+          if (this.bossState === 'kick_anim') {
+            const kp = Math.min(this.bossKickTimer / 0.32, 1);
+            const kickX = (-115 + kp * 80) * s;
+            this.ctx.save();
+            this.ctx.translate(kickX, -28 * s);
+            // Blue leg
+            this.ctx.fillStyle = '#1d4ed8';
+            this.ctx.beginPath();
+            this.ctx.roundRect(-10, -30, 21, 34, 5);
+            this.ctx.fill();
+            // Red boot
+            this.ctx.fillStyle = '#e11d48';
+            this.ctx.shadowColor = '#e11d48';
+            this.ctx.shadowBlur = 8;
+            this.ctx.beginPath();
+            this.ctx.ellipse(5, 5, 24, 13, 0.4, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.shadowBlur = 0;
+            // Impact burst when contact
+            if (kp > 0.68) {
+              this.ctx.fillStyle = '#ffd700';
+              this.ctx.shadowColor = '#ffd700';
+              this.ctx.shadowBlur = 16;
+              for (let i = 0; i < 7; i++) {
+                const a = (i / 7) * Math.PI * 2;
+                const sr = 30 + Math.sin(now * 22 + i) * 6;
+                this.ctx.fillRect(Math.cos(a) * sr - 3, Math.sin(a) * sr - 3, 7, 7);
+              }
+              this.ctx.shadowBlur = 0;
+              // WHAM! text
+              this.ctx.fillStyle = '#ffd700';
+              this.ctx.font = 'bold 24px Outfit, sans-serif';
+              this.ctx.textAlign = 'center';
+              this.ctx.shadowColor = '#ff2a55';
+              this.ctx.shadowBlur = 14;
+              this.ctx.fillText('WHAM!', 22, -62);
+              this.ctx.shadowBlur = 0;
+            }
+            this.ctx.restore();
+          }
+
+          this.ctx.globalAlpha = 1;
+          this.ctx.restore();
+        }
+
         renderBackground() {
           const camX = this.camera.x;
           const camY = this.camera.y;
+          const W = this.width;
+          const H = this.height;
+          const now = performance.now() / 1000;
 
           if (this.theme === 'spiderman') {
-            const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
-            grad.addColorStop(0, '#0a0d24');
-            grad.addColorStop(0.6, '#14183d');
-            grad.addColorStop(1, '#2a1236');
+            // === Deep night sky ===
+            const grad = this.ctx.createLinearGradient(0, 0, 0, H);
+            grad.addColorStop(0,   '#02041a');
+            grad.addColorStop(0.5, '#0b0e3c');
+            grad.addColorStop(1,   '#160828');
             this.ctx.fillStyle = grad;
-            this.ctx.fillRect(0, 0, this.width, this.height);
+            this.ctx.fillRect(0, 0, W, H);
 
-            this.ctx.fillStyle = '#ffffff';
+            // Moon + halo
+            const moonX = W * 0.73 - camX * 0.007;
+            const moonY = H * 0.16;
+            const moonGrad = this.ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, 95);
+            moonGrad.addColorStop(0, 'rgba(188,215,255,0.18)');
+            moonGrad.addColorStop(1, 'rgba(0,0,0,0)');
+            this.ctx.fillStyle = moonGrad;
+            this.ctx.fillRect(0, 0, W, H);
+            this.ctx.fillStyle = 'rgba(224,238,255,0.90)';
+            this.ctx.beginPath();
+            this.ctx.arc(moonX, moonY, 22, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            // Stars (0.018x) with per-star twinkle
             for (const s of this.bgStars) {
-              const sx = ((s.x - camX * 0.05) % (this.width + 400) + this.width + 400) % (this.width + 400) - 200;
-              this.ctx.globalAlpha = s.opacity;
+              const sx = ((s.x - camX * 0.018) % (W + 600) + W + 600) % (W + 600) - 300;
+              if (sx < -4 || sx > W + 4) continue;
+              const tw = 0.6 + 0.4 * Math.sin(now * 1.7 + s.twinkle);
+              this.ctx.globalAlpha = s.opacity * tw;
+              this.ctx.fillStyle = '#ffffff';
               this.ctx.beginPath();
-              this.ctx.arc(sx, s.y, s.radius, 0, Math.PI * 2);
+              this.ctx.arc(sx, s.y, s.radius * (0.85 + 0.15 * tw), 0, Math.PI * 2);
               this.ctx.fill();
             }
             this.ctx.globalAlpha = 1;
 
-            for (const b of this.buildings) {
-              const factor = b.layer === 1 ? 0.12 : b.layer === 2 ? 0.25 : 0.42;
-              const bx = b.x - camX * factor;
-              const by = this.height - b.height + camY * 0.1;
-              if (bx > -200 && bx < this.width + 200) {
-                this.ctx.fillStyle = b.layer === 1 ? '#080a1c' : b.layer === 2 ? '#101432' : '#181e46';
-                this.ctx.fillRect(bx, by, b.width, b.height + 400);
+            // FAR buildings (0.12x) — hazy dark silhouettes
+            const farWrap = 8640;
+            for (const b of this.buildingsFar) {
+              const bx = ((b.x - camX * 0.12) % farWrap + farWrap) % farWrap;
+              if (bx > W + 180) continue;
+              const by = H - b.height + camY * 0.02;
+              this.ctx.fillStyle = '#050813';
+              this.ctx.globalAlpha = 0.90;
+              this.ctx.fillRect(bx, by, b.width, b.height + 280);
+            }
+            this.ctx.globalAlpha = 1;
+
+            // MID buildings (0.30x) — dim window lights
+            const midWrap = 9156;
+            for (const b of this.buildingsMid) {
+              const bx = ((b.x - camX * 0.30) % midWrap + midWrap) % midWrap;
+              if (bx > W + 220) continue;
+              const by = H - b.height + camY * 0.06;
+              this.ctx.fillStyle = '#0c1130';
+              this.ctx.fillRect(bx, by, b.width, b.height + 280);
+              if (b.windows) {
+                for (const w of b.windows) {
+                  if (!w.lit) continue;
+                  const wx = bx + w.rx * (b.width - 14) + 4;
+                  const wy = by + w.ry * (b.height - 20) + 10;
+                  this.ctx.fillStyle = w.warm ? 'rgba(255,218,120,0.28)' : 'rgba(140,215,255,0.22)';
+                  this.ctx.fillRect(wx, wy, 8, 11);
+                }
               }
             }
+
+            // NEAR buildings (0.60x) — sharp neon windows, billboards, antennae
+            const nearWrap = 8832;
+            for (const b of this.buildingsNear) {
+              const bx = ((b.x - camX * 0.60) % nearWrap + nearWrap) % nearWrap;
+              if (bx > W + 280) continue;
+              const by = H - b.height + camY * 0.12;
+
+              // Building body
+              const bGrad = this.ctx.createLinearGradient(bx, by, bx + b.width, by);
+              bGrad.addColorStop(0, '#101838');
+              bGrad.addColorStop(1, '#141f44');
+              this.ctx.fillStyle = bGrad;
+              this.ctx.fillRect(bx, by, b.width, b.height + 280);
+
+              // Roof cap + antenna
+              this.ctx.fillStyle = '#1e2d5a';
+              this.ctx.fillRect(bx, by, b.width, 3);
+              this.ctx.fillStyle = '#182044';
+              this.ctx.fillRect(bx + b.width * 0.44, by - 20, 5, 20);
+              // Blinking antenna light
+              if (Math.sin(now * 1.85 + b.x * 0.009) > 0.18) {
+                this.ctx.fillStyle = '#ff4444';
+                this.ctx.shadowColor = '#ff4444';
+                this.ctx.shadowBlur = 7;
+                this.ctx.beginPath();
+                this.ctx.arc(bx + b.width * 0.44 + 2.5, by - 22, 3.2, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.shadowBlur = 0;
+              }
+
+              // Neon window lights
+              if (b.windows) {
+                for (const w of b.windows) {
+                  if (!w.lit) continue;
+                  const wx = bx + w.rx * (b.width - 16) + 5;
+                  const wy = by + w.ry * (b.height - 26) + 13;
+                  this.ctx.fillStyle = w.color;
+                  this.ctx.shadowColor = w.color;
+                  this.ctx.shadowBlur = 8;
+                  this.ctx.fillRect(wx, wy, 9, 12);
+                }
+              }
+              this.ctx.shadowBlur = 0;
+
+              // Billboard
+              if (b.hasBillboard) {
+                const bby = by + b.height * 0.21;
+                const bw = b.width - 22;
+                this.ctx.globalAlpha = 0.84;
+                this.ctx.fillStyle = b.billboardColor;
+                this.ctx.fillRect(bx + 11, bby, bw, 30);
+                this.ctx.globalAlpha = 1;
+                this.ctx.strokeStyle = b.billboardColor;
+                this.ctx.lineWidth = 1.6;
+                this.ctx.shadowColor = b.billboardColor;
+                this.ctx.shadowBlur = 9;
+                this.ctx.strokeRect(bx + 11, bby, bw, 30);
+                this.ctx.shadowBlur = 0;
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = 'bold 10px Outfit, sans-serif';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(b.billboardText, bx + b.width / 2, bby + 20);
+              }
+            }
+
+            // FOREGROUND silhouettes (0.88x) — fire escapes & water towers
+            const fgWrap = 8520;
+            for (const fg of this.buildingsFg) {
+              const fx = ((fg.x - camX * 0.88) % fgWrap + fgWrap) % fgWrap;
+              if (fx > W + 160 || fx < -160) continue;
+              const fy = H - fg.h + camY * 0.24;
+              this.ctx.fillStyle = '#040710';
+              this.ctx.globalAlpha = 0.94;
+              if (fg.type === 'fire_escape') {
+                this.ctx.fillRect(fx, fy, 4, fg.h);
+                this.ctx.fillRect(fx + 32, fy, 4, fg.h);
+                for (let r = 0; r <= 6; r++) {
+                  this.ctx.fillRect(fx - 5, fy + (fg.h / 6) * r - 1, 46, 3);
+                }
+              } else {
+                this.ctx.fillRect(fx + 5, fy + 24, 46, fg.h - 20);
+                this.ctx.beginPath();
+                this.ctx.ellipse(fx + 28, fy + 24, 25, 13, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.moveTo(fx + 3, fy + 24);
+                this.ctx.lineTo(fx + 28, fy + 5);
+                this.ctx.lineTo(fx + 53, fy + 24);
+                this.ctx.fill();
+                this.ctx.fillRect(fx + 5, fy + 28, 5, fg.h - 16);
+                this.ctx.fillRect(fx + 48, fy + 28, 5, fg.h - 16);
+              }
+              this.ctx.globalAlpha = 1;
+            }
+
           } else if (this.theme === 'monkey') {
             const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
             grad.addColorStop(0, '#022c22');
@@ -2212,21 +3659,51 @@
           });
         }
 
+        window.pauseSwingsGame = function() {
+          if (window.stickmanGame && !window.stickmanGame.isPaused) {
+            window.stickmanGame.togglePause();
+            document.body.classList.add('portal-paused');
+            const bankBadge = document.getElementById('portal-top-bank');
+            if (bankBadge) bankBadge.textContent = `🪙 ${localStorage.getItem('coins') || 70} P`;
+          }
+        };
+
+        window.resumeSwingsGame = function() {
+          if (window.stickmanGame && window.stickmanGame.isPaused) {
+            window.stickmanGame.togglePause();
+            document.body.classList.remove('portal-paused');
+          }
+        };
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+            e.preventDefault();
+            if (window.stickmanGame) {
+              if (window.stickmanGame.isPaused) {
+                window.resumeSwingsGame();
+              } else {
+                window.pauseSwingsGame();
+              }
+            }
+          }
+        });
+
         if (pauseBtn) {
           pauseBtn.addEventListener('click', () => {
-            if (window.stickmanGame) window.stickmanGame.togglePause();
+            window.pauseSwingsGame();
           });
         }
 
         if (resumeBtn) {
           resumeBtn.addEventListener('click', () => {
-            if (window.stickmanGame) window.stickmanGame.togglePause();
+            window.resumeSwingsGame();
           });
         }
 
         if (pauseRestartBtn) {
           pauseRestartBtn.addEventListener('click', () => {
             if (window.stickmanGame) {
+              window.resumeSwingsGame();
               window.stickmanGame.restartLevel();
               pauseModal.classList.remove('active');
             }

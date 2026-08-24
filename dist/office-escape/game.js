@@ -39,148 +39,267 @@ let bestDistance = storage.get('best_dist', 0);
 let unlockedAvatars = storage.get('unlocked_avatars', ['dev']);
 let activeAvatarId = storage.get('selected_avatar', 'dev');
 
-// Upgrades (Bought flags)
+// Upgrades (Permanent upgrades)
 let upgrades = storage.get('upgrades', {
     coffee_duration: 0,
     shield_strength: 0,
-    magnet_duration: 0
+    magnet_range: 0,
+    stamina_turbo: 0,
+    coin_boost: 0,
+    sneaker_spring: 0
 });
 
-// Avatar Definitions (Dev unlocked, others purchased with P)
+// Consumable Items Inventory (Single-use items activated per run)
+let inventory = storage.get('inventory', {
+    rocket_start: 0,
+    extra_life: 0,
+    double_points: 0
+});
+
+// Avatar Definitions with clear unlock costs (in P Points)
 const AVATARS = {
     dev: {
         id: 'dev',
-        name: 'Dev',
+        name: 'DEV',
         role: 'Core Developer',
         emoji: '💻',
         perk: 'Double Jump + Fast Stamina',
         color: '#38bdf8',
-        skinColor: '#fed7aa',
-        hairColor: '#f97316',
+        skinColor: '#fbd5b5',
+        hairColor: '#1e293b',
         shirtColor: '#0284c7',
-        pantsColor: '#1e293b',
-        cost: 0,
+        pantsColor: '#0f172a',
+        tieColor: '#ef4444',
+        gender: 'male',
+        hairStyle: 'coder',
+        hasGlasses: true,
+        hasHeadphones: true,
+        cost: 0, // FREE / Starter
         hasDoubleJump: true,
         coffeeBonus: 1.3,
         magnetBonus: 1.0,
         dashBonus: 1.2
     },
-    og_man: {
-        id: 'og_man',
-        name: 'OG Man',
-        role: 'Senior Specialist',
-        emoji: '👨',
-        perk: 'Balanced Agility & Low Friction',
+    maya: {
+        id: 'maya',
+        name: 'MAYA',
+        role: 'Lead UX Designer',
+        emoji: '🎨',
+        perk: 'Agility Glide + High Speed Dash',
+        color: '#f43f5e',
+        skinColor: '#fed7aa',
+        hairColor: '#9a3412',
+        shirtColor: '#f43f5e',
+        pantsColor: '#4c0519',
+        tieColor: '#fb7185',
+        gender: 'female',
+        hairStyle: 'ponytail',
+        hasEarrings: true,
+        cost: 40, // 40 P
+        hasDoubleJump: true,
+        coffeeBonus: 1.2,
+        magnetBonus: 1.3,
+        dashBonus: 1.5
+    },
+    zack: {
+        id: 'zack',
+        name: 'ZACK',
+        role: 'Systems Architect',
+        emoji: '⚡',
+        perk: 'Overdrive Dash + Low Friction',
         color: '#10b981',
-        skinColor: '#fde047',
+        skinColor: '#fcd34d',
+        hairColor: '#14532d',
+        shirtColor: '#065f46',
+        pantsColor: '#022c22',
+        tieColor: '#34d399',
+        gender: 'male',
+        hairStyle: 'spiky',
+        hasVisor: true,
+        hasHeadsetMic: true,
+        cost: 60, // 60 P
+        hasDoubleJump: true,
+        coffeeBonus: 1.3,
+        magnetBonus: 1.1,
+        dashBonus: 1.6
+    },
+    chloe: {
+        id: 'chloe',
+        name: 'CHLOE',
+        role: 'Product Lead',
+        emoji: '📊',
+        perk: 'Point Magnet Boost + 2x Coin Value',
+        color: '#f59e0b',
+        skinColor: '#ffedd5',
         hairColor: '#451a03',
-        shirtColor: '#10b981',
-        pantsColor: '#334155',
-        cost: 40,
-        hasDoubleJump: false,
-        coffeeBonus: 1.1,
+        shirtColor: '#d97706',
+        pantsColor: '#291508',
+        tieColor: '#fbbf24',
+        gender: 'female',
+        hairStyle: 'bob',
+        hasPearlEarrings: true,
+        cost: 80, // 80 P
+        hasDoubleJump: true,
+        coinMultiplier: 1.5,
+        coffeeBonus: 1.2,
+        magnetBonus: 2.2,
+        dashBonus: 1.2
+    },
+    kai: {
+        id: 'kai',
+        name: 'KAI',
+        role: 'Night Ops',
+        emoji: '🕶️',
+        perk: 'Stealth Phase + Protective Shield',
+        color: '#a855f7',
+        skinColor: '#e2e8f0',
+        hairColor: '#4c1d95',
+        shirtColor: '#1e1b4b',
+        pantsColor: '#0f0b24',
+        tieColor: '#9333ea',
+        gender: 'male',
+        hairStyle: 'hoodie',
+        hasDarkShades: true,
+        cost: 100, // 100 P
+        hasDoubleJump: true,
+        startShield: true,
+        coffeeBonus: 1.4,
         magnetBonus: 1.2,
         dashBonus: 1.3
     },
-    og_woman: {
-        id: 'og_woman',
-        name: 'OG Woman',
-        role: 'Lead Strategist',
-        emoji: '👩',
-        perk: 'Extended Slide & Fast Dash Recharge',
-        color: '#ec4899',
-        skinColor: '#fed7aa',
-        hairColor: '#a855f7',
-        shirtColor: '#ec4899',
-        pantsColor: '#475569',
-        cost: 40,
-        hasDoubleJump: false,
-        coffeeBonus: 1.1,
-        magnetBonus: 1.3,
+    axel: {
+        id: 'axel',
+        name: 'AXEL',
+        role: 'Facilities Chief',
+        emoji: '🛡️',
+        perk: 'Ice Armor Shield + Hazard Deflect',
+        color: '#38bdf8',
+        skinColor: '#cbd5e1',
+        hairColor: '#334155',
+        shirtColor: '#0f172a',
+        pantsColor: '#020617',
+        tieColor: '#0ea5e9',
+        gender: 'male',
+        hairStyle: 'buzz',
+        hasArmorCollar: true,
+        cost: 150, // 150 P
+        hasDoubleJump: true,
+        startShield: true,
+        coffeeBonus: 1.5,
+        magnetBonus: 1.1,
         dashBonus: 1.4
     },
-    black_man: {
-        id: 'black_man',
-        name: 'Black Man',
-        role: 'Chief Architect',
-        emoji: '👨🏿',
-        perk: 'Free Shield Every Run + 2x Point Coins',
-        color: '#8b5cf6',
-        skinColor: '#582f0e',
-        hairColor: '#1e1b4b',
-        shirtColor: '#8b5cf6',
-        pantsColor: '#0f172a',
-        cost: 60,
-        hasDoubleJump: false,
-        startShield: true,
-        coinMultiplier: 2.0,
-        coffeeBonus: 1.2,
-        magnetBonus: 1.3,
-        dashBonus: 1.2
-    },
-    black_woman: {
-        id: 'black_woman',
-        name: 'Black Woman',
-        role: 'Director of Ops',
-        emoji: '👩🏿',
-        perk: '+80% Point Magnet Range',
-        color: '#f59e0b',
-        skinColor: '#582f0e',
-        hairColor: '#020617',
-        shirtColor: '#f59e0b',
-        pantsColor: '#1e293b',
-        cost: 60,
-        hasDoubleJump: false,
-        coffeeBonus: 1.2,
-        magnetBonus: 1.8,
-        dashBonus: 1.2
-    },
-    muscular_man: {
-        id: 'muscular_man',
-        name: 'Muscular Man',
-        role: 'Fitness Director',
-        emoji: '🏋️‍♂️',
-        perk: 'Smash Obstacles on Dash',
-        color: '#ef4444',
-        skinColor: '#fed7aa',
-        hairColor: '#b45309',
-        shirtColor: '#ef4444',
-        pantsColor: '#1e3a8a',
-        cost: 80,
-        hasDoubleJump: false,
-        coffeeBonus: 1.4,
-        magnetBonus: 1.1,
-        dashBonus: 1.5,
-        startShield: true
-    },
-    muscular_woman: {
-        id: 'muscular_woman',
-        name: 'Muscular Woman',
-        role: 'Power Exec',
-        emoji: '🏋️‍♀️',
-        perk: 'Protective Shield + Double Jump',
-        color: '#06b6d4',
-        skinColor: '#582f0e',
-        hairColor: '#7c2d12',
-        shirtColor: '#06b6d4',
-        pantsColor: '#312e81',
-        cost: 80,
+    nova: {
+        id: 'nova',
+        name: 'NOVA',
+        role: 'Executive VP',
+        emoji: '👑',
+        perk: 'Unlimited Override + 2.5x Score Multiplier',
+        color: '#f43f5e',
+        skinColor: '#18181b',
+        hairColor: '#4c0519',
+        shirtColor: '#09090b',
+        pantsColor: '#000000',
+        tieColor: '#fbbf24',
+        gender: 'executive',
+        hairStyle: 'vip',
+        hasCrownPin: true,
+        hasGlowingEyes: true,
+        cost: 250, // 250 P
         hasDoubleJump: true,
-        coffeeBonus: 1.3,
-        magnetBonus: 1.2,
-        dashBonus: 1.3,
-        startShield: true
+        startShield: true,
+        coinMultiplier: 2.5,
+        coffeeBonus: 1.6,
+        magnetBonus: 2.0,
+        dashBonus: 1.5
     }
 };
 
-// Biomes / Office Departments
+// Store items catalog definition
+const STORE_CATALOG = {
+    upgrades: [
+        { id: 'coffee_duration', name: 'Quad-Shot Espresso', icon: '☕', cost: 50, desc: 'Extends invincibility rush by +3.5s per tier' },
+        { id: 'shield_strength', name: 'Noise-Canceling Shield', icon: '🎧', cost: 75, desc: 'Starts every run with an extra hazard protection bubble' },
+        { id: 'magnet_range', name: 'PTO Point Magnet', icon: '🧲', cost: 60, desc: 'Doubles Point Coin attraction range on screen' },
+        { id: 'stamina_turbo', name: 'Turbo Stamina Matrix', icon: '⚡', cost: 70, desc: 'Stamina recovers 60% faster for rapid dashes' },
+        { id: 'coin_boost', name: 'Stock Option Yield', icon: '🪙', cost: 100, desc: 'Permanently increases all Point Coin rewards by +50%' },
+        { id: 'sneaker_spring', name: 'Anti-Gravity Sneakers', icon: '👟', cost: 80, desc: 'Higher, floatier jumps & smoother air glide' }
+    ],
+    items: [
+        { id: 'rocket_start', name: 'Rocket Coffee Start', icon: '🚀', cost: 30, desc: 'Blasts through the first 300m at supersonic speed!' },
+        { id: 'extra_life', name: 'HR Life Insurance', icon: '🛡️', cost: 45, desc: 'Automatically revives you once on a fatal obstacle crash' },
+        { id: 'double_points', name: 'Double Point Contract', icon: '💰', cost: 40, desc: '2x multiplier on all Points earned in the next run' }
+    ]
+};
+
+// Biomes / Office Departments with rich unique color schemes & architecture
 const BIOMES = [
-    { name: 'Cubicle Maze', bg1: '#0f172a', bg2: '#1e293b', accent: '#38bdf8', wallColor: '#1e293b', floorColor: '#334155', distance: 0 },
-    { name: 'Conference Zone', bg1: '#172554', bg2: '#1e3a8a', accent: '#60a5fa', wallColor: '#1e3a8a', floorColor: '#1e293b', distance: 500 },
-    { name: 'Coffee Pantry', bg1: '#451a03', bg2: '#78350f', accent: '#f59e0b', wallColor: '#78350f', floorColor: '#3d1d07', distance: 1100 },
-    { name: 'HR Compliance Dept', bg1: '#4c0519', bg2: '#831843', accent: '#f43f5e', wallColor: '#831843', floorColor: '#4a044e', distance: 1800 },
-    { name: 'Executive Corner Suite', bg1: '#3b0764', bg2: '#581c87', accent: '#c084fc', wallColor: '#581c87', floorColor: '#2e1065', distance: 2600 },
-    { name: 'The Great Elevator EXIT', bg1: '#022c22', bg2: '#065f46', accent: '#34d399', wallColor: '#065f46', floorColor: '#064e3b', distance: 3500 }
+    { 
+        id: 'cubicles',
+        name: '🖥️ Cubicle Maze', 
+        bg1: '#070b14', 
+        bg2: '#0f172a', 
+        accent: '#38bdf8', 
+        floorColor: '#090d18',
+        laserColor: '#00f0ff',
+        propEmoji: '💻',
+        distance: 0 
+    },
+    { 
+        id: 'conference',
+        name: '📊 Conference Boardroom', 
+        bg1: '#0b132b', 
+        bg2: '#1c2541', 
+        accent: '#60a5fa', 
+        floorColor: '#0a0f24',
+        laserColor: '#3b82f6',
+        propEmoji: '📈',
+        distance: 300 
+    },
+    { 
+        id: 'cafeteria',
+        name: '☕ Coffee Pantry & Cafe', 
+        bg1: '#1a0c02', 
+        bg2: '#451a03', 
+        accent: '#f59e0b', 
+        floorColor: '#1c0c03',
+        laserColor: '#fbbf24',
+        propEmoji: '🍩',
+        distance: 700 
+    },
+    { 
+        id: 'hr_audit',
+        name: '🚨 HR Compliance Dept', 
+        bg1: '#1f040d', 
+        bg2: '#4c0519', 
+        accent: '#f43f5e', 
+        floorColor: '#19030a',
+        laserColor: '#ff2a5f',
+        propEmoji: '📑',
+        distance: 1200 
+    },
+    { 
+        id: 'executive',
+        name: '👑 Executive Penthouse Suite', 
+        bg1: '#150324', 
+        bg2: '#3b0764', 
+        accent: '#c084fc', 
+        floorColor: '#140223',
+        laserColor: '#d946ef',
+        propEmoji: '💎',
+        distance: 1800 
+    },
+    { 
+        id: 'elevator_exit',
+        name: '🛗 The Great Elevator EXIT', 
+        bg1: '#011c16', 
+        bg2: '#064e3b', 
+        accent: '#34d399', 
+        floorColor: '#021813',
+        laserColor: '#10b981',
+        propEmoji: '🚪',
+        distance: 2500 
+    }
 ];
 
 // Satirical Corporate Termination Reasons
@@ -206,13 +325,17 @@ class Player {
     }
 
     reset() {
-        let avatar = AVATARS[activeAvatarId];
-        if (!avatar) {
-            activeAvatarId = 'dev';
-            avatar = AVATARS.dev;
-            storage.set('selected_avatar', 'dev');
+        // Enforce that players can ONLY play with unlocked/purchased characters!
+        let playableId = activeAvatarId;
+        if (!unlockedAvatars.includes(playableId)) {
+            // Find first unlocked avatar, default to 'dev'
+            playableId = unlockedAvatars.find(id => AVATARS[id]) || 'dev';
         }
+        
+        let avatar = AVATARS[playableId] || AVATARS.dev;
         this.avatar = avatar;
+        this.isUnlocked = unlockedAvatars.includes(avatar.id);
+
         this.width = 44 * (avatar.hitboxScale || 1.0);
         this.height = 68 * (avatar.hitboxScale || 1.0);
         this.standHeight = this.height;
@@ -221,30 +344,38 @@ class Player {
         this.groundY = 500 - this.standHeight;
         this.y = this.groundY;
         this.vy = 0;
-        this.gravity = 0.82; // Crisp, balanced Dino jump gravity
-        this.jumpForce = -15.6; // Responsive, punchy jump arc
+        this.gravity = upgrades.sneaker_spring > 0 ? 0.76 : 0.82; 
+        this.jumpForce = upgrades.sneaker_spring > 0 ? -16.8 : -15.6; 
         this.isGrounded = true;
         this.isSliding = false;
         this.isHoldingDuck = false;
         this.slideTimer = 0;
-        this.slideDuration = 30; // frames
+        this.slideDuration = 32;
         this.jumpCount = 0;
-        this.maxJumps = avatar.hasDoubleJump ? 2 : 1;
+        
+        // Perks only active if character is bought / unlocked!
+        this.maxJumps = 2; // Double Jump enabled
         this.jumpBuffer = 0;
         this.coyoteTimer = 0;
 
         // Stamina & Dash
         this.stamina = 100;
         this.maxStamina = 100;
+        this.staminaRechargeDelay = 0;
         this.isDashing = false;
         this.dashTimer = 0;
-        this.dashDuration = 16;
+        this.dashDuration = 18;
 
-        // Buffs
-        this.shield = avatar.startShield ? 1 : 0;
+        // Buffs & Upgrades (Perks only granted when unlocked/bought)
+        this.shield = ((this.isUnlocked && avatar.startShield) || (upgrades.shield_strength > 0)) ? 1 : 0;
         this.coffeeTimer = 0;
         this.ptoTimer = 0;
         this.invulnerableTimer = 0;
+
+        // Single-use items equipped for run (activated in startGame)
+        this.hasExtraLife = false;
+        this.doublePointsActive = false;
+        this.rocketStartActive = false;
 
         // Animation
         this.animFrame = 0;
@@ -252,7 +383,6 @@ class Player {
     }
 
     jump() {
-        // If sliding/ducking, cancel slide and jump immediately
         if (this.isSliding) {
             this.isSliding = false;
             this.slideTimer = 0;
@@ -266,27 +396,36 @@ class Player {
             this.coyoteTimer = 0;
             this.jumpCount = 1;
             window.soundManager.playJump();
-            createDust(this.x + 20, this.y + this.height, 6);
+            createDust(this.x + 20, 500, 5);
         } else if (this.jumpCount < this.maxJumps) {
-            this.vy = this.jumpForce * 0.95;
+            // Double Jump
+            this.vy = this.jumpForce * 0.94;
             this.jumpCount++;
             window.soundManager.playDoubleJump();
-            createJumpRings(this.x + 20, this.y + this.height);
+            createDust(this.x + 20, this.y + this.height, 4);
+            createScorePopup(this.x + 20, this.y, 'DOUBLE JUMP! 🚀', '#38bdf8');
         } else {
-            // Buffer jump input
-            this.jumpBuffer = 8;
+            this.jumpBuffer = 6;
         }
+    }
+
+    slide() {
+        if (this.isSliding) return;
+        this.isSliding = true;
+        this.slideTimer = this.slideDuration;
+        this.height = this.slideHeight;
+        this.y = 500 - this.slideHeight;
+        window.soundManager.playSlide();
+        createDust(this.x + 10, 500, 4);
     }
 
     duckStart() {
         this.isHoldingDuck = true;
         if (this.isGrounded) {
-            this.isSliding = true;
-            this.height = this.slideHeight;
-            this.y = 500 - this.slideHeight;
+            this.slide();
             createSlideSparks(this.x + 10, 500);
         } else {
-            // Fast drop while in air (Classic Chrome Dino mechanic!)
+            // Fast drop while in air
             this.vy += 2.8;
         }
     }
@@ -300,69 +439,69 @@ class Player {
         }
     }
 
-    slide() {
-        this.duckStart();
-        this.slideTimer = this.slideDuration;
-    }
-
     dash() {
-        if (this.stamina >= 35 && !this.isDashing) {
-            this.stamina -= 35;
-            this.isDashing = true;
-            this.dashTimer = this.dashDuration;
-            this.invulnerableTimer = Math.max(this.invulnerableTimer, this.dashDuration);
-            window.soundManager.playDash();
-            createGhostTrail(this);
+        if (this.isDashing) return;
+        if (this.stamina < 30) {
+            window.soundManager.playTone(180, 'sawtooth', 0.08, 0.15);
+            createScorePopup(this.x + 20, this.y - 15, 'LOW STAMINA! ⚠️', '#ef4444');
+            return;
         }
+
+        this.stamina -= 30;
+        this.staminaRechargeDelay = 45;
+        this.isDashing = true;
+        this.dashTimer = this.dashDuration;
+        this.invulnerableTimer = this.dashDuration + 5;
+        window.soundManager.playDash();
+        createScorePopup(this.x + 30, this.y - 20, 'DASH! ⚡', '#38bdf8');
+        const fill = document.getElementById('stamina-fill');
+        if (fill) fill.style.width = (this.stamina / this.maxStamina * 100) + '%';
     }
 
     update() {
         this.animFrame++;
 
-        // Stamina recharge
-        const rechargeRate = 0.45 * (this.avatar.dashBonus || 1.0);
-        if (this.stamina < this.maxStamina) {
-            this.stamina = Math.min(this.maxStamina, this.stamina + rechargeRate);
-        }
-
-        // Slide / Duck timer & state
-        if (this.isSliding) {
-            if (this.slideTimer > 0) this.slideTimer--;
-            if (this.animFrame % 5 === 0) {
-                createSlideSparks(this.x + 5, 500);
-            }
-            if (this.slideTimer <= 0 && !this.isHoldingDuck) {
-                this.isSliding = false;
-                this.height = this.standHeight;
-                this.y = 500 - this.standHeight;
-            }
+        // Stamina Recovery
+        const bonus = (this.isUnlocked && this.avatar.dashBonus) ? this.avatar.dashBonus : 1.0;
+        const staminaRate = (upgrades.stamina_turbo > 0 ? 0.95 : 0.6) * bonus;
+        if (this.staminaRechargeDelay > 0) {
+            this.staminaRechargeDelay--;
+        } else if (this.stamina < this.maxStamina) {
+            this.stamina = Math.min(this.maxStamina, this.stamina + staminaRate);
         }
 
         // Dash Timer
         if (this.isDashing) {
             this.dashTimer--;
-            if (this.animFrame % 2 === 0) {
-                createGhostTrail(this);
-            }
+            createDust(this.x, 500, 1);
             if (this.dashTimer <= 0) {
                 this.isDashing = false;
             }
         }
 
-        // Buff Timers
-        if (this.coffeeTimer > 0) {
-            this.coffeeTimer--;
-            if (this.animFrame % 3 === 0) {
-                createCoffeeSteam(this.x + Math.random() * 30, this.y + 10);
+        // Slide Timer
+        if (this.isSliding) {
+            this.slideTimer--;
+            if (this.isGrounded) createSlideSparks(this.x, 500);
+
+            if (this.slideTimer <= 0 && !this.isHoldingDuck) {
+                this.isSliding = false;
+                this.height = this.standHeight;
+                this.y = 500 - this.standHeight;
+            }
+            if (this.isGrounded) {
+                this.y = 500 - this.height;
             }
         }
+
+        // Buff Timers
+        if (this.coffeeTimer > 0) this.coffeeTimer--;
         if (this.ptoTimer > 0) this.ptoTimer--;
         if (this.invulnerableTimer > 0) this.invulnerableTimer--;
 
-        // Gravity & Jump Physics
+        // Gravity and Physics
         if (!this.isGrounded) {
             if (this.coyoteTimer > 0) this.coyoteTimer--;
-            // Extra fast fall if holding down in air
             if (this.isHoldingDuck) {
                 this.vy += this.gravity * 1.6;
             } else {
@@ -391,336 +530,449 @@ class Player {
             }
         } else {
             this.coyoteTimer = 5;
-            this.runCycle += 0.2 + (gameSpeed * 0.025);
+            this.runCycle += 0.05 + (gameSpeed * 0.025);
         }
 
         if (this.jumpBuffer > 0) {
             this.jumpBuffer--;
         }
     }
+    // Authentic human baseball-slide pose with custom character features
+    drawSlidePose(px, skin, accent) {
+        const av = this.avatar;
+        const groundY = 500; // floor track line
+        const spark = Math.sin(this.animFrame * 0.25) * 1.5;
+        const isWoman = av.gender === 'female' || av.id === 'maya' || av.id === 'chloe';
+
+        ctx.save();
+        ctx.translate(px, groundY);
+
+        // Ground contact shadow under sliding body
+        ctx.save();
+        ctx.globalAlpha = 0.42;
+        ctx.fillStyle = '#010408';
+        ctx.beginPath();
+        ctx.ellipse(20, -1, 56, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // 1. Supporting rear arm bracing against the ground (on the left)
+        ctx.fillStyle = av.shirtColor || accent;
+        ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-28, -20, 18, 8, 3);
+        ctx.fill(); ctx.stroke();
+        // Hand flat against the floor
+        ctx.fillStyle = skin;
+        ctx.beginPath();
+        ctx.roundRect(-30, -10, 14, 5, 2);
+        ctx.fill();
+
+        // 2. Secondary (tucked) leg underneath
+        ctx.fillStyle = av.pantsColor || '#17243b';
+        ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(4, -18, 24, 10, 3);
+        ctx.fill(); ctx.stroke();
+        // Bent knee joint
+        ctx.fillStyle = '#2d3d55';
+        ctx.beginPath(); ctx.arc(26, -13, 5, 0, Math.PI * 2); ctx.fill();
+
+        // 3. Lead leg extended straight forward (shooting to the right)
+        ctx.fillStyle = av.pantsColor || '#17243b';
+        ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(18, -12 + spark, 46, 10, 3);
+        ctx.fill(); ctx.stroke();
+        // Front shoe slicing forward
+        ctx.fillStyle = '#07111e'; ctx.strokeStyle = accent; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(60, -12 + spark, 18, 8, 3);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#e8f4ff';
+        ctx.fillRect(63, -7 + spark, 13, 1.8);
+
+        // 4. Human Torso — leaning backward low to ground
+        const bodyGrad = ctx.createLinearGradient(-16, -30, 26, -12);
+        bodyGrad.addColorStop(0, '#0c2236');
+        bodyGrad.addColorStop(0.45, accent);
+        bodyGrad.addColorStop(1, av.shirtColor || accent);
+        ctx.fillStyle = bodyGrad;
+        ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-16, -28, 40, 18, isWoman ? [5, 8, 5, 5] : 5);
+        ctx.fill(); ctx.stroke();
+
+        // Shirt collar & necktie / blouse
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.moveTo(-10, -26); ctx.lineTo(-2, -26); ctx.lineTo(-6, -20); ctx.closePath();
+        ctx.fill();
+        
+        // Necktie / scarf
+        ctx.fillStyle = av.tieColor || '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(-7, -24); ctx.lineTo(-4, -24); ctx.lineTo(8, -17); ctx.lineTo(5, -17);
+        ctx.closePath(); ctx.fill();
+
+        // 5. Front balancing arm (across chest)
+        ctx.fillStyle = av.shirtColor || accent;
+        ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(8, -26, 20, 8, 3);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = skin;
+        ctx.beginPath(); ctx.arc(28, -22, 4.5, 0, Math.PI * 2); ctx.fill();
+
+        // 6. Human Head — at the BACK (left), tilted back, focused forward
+        // Neck
+        ctx.fillStyle = skin;
+        ctx.fillRect(-18, -32, 7, 7);
+        // Head base
+        ctx.beginPath(); ctx.arc(-14, -36, 11, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#06101d'; ctx.lineWidth = 1.6; ctx.stroke();
+
+        // Distinct Hair & Headgear
+        ctx.fillStyle = av.hairColor || '#1b2430';
+
+        if (av.id === 'maya') {
+            // Maya: Flowing ponytail & bangs
+            ctx.beginPath();
+            ctx.arc(-15, -37, 11.5, Math.PI * 0.6, Math.PI * 2.2);
+            ctx.fill();
+            // Ponytail streaming left
+            ctx.beginPath();
+            ctx.moveTo(-24, -36);
+            ctx.quadraticCurveTo(-38, -40, -36, -28);
+            ctx.quadraticCurveTo(-27, -32, -24, -34);
+            ctx.fill();
+            // Coral Scrunchie
+            ctx.fillStyle = '#f43f5e';
+            ctx.beginPath(); ctx.arc(-24, -35, 2.5, 0, Math.PI * 2); ctx.fill();
+            // Drop Gold Earring
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath(); ctx.arc(-16, -30, 1.8, 0, Math.PI * 2); ctx.fill();
+        } else if (av.id === 'chloe') {
+            // Chloe: Sleek bob haircut
+            ctx.beginPath();
+            ctx.arc(-14, -37, 12, Math.PI * 0.5, Math.PI * 2.3);
+            ctx.fill();
+            ctx.fillRect(-22, -36, 8, 12);
+            // Gold Pearl Earring
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath(); ctx.arc(-15, -30, 2, 0, Math.PI * 2); ctx.fill();
+        } else if (av.id === 'kai') {
+            // Kai: Cowl Hoodie
+            ctx.fillStyle = '#4c1d95';
+            ctx.beginPath(); ctx.arc(-14, -36, 13, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = skin;
+            ctx.beginPath(); ctx.arc(-11, -36, 7.5, 0, Math.PI * 2); ctx.fill();
+        } else if (av.id === 'zack') {
+            // Zack: Spiky Hair
+            ctx.beginPath();
+            ctx.arc(-15, -38, 11.5, Math.PI * 0.7, Math.PI * 2.2);
+            ctx.fill();
+            // Spikes
+            ctx.beginPath();
+            ctx.moveTo(-24, -42); ctx.lineTo(-18, -49); ctx.lineTo(-13, -44);
+            ctx.lineTo(-7, -49); ctx.lineTo(-3, -43); ctx.closePath(); ctx.fill();
+        } else {
+            // Dev / Axel / Nova: Clean Crop
+            ctx.beginPath();
+            ctx.arc(-15, -38, 11.5, Math.PI * 0.7, Math.PI * 2.2);
+            ctx.fill();
+            ctx.fillRect(-22, -37, 4, 7);
+        }
+
+        // Eyes & Accessories
+        if (av.id === 'dev') {
+            // Dev Coder Glasses
+            ctx.fillStyle = '#38bdf8';
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.8;
+            ctx.strokeRect(-9, -38, 5, 4);
+            // Cyan Headphones
+            ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.2;
+            ctx.beginPath(); ctx.arc(-14, -37, 12.5, Math.PI * 0.8, Math.PI * 1.8); ctx.stroke();
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(-26, -38, 3, 6);
+        } else if (av.id === 'zack') {
+            // Zack Neon Visor
+            ctx.fillStyle = '#22c55e';
+            ctx.fillRect(-10, -38, 8, 3.5);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(-8, -37, 5, 1);
+        } else if (av.id === 'kai') {
+            // Kai Neon Shades
+            ctx.fillStyle = '#a855f7';
+            ctx.fillRect(-10, -38, 8, 3.5);
+        } else if (av.id === 'nova') {
+            // Nova Glowing Eyes
+            ctx.fillStyle = '#f43f5e';
+            ctx.beginPath(); ctx.arc(-7.5, -36, 2, 0, Math.PI * 2); ctx.fill();
+        } else {
+            // Normal Eyes
+            ctx.fillStyle = '#172033';
+            ctx.beginPath(); ctx.arc(-7.5, -36, 1.8, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.arc(-7, -36.5, 0.6, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Determined mouth / smile
+        ctx.strokeStyle = isWoman ? '#be123c' : '#7b3f2b'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(-10, -31); ctx.lineTo(-6, -31); ctx.stroke();
+
+        ctx.restore();
+    }
 
     draw() {
         ctx.save();
-
-        // Invulnerable flash
-        if (this.invulnerableTimer > 0 && Math.floor(this.animFrame / 3) % 2 === 0) {
-            ctx.globalAlpha = 0.5;
-        }
-
-        // Shield Bubble
-        if (this.shield > 0) {
-            ctx.save();
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(this.x + this.width / 2, this.y + this.height / 2, 44, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.18)';
-            ctx.fill();
-            ctx.font = '18px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('🎧', this.x + this.width / 2, this.y - 8);
-            ctx.restore();
-        }
-
         const px = this.x;
         const py = this.y;
-        const skin = this.avatar.skinColor || '#fed7aa';
+        const av = this.avatar;
+        const skin = av.skinColor || '#fbd5b5';
+        const accent = av.color || '#38bdf8';
+        const t = this.runCycle;
+        const leg = Math.sin(t) * 7;
+        const arm = Math.cos(t) * 5;
+        const bob = this.isGrounded ? Math.abs(Math.sin(t * 1.05)) * 1.8 : 0;
+        const cx = px + 22;
+        const isWoman = av.gender === 'female' || av.id === 'maya' || av.id === 'chloe';
 
-        if (this.isSliding) {
-            // --- ULTRA-SMOOTH ATHLETIC ACTION SLIDE ---
-            const slideProgress = 1 - (this.slideTimer / this.slideDuration);
-            const tiltAngle = Math.sin(slideProgress * Math.PI) * 0.15;
+        // Ground contact shadow
+        ctx.save();
+        ctx.globalAlpha = this.isGrounded ? 0.42 : 0.16;
+        ctx.fillStyle = '#020611';
+        ctx.beginPath();
+        ctx.ellipse(cx, 503, this.isGrounded ? 24 : 15, 5.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
 
+        if (this.invulnerableTimer > 0 && Math.floor(this.animFrame / 3) % 2 === 0) ctx.globalAlpha = 0.48;
+
+        // Shield / dash / buff aura
+        if (this.shield > 0 || this.isDashing || this.coffeeTimer > 0) {
+            const aura = this.coffeeTimer > 0 ? '#ffb72e' : accent;
             ctx.save();
-            ctx.translate(px + 24, py + 18);
-            ctx.rotate(tiltAngle);
-
-            // Torso leaned back
-            ctx.fillStyle = this.avatar.shirtColor;
+            ctx.strokeStyle = aura;
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.72;
+            ctx.shadowColor = aura;
+            ctx.shadowBlur = 16;
+            ctx.setLineDash(this.shield > 0 ? [6, 5] : []);
             ctx.beginPath();
-            ctx.roundRect(-24, -4, 46, 18, 5);
-            ctx.fill();
-
-            // Tie trailing backward
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(-22, -2, 18, 3.5);
-
-            // Head ducked low
-            ctx.fillStyle = skin;
-            ctx.beginPath();
-            ctx.arc(16, 2, 11, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Focused eye looking ahead
-            ctx.fillStyle = '#0f172a';
-            ctx.beginPath();
-            ctx.arc(20, 1, 2.2, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Hair swept back
-            ctx.fillStyle = this.avatar.hairColor;
-            ctx.beginPath();
-            ctx.arc(14, -2, 11, Math.PI * 0.8, Math.PI * 2.1);
-            ctx.fill();
-
-            // Front Extended Sliding Leg
-            ctx.fillStyle = this.avatar.pantsColor;
-            ctx.fillRect(10, 8, 26, 7);
-            ctx.fillStyle = '#0f172a'; // Shoe
-            ctx.fillRect(32, 7, 10, 8);
-
-            // Back Tucked Leg
-            ctx.fillStyle = this.avatar.pantsColor;
-            ctx.fillRect(-22, 6, 24, 8);
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(-26, 7, 10, 8);
-
-            // Briefcase skimming the ground
-            ctx.fillStyle = '#78350f';
-            ctx.fillRect(-8, 7, 18, 10);
-            ctx.fillStyle = '#d97706';
-            ctx.fillRect(-4, 5, 10, 3);
-
-            ctx.restore();
-        } else {
-            // --- DYNAMIC VECTOR RUNNING / JUMPING CHARACTER ---
-            const legOffset = Math.sin(this.runCycle) * 16;
-            const armOffset = Math.cos(this.runCycle) * 12;
-            const bobY = this.isGrounded ? Math.abs(Math.sin(this.runCycle)) * 3 : 0;
-
-            ctx.save();
-            ctx.translate(px, py - bobY);
-
-            // Running Body Tilt
-            const runTilt = this.isGrounded ? 0.08 : (this.vy < 0 ? -0.1 : 0.12);
-            ctx.rotate(runTilt);
-
-            // 1. Back Arm (Swinging)
-            ctx.fillStyle = this.avatar.shirtColor;
-            ctx.fillRect(12 - armOffset * 0.5, 22, 8, 16);
-            ctx.fillStyle = skin;
-            ctx.beginPath();
-            ctx.arc(16 - armOffset * 0.5, 38, 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 2. Legs with Natural Kinematics
-            ctx.fillStyle = this.avatar.pantsColor;
-            if (this.isGrounded) {
-                // Back Leg
-                ctx.fillRect(8, 42, 11, 20 - legOffset * 0.45);
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(6, 60 - legOffset * 0.45, 15, 8);
-
-                // Front Leg
-                ctx.fillStyle = this.avatar.pantsColor;
-                ctx.fillRect(24, 42, 11, 20 + legOffset * 0.45);
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(22, 60 + legOffset * 0.45, 15, 8);
-            } else {
-                // Tucked Jumping Pose
-                ctx.fillRect(10, 42, 11, 15);
-                ctx.fillRect(24, 42, 11, 10);
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(8, 55, 14, 8);
-                ctx.fillRect(22, 50, 14, 8);
-            }
-
-            // 3. Torso & Build (Custom per avatar type)
-            const isMuscular = this.avatar.id.includes('muscular');
-            const isFemale = this.avatar.id.includes('woman');
-            const torsoW = isMuscular ? 36 : (isFemale ? 26 : 28);
-            const torsoX = isMuscular ? 4 : (isFemale ? 9 : 8);
-
-            ctx.fillStyle = this.avatar.shirtColor;
-            ctx.beginPath();
-            ctx.roundRect(torsoX, 16, torsoW, 28, 6);
-            ctx.fill();
-
-            // Tie, sport stripe, or crop top styling
-            if (this.avatar.id === 'dev') {
-                // Hoodie zipper & pocket
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(21, 16, 2, 28);
-                ctx.fillStyle = '#0369a1';
-                ctx.fillRect(12, 34, 18, 8);
-            } else if (this.avatar.id === 'og_man') {
-                // White collared shirt + Red tie
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(20, 16, 6, 8);
-                ctx.fillStyle = '#ef4444';
-                ctx.fillRect(21, 20, 4, 18);
-            } else if (this.avatar.id === 'og_woman') {
-                // White v-neck + Gold brooch
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.moveTo(18, 16); ctx.lineTo(26, 16); ctx.lineTo(22, 24);
-                ctx.fill();
-                ctx.fillStyle = '#fbbf24';
-                ctx.beginPath();
-                ctx.arc(22, 24, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (this.avatar.id === 'black_man') {
-                // Lavender tie + Lapel
-                ctx.fillStyle = '#c084fc';
-                ctx.fillRect(21, 19, 4, 18);
-                ctx.fillStyle = '#581c87';
-                ctx.fillRect(torsoX + 2, 16, 4, 20);
-            } else if (this.avatar.id === 'black_woman') {
-                // Gold collar line + Black top
-                ctx.fillStyle = '#020617';
-                ctx.fillRect(18, 16, 8, 10);
-                ctx.fillStyle = '#fbbf24';
-                ctx.fillRect(17, 16, 10, 2);
-            } else if (this.avatar.id === 'muscular_man') {
-                // Athletic power stripe
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(torsoX + 3, 24, torsoW - 6, 3);
-            } else if (this.avatar.id === 'muscular_woman') {
-                // Athletic crop top (bare waistline)
-                ctx.fillStyle = skin;
-                ctx.fillRect(torsoX, 36, torsoW, 8);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                ctx.fillRect(torsoX + 2, 26, torsoW - 4, 2);
-            }
-
-            // 4. Head & Face
-            ctx.fillStyle = skin;
-            ctx.beginPath();
-            ctx.arc(22, 10, 12, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Expressive Eye
-            ctx.fillStyle = '#0f172a';
-            ctx.beginPath();
-            ctx.arc(26, 9, 2.3, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Eye highlight
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(25.3, 8.2, 0.8, 0, Math.PI * 2);
-            ctx.fill();
-
-            // --- AVATAR-SPECIFIC HAIRSTYLES, GLASSES & ACCESSORIES ---
-            ctx.fillStyle = this.avatar.hairColor;
-            if (this.avatar.id === 'dev') {
-                // Spiky Orange Dev Hair
-                ctx.beginPath();
-                ctx.arc(21, 6, 13, Math.PI * 0.7, Math.PI * 2.3);
-                ctx.fill();
-                // Developer Glasses
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(23, 7, 7, 4);
-                ctx.fillStyle = '#38bdf8';
-                ctx.fillRect(24, 8, 5, 2);
-                // Headset
-                ctx.fillStyle = '#0284c7';
-                ctx.fillRect(12, 2, 4, 14);
-                ctx.beginPath();
-                ctx.arc(14, 10, 5, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (this.avatar.id === 'og_man') {
-                // Classic Business Hair + Mustache
-                ctx.beginPath();
-                ctx.arc(21, 6, 12, Math.PI * 0.8, Math.PI * 2.2);
-                ctx.fill();
-                // Mustache
-                ctx.fillStyle = this.avatar.hairColor;
-                ctx.fillRect(24, 13, 6, 2.5);
-            } else if (this.avatar.id === 'og_woman') {
-                // Long Hair + Flowing Ponytail
-                ctx.beginPath();
-                ctx.arc(21, 6, 12.5, Math.PI * 0.7, Math.PI * 2.3);
-                ctx.fill();
-                // Dynamic Ponytail
-                ctx.beginPath();
-                ctx.arc(8, 14 + (this.isGrounded ? legOffset * 0.25 : 0), 8, 0, Math.PI * 2);
-                ctx.fill();
-                // Gold Hair Clip & Pearl Earring
-                ctx.fillStyle = '#fbbf24';
-                ctx.fillRect(11, 11, 3, 5);
-                ctx.beginPath();
-                ctx.arc(15, 12, 2, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (this.avatar.id === 'black_man') {
-                // Razor Fade Haircut + Neat Goatee
-                ctx.beginPath();
-                ctx.arc(21, 7, 11.5, Math.PI * 0.8, Math.PI * 2.2);
-                ctx.fill();
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(24, 14, 4, 3);
-            } else if (this.avatar.id === 'black_woman') {
-                // High Braided Bun + Gold Earring & Hair Ring
-                ctx.beginPath();
-                ctx.arc(21, 8, 11.5, Math.PI * 0.8, Math.PI * 2.2);
-                ctx.fill();
-                // Top Bun
-                ctx.beginPath();
-                ctx.arc(18, -2, 8, 0, Math.PI * 2);
-                ctx.fill();
-                // Gold Ring & Earring
-                ctx.fillStyle = '#fbbf24';
-                ctx.fillRect(17, 3, 4, 2);
-                ctx.beginPath();
-                ctx.arc(15, 12, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (this.avatar.id === 'muscular_man') {
-                // Crew Cut + Red Headband
-                ctx.beginPath();
-                ctx.arc(21, 7, 11, Math.PI * 0.8, Math.PI * 2.2);
-                ctx.fill();
-                // Red Headband
-                ctx.fillStyle = '#ef4444';
-                ctx.fillRect(14, 6, 16, 3);
-            } else if (this.avatar.id === 'muscular_woman') {
-                // Cyan Headband & Braided Ponytail
-                ctx.beginPath();
-                ctx.arc(21, 6, 12, Math.PI * 0.8, Math.PI * 2.2);
-                ctx.fill();
-                // Cyan Sports Headband
-                ctx.fillStyle = '#06b6d4';
-                ctx.fillRect(14, 5, 16, 3);
-                // Ponytail
-                ctx.fillStyle = this.avatar.hairColor;
-                ctx.beginPath();
-                ctx.arc(6, 10 + (this.isGrounded ? legOffset * 0.2 : 0), 7, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // 5. Front Arm (Muscular bare bicep or tailored sleeve)
-            ctx.fillStyle = isMuscular ? skin : this.avatar.shirtColor;
-            ctx.fillRect(22 + armOffset * 0.5, 22, isMuscular ? 11 : 8, 16);
-            ctx.fillStyle = skin;
-            ctx.beginPath();
-            ctx.arc(26 + armOffset * 0.5, 38, 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 6. Custom Handheld Props per Avatar
-            if (this.avatar.id === 'dev') {
-                // Glowing Code Tablet
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(22 + armOffset * 0.7, 34, 16, 11);
-                ctx.fillStyle = '#38bdf8';
-                ctx.fillRect(24 + armOffset * 0.7, 36, 12, 7);
-            } else if (isMuscular) {
-                // Dumbbell / Power Shaker
-                ctx.fillStyle = '#475569';
-                ctx.fillRect(24 + armOffset * 0.7, 32, 10, 16);
-                ctx.fillStyle = this.avatar.id === 'muscular_man' ? '#ef4444' : '#06b6d4';
-                ctx.fillRect(23 + armOffset * 0.7, 30, 12, 4);
-                ctx.fillRect(23 + armOffset * 0.7, 46, 12, 4);
-            } else {
-                // Classic Business Briefcase
-                ctx.fillStyle = '#78350f';
-                ctx.fillRect(22 + armOffset * 0.7, 34, 15, 12);
-                ctx.fillStyle = '#d97706';
-                ctx.fillRect(26 + armOffset * 0.7, 32, 7, 3);
-            }
-
+            ctx.arc(cx, py + 34, 35 + Math.sin(this.animFrame * 0.18) * 2, 0, Math.PI * 2);
+            ctx.stroke();
             ctx.restore();
         }
 
+        // --- Ground Slide Pose ---
+        if (this.isSliding && this.isGrounded) {
+            ctx.restore();
+            if (this.invulnerableTimer > 0 && Math.floor(this.animFrame / 3) % 2 === 0) {
+                ctx.globalAlpha = 0.48;
+            }
+            this.drawSlidePose(px, skin, accent);
+            ctx.globalAlpha = 1;
+            return;
+        }
+
+        ctx.save();
+        ctx.translate(px, py - bob);
+        ctx.rotate(this.isGrounded ? 0.035 : (this.vy < 0 ? -0.075 : 0.08));
+
+        // Motion streaks during dash
+        if (this.isDashing || this.coffeeTimer > 0) {
+            const c = this.coffeeTimer > 0 ? '#ffb72e' : accent;
+            ctx.save();
+            ctx.globalAlpha = 0.38;
+            ctx.strokeStyle = c;
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(4, 22 + i * 9);
+                ctx.lineTo(-16 - i * 7, 22 + i * 9);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        const torsoX = isWoman ? 8 : 7;
+        const torsoW = isWoman ? 28 : 30;
+
+        // 1. Legs & Shoes
+        const drawLeg = (x, offset, back=false) => {
+            ctx.save();
+            ctx.translate(x, 40);
+            ctx.rotate(offset * 0.018);
+            ctx.fillStyle = av.pantsColor || '#17243b';
+            ctx.strokeStyle = '#06101d';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 11, 22, 3);
+            ctx.fill(); ctx.stroke();
+            // Polished Shoes
+            ctx.fillStyle = '#0b1422';
+            ctx.beginPath();
+            ctx.roundRect(-3, 17, 16, 8, 3);
+            ctx.fill();
+            ctx.fillStyle = accent;
+            ctx.fillRect(2, 21, 8, 2);
+            ctx.restore();
+        };
+        if (this.isGrounded) {
+            drawLeg(8, leg, true); drawLeg(25, -leg);
+        } else {
+            drawLeg(8, -2); drawLeg(25, 4);
+        }
+
+        // 2. Torso / Jacket / Blouse
+        const bodyGrad = ctx.createLinearGradient(torsoX, 13, torsoX + torsoW, 46);
+        bodyGrad.addColorStop(0, av.shirtColor || accent);
+        bodyGrad.addColorStop(0.55, accent);
+        bodyGrad.addColorStop(1, '#0c2236');
+        ctx.fillStyle = bodyGrad;
+        ctx.strokeStyle = '#06101d';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        if (isWoman) {
+            // Feminine tailored waist jacket / blouse
+            ctx.roundRect(torsoX, 14, torsoW, 30, [6, 6, 8, 8]);
+        } else {
+            // Masculine athletic cut blazer / shirt
+            ctx.roundRect(torsoX, 14, torsoW, 31, 5);
+        }
+        ctx.fill(); ctx.stroke();
+
+        // 3. Shirt collar & tie / blouse neckline
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.moveTo(18, 16); ctx.lineTo(28, 16); ctx.lineTo(23, 23); ctx.closePath(); ctx.fill();
+
+        // Tie or scarf
+        ctx.fillStyle = av.tieColor || '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(21.5, 20); ctx.lineTo(25.5, 20); ctx.lineTo(24, 38); ctx.lineTo(21, 38); ctx.closePath(); ctx.fill();
+
+        // ID badge
+        ctx.fillStyle = '#f8fafc';
+        ctx.strokeStyle = '#1e3448';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.roundRect(25, 28, 8, 10, 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = accent; ctx.fillRect(27, 30, 4, 2);
+
+        // 4. Arms & Hands
+        const armDraw = (x, off, front) => {
+            ctx.save(); ctx.translate(x, 21); ctx.rotate(off * 0.025);
+            ctx.fillStyle = av.shirtColor || accent;
+            ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.roundRect(0, 0, front ? 9 : 8, 18, 3); ctx.fill(); ctx.stroke();
+            // Human hand
+            ctx.fillStyle = skin;
+            ctx.beginPath(); ctx.arc(front ? 4.5 : 4, 19, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+        };
+        armDraw(8, -arm, false); armDraw(29, arm, true);
+
+        // 5. Human Neck + Head
+        ctx.fillStyle = skin;
+        ctx.fillRect(19, 8, 8, 8);
+        ctx.beginPath(); ctx.arc(23, 7.5, 11.5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#06101d'; ctx.lineWidth = 1.6; ctx.stroke();
+
+        // 6. Distinct Hairstyle & Character Features
+        ctx.fillStyle = av.hairColor || '#1b2430';
+
+        if (av.id === 'maya') {
+            // Maya: High flowing ponytail + coral scrunchie + bangs
+            ctx.beginPath();
+            ctx.arc(22, 6, 12, Math.PI * 0.7, Math.PI * 2.2);
+            ctx.fill();
+            // Ponytail streaming back
+            ctx.beginPath();
+            ctx.moveTo(11, 7);
+            ctx.quadraticCurveTo(-2, 8 + Math.sin(t) * 2, 0, 22 + Math.sin(t) * 3);
+            ctx.quadraticCurveTo(8, 14, 11, 10);
+            ctx.fill();
+            // Coral Scrunchie
+            ctx.fillStyle = '#f43f5e';
+            ctx.beginPath(); ctx.arc(11, 8, 2.5, 0, Math.PI * 2); ctx.fill();
+            // Drop Gold Earring
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath(); ctx.arc(18, 14, 1.8, 0, Math.PI * 2); ctx.fill();
+        } else if (av.id === 'chloe') {
+            // Chloe: Sleek bob haircut
+            ctx.beginPath();
+            ctx.arc(22, 6, 12.5, Math.PI * 0.6, Math.PI * 2.3);
+            ctx.fill();
+            ctx.fillRect(12, 6, 8, 15);
+            // Gold Pearl Earring
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath(); ctx.arc(18, 14, 2, 0, Math.PI * 2); ctx.fill();
+        } else if (av.id === 'kai') {
+            // Kai: Cowl Hoodie
+            ctx.fillStyle = '#4c1d95';
+            ctx.beginPath(); ctx.arc(23, 7.5, 13.5, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = skin;
+            ctx.beginPath(); ctx.arc(25, 7.5, 8, 0, Math.PI * 2); ctx.fill();
+        } else if (av.id === 'zack') {
+            // Zack: Spiky Hair
+            ctx.beginPath();
+            ctx.arc(22, 5, 12, Math.PI * 0.7, Math.PI * 2.25);
+            ctx.fill();
+            // Spikes
+            ctx.beginPath();
+            ctx.moveTo(11, 2); ctx.lineTo(16, -6); ctx.lineTo(21, 0);
+            ctx.lineTo(26, -6); ctx.lineTo(31, 1); ctx.closePath(); ctx.fill();
+        } else {
+            // Dev / Axel / Nova: Tapered crop
+            ctx.beginPath();
+            ctx.arc(22, 5, 12, Math.PI * 0.7, Math.PI * 2.25);
+            ctx.fill();
+            ctx.fillRect(13, 5, 4, 7);
+        }
+
+        // Eyes & Distinct Accessories
+        if (av.id === 'dev') {
+            // Dev Coder Glasses
+            ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.2;
+            ctx.strokeRect(26, 5.5, 5, 4);
+            // Dev Cyan Headphones
+            ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.arc(22, 5, 13, Math.PI * 0.8, Math.PI * 1.8); ctx.stroke();
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(10, 4, 3, 6);
+        } else if (av.id === 'zack') {
+            // Zack Neon Cyber Visor
+            ctx.fillStyle = '#22c55e';
+            ctx.fillRect(25, 6, 8, 4);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(26.5, 7.2, 5, 1);
+        } else if (av.id === 'kai') {
+            // Kai Neon Purple Sunglasses
+            ctx.fillStyle = '#a855f7';
+            ctx.fillRect(25, 6, 8, 4);
+        } else if (av.id === 'nova') {
+            // Nova Glowing Ruby Eyes
+            ctx.fillStyle = '#f43f5e';
+            ctx.beginPath(); ctx.arc(28.5, 8, 2, 0, Math.PI * 2); ctx.fill();
+        } else {
+            // Normal sparkling eye
+            ctx.fillStyle = '#172033';
+            ctx.beginPath(); ctx.arc(28, 8, 1.9, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.arc(28.6, 7.5, 0.65, 0, Math.PI * 2); ctx.fill();
+            if (isWoman) {
+                // Eyelash
+                ctx.strokeStyle = '#172033'; ctx.lineWidth = 1.2;
+                ctx.beginPath(); ctx.moveTo(26.5, 6.2); ctx.lineTo(29.8, 6.8); ctx.stroke();
+            }
+        }
+
+        // Mouth / Smile
+        ctx.strokeStyle = isWoman ? '#be123c' : '#7b3f2b'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(26.5, 13); ctx.lineTo(29.5, 13); ctx.stroke();
+
+        ctx.restore();
         ctx.restore();
     }
 }
@@ -866,162 +1118,141 @@ function updateAndDrawParticles() {
     }
 }
 
-// Ultra-Fast Offscreen Cached Parallax Background Engine (Zero CPU Lag!)
+// Layered corporate-night background. Architecture is intentionally brighter and softer
+// than hazards so gameplay objects remain readable at a glance.
 class BackgroundManager {
     constructor() {
-        this.layer1 = 0; // Skyline & Windows
-        this.layer2 = 0; // Wall Decor & Whiteboards
-        this.layer3 = 0; // Cubicles & Desks
-        this.layer4 = 0; // Floor & Ceiling
-        this.initOffscreenBuffers();
-    }
-
-    initOffscreenBuffers() {
-        // 1. Buffer for Skyline Windows (Width 800px)
-        this.skylineCanvas = document.createElement('canvas');
-        this.skylineCanvas.width = 800;
-        this.skylineCanvas.height = 440;
-        const sCtx = this.skylineCanvas.getContext('2d');
-
-        // Draw static skyline pattern
-        sCtx.fillStyle = '#060a17';
-        sCtx.fillRect(0, 0, 800, 440);
-
-        for (let i = 0; i < 2; i++) {
-            const bx = i * 400;
-            sCtx.fillStyle = '#03060c';
-            sCtx.fillRect(bx + 40, 40, 200, 180);
-            sCtx.fillStyle = 'rgba(56, 189, 248, 0.05)';
-            sCtx.fillRect(bx + 40, 40, 200, 180);
-
-            // Skyscrapers
-            sCtx.fillStyle = '#0b1120';
-            sCtx.fillRect(bx + 50, 90, 40, 130);
-            sCtx.fillRect(bx + 95, 60, 55, 160);
-            sCtx.fillRect(bx + 155, 80, 45, 140);
-
-            // Glowing window dots
-            sCtx.fillStyle = 'rgba(254, 240, 138, 0.3)';
-            for (let r = 0; r < 4; r++) {
-                for (let c = 0; c < 2; c++) {
-                    sCtx.fillRect(bx + 105 + c * 16, 75 + r * 22, 6, 8);
-                }
-            }
-
-            sCtx.strokeStyle = '#1e293b';
-            sCtx.lineWidth = 2;
-            sCtx.strokeRect(bx + 40, 40, 200, 180);
-        }
-
-        // 2. Buffer for Cubicles & Props (Width 800px)
-        this.cubicleCanvas = document.createElement('canvas');
-        this.cubicleCanvas.width = 800;
-        this.cubicleCanvas.height = 260;
-        const cCtx = this.cubicleCanvas.getContext('2d');
-
-        for (let i = 0; i < 2; i++) {
-            const bx = i * 400;
-            // Cubicle partition
-            cCtx.fillStyle = '#1e293b';
-            cCtx.beginPath();
-            cCtx.roundRect(bx + 30, 40, 220, 180, [8, 8, 0, 0]);
-            cCtx.fill();
-
-            // Desk
-            cCtx.fillStyle = '#334155';
-            cCtx.fillRect(bx + 50, 130, 180, 14);
-            cCtx.fillStyle = '#475569';
-            cCtx.fillRect(bx + 60, 144, 8, 80);
-            cCtx.fillRect(bx + 210, 144, 8, 80);
-
-            // Dual Monitors
-            cCtx.fillStyle = '#050811';
-            cCtx.fillRect(bx + 70, 75, 55, 42);
-            cCtx.fillRect(bx + 135, 75, 55, 42);
-            cCtx.fillStyle = '#38bdf8';
-            cCtx.fillRect(bx + 76, 82, 22, 3);
-            cCtx.fillStyle = '#f472b6';
-            cCtx.fillRect(bx + 142, 82, 26, 3);
-        }
+        this.scrollFar = 0;
+        this.scrollMid = 0;
+        this.scrollNear = 0;
+        this.lastBiomeId = null;
+        this.time = 0;
     }
 
     update(speed) {
-        this.layer1 -= speed * 0.15;
-        while (this.layer1 <= -800) this.layer1 += 800;
-
-        this.layer2 -= speed * 0.45;
-        while (this.layer2 <= -800) this.layer2 += 800;
-
-        this.layer3 -= speed * 0.65;
-        while (this.layer3 <= -800) this.layer3 += 800;
-
-        this.layer4 -= speed;
-        while (this.layer4 <= -800) this.layer4 += 800;
+        this.time += 0.016;
+        this.scrollFar = (this.scrollFar - speed * 0.10) % 1000;
+        this.scrollMid = (this.scrollMid - speed * 0.26) % 1000;
+        this.scrollNear = (this.scrollNear - speed * 0.65) % 1000;
     }
 
     draw(biome) {
-        const l1 = Math.round(this.layer1);
-        const l3 = Math.round(this.layer3);
-        const l4 = Math.round(this.layer4);
-
-        // 1. Draw Cached Skyline Layer (Snapped to exact integer coordinates)
-        if (this.skylineCanvas) {
-            ctx.drawImage(this.skylineCanvas, l1, 60);
-            ctx.drawImage(this.skylineCanvas, l1 + 800, 60);
-            ctx.drawImage(this.skylineCanvas, l1 + 1600, 60);
+        const far = this.scrollFar, mid = this.scrollMid, near = this.scrollNear, accent = biome.accent;
+        const sky = ctx.createLinearGradient(0,0,0,510);
+        sky.addColorStop(0,biome.bg1); sky.addColorStop(0.42,biome.bg2); sky.addColorStop(1,'#17263a');
+        ctx.fillStyle=sky; ctx.fillRect(0,0,1000,600);
+        switch(biome.id){
+            case 'cubicles':      this._drawCubicles(far,mid,near,accent); break;
+            case 'conference':    this._drawConference(far,mid,near,accent); break;
+            case 'cafeteria':     this._drawCafeteria(far,mid,near,accent); break;
+            case 'hr_audit':      this._drawHR(far,mid,near,accent); break;
+            case 'executive':     this._drawExecutive(far,mid,near,accent); break;
+            case 'elevator_exit': this._drawElevator(far,mid,near,accent); break;
+            default:              this._drawCubicles(far,mid,near,accent);
         }
 
-        // 2. Draw Cached Cubicles Layer
-        if (this.cubicleCanvas) {
-            ctx.save();
-            ctx.globalAlpha = 0.35;
-            ctx.drawImage(this.cubicleCanvas, l3, 240);
-            ctx.drawImage(this.cubicleCanvas, l3 + 800, 240);
-            ctx.drawImage(this.cubicleCanvas, l3 + 1600, 240);
-            ctx.restore();
-        }
+        // Atmospheric Depth Scrim: drapes background architecture in soft depth gradient
+        // ensuring active gameplay hazards & collectibles on the floor lane have crisp, unmistakable contrast
+        const depthScrim = ctx.createLinearGradient(0, 300, 0, 492);
+        depthScrim.addColorStop(0, 'rgba(4, 8, 16, 0.0)');
+        depthScrim.addColorStop(0.55, 'rgba(4, 8, 16, 0.38)');
+        depthScrim.addColorStop(1, 'rgba(4, 8, 16, 0.78)');
+        ctx.fillStyle = depthScrim;
+        ctx.fillRect(0, 300, 1000, 192);
 
-        // 3. Drop Ceiling
-        ctx.fillStyle = '#060913';
-        ctx.fillRect(0, 0, 1000, 70);
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(0, 64, 1000, 4);
+        this._drawCeiling(near,accent);
+        this._drawFloor(near,accent,biome);
+    }
 
-        // Ceiling Lights (Lightweight)
-        for (let i = 0; i < 6; i++) {
-            const lx = Math.round(((l4 + i * 180) % 1080 + 1080) % 1080);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(lx, 66, 60, 3);
-        }
+    _drawCeiling(near,accent){
+        const c=ctx.createLinearGradient(0,0,0,88); c.addColorStop(0,'#050a12'); c.addColorStop(1,'#101b2b');
+        ctx.fillStyle=c; ctx.fillRect(0,0,1000,78);
+        ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(0,77,1000,2);
+        for(let i=-1;i<8;i++){const x=i*165+near; ctx.fillStyle='#eaf3fb'; ctx.fillRect(x,70,70,4); ctx.fillStyle=accent; ctx.globalAlpha=.34; ctx.fillRect(x,74,70,2); ctx.globalAlpha=1;}
+    }
 
-        // 4. Running Floor Base
-        ctx.fillStyle = '#090d18';
-        ctx.fillRect(0, 500, 1000, 100);
+    _drawFloor(near,accent,biome){
+        const f=ctx.createLinearGradient(0,492,0,600); f.addColorStop(0,biome.floorColor||'#142233'); f.addColorStop(.25,'#0c1625'); f.addColorStop(1,'#050a12');
+        ctx.fillStyle=f; ctx.fillRect(0,492,1000,108);
+        ctx.fillStyle=accent; ctx.globalAlpha=.85; ctx.fillRect(0,492,1000,2); ctx.globalAlpha=1;
+        ctx.fillStyle='#f5a623'; ctx.globalAlpha=.9; ctx.fillRect(0,499,1000,3); ctx.globalAlpha=1;
+        ctx.strokeStyle='rgba(135,162,184,.13)'; ctx.lineWidth=1;
+        for(let i=-1;i<17;i++){const x=i*72+near; ctx.beginPath(); ctx.moveTo(x,503); ctx.lineTo(x,600); ctx.stroke();}
+        for(let y=520;y<600;y+=25){ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(1000,y); ctx.stroke();}
+        const v=ctx.createRadialGradient(500,300,230,500,300,650); v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(.75,'rgba(0,0,0,.08)'); v.addColorStop(1,'rgba(0,0,0,.40)');
+        ctx.fillStyle=v; ctx.fillRect(0,0,1000,600);
+    }
 
-        // Vibrant Cyan Running Laser Track
-        ctx.strokeStyle = '#00f0ff';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(0, 500);
-        ctx.lineTo(1000, 500);
-        ctx.stroke();
+    // ── BIOME 1: CUBICLE MAZE ─────────────────────────────────────────
+    _drawCubicles(far,mid,near,accent){
+        const p1=ctx.createRadialGradient(160,190,20,160,190,330); p1.addColorStop(0,'rgba(56,189,248,.10)'); p1.addColorStop(1,'rgba(56,189,248,0)'); ctx.fillStyle=p1; ctx.fillRect(0,60,500,400);
+        ctx.save(); ctx.globalAlpha=.38;
+        const bh=[130,190,105,155,215,135,175,120,200,145];
+        for(let i=-1;i<11;i++){const x=i*105+far,h=bh[(i+10)%bh.length]; ctx.fillStyle='#091321'; ctx.fillRect(x,280-h,78,h); ctx.fillStyle='#b9c7d9'; ctx.globalAlpha=.07; for(let r=0;r<5;r++)for(let c=0;c<3;c++)ctx.fillRect(x+12+c*20,255-h+r*25,7,9); ctx.globalAlpha=.38;} ctx.restore();
+        ctx.fillStyle='rgba(29,43,61,.92)'; ctx.fillRect(0,112,1000,390); ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(0,112,1000,2);
+        for(let i=-1;i<8;i++){const x=i*170+mid,y=142,w=142,h=190; ctx.save(); ctx.fillStyle='rgba(7,18,31,.72)'; ctx.strokeStyle='rgba(157,185,211,.24)'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(x,y,w,h,8); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(40,70,94,.45)'; ctx.fillRect(x+10,y+105,42,75); ctx.fillRect(x+58,y+76,28,104); ctx.fillRect(x+91,y+116,40,64); ctx.fillStyle=accent; ctx.globalAlpha=.13; for(let r=0;r<3;r++){ctx.fillRect(x+18,y+34+r*35,7,10);ctx.fillRect(x+36,y+34+r*35,7,10);ctx.fillRect(x+101,y+40+r*35,7,10);} ctx.globalAlpha=1; const rf=ctx.createLinearGradient(x,y,x+w,y+h); rf.addColorStop(0,'rgba(255,255,255,.10)'); rf.addColorStop(.18,'rgba(255,255,255,.015)'); rf.addColorStop(.48,'rgba(255,255,255,0)'); rf.addColorStop(1,'rgba(0,0,0,.10)'); ctx.fillStyle=rf; ctx.fill(); ctx.restore();}
+        for(let i=-1;i<6;i++){const x=i*220+mid*.7,y=346+(i&1)*14; ctx.save(); ctx.shadowColor='rgba(0,0,0,.25)'; ctx.shadowBlur=12; ctx.fillStyle='rgba(46,62,82,.88)'; ctx.beginPath(); ctx.roundRect(x,y,176,108,9); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#101a2b'; ctx.beginPath(); ctx.roundRect(x+16,y+25,62,44,5); ctx.fill(); ctx.beginPath(); ctx.roundRect(x+91,y+25,62,44,5); ctx.fill(); ctx.fillStyle='rgba(56,189,248,.18)'; ctx.fillRect(x+25,y+35,44,2); ctx.fillRect(x+100,y+35,44,2); ctx.fillStyle='rgba(255,255,255,.09)'; ctx.fillRect(x+11,y+80,154,6); ctx.fillStyle='rgba(8,15,27,.7)'; ctx.fillRect(x+25,y+90,6,28); ctx.fillRect(x+145,y+90,6,28); ctx.restore();}
+        for(let i=-1;i<8;i++){const x=i*185+near; const g=ctx.createLinearGradient(x,110,x+14,500); g.addColorStop(0,'rgba(105,128,151,.22)'); g.addColorStop(.5,'rgba(11,22,36,.28)'); g.addColorStop(1,'rgba(105,128,151,.10)'); ctx.fillStyle=g; ctx.fillRect(x,112,14,388); ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(x+2,126,2,360);}
+    }
 
-        ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(0, 504, 1000, 2);
+    // ── BIOME 2: CONFERENCE BOARDROOM ─────────────────────────────────
+    _drawConference(far,mid,near,accent){
+        const pool=ctx.createRadialGradient(500,200,10,500,200,500); pool.addColorStop(0,'rgba(96,165,250,.12)'); pool.addColorStop(1,'rgba(96,165,250,0)'); ctx.fillStyle=pool; ctx.fillRect(0,60,1000,440);
+        ctx.fillStyle='rgba(14,22,45,.96)'; ctx.fillRect(0,112,1000,390);
+        for(let i=-1;i<6;i++){const x=i*200+(far*0.2); ctx.fillStyle='rgba(30,50,90,.65)'; ctx.strokeStyle='rgba(96,165,250,.18)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.roundRect(x+10,130,175,280,6); ctx.fill(); ctx.stroke();}
+        ctx.save(); ctx.fillStyle='rgba(220,235,255,.95)'; ctx.strokeStyle='#60a5fa'; ctx.lineWidth=3; ctx.beginPath(); ctx.roundRect(340+mid*0.02,130,320,200,4); ctx.fill(); ctx.stroke();
+        const bc=['#60a5fa','#34d399','#f59e0b','#f43f5e','#a855f7'],bhs=[110,80,140,60,100];
+        for(let b=0;b<5;b++){ctx.fillStyle=bc[b]; ctx.globalAlpha=.85; ctx.fillRect(360+mid*0.02+b*55,300-bhs[b],38,bhs[b]); ctx.fillStyle='rgba(0,0,0,.6)'; ctx.globalAlpha=1; ctx.font='900 10px Outfit'; ctx.textAlign='center'; ctx.fillText(['Q1','Q2','Q3','Q4','Q5'][b],379+mid*0.02+b*55,320);}
+        ctx.fillStyle='#1e3a6e'; ctx.font='900 14px Outfit'; ctx.textAlign='center'; ctx.fillText('Q3 SYNERGY GROWTH',500+mid*0.02,152); ctx.globalAlpha=1;
+        ctx.save(); ctx.globalAlpha=.07; ctx.fillStyle='#60a5fa'; ctx.beginPath(); ctx.moveTo(500+mid*0.02,78); ctx.lineTo(340+mid*0.02,330); ctx.lineTo(660+mid*0.02,330); ctx.closePath(); ctx.fill(); ctx.restore(); ctx.restore();
+        for(let i=-1;i<6;i++){const x=i*210+mid*.6; ctx.save(); ctx.fillStyle='rgba(25,40,70,.95)'; ctx.strokeStyle='rgba(96,165,250,.25)'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(x,370,190,80,10); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(96,165,250,.07)'; ctx.beginPath(); ctx.roundRect(x+10,375,90,15,4); ctx.fill(); for(let c=0;c<3;c++){ctx.fillStyle='rgba(30,58,110,.85)'; ctx.strokeStyle='rgba(96,165,250,.3)'; ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(x+20+c*58,348,40,26,8); ctx.fill(); ctx.stroke();} ctx.fillStyle='#1d2d4e'; ctx.beginPath(); ctx.roundRect(x+30,380,35,22,3); ctx.fill(); ctx.fillStyle='rgba(96,165,250,.25)'; ctx.fillRect(x+34,384,27,2); ctx.restore();}
+        for(let i=-1;i<7;i++){const x=i*185+near; ctx.fillStyle='rgba(18,32,68,.85)'; ctx.fillRect(x,112,16,388); ctx.fillStyle='rgba(96,165,250,.12)'; ctx.fillRect(x+1,120,3,370);}
+    }
 
-        // Floor Grid Lines
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
-        ctx.lineWidth = 1.5;
-        for (let i = 0; i < 16; i++) {
-            const fx = Math.round(((l4 + i * 70) % 1120 + 1120) % 1120);
-            ctx.beginPath();
-            ctx.moveTo(fx, 506);
-            ctx.lineTo(fx, 600);
-            ctx.stroke();
-        }
+    // ── BIOME 3: COFFEE PANTRY & CAFE ─────────────────────────────────
+    _drawCafeteria(far,mid,near,accent){
+        const pool=ctx.createRadialGradient(300,220,20,300,220,450); pool.addColorStop(0,'rgba(245,158,11,.18)'); pool.addColorStop(1,'rgba(245,158,11,0)'); ctx.fillStyle=pool; ctx.fillRect(0,60,1000,440);
+        ctx.fillStyle='rgba(38,18,8,.95)'; ctx.fillRect(0,112,1000,390);
+        for(let row=0;row<8;row++){const off=(row%2)*55; for(let col=-1;col<10;col++){const bx=col*110+off+(far*0.05),by=118+row*48; ctx.fillStyle=row%2===0?'rgba(70,30,12,.55)':'rgba(55,22,8,.55)'; ctx.strokeStyle='rgba(20,8,3,.6)'; ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(bx,by,100,42,2); ctx.fill(); ctx.stroke();}}
+        ctx.save(); const cbx=120+mid*0.05,cby=140; ctx.fillStyle='#1a2e1a'; ctx.strokeStyle='#4ade80'; ctx.lineWidth=4; ctx.beginPath(); ctx.roundRect(cbx,cby,230,160,6); ctx.fill(); ctx.stroke(); ctx.fillStyle='#d1fae5'; ctx.font='900 13px Outfit'; ctx.textAlign='center'; ctx.fillText("TODAY'S MENU",cbx+115,cby+25); ctx.fillStyle='rgba(209,250,229,.8)'; ctx.font='11px Outfit'; ['Quad Espresso ... 4P','Cortado ... 3P','Cold Brew ... 5P','Croissant ... 2P'].forEach((item,idx)=>ctx.fillText(item,cbx+115,cby+50+idx*24)); ctx.strokeStyle='rgba(209,250,229,.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(cbx+20,cby+32); ctx.lineTo(cbx+210,cby+32); ctx.stroke(); ctx.restore();
+        for(let i=-1;i<5;i++){const mx=i*250+mid*.55+30,my=320; ctx.save(); ctx.fillStyle='#2a1805'; ctx.strokeStyle='#f59e0b'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(mx,my,80,130,10); ctx.fill(); ctx.stroke(); ctx.fillStyle='#1a0e03'; ctx.beginPath(); ctx.roundRect(mx+10,my+15,60,80,6); ctx.fill(); ['#ef4444','#10b981','#f59e0b'].forEach((c,bi)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(mx+24+bi*18,my+30,5,0,Math.PI*2);ctx.fill();}); ctx.strokeStyle='#94a3b8'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(mx+70,my+50); ctx.lineTo(mx+90,my+80); ctx.stroke(); ctx.fillStyle='#78350f'; ctx.beginPath(); ctx.roundRect(mx+22,my+65,14,22,4); ctx.fill(); ctx.beginPath(); ctx.roundRect(mx+44,my+65,14,22,4); ctx.fill(); ctx.globalAlpha=0.5+Math.sin(this.time*2+i)*0.3; ctx.strokeStyle='#fde68a'; ctx.lineWidth=1.5; for(let s=0;s<3;s++){ctx.beginPath();ctx.moveTo(mx+22+s*11,my+60);ctx.quadraticCurveTo(mx+17+s*11,my+45,mx+22+s*11,my+30);ctx.stroke();} ctx.globalAlpha=1; ctx.fillStyle='rgba(240,230,200,.12)'; ctx.strokeStyle='rgba(251,191,36,.35)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.roundRect(mx+95,my+40,100,90,8); ctx.fill(); ctx.stroke(); ctx.font='20px sans-serif'; ctx.textAlign='center'; ['🍩','🥐','🍰'].forEach((p,pi)=>ctx.fillText(p,mx+115+pi*28,my+90)); ctx.restore();}
+        for(let i=0;i<6;i++){const lx=80+i*170+(near*0.3); ctx.save(); ctx.strokeStyle='#6b3a10'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(lx,78); ctx.lineTo(lx,110); ctx.stroke(); const lg=ctx.createRadialGradient(lx,115,2,lx,115,22); lg.addColorStop(0,'rgba(253,186,116,.9)'); lg.addColorStop(0.5,'rgba(234,88,12,.5)'); lg.addColorStop(1,'rgba(234,88,12,0)'); ctx.fillStyle=lg; ctx.beginPath(); ctx.arc(lx,115,22,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#7c2d12'; ctx.beginPath(); ctx.arc(lx,112,9,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=0.06; ctx.fillStyle='#fde68a'; ctx.beginPath(); ctx.moveTo(lx,115); ctx.lineTo(lx-60,480); ctx.lineTo(lx+60,480); ctx.closePath(); ctx.fill(); ctx.globalAlpha=1; ctx.restore();}
+    }
+
+    // ── BIOME 4: HR COMPLIANCE DEPT ───────────────────────────────────
+    _drawHR(far,mid,near,accent){
+        const pool=ctx.createRadialGradient(500,180,10,500,180,500); pool.addColorStop(0,'rgba(244,63,94,.14)'); pool.addColorStop(1,'rgba(244,63,94,0)'); ctx.fillStyle=pool; ctx.fillRect(0,60,1000,440);
+        ctx.fillStyle='rgba(28,5,10,.97)'; ctx.fillRect(0,112,1000,390);
+        ctx.save(); ctx.globalAlpha=.10; ctx.strokeStyle='#f43f5e'; ctx.lineWidth=18; for(let d=-200;d<1200;d+=50){ctx.beginPath();ctx.moveTo(d,112);ctx.lineTo(d+400,512);ctx.stroke();} ctx.restore();
+        [{title:'COMPLIANCE',sub:'MANDATORY TRAINING\nQ4 DEADLINE',color:'#f43f5e'},{title:'POLICY 4.7b',sub:'NO UNAUTHORIZED\nEARLY EXITS',color:'#fbbf24'},{title:'NOTICE',sub:'ALL BAGS\nSUBJECT TO AUDIT',color:'#f43f5e'},{title:'FORM 27-C',sub:'EXIT INTERVIEW\nREQUIRED',color:'#ef4444'}].forEach((p,pi)=>{
+            const px=80+pi*230+mid*0.06,py=140; ctx.save(); ctx.fillStyle='#0f0307'; ctx.strokeStyle=p.color; ctx.lineWidth=3; ctx.beginPath(); ctx.roundRect(px,py,170,120,4); ctx.fill(); ctx.stroke(); ctx.fillStyle=p.color; ctx.fillRect(px,py,170,28); ctx.fillStyle='#fff'; ctx.font='900 11px Outfit'; ctx.textAlign='center'; ctx.fillText(p.title,px+85,py+19); ctx.fillStyle='rgba(255,255,255,.75)'; ctx.font='10px Outfit'; p.sub.split('\n').forEach((line,li)=>ctx.fillText(line,px+85,py+52+li*18)); ctx.strokeStyle=p.color; ctx.lineWidth=2; ctx.globalAlpha=.6; ctx.font='900 18px Outfit'; ctx.fillStyle=p.color; ctx.save(); ctx.translate(px+130,py+85); ctx.rotate(-0.35); ctx.strokeRect(-30,-12,60,24); ctx.fillText('FINAL',0,5); ctx.restore(); ctx.globalAlpha=1; ctx.restore();
+        });
+        for(let i=-1;i<6;i++){const fx=i*220+mid*.55,fy=340; ctx.save(); ctx.fillStyle='#1f0608'; ctx.strokeStyle='rgba(244,63,94,.4)'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(fx,fy,90,150,4); ctx.fill(); ctx.stroke(); for(let d=0;d<4;d++){ctx.fillStyle='#2d0a10'; ctx.strokeStyle='rgba(244,63,94,.3)'; ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(fx+6,fy+8+d*34,78,28,3); ctx.fill(); ctx.stroke(); ctx.fillStyle='#7f1d1d'; ctx.beginPath(); ctx.roundRect(fx+32,fy+19+d*34,26,6,3); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.15)'; ctx.beginPath(); ctx.roundRect(fx+10,fy+11+d*34,42,10,2); ctx.fill();} ctx.fillStyle='#fff8f0'; ctx.globalAlpha=.8; for(let pp=0;pp<5;pp++){ctx.save();ctx.translate(fx+10+pp*12,fy+2);ctx.rotate((pp-2)*0.06);ctx.fillRect(0,0,12,20);ctx.restore();} ctx.globalAlpha=1; ctx.restore();}
+        ctx.save(); ctx.globalAlpha=.3; ctx.strokeStyle='#f43f5e'; ctx.lineWidth=6; ctx.setLineDash([30,20]); ctx.beginPath(); ctx.moveTo(0,460); ctx.lineTo(1000,460); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+        for(let i=-1;i<7;i++){const x=i*185+near; ctx.fillStyle='rgba(40,6,12,.9)'; ctx.fillRect(x,112,16,388); ctx.fillStyle='rgba(244,63,94,.20)'; ctx.fillRect(x+1,120,3,370);}
+    }
+
+    // ── BIOME 5: EXECUTIVE PENTHOUSE ──────────────────────────────────
+    _drawExecutive(far,mid,near,accent){
+        const pool=ctx.createRadialGradient(200,200,10,200,200,400); pool.addColorStop(0,'rgba(192,132,252,.12)'); pool.addColorStop(1,'rgba(192,132,252,0)'); ctx.fillStyle=pool; ctx.fillRect(0,60,1000,440);
+        ctx.fillStyle='rgba(8,3,18,.98)'; ctx.fillRect(0,112,1000,390);
+        ctx.save(); ctx.globalAlpha=.55; const sl=[120,200,140,180,250,130,170,110,190,160]; for(let i=-1;i<11;i++){const bx=i*105+far,bh=sl[(i+10)%sl.length]; const bg=ctx.createLinearGradient(bx,280-bh,bx+75,280); bg.addColorStop(0,'#1a0a30'); bg.addColorStop(1,'#0d0520'); ctx.fillStyle=bg; ctx.fillRect(bx,280-bh,75,bh); ctx.fillStyle='rgba(192,132,252,.25)'; for(let r=0;r<6;r++)for(let c=0;c<3;c++){if(Math.sin(bx+r*c*7)>0.3)ctx.fillRect(bx+10+c*22,255-bh+r*22,6,8);}} ctx.restore();
+        for(let i=-1;i<7;i++){const wx=i*165+mid*.3; ctx.fillStyle='rgba(234,179,8,.35)'; ctx.fillRect(wx,112,4,388); ctx.fillStyle='rgba(234,179,8,.20)'; ctx.fillRect(wx,260,165,3); const sh=ctx.createLinearGradient(wx+5,115,wx+160,380); sh.addColorStop(0,'rgba(255,255,255,.04)'); sh.addColorStop(.3,'rgba(255,255,255,.01)'); sh.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=sh; ctx.fillRect(wx+5,115,158,375);}
+        for(let i=-1;i<5;i++){const dx=i*280+mid*.5,dy=350; ctx.save(); const dg=ctx.createLinearGradient(dx,dy,dx+220,dy+80); dg.addColorStop(0,'#2d1a08'); dg.addColorStop(.5,'#1a0d04'); dg.addColorStop(1,'#2d1a08'); ctx.fillStyle=dg; ctx.strokeStyle='rgba(234,179,8,.5)'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(dx,dy,220,90,8); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(234,179,8,.6)'; ctx.fillRect(dx+10,dy+4,200,2); ctx.fillStyle='#0f0f0f'; ctx.beginPath(); ctx.roundRect(dx+55,dy+10,70,45,4); ctx.fill(); ctx.fillStyle='rgba(192,132,252,.3)'; ctx.fillRect(dx+60,dy+15,60,2); ctx.fillStyle='#78350f'; ctx.strokeStyle='rgba(234,179,8,.7)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.roundRect(dx+150,dy+15,50,40,4); ctx.fill(); ctx.stroke(); ctx.fillStyle='#fde68a'; ctx.font='900 8px Outfit'; ctx.textAlign='center'; ctx.fillText('TROPHY',dx+175,dy+33); ctx.fillText('OF YEAR',dx+175,dy+44); ctx.restore();}
+        for(let i=-1;i<7;i++){const cx2=i*185+near; const cg=ctx.createLinearGradient(cx2,112,cx2+18,500); cg.addColorStop(0,'rgba(234,179,8,.35)'); cg.addColorStop(.5,'rgba(60,20,80,.4)'); cg.addColorStop(1,'rgba(234,179,8,.20)'); ctx.fillStyle=cg; ctx.fillRect(cx2,112,18,388); ctx.fillStyle='rgba(234,179,8,.5)'; ctx.fillRect(cx2-4,112,26,8);}
+    }
+
+    // ── BIOME 6: ELEVATOR EXIT ────────────────────────────────────────
+    _drawElevator(far,mid,near,accent){
+        const pool=ctx.createRadialGradient(500,250,10,500,250,500); pool.addColorStop(0,'rgba(52,211,153,.16)'); pool.addColorStop(1,'rgba(52,211,153,0)'); ctx.fillStyle=pool; ctx.fillRect(0,60,1000,440);
+        const wg=ctx.createLinearGradient(0,112,0,500); wg.addColorStop(0,'rgba(15,30,22,.98)'); wg.addColorStop(1,'rgba(8,20,15,.98)'); ctx.fillStyle=wg; ctx.fillRect(0,112,1000,390);
+        for(let i=-1;i<6;i++){const mpx=i*190+far*.06; ctx.fillStyle='rgba(20,50,38,.7)'; ctx.strokeStyle='rgba(52,211,153,.2)'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(mpx+5,118,170,320,6); ctx.fill(); ctx.stroke(); ctx.strokeStyle='rgba(52,211,153,.08)'; ctx.lineWidth=1.5; for(let v=0;v<4;v++){ctx.beginPath();ctx.moveTo(mpx+20+v*35,125);ctx.quadraticCurveTo(mpx+30+v*35,200+v*20,mpx+15+v*35,420);ctx.stroke();}}
+        [150+mid*0.15,550+mid*0.15].forEach(ex=>{ctx.save(); ctx.fillStyle='rgba(16,185,129,.15)'; ctx.strokeStyle='#34d399'; ctx.lineWidth=4; ctx.beginPath(); ctx.roundRect(ex-5,130,210,340,6); ctx.fill(); ctx.stroke(); const ld=ctx.createLinearGradient(ex,135,ex+95,465); ld.addColorStop(0,'#0d2e22'); ld.addColorStop(.5,'#1a4d38'); ld.addColorStop(1,'#0d2e22'); ctx.fillStyle=ld; ctx.fillRect(ex,135,97,330); const rd=ctx.createLinearGradient(ex+103,135,ex+200,465); rd.addColorStop(0,'#0d2e22'); rd.addColorStop(.5,'#1a4d38'); rd.addColorStop(1,'#0d2e22'); ctx.fillStyle=rd; ctx.fillRect(ex+103,135,97,330); ctx.fillStyle='#000'; ctx.fillRect(ex+97,135,6,330); ctx.fillStyle='#34d399'; ctx.strokeStyle='#ecfdf5'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(ex+91,295,8,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.arc(ex+109,295,8,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(255,255,255,.05)'; ctx.fillRect(ex+15,140,4,320); ctx.fillRect(ex+120,140,4,320); ctx.globalAlpha=0.4+Math.sin(this.time*3)*0.3; const pg=ctx.createRadialGradient(ex+100,150,2,ex+100,150,30); pg.addColorStop(0,'#34d399'); pg.addColorStop(1,'rgba(52,211,153,0)'); ctx.fillStyle=pg; ctx.fillRect(ex+70,130,60,50); ctx.globalAlpha=1; ctx.restore();});
+        for(let i=0;i<4;i++){const esx=120+i*250+near*0.2; ctx.save(); ctx.strokeStyle='#374151'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(esx,78); ctx.lineTo(esx,110); ctx.stroke(); ctx.fillStyle='#064e3b'; ctx.strokeStyle='#34d399'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(esx-35,110,70,24,4); ctx.fill(); ctx.stroke(); ctx.globalAlpha=0.6+Math.sin(this.time*2+i)*0.2; ctx.fillStyle='#34d399'; ctx.font='900 12px Outfit'; ctx.textAlign='center'; ctx.fillText('EXIT',esx,127); ctx.globalAlpha=1; ctx.restore();}
+        for(let i=-1;i<4;i++){const rdx=i*320+mid*.45,rdy=370; ctx.save(); ctx.fillStyle='rgba(6,78,59,.85)'; ctx.strokeStyle='rgba(52,211,153,.4)'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(rdx,rdy,260,80,8); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(52,211,153,.15)'; ctx.fillRect(rdx+10,rdy+5,240,4); ctx.fillStyle='#065f46'; ctx.beginPath(); ctx.roundRect(rdx+90,rdy+15,80,28,4); ctx.fill(); ctx.fillStyle='#34d399'; ctx.font='900 10px Outfit'; ctx.textAlign='center'; ctx.fillText('LOBBY EXIT',rdx+130,rdy+33); ctx.restore();}
+        for(let i=-1;i<7;i++){const cpx=i*185+near; const cpg=ctx.createLinearGradient(cpx,112,cpx+16,500); cpg.addColorStop(0,'rgba(52,211,153,.3)'); cpg.addColorStop(.5,'rgba(6,40,28,.5)'); cpg.addColorStop(1,'rgba(52,211,153,.15)'); ctx.fillStyle=cpg; ctx.fillRect(cpx,112,16,388); ctx.fillStyle='rgba(52,211,153,.15)'; ctx.fillRect(cpx+2,120,3,370);}
     }
 }
-
 // Obstacles & Hazards
 class Obstacle {
     constructor(type, x) {
@@ -1051,26 +1282,18 @@ class Obstacle {
                 this.height = 30;
                 this.y = 500 - this.height;
                 break;
-            case 'COFFEE_SPILL':
-                // Coffee spill puddle with caution hazard cone
-                this.width = 64;
-                this.height = 18;
-                this.y = 500 - this.height;
-                break;
-            case 'FLYING_BUZZWORD':
-                // Flying laser buzzword projectile (Slide under!)
-                this.width = 88;
-                this.height = 30;
-                this.y = 402;
-                this.buzzwords = ['SYNERGY!', 'CIRCLE BACK!', 'EOD ASAP!', 'DEEP DIVE!', 'PER MY EMAIL'];
-                this.text = this.buzzwords[Math.floor(Math.random() * this.buzzwords.length)];
-                break;
             case 'TASK_BOULDER':
-                // Rolling Giant "URGENT TASK" Boulder
+                // Rolling Giant "URGENT TASK" Boulder (Jump)
                 this.width = 52;
                 this.height = 52;
                 this.y = 500 - this.height;
                 this.rot = 0;
+                break;
+            case 'FLYING_DRONE':
+                // Overhead Security Drone / Surveillance Scanner (Slide Under)
+                this.width = 58;
+                this.height = 36;
+                this.y = 416; // Overhead: hits standing player (y=432), safe when sliding (y=468)
                 break;
         }
     }
@@ -1088,271 +1311,176 @@ class Obstacle {
 
     draw() {
         ctx.save();
-        const pulse = 0.85 + Math.sin(this.animFrame * 0.15) * 0.2;
+        const pulse = 0.9 + Math.sin(this.animFrame * 0.13) * 0.12;
+        const x = this.x, y = this.y, w = this.width, h = this.height;
+
+        // Ground Hazard Footprint: vibrant danger zone marker on the track floor
+        ctx.save();
+        ctx.fillStyle = '#01040a';
+        ctx.globalAlpha = 0.55;
+        ctx.beginPath();
+        ctx.ellipse(x + w / 2, 503, Math.max(20, w * 0.52), 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pulsing neon red hazard tick bar underneath
+        ctx.globalAlpha = 0.35 + Math.sin(this.animFrame * 0.2) * 0.2;
+        ctx.fillStyle = '#ff2b43';
+        ctx.beginPath();
+        ctx.roundRect(x - 4, 500, w + 8, 4, 2);
+        ctx.fill();
+        ctx.restore();
+
+        const hazard = (color='#ff5722') => {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 18 * pulse;
+            ctx.beginPath();
+            ctx.roundRect(x - 3, y - 3, w + 6, h + 6, 7);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        };
+        const stripe = (sx, sy, sw, sh, color='#f9c74f') => {
+            ctx.save(); ctx.beginPath(); ctx.rect(sx, sy, sw, sh); ctx.clip();
+            ctx.fillStyle = '#17202d'; ctx.fillRect(sx, sy, sw, sh);
+            ctx.fillStyle = color;
+            for (let k = -sh; k < sw + sh; k += 12) {
+                ctx.save(); ctx.translate(sx + k, sy); ctx.rotate(-0.6); ctx.fillRect(0, 0, 5, sh * 2); ctx.restore();
+            }
+            ctx.restore();
+        };
 
         switch (this.type) {
-            case 'CHAIR':
-                // --- HIGH-VISIBILITY HAZARD ROLLING CHAIR ---
-                ctx.shadowColor = '#facc15';
-                ctx.shadowBlur = 18 * pulse;
-
-                // Glowing outer danger border
-                ctx.strokeStyle = '#facc15';
-                ctx.lineWidth = 2.5;
-                ctx.beginPath();
-                ctx.roundRect(this.x - 2, this.y - 2, this.width + 4, this.height + 4, 8);
-                ctx.stroke();
-
-                // High-back mesh with Black & Yellow Danger Stripes
-                ctx.fillStyle = '#0f172a';
-                ctx.beginPath();
-                ctx.roundRect(this.x + 8, this.y + 4, 30, 26, 4);
-                ctx.fill();
-
-                // Yellow Hazard Stripes on Seat Back
-                ctx.fillStyle = '#facc15';
-                ctx.fillRect(this.x + 12, this.y + 8, 22, 4);
-                ctx.fillRect(this.x + 12, this.y + 16, 22, 4);
-                ctx.fillRect(this.x + 12, this.y + 24, 22, 4);
-
-                // Top Red Alert Flasher
-                ctx.fillStyle = '#ef4444';
-                ctx.shadowColor = '#ef4444';
-                ctx.shadowBlur = 12;
-                ctx.beginPath();
-                ctx.arc(this.x + 23, this.y + 2, 5, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Seat Cushion
-                ctx.fillStyle = '#1e293b';
-                ctx.beginPath();
-                ctx.roundRect(this.x + 4, this.y + 30, 38, 10, 3);
-                ctx.fill();
-                ctx.strokeStyle = '#facc15';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                // Chrome Stem & Wheeled Star Base
-                ctx.fillStyle = '#94a3b8';
-                ctx.fillRect(this.x + 20, this.y + 40, 6, 8);
-                ctx.fillRect(this.x + 6, this.y + 47, 34, 3);
-
-                // Caster Wheels
-                ctx.fillStyle = '#fde047';
-                ctx.beginPath();
-                ctx.arc(this.x + 8, this.y + 51, 3.5, 0, Math.PI * 2);
-                ctx.arc(this.x + 38, this.y + 51, 3.5, 0, Math.PI * 2);
-                ctx.fill();
+            case 'CHAIR': {
+                hazard('#ff9f1c');
+                // Backrest
+                const back = ctx.createLinearGradient(x+6,y+2,x+40,y+30);
+                back.addColorStop(0,'#27384d'); back.addColorStop(1,'#0b1422');
+                ctx.fillStyle=back; ctx.strokeStyle='#07111d'; ctx.lineWidth=2;
+                ctx.beginPath(); ctx.roundRect(x+7,y+5,32,28,6); ctx.fill(); ctx.stroke();
+                // Mesh holes
+                ctx.fillStyle='rgba(255,255,255,.12)';
+                for(let r=0;r<3;r++) for(let c=0;c<4;c++) ctx.fillRect(x+11+c*7,y+10+r*6,3,2);
+                // Seat
+                ctx.fillStyle='#34495e'; ctx.beginPath(); ctx.roundRect(x+3,y+31,40,11,5); ctx.fill();
+                ctx.fillStyle='#ffb72e'; ctx.fillRect(x+8,y+34,30,2);
+                // Stem + base
+                ctx.fillStyle='#aab8c5'; ctx.fillRect(x+20,y+42,6,8);
+                ctx.strokeStyle='#aab8c5'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x+23,y+49); ctx.lineTo(x+7,y+52); ctx.moveTo(x+23,y+49); ctx.lineTo(x+39,y+52); ctx.stroke();
+                ctx.fillStyle='#ffb72e'; ctx.beginPath(); ctx.arc(x+7,y+53,3.5,0,Math.PI*2); ctx.arc(x+39,y+53,3.5,0,Math.PI*2); ctx.fill();
+                // Hazard badge
+                ctx.fillStyle='#ff5722'; ctx.beginPath(); ctx.arc(x+43,y+5,6,0,Math.PI*2); ctx.fill();
+                ctx.fillStyle='#fff'; ctx.font='900 8px Outfit'; ctx.textAlign='center'; ctx.fillText('!',x+43,y+8);
                 break;
-
-            case 'CALENDAR':
-                // --- HIGH-CONTRAST URGENT DEADLINE CALENDAR ---
-                ctx.shadowColor = 'rgba(239, 68, 68, 0.95)';
-                ctx.shadowBlur = 20 * pulse;
-
-                // Glowing outer red laser hazard border
-                ctx.strokeStyle = '#f87171';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.roundRect(this.x - 2, this.y - 2, this.width + 4, this.height + 4, 8);
-                ctx.stroke();
-
-                // Bold Fiery Red Header Block
-                ctx.fillStyle = '#dc2626';
-                ctx.beginPath();
-                ctx.roundRect(this.x, this.y, this.width, 20, [6, 6, 0, 0]);
-                ctx.fill();
-
-                // Crisp White Body
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.roundRect(this.x, this.y + 20, this.width, this.height - 20, [0, 0, 6, 6]);
-                ctx.fill();
-
-                // Binding Spirals
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(this.x + 8, this.y - 4, 6, 8);
-                ctx.fillRect(this.x + this.width - 14, this.y - 4, 6, 8);
-
-                // Top Alert Badge
-                ctx.fillStyle = '#fde047';
-                ctx.beginPath();
-                ctx.arc(this.x + this.width - 4, this.y + 2, 7, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#000';
-                ctx.font = 'bold 9px Outfit, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('!', this.x + this.width - 4, this.y + 5);
-
-                // Bold Text
-                ctx.fillStyle = '#0f172a';
-                ctx.font = '900 11px Outfit, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(this.title, this.x + this.width / 2, this.y + 33);
-
-                ctx.fillStyle = '#dc2626';
-                ctx.font = '900 11.5px Outfit, sans-serif';
-                ctx.fillText('🚨 ' + this.subtitle, this.x + this.width / 2, this.y + 45);
+            }
+            case 'CALENDAR': {
+                hazard('#ff4d5a');
+                // Paper with drop shadow
+                ctx.fillStyle='#f8fafc'; ctx.beginPath(); ctx.roundRect(x,y+7,w,h-7,6); ctx.fill();
+                ctx.fillStyle='#e63946'; ctx.beginPath(); ctx.roundRect(x,y,w,18,[6,6,0,0]); ctx.fill();
+                // top tabs
+                ctx.fillStyle='#17202d'; ctx.fillRect(x+8,y-4,5,8); ctx.fillRect(x+w-13,y-4,5,8);
+                // header label
+                ctx.fillStyle='#fff'; ctx.font='900 8px Outfit'; ctx.textAlign='left'; ctx.fillText('MEETING',x+7,y+13);
+                // calendar grid
+                ctx.fillStyle='#cbd5e1';
+                for(let r=0;r<2;r++) for(let c=0;c<4;c++) ctx.fillRect(x+8+c*10,y+26+r*9,6,5);
+                ctx.fillStyle='#e63946'; ctx.fillRect(x+28,y+26,6,5); ctx.fillRect(x+38,y+35,6,5);
+                ctx.fillStyle='#17202d'; ctx.font='900 8px Outfit'; ctx.textAlign='center'; ctx.fillText('30m',x+w/2,y+h-5);
+                // alert dot
+                ctx.fillStyle='#ffd166'; ctx.beginPath(); ctx.arc(x+w-4,y+4,6,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#17202d'; ctx.font='900 8px Outfit'; ctx.fillText('!',x+w-4,y+7);
                 break;
-
-            case 'LAPTOP':
-                // --- NEON CYBER SPARKING LAPTOP ---
-                ctx.shadowColor = '#00f0ff';
-                ctx.shadowBlur = 22 * pulse;
-
-                // Base Hazard Neon Border
-                ctx.strokeStyle = '#00f0ff';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.roundRect(this.x - 3, this.y + 14, this.width + 6, 16, 4);
-                ctx.stroke();
-
-                // Laptop Base Chassis
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(this.x, this.y + 16, this.width, 12);
-
-                // Glowing Cyan-Magenta Display Screen
-                const scrGrad = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + 16);
-                scrGrad.addColorStop(0, '#00f0ff');
-                scrGrad.addColorStop(1, '#f43f5e');
-                ctx.fillStyle = scrGrad;
-                ctx.beginPath();
-                ctx.moveTo(this.x + 4, this.y + 16);
-                ctx.lineTo(this.x + 12, this.y);
-                ctx.lineTo(this.x + 44, this.y);
-                ctx.lineTo(this.x + 44, this.y + 16);
-                ctx.closePath();
-                ctx.fill();
-
-                // Screen warning text
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '900 9px Outfit, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('⚡ CRASH', this.x + 28, this.y + 11);
-
-                // Tangled cords with animated electric sparks
-                ctx.strokeStyle = '#f59e0b';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(this.x - 18, this.y + 22);
-                ctx.quadraticCurveTo(this.x - 8, this.y + 10, this.x, this.y + 18);
-                ctx.stroke();
-
-                // Electric spark dots
-                if (this.animFrame % 4 < 2) {
-                    ctx.fillStyle = '#fde047';
-                    ctx.beginPath();
-                    ctx.arc(this.x - 10, this.y + 12, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                }
+            }
+            case 'LAPTOP': {
+                hazard('#ff5c35');
+                // Broken laptop: warm warning screen, cool keyboard.
+                ctx.fillStyle='#1d2c3e'; ctx.strokeStyle='#07111d'; ctx.lineWidth=2;
+                ctx.beginPath(); ctx.moveTo(x+7,y+15); ctx.lineTo(x+13,y+2); ctx.lineTo(x+w-4,y+2); ctx.lineTo(x+w-1,y+18); ctx.closePath(); ctx.fill(); ctx.stroke();
+                const screen=ctx.createLinearGradient(x+10,y+4,x+w-5,y+16); screen.addColorStop(0,'#ff8a3d'); screen.addColorStop(.55,'#ef4444'); screen.addColorStop(1,'#ffcf5a');
+                ctx.fillStyle=screen; ctx.beginPath(); ctx.moveTo(x+12,y+14); ctx.lineTo(x+15,y+5); ctx.lineTo(x+w-8,y+5); ctx.lineTo(x+w-5,y+14); ctx.closePath(); ctx.fill();
+                ctx.fillStyle='#fff'; ctx.font='900 7px Outfit'; ctx.textAlign='center'; ctx.fillText('SYSTEM ERROR',x+w/2,y+11);
+                ctx.fillStyle='#27384d'; ctx.beginPath(); ctx.roundRect(x+1,y+17,w-2,11,3); ctx.fill();
+                ctx.fillStyle='rgba(255,255,255,.14)'; for(let k=0;k<6;k++) ctx.fillRect(x+7+k*6,y+20,4,2);
+                // loose cable
+                ctx.strokeStyle='#ffb72e'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x-16,y+23); ctx.bezierCurveTo(x-8,y+7,x-2,y+28,x+7,y+22); ctx.stroke();
+                if(this.animFrame%5<2){ctx.fillStyle='#ffd166';ctx.beginPath();ctx.arc(x-9,y+13,3,0,Math.PI*2);ctx.fill();}
                 break;
-
-            case 'COFFEE_SPILL':
-                // --- HAZARD COFFEE SPILL WITH WET FLOOR CONE ---
-                ctx.shadowColor = '#ea580c';
-                ctx.shadowBlur = 18 * pulse;
-
-                // Glowing Orange Floor Puddle Outline
-                ctx.strokeStyle = '#f97316';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.ellipse(this.x + this.width / 2, this.y + 10, this.width / 2 + 3, 9, 0, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // Dark Hot Coffee Spill Puddle
-                ctx.fillStyle = '#291003';
-                ctx.beginPath();
-                ctx.ellipse(this.x + this.width / 2, this.y + 10, this.width / 2, 7, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Knocked Mug
-                ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 0;
-                ctx.beginPath();
-                ctx.roundRect(this.x + 2, this.y, 14, 12, 3);
-                ctx.fill();
-                ctx.fillStyle = '#ef4444';
-                ctx.fillRect(this.x + 4, this.y + 2, 10, 4);
-
-                // Fluorescent Yellow Caution Triangle Sign
-                const tx = this.x + this.width - 12;
-                const ty = this.y - 14;
-                ctx.fillStyle = '#fde047';
-                ctx.shadowColor = '#fde047';
-                ctx.shadowBlur = 12;
-                ctx.beginPath();
-                ctx.moveTo(tx, ty);
-                ctx.lineTo(tx + 14, ty + 24);
-                ctx.lineTo(tx - 14, ty + 24);
-                ctx.closePath();
-                ctx.fill();
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                ctx.fillStyle = '#000000';
-                ctx.font = '900 11px Outfit, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('⚠️', tx, ty + 19);
-                break;
-
-            case 'FLYING_BUZZWORD':
-                // --- LASER BUZZWORD BARRIER ---
-                ctx.shadowColor = '#ef4444';
-                ctx.shadowBlur = 24 * pulse;
-
-                // Outer High-Intensity Laser Border
-                ctx.strokeStyle = '#fca5a5';
-                ctx.lineWidth = 3.5;
-                ctx.beginPath();
-                ctx.roundRect(this.x - 3, this.y - 3, this.width + 6, this.height + 6, 8);
-                ctx.stroke();
-
-                // High-Intensity Red-Orange Body
-                const buzzGrad = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
-                buzzGrad.addColorStop(0, '#ef4444');
-                buzzGrad.addColorStop(1, '#b91c1c');
-                ctx.fillStyle = buzzGrad;
-                ctx.beginPath();
-                ctx.roundRect(this.x, this.y, this.width, this.height, 6);
-                ctx.fill();
-
-                // High-Contrast Warning Text
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '900 12.5px Outfit, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('⚡ ' + this.text + ' ⚡', this.x + this.width / 2, this.y + 20);
-                break;
-
-            case 'TASK_BOULDER':
-                // --- ROLLING URGENT BOULDER ---
+            }
+            case 'TASK_BOULDER': {
                 ctx.save();
-                ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-                ctx.rotate(this.rot);
-
-                ctx.shadowColor = '#f43f5e';
-                ctx.shadowBlur = 24 * pulse;
-
-                // Outer Danger Ring
-                ctx.strokeStyle = '#ef4444';
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.arc(0, 0, this.width / 2 + 2, 0, Math.PI * 2);
-                ctx.stroke();
-
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(0, 0, this.width / 2, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Red Caution Stamp
-                ctx.fillStyle = '#dc2626';
-                ctx.font = '900 12px Outfit, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('🚨 URGENT', 0, -4);
-                ctx.fillText('TASK 🚨', 0, 11);
+                ctx.translate(x+w/2,y+h/2); ctx.rotate(this.rot);
+                ctx.shadowColor='#ff3b4d'; ctx.shadowBlur=22*pulse;
+                // Steel warning crate
+                const g=ctx.createLinearGradient(-w/2,-h/2,w/2,h/2); g.addColorStop(0,'#4a2027');g.addColorStop(.5,'#b43c32');g.addColorStop(1,'#4d1b23');
+                ctx.fillStyle=g; ctx.strokeStyle='#ff6b5a'; ctx.lineWidth=3;
+                ctx.beginPath(); ctx.roundRect(-w/2,-h/2,w,h,8);ctx.fill();ctx.stroke();
+                stripe(-w/2,-h/2,w,h,'#ffd166');
+                // Center plate over stripes
+                ctx.fillStyle='#171d27'; ctx.strokeStyle='#ff7a66'; ctx.lineWidth=1.5; ctx.beginPath();ctx.roundRect(-20,-14,40,28,5);ctx.fill();ctx.stroke();
+                ctx.fillStyle='#fff';ctx.font='900 8px Outfit';ctx.textAlign='center';ctx.fillText('URGENT',0,-2);ctx.fillText('TASK',0,9);
+                ctx.fillStyle='#ffd166';ctx.beginPath();ctx.arc(0,-21,3,0,Math.PI*2);ctx.fill();
                 ctx.restore();
                 break;
+            }
+            case 'FLYING_DRONE': {
+                hazard('#f43f5e');
+                const hoverY = y + Math.sin(this.animFrame * 0.15) * 3;
+
+                // Downward surveillance scanning laser cone
+                ctx.save();
+                ctx.globalAlpha = 0.18 + Math.sin(this.animFrame * 0.2) * 0.08;
+                ctx.fillStyle = '#f43f5e';
+                ctx.beginPath();
+                ctx.moveTo(x + w / 2, hoverY + h);
+                ctx.lineTo(x - 14, 500);
+                ctx.lineTo(x + w + 14, 500);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+
+                // Drone chassis
+                ctx.fillStyle = '#1e293b';
+                ctx.strokeStyle = '#f43f5e';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(x + 8, hoverY + 8, w - 16, h - 14, 6);
+                ctx.fill(); ctx.stroke();
+
+                // Spinning Propellers (4 rotors)
+                const propRot = this.animFrame * 0.8;
+                ctx.strokeStyle = '#94a3b8';
+                ctx.lineWidth = 2.5;
+                [-4, w - 8].forEach(px => {
+                    ctx.beginPath();
+                    ctx.moveTo(x + px, hoverY + 4);
+                    ctx.lineTo(x + px + 12, hoverY + 4);
+                    ctx.stroke();
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.beginPath();
+                    ctx.ellipse(x + px + 6, hoverY + 4, Math.abs(Math.cos(propRot)) * 10 + 2, 2.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Glowing Camera / Sensor Visor
+                ctx.fillStyle = '#f43f5e';
+                ctx.shadowColor = '#f43f5e';
+                ctx.shadowBlur = 12;
+                ctx.beginPath();
+                ctx.ellipse(x + w / 2, hoverY + h / 2 + 2, 9, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Bright "SLIDE ⬇" Warning Badge above the drone
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.roundRect(x + 2, hoverY - 14, w - 4, 13, 3);
+                ctx.fill();
+                ctx.fillStyle = '#0f172a';
+                ctx.font = '900 8.5px Outfit, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('SLIDE ⬇', x + w / 2, hoverY - 4);
+                break;
+            }
         }
         ctx.restore();
     }
@@ -1374,8 +1502,12 @@ class Item {
         this.anim += 0.08;
         this.x -= speed;
 
-        // Magnet logic (PTO or Zara perk)
-        const magnetRadius = (player.ptoTimer > 0 || player.avatar.magnetBonus > 1.0) ? (200 * player.avatar.magnetBonus) : 0;
+        // Magnet logic: active if PTO powerup is running OR permanent magnet_range upgrade was bought!
+        const isAvatarUnlocked = unlockedAvatars.includes(player.avatar.id);
+        const magnetMultiplier = (isAvatarUnlocked && player.avatar.magnetBonus) ? player.avatar.magnetBonus : 1.0;
+        const hasMagnet = player.ptoTimer > 0 || (upgrades.magnet_range > 0);
+        const baseRadius = upgrades.magnet_range > 0 ? 300 : (player.ptoTimer > 0 ? 220 : 0);
+        const magnetRadius = hasMagnet ? (baseRadius * magnetMultiplier) : 0;
         if (magnetRadius > 0) {
             const dx = (player.x + player.width / 2) - (this.x + this.width / 2);
             const dy = (player.y + player.height / 2) - (this.y + this.height / 2);
@@ -1394,50 +1526,90 @@ class Item {
 
     draw() {
         const floatY = this.y + Math.sin(this.anim) * 5;
+        const cx = this.x + this.width / 2;
+        const cy = floatY + this.height / 2;
         ctx.save();
 
-        switch (this.type) {
-            case 'COIN':
-                // Spinning Gold Point Token (P)
-                ctx.fillStyle = '#fbbf24';
-                ctx.beginPath();
-                ctx.ellipse(this.x + 16, floatY + 16, 14 * Math.abs(Math.cos(this.anim * 1.5)), 14, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#d97706';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
+        // Glowing Pickup Halo: ensures item immediately pops out from background scenery
+        const auraColor = this.type === 'COIN' ? 'rgba(251, 191, 36, 0.25)'
+            : (this.type === 'COFFEE' ? 'rgba(245, 158, 11, 0.28)'
+            : (this.type === 'HEADPHONES' ? 'rgba(56, 189, 248, 0.28)'
+            : (this.type === 'PTO' ? 'rgba(52, 211, 153, 0.28)' : 'rgba(168, 85, 247, 0.28)')));
 
-                ctx.fillStyle = '#78350f';
+        ctx.fillStyle = auraColor;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 18 + Math.sin(this.anim * 2) * 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // High-contrast neon pickup rendering
+        ctx.shadowBlur = 16;
+        switch (this.type) {
+            case 'COIN': {
+                ctx.shadowColor = '#fbbf24';
+                const squash = 0.35 + Math.abs(Math.cos(this.anim * 1.5)) * 0.65;
+                ctx.fillStyle = '#fbbf24';
+                ctx.strokeStyle = '#fff7ae';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, 12 * squash, 12, 0, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#7c4a03';
                 ctx.font = '900 13px Outfit, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('P', this.x + 16, floatY + 21);
+                ctx.fillText('P', cx, cy + 5);
                 break;
-
-            case 'COFFEE':
-                // Espresso Cup
-                ctx.font = '28px sans-serif';
-                ctx.fillText('☕', this.x, floatY + 26);
+            }
+            case 'COFFEE': {
+                ctx.shadowColor = '#f59e0b';
+                // Cup + handle.
+                ctx.fillStyle = '#f8fafc';
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.roundRect(this.x + 6, floatY + 10, 20, 17, 4); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(this.x + 27, floatY + 18, 6, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+                ctx.fillStyle = '#7c2d12';
+                ctx.beginPath(); ctx.ellipse(this.x + 16, floatY + 11, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
+                // Steam.
+                ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.75;
+                ctx.beginPath(); ctx.moveTo(this.x + 12, floatY + 6); ctx.quadraticCurveTo(this.x + 9, floatY + 1, this.x + 13, floatY - 3); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(this.x + 20, floatY + 6); ctx.quadraticCurveTo(this.x + 23, floatY + 1, this.x + 19, floatY - 3); ctx.stroke();
                 break;
-
-            case 'HEADPHONES':
-                // Noise Cancelling Shield
-                ctx.font = '28px sans-serif';
-                ctx.fillText('🎧', this.x, floatY + 26);
+            }
+            case 'HEADPHONES': {
+                ctx.shadowColor = '#38bdf8';
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.arc(cx, cy + 2, 12, Math.PI, Math.PI * 2); ctx.stroke();
+                ctx.fillStyle = '#0ea5e9';
+                ctx.beginPath(); ctx.roundRect(this.x + 3, cy - 1, 7, 13, 3); ctx.fill();
+                ctx.beginPath(); ctx.roundRect(this.x + 24, cy - 1, 7, 13, 3); ctx.fill();
+                ctx.fillStyle = '#e0f2fe';
+                ctx.fillRect(this.x + 6, cy + 3, 3, 5); ctx.fillRect(this.x + 25, cy + 3, 3, 5);
                 break;
-
-            case 'PTO':
-                // Paid Time Off Slip
-                ctx.font = '28px sans-serif';
-                ctx.fillText('🏝️', this.x, floatY + 26);
+            }
+            case 'PTO': {
+                ctx.shadowColor = '#34d399';
+                ctx.fillStyle = '#ecfdf5';
+                ctx.strokeStyle = '#34d399';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.roundRect(this.x + 5, floatY + 5, 24, 25, 4); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#10b981'; ctx.fillRect(this.x + 9, floatY + 10, 16, 3);
+                ctx.fillStyle = '#64748b'; ctx.fillRect(this.x + 9, floatY + 17, 13, 2); ctx.fillRect(this.x + 9, floatY + 22, 9, 2);
+                ctx.fillStyle = '#10b981'; ctx.font = '900 7px Outfit, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('PTO', cx, floatY + 29);
                 break;
-
-            case 'OOO':
-                // Out of Office Blast
-                ctx.font = '28px sans-serif';
-                ctx.fillText('📨', this.x, floatY + 26);
+            }
+            case 'OOO': {
+                ctx.shadowColor = '#a855f7';
+                ctx.fillStyle = '#faf5ff';
+                ctx.strokeStyle = '#a855f7';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.roundRect(this.x + 3, floatY + 8, 28, 20, 4); ctx.fill(); ctx.stroke();
+                ctx.strokeStyle = '#7e22ce'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(this.x + 5, floatY + 10); ctx.lineTo(cx, floatY + 20); ctx.lineTo(this.x + 29, floatY + 10); ctx.stroke();
+                ctx.fillStyle = '#a855f7'; ctx.font = '900 7px Outfit, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('OOO', cx, floatY + 33);
                 break;
+            }
         }
-
         ctx.restore();
     }
 }
@@ -1550,18 +1722,26 @@ class BossManager {
 // Game Core
 let player = new Player();
 let bgManager = new BackgroundManager();
+// Fast, Responsive Speed Progression (Faster start pace + intense distance acceleration)
+const DINO_CONFIG = {
+    SPEED: 6.8,              // Fast, punchy starting speed
+    MAX_SPEED: 21.0,         // Intense high-speed ceiling at long distances
+    DISTANCE_FACTOR: 0.0095, // Continuous speed progression
+    GAP_COEFFICIENT: 0.65
+};
+
 let bossManager = new BossManager();
 let obstacles = [];
 let items = [];
-let baseSpeed = 3.6; // Walking pace start (Classic Chrome Dinosaur pace)
-let gameSpeed = baseSpeed;
+let gameSpeed = DINO_CONFIG.SPEED;
 let distance = 0;
+let lastMilestoneHundreds = 0;
 let runStartTime = 0;
 let survivalTime = 0;
 let runCoins = 0;
-let spawnCooldown = 45;
+let spawnCooldown = 80;
 let itemCooldown = 30;
-let nextBossTriggerDist = 800;
+let nextBossTriggerDist = 700;
 
 // Collision Detection with generous forgiving hitboxes
 function checkCollision(p, obj, isItem = false) {
@@ -1601,17 +1781,48 @@ function checkCollision(p, obj, isItem = false) {
 
 // Start / Restart Game
 function startGame() {
+    // 1. Consume and activate single-use items from inventory for THIS run
+    let hasRocket = (inventory.rocket_start || 0) > 0;
+    if (hasRocket) {
+        inventory.rocket_start--;
+        storage.set('inventory', inventory);
+    }
+
+    let hasExtraLife = (inventory.extra_life || 0) > 0;
+    if (hasExtraLife) {
+        inventory.extra_life--;
+        storage.set('inventory', inventory);
+    }
+
+    let hasDoublePts = (inventory.double_points || 0) > 0;
+    if (hasDoublePts) {
+        inventory.double_points--;
+        storage.set('inventory', inventory);
+    }
+
     player.reset();
+
+    // 2. Attach single-use item powers to player
+    if (hasRocket) {
+        player.coffeeTimer = 300; // 5s supersonic rocket speed + invincibility
+        player.invulnerableTimer = 300;
+        createScorePopup(canvas.width / 2, 180, '🚀 ROCKET START ENGAGED!', '#f59e0b');
+    }
+    player.hasExtraLife = hasExtraLife;
+    player.doublePointsActive = hasDoublePts;
+
     obstacles = [];
     items = [];
     particles = [];
     bossManager.active = false;
     distance = 0;
+    lastMilestoneHundreds = 0;
     runCoins = 0;
-    gameSpeed = baseSpeed;
-    spawnCooldown = 50; // First obstacle arrives in <1 second!
-    itemCooldown = 25;
-    nextBossTriggerDist = 800;
+    gameSpeed = DINO_CONFIG.SPEED;
+    window.smoothSpeed = DINO_CONFIG.SPEED;
+    spawnCooldown = 80;
+    itemCooldown = 30;
+    nextBossTriggerDist = 700;
     runStartTime = performance.now();
     survivalTime = 0;
 
@@ -1620,6 +1831,7 @@ function startGame() {
     document.getElementById('gameover-screen').classList.add('hidden');
     document.getElementById('shop-screen').classList.add('hidden');
 
+    window.updateGlobalPointsUI();
     window.soundManager.startBGM();
 }
 
@@ -1663,52 +1875,99 @@ function gameOver(customReason) {
     document.getElementById('gameover-screen').classList.remove('hidden');
 }
 
-// Spawner Logic — Dynamic Rhythmic Stream (Engaging, fair, zero dead time)
+// Spawner Logic — Distance-Escalating Multi-Hazard Gauntlet
 function updateSpawner(effectiveSpeed) {
     spawnCooldown--;
-    if (spawnCooldown <= 0 && obstacles.length < 5) {
-        // Compute dynamic cooldown: Starts around 80 frames, tightens down to 48 frames as speed increases
-        const speedBonus = Math.min(32, (effectiveSpeed - baseSpeed) * 8.5);
-        spawnCooldown = Math.max(48, Math.floor(82 - speedBonus + (Math.random() * 20 - 10)));
 
+    // Max simultaneous obstacles climbs rapidly with distance: from 4 up to 9
+    const maxObstacles = Math.min(9, 4 + Math.floor(distance / 180));
+
+    if (spawnCooldown <= 0 && obstacles.length < maxObstacles) {
+        // Cooldown between hazards shrinks sharply as distance grows
+        const distReduction = Math.min(52, Math.floor(distance * 0.048));
+        spawnCooldown = Math.max(18, Math.floor(64 - distReduction + (Math.random() * 12 - 6)));
+
+        const distLevel = distance;
         const rand = Math.random();
-        if (distance > 150 && rand < 0.28) {
-            // Low-flying buzzword requiring ducking/sliding (like Dino Pterodactyl!)
-            obstacles.push(new Obstacle('FLYING_BUZZWORD', 1050));
-        } else if (rand < 0.25) {
-            obstacles.push(new Obstacle('CHAIR', 1050));
-        } else if (rand < 0.50) {
-            obstacles.push(new Obstacle('CALENDAR', 1050));
-        } else if (rand < 0.72) {
-            obstacles.push(new Obstacle('LAPTOP', 1050));
-        } else if (rand < 0.88) {
-            obstacles.push(new Obstacle('COFFEE_SPILL', 1050));
-        } else {
-            obstacles.push(new Obstacle('TASK_BOULDER', 1050));
+
+        // Pattern 1: High distance (>= 450m) Triple & Multi-Hazard Gauntlets
+        if (distLevel >= 450 && rand < 0.40) {
+            // Rapid alternating sequences
+            if (Math.random() < 0.5) {
+                // Slide under Drone -> Jump over Chair -> Slide under Drone
+                obstacles.push(new Obstacle('FLYING_DRONE', 1050));
+                obstacles.push(new Obstacle('CHAIR', 1210));
+                obstacles.push(new Obstacle('FLYING_DRONE', 1370));
+                spawnCooldown += 34;
+            } else {
+                // Double Jump over high Task Boulder -> Jump Laptop -> Slide Drone
+                obstacles.push(new Obstacle('TASK_BOULDER', 1050));
+                obstacles.push(new Obstacle('LAPTOP', 1200));
+                obstacles.push(new Obstacle('FLYING_DRONE', 1360));
+                spawnCooldown += 36;
+            }
+        }
+        // Pattern 2: Mid distance (>= 150m) Double Hazard Pairs (Ground + Air or Fast Rolling Pairs)
+        else if (distLevel >= 150 && rand < 0.52) {
+            const pairChoice = Math.random();
+            if (pairChoice < 0.40) {
+                // Jump over Laptop immediately into overhead Slide under Drone!
+                obstacles.push(new Obstacle('LAPTOP', 1050));
+                obstacles.push(new Obstacle('FLYING_DRONE', 1190));
+            } else if (pairChoice < 0.70) {
+                // Rapid Double Ground Jump (Chair + Meeting Calendar)!
+                obstacles.push(new Obstacle('CHAIR', 1050));
+                obstacles.push(new Obstacle('CALENDAR', 1190));
+            } else {
+                // Rolling Task Boulder into Ergonomic Chair!
+                obstacles.push(new Obstacle('TASK_BOULDER', 1050));
+                obstacles.push(new Obstacle('CHAIR', 1200));
+            }
+            spawnCooldown += 22;
+        }
+        // Pattern 3: Early distance (>= 50m) Single/Double Quick Hazards
+        else if (distLevel >= 50 && rand < 0.45) {
+            const types = ['CHAIR', 'CALENDAR', 'LAPTOP', 'TASK_BOULDER', 'FLYING_DRONE'];
+            const chosen = types[Math.floor(Math.random() * types.length)];
+            obstacles.push(new Obstacle(chosen, 1050));
+            if (Math.random() < 0.4) {
+                obstacles.push(new Obstacle('CHAIR', 1180));
+                spawnCooldown += 16;
+            }
+        }
+        // Pattern 4: Introductory single obstacle
+        else {
+            const types = ['CHAIR', 'CALENDAR', 'LAPTOP'];
+            const chosen = types[Math.floor(Math.random() * types.length)];
+            obstacles.push(new Obstacle(chosen, 1050));
         }
     }
 
     // Spawn Coins & Power-ups rhythmically
     itemCooldown--;
-    if (itemCooldown <= 0 && items.length < 5) {
-        itemCooldown = Math.floor(65 + Math.random() * 40);
-        if (Math.random() < 0.68) {
-            const coinY = Math.random() > 0.4 ? 460 : 380;
-            const coinCount = Math.floor(Math.random() * 2) + 1;
-            for (let i = 0; i < coinCount; i++) {
-                items.push(new Item('COIN', 1100 + i * 42, coinY));
+    if (itemCooldown <= 0 && items.length < 6) {
+        itemCooldown = Math.floor(45 + Math.random() * 30);
+        const spawnBlocked = obstacles.some(o => o.x > 930 && o.x < 1170);
+
+        if (!spawnBlocked) {
+            if (Math.random() < 0.68) {
+                const coinY = Math.random() > 0.4 ? 455 : 385;
+                const coinCount = Math.floor(Math.random() * 3) + 1;
+                for (let i = 0; i < coinCount; i++) {
+                    items.push(new Item('COIN', 1080 + i * 40, coinY));
+                }
+            } else if (Math.random() < 0.42) {
+                const powerups = ['COFFEE', 'HEADPHONES', 'PTO', 'OOO'];
+                const chosen = powerups[Math.floor(Math.random() * powerups.length)];
+                items.push(new Item(chosen, 1120, 395));
             }
-        } else if (Math.random() < 0.4) {
-            const powerups = ['COFFEE', 'HEADPHONES', 'PTO', 'OOO'];
-            const chosen = powerups[Math.floor(Math.random() * powerups.length)];
-            items.push(new Item(chosen, 1150, 420));
         }
     }
 
     // Boss Battle Trigger (Scales with distance milestones)
     if (distance >= nextBossTriggerDist && !bossManager.active) {
         bossManager.trigger();
-        nextBossTriggerDist += 1000 + Math.random() * 300;
+        nextBossTriggerDist += 750 + Math.random() * 200;
     }
 }
 
@@ -1722,27 +1981,49 @@ function getCurrentBiome() {
     return BIOMES[0];
 }
 
-// Main Game Loop — Smooth, gradual Dino scaling starting at gentle walking speed
+// Main Game Loop — Gradual, distance-based smooth speed progression
 function updateGame() {
     if (currentState !== GAME_STATE.PLAYING) return;
 
     survivalTime = (performance.now() - runStartTime) / 1000;
 
-    // Classic Chrome Dino gradual acceleration formula
-    const targetBaseSpeed = baseSpeed + Math.min(4.2, distance * 0.0012 + survivalTime * 0.012);
+    // Dynamic distance-driven speed scaling: starts at 6.8 and accelerates continuously with distance
+    const distSpeedGain = Math.min(14.2, (distance * 0.009) + Math.pow(distance / 180, 0.75) * 1.5);
+    const baseSpeed = Math.min(DINO_CONFIG.MAX_SPEED, DINO_CONFIG.SPEED + distSpeedGain);
+    gameSpeed = baseSpeed;
 
-    // Smooth speed boost multiplier (prevents sudden velocity spikes)
-    const targetBoost = player.coffeeTimer > 0 ? 1.15 : (player.isDashing ? 1.22 : 1.0);
-    const targetEffectiveSpeed = targetBaseSpeed * targetBoost;
+    // Active in-game temporary buff multipliers (Quad Espresso, Dash, and gentle Boss Alert)
+    const buffBoost = player.coffeeTimer > 0 ? 1.20 : (player.isDashing ? 1.25 : 1.0);
+    const bossBoost = bossManager.active ? 1.10 : 1.0;
+    const targetEffectiveSpeed = gameSpeed * buffBoost * bossBoost;
 
-    if (typeof window.smoothSpeed === 'undefined') window.smoothSpeed = baseSpeed;
+    if (typeof window.smoothSpeed === 'undefined') window.smoothSpeed = DINO_CONFIG.SPEED;
     window.smoothSpeed += (targetEffectiveSpeed - window.smoothSpeed) * 0.06;
     const effectiveSpeed = window.smoothSpeed;
-    gameSpeed = targetBaseSpeed;
 
-    distance += effectiveSpeed * 0.055;
+    // Distance accumulation
+    distance += effectiveSpeed * 0.04;
+
+    // Authentic 100m Milestone Celebration (Dino 100m beep & score flash)
+    const currentHundreds = Math.floor(distance / 100);
+    if (currentHundreds > lastMilestoneHundreds && currentHundreds > 0) {
+        lastMilestoneHundreds = currentHundreds;
+        window.soundManager.playMilestone();
+        createScorePopup(canvas.width / 2, 140, `${currentHundreds * 100}m MILESTONE! 🎯`, '#ffd166');
+        createBlastConfetti(canvas.width / 2, 140, 16);
+    }
 
     const currentBiome = getCurrentBiome();
+
+    // Biome Transition Announcement
+    if (bgManager.lastBiomeId !== currentBiome.id) {
+        if (bgManager.lastBiomeId !== null) {
+            window.soundManager.playCoin();
+            createScorePopup(canvas.width / 2 - 80, 160, `ZONE: ${currentBiome.name} ✨`, currentBiome.accent);
+            createBlastConfetti(canvas.width / 2, 160);
+        }
+        bgManager.lastBiomeId = currentBiome.id;
+    }
 
     // Update Systems
     bgManager.update(effectiveSpeed);
@@ -1756,7 +2037,7 @@ function updateGame() {
         obs.update(effectiveSpeed);
 
         if (checkCollision(player, obs)) {
-            // Invulnerable / Coffee / Dash Smash
+            // Invulnerable / Coffee / Dash Smash (Dash smash active if dashing or coffee buff active)
             if (player.invulnerableTimer > 0 || player.coffeeTimer > 0) {
                 obs.markedForDeletion = true;
                 createBlastConfetti(obs.x + obs.width / 2, obs.y + obs.height / 2);
@@ -1782,19 +2063,17 @@ function updateGame() {
                     storage.set('coins', totalCoins);
                 }
                 createScorePopup(player.x, player.y - 20, `SHIELD BROKE! -${penalty} P`, '#ff4757');
+            } else if (player.hasExtraLife) {
+                // HR Extra Life Insurance Item Consumed!
+                player.hasExtraLife = false;
+                player.invulnerableTimer = 160;
+                player.shield = 1;
+                obs.markedForDeletion = true;
+                if (window.soundManager) window.soundManager.playShieldUp();
+                createBlastConfetti(player.x + 20, player.y);
+                createScorePopup(player.x, player.y - 30, 'REVIVED BY HR LIFE INSURANCE! 🛡️', '#10b981');
+                updateHUD(currentBiome);
             } else {
-                // Point deduction on fatal hit
-                const penalty = Math.min(15, totalCoins + runCoins);
-                if (runCoins >= penalty) {
-                    runCoins -= penalty;
-                } else {
-                    const rem = penalty - runCoins;
-                    runCoins = 0;
-                    totalCoins = Math.max(0, totalCoins - rem);
-                    storage.set('coins', totalCoins);
-                }
-                createScorePopup(player.x, player.y - 30, `-${penalty} P`, '#ef4444');
-
                 // Game Over Collision
                 let specificReason = null;
                 if (obs.type === 'CHAIR') specificReason = "Smashed into a rogue ergonomic office chair in the hallway.";
@@ -1821,17 +2100,28 @@ function updateGame() {
             item.markedForDeletion = true;
 
             switch (item.type) {
-                case 'COIN':
-                    runCoins += 1;
+                case 'COIN': {
+                    const isAvUnlocked = unlockedAvatars.includes(player.avatar.id);
+                    const charMult = (isAvUnlocked && player.avatar.coinMultiplier) ? player.avatar.coinMultiplier : 1;
+                    const stockBoost = (upgrades.coin_boost > 0) ? 1.5 : 1.0;
+                    const contractMult = player.doublePointsActive ? 2 : 1;
+                    const earned = Math.max(1, Math.round(1 * charMult * stockBoost * contractMult));
+                    runCoins += earned;
                     window.soundManager.playCoin();
-                    createScorePopup(item.x, item.y, '+1 P', '#fbbf24');
+                    createScorePopup(item.x, item.y, `+${earned} P`, '#fbbf24');
                     break;
-                case 'COFFEE':
-                    const durationFrames = Math.floor(240 * (upgrades.coffee_duration * 0.4 + 1) * (player.avatar.coffeeBonus || 1));
-                    player.coffeeTimer = durationFrames;
+                }
+                case 'COFFEE': {
+                    const isAvUnlocked = unlockedAvatars.includes(player.avatar.id);
+                    const coffeeBonus = (isAvUnlocked && player.avatar.coffeeBonus) ? player.avatar.coffeeBonus : 1.0;
+                    const extraDuration = (upgrades.coffee_duration > 0) ? 210 : 0;
+                    const totalDuration = Math.round((240 + extraDuration) * coffeeBonus);
+                    player.coffeeTimer = totalDuration;
+                    player.invulnerableTimer = totalDuration;
                     window.soundManager.playCoffeePowerup();
                     createScorePopup(player.x, player.y - 30, 'QUAD ESPRESSO! ☕', '#f59e0b');
                     break;
+                }
                 case 'HEADPHONES':
                     player.shield = 1;
                     window.soundManager.playShieldUp();
@@ -1869,6 +2159,15 @@ function drawGame() {
 
     const currentBiome = getCurrentBiome();
     bgManager.draw(currentBiome);
+
+    // Foreground lane guide: makes the playable strip obvious and keeps hazards visually anchored.
+    ctx.save();
+    ctx.globalAlpha = 0.16;
+    ctx.strokeStyle = currentBiome.accent;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([10, 18]);
+    ctx.beginPath(); ctx.moveTo(0, 486); ctx.lineTo(1000, 486); ctx.stroke();
+    ctx.restore();
 
     // Draw Items
     items.forEach(it => it.draw());
@@ -1914,7 +2213,25 @@ function updateHUD(biome) {
     document.getElementById('hud-time').textContent = survivalTime.toFixed(1) + 's';
     document.getElementById('hud-coins').textContent = (totalCoins + runCoins) + ' P';
     document.getElementById('hud-zone').textContent = biome.name;
-    document.getElementById('stamina-fill').style.width = (player.stamina / player.maxStamina * 100) + '%';
+
+    const staminaFill = document.getElementById('stamina-fill');
+    if (staminaFill) {
+        const stamPct = Math.max(0, Math.min(100, Math.round(player.stamina / player.maxStamina * 100)));
+        staminaFill.style.width = stamPct + '%';
+        if (stamPct < 35) {
+            staminaFill.style.background = 'linear-gradient(90deg, #ef4444, #f59e0b)';
+            staminaFill.style.boxShadow = '0 0 8px rgba(239, 68, 68, 0.8)';
+        } else {
+            staminaFill.style.background = 'linear-gradient(90deg, #38bdf8, #10b981)';
+            staminaFill.style.boxShadow = '0 0 8px rgba(56, 189, 248, 0.8)';
+        }
+    }
+
+    const staminaVal = document.getElementById('hud-stamina-val');
+    if (staminaVal) {
+        staminaVal.textContent = Math.round(player.stamina) + '%';
+        staminaVal.style.color = player.stamina < 35 ? '#f87171' : '#38bdf8';
+    }
 
     // Active powerups tag
     const powerupContainer = document.getElementById('active-powerup-bar');
@@ -1923,7 +2240,7 @@ function updateHUD(biome) {
     if (player.coffeeTimer > 0) {
         const tag = document.createElement('div');
         tag.className = 'powerup-tag';
-        tag.innerHTML = `☕ Espresso Rush (${(player.coffeeTimer / 60).toFixed(1)}s)`;
+        tag.innerHTML = `🚀 Rocket / Espresso (${(player.coffeeTimer / 60).toFixed(1)}s)`;
         powerupContainer.appendChild(tag);
     }
     if (player.shield > 0) {
@@ -1940,6 +2257,22 @@ function updateHUD(biome) {
         tag.innerHTML = `🏝️ PTO Coin Magnet (${(player.ptoTimer / 60).toFixed(1)}s)`;
         powerupContainer.appendChild(tag);
     }
+    if (player.hasExtraLife) {
+        const tag = document.createElement('div');
+        tag.className = 'powerup-tag';
+        tag.style.borderColor = '#10b981';
+        tag.style.color = '#34d399';
+        tag.innerHTML = `🛡️ HR Revive Ready`;
+        powerupContainer.appendChild(tag);
+    }
+    if (player.doublePointsActive) {
+        const tag = document.createElement('div');
+        tag.className = 'powerup-tag';
+        tag.style.borderColor = '#fbbf24';
+        tag.style.color = '#fbbf24';
+        tag.innerHTML = `💰 2x Points Active`;
+        powerupContainer.appendChild(tag);
+    }
 }
 
 function showBossWarning(quote) {
@@ -1951,15 +2284,19 @@ function showBossWarning(quote) {
     }, 2800);
 }
 
-// Pause and Navigation Functions
+// Pause and Navigation Functions (CrazyGames / Poki Paused Portal Docking Mode)
 let pauseStartTime = 0;
 
 function pauseGame() {
     if (currentState === GAME_STATE.PLAYING) {
         currentState = GAME_STATE.PAUSED;
         pauseStartTime = performance.now();
-        document.getElementById('pause-screen').classList.remove('hidden');
-        window.soundManager.stopBGM();
+        document.body.classList.add('portal-paused');
+        const pauseScr = document.getElementById('pause-screen');
+        if (pauseScr) pauseScr.classList.remove('hidden');
+        if (window.soundManager) window.soundManager.stopBGM();
+        const topBank = document.getElementById('portal-top-bank');
+        if (topBank) topBank.textContent = `🪙 ${totalCoins} P`;
     }
 }
 
@@ -1968,21 +2305,34 @@ function resumeGame() {
         currentState = GAME_STATE.PLAYING;
         const pauseDuration = performance.now() - pauseStartTime;
         runStartTime += pauseDuration; // adjust elapsed timer seamlessly
-        document.getElementById('pause-screen').classList.add('hidden');
-        window.soundManager.startBGM();
+        document.body.classList.remove('portal-paused');
+        const pauseScr = document.getElementById('pause-screen');
+        if (pauseScr) pauseScr.classList.add('hidden');
+        if (window.soundManager) window.soundManager.startBGM();
     }
 }
 
 function goHome() {
     currentState = GAME_STATE.MENU;
-    document.getElementById('pause-screen').classList.add('hidden');
-    document.getElementById('gameover-screen').classList.add('hidden');
-    document.getElementById('shop-screen').classList.add('hidden');
-    document.getElementById('start-screen').classList.remove('hidden');
-    window.soundManager.stopBGM();
-    renderAvatarSelection();
-    updateShopUI();
+    document.body.classList.remove('portal-paused');
+    document.body.classList.remove('in-game');
+    const gWrapper = document.getElementById('game-view-wrapper');
+    if (gWrapper) gWrapper.classList.add('hidden');
+    const hpView = document.getElementById('homepage-view');
+    if (hpView) hpView.classList.remove('hidden');
+    const pauseScr = document.getElementById('pause-screen');
+    if (pauseScr) pauseScr.classList.add('hidden');
+    const govScr = document.getElementById('gameover-screen');
+    if (govScr) govScr.classList.add('hidden');
+    const shpScr = document.getElementById('shop-screen');
+    if (shpScr) shpScr.classList.add('hidden');
+    if (window.soundManager) window.soundManager.stopBGM();
+    if (typeof updateGlobalPointsUI === 'function') updateGlobalPointsUI();
 }
+
+window.pauseGame = pauseGame;
+window.resumeGame = resumeGame;
+window.goHome = goHome;
 
 // Input Handlers (Classic Chrome Dinosaur Controls)
 window.addEventListener('keydown', (e) => {
@@ -1996,6 +2346,12 @@ window.addEventListener('keydown', (e) => {
         } else if (currentState === GAME_STATE.PAUSED) {
             resumeGame();
         }
+        return;
+    }
+
+    // Ignore key auto-repeats for Jump and Dash to avoid consuming double jump / stamina instantly
+    if (e.repeat && (e.code === 'Space' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === 'Shift' || e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D')) {
+        e.preventDefault();
         return;
     }
 
@@ -2023,6 +2379,54 @@ window.addEventListener('keyup', (e) => {
         player.duckEnd();
     }
 });
+
+// Mouse Controls: Left Click = Jump, Right Click = Slide, Mouse Scroll = Dash
+window.addEventListener('mousedown', (e) => {
+    window.soundManager.init();
+
+    // Ignore clicks on UI buttons/modals so menu clicking still works
+    if (e.target.closest('button') || e.target.closest('.modal-content') || e.target.closest('.shop-card')) {
+        return;
+    }
+
+    if (e.button === 0) {
+        // Left Click: Jump during play, or Start/Restart from GameOver
+        if (currentState === GAME_STATE.PLAYING) {
+            player.jump();
+        } else if (currentState === GAME_STATE.GAMEOVER) {
+            startGame();
+        }
+    } else if (e.button === 2) {
+        // Right Click: Slide / Duck
+        e.preventDefault();
+        if (currentState === GAME_STATE.PLAYING) {
+            player.duckStart();
+        }
+    }
+});
+
+window.addEventListener('mouseup', (e) => {
+    if (e.button === 2) {
+        // Release Right Click: End Slide
+        e.preventDefault();
+        player.duckEnd();
+    }
+});
+
+// Disable browser context menu on right-click during the game
+window.addEventListener('contextmenu', (e) => {
+    if (!e.target.closest('input') && !e.target.closest('textarea')) {
+        e.preventDefault();
+    }
+});
+
+// Mouse Scroll Wheel: Dash using stamina
+window.addEventListener('wheel', (e) => {
+    if (currentState === GAME_STATE.PLAYING) {
+        e.preventDefault();
+        player.dash();
+    }
+}, { passive: false });
 
 // Touch & Mobile Buttons Setup
 function setupTouchControls() {
@@ -2127,68 +2531,469 @@ function renderAvatarSelection() {
     });
 }
 
-function updateShopUI() {
-    const totalEl = document.getElementById('shop-total-coins');
-    if (totalEl) totalEl.textContent = `${totalCoins} P`;
+function gameOver(customReason) {
+    currentState = GAME_STATE.GAMEOVER;
+    window.soundManager.stopBGM();
+    window.soundManager.playGameOver();
 
-    const coffeeBtn = document.getElementById('shop-btn-coffee');
-    const shieldBtn = document.getElementById('shop-btn-shield');
-    const magnetBtn = document.getElementById('shop-btn-magnet');
+    const finalTime = survivalTime;
+    const finalDist = Math.floor(distance);
 
-    if (coffeeBtn) {
-        if (upgrades.coffee_duration > 0) {
-            coffeeBtn.textContent = 'BOUGHT ✓';
-            coffeeBtn.className = 'shop-buy-btn bought';
-            coffeeBtn.disabled = true;
+    // Calculate Points Rewards
+    const distPoints = Math.floor(finalDist / 40); // 1 P per 40m
+    const boostMult = (player.doublePointsActive ? 2 : 1) * (upgrades.coin_boost > 0 ? 1.5 : 1.0);
+    const totalEarnedThisRun = Math.max(1, Math.round((runCoins + distPoints) * boostMult));
+
+    // Save records
+    totalCoins += totalEarnedThisRun;
+    storage.set('coins', totalCoins);
+
+    const isNewRecord = finalTime > bestSurvivalTime || finalDist > bestDistance;
+    if (finalTime > bestSurvivalTime) {
+        bestSurvivalTime = finalTime;
+        storage.set('best_time', bestSurvivalTime);
+    }
+    if (finalDist > bestDistance) {
+        bestDistance = finalDist;
+        storage.set('best_dist', bestDistance);
+    }
+
+    // Populate Game Over Screen
+    const reasonText = customReason || DEATH_REASONS[Math.floor(Math.random() * DEATH_REASONS.length)];
+    const reasonEl = document.getElementById('death-reason-text');
+    if (reasonEl) reasonEl.textContent = `"${reasonText}"`;
+    
+    const timeEl = document.getElementById('stat-time-val');
+    if (timeEl) timeEl.textContent = finalTime.toFixed(2) + 's';
+    
+    const distEl = document.getElementById('stat-dist-val');
+    if (distEl) distEl.textContent = finalDist + 'm';
+    
+    const coinsEl = document.getElementById('stat-coins-val');
+    if (coinsEl) {
+        coinsEl.innerHTML = `+${totalEarnedThisRun} P <small style="display:block; font-size:0.7rem; color:#94a3b8; font-weight:normal;">(${runCoins} coins + ${distPoints} dist${boostMult > 1 ? ` × ${boostMult}x` : ''})</small>`;
+    }
+
+    const bankEl = document.getElementById('stat-bank-val');
+    if (bankEl) bankEl.textContent = `${totalCoins} P`;
+
+    const bestEl = document.getElementById('stat-best-val');
+    if (bestEl) bestEl.textContent = bestSurvivalTime.toFixed(2) + 's';
+
+    const recordTag = document.getElementById('new-record-tag');
+    if (recordTag) {
+        recordTag.style.display = isNewRecord ? 'block' : 'none';
+    }
+
+    window.updateGlobalPointsUI();
+    document.getElementById('gameover-screen').classList.remove('hidden');
+}
+
+// Spawner Logic — Dynamic Rhythmic Stream with Chromium gap scaling
+function updateSpawner(effectiveSpeed) {
+    spawnCooldown--;
+    if (spawnCooldown <= 0 && obstacles.length < 5) {
+        const speedRatio = Math.min(1.0, (gameSpeed - DINO_CONFIG.SPEED) / (DINO_CONFIG.MAX_SPEED - DINO_CONFIG.SPEED));
+        spawnCooldown = Math.max(48, Math.floor(105 - speedRatio * 50 + (Math.random() * 20 - 10)));
+
+        const rand = Math.random();
+        if (rand < 0.24) {
+            obstacles.push(new Obstacle('CHAIR', 1050));
+        } else if (rand < 0.46) {
+            obstacles.push(new Obstacle('CALENDAR', 1050));
+        } else if (rand < 0.66) {
+            obstacles.push(new Obstacle('LAPTOP', 1050));
+        } else if (rand < 0.82) {
+            obstacles.push(new Obstacle('TASK_BOULDER', 1050));
         } else {
-            coffeeBtn.textContent = '40 P BUY';
-            coffeeBtn.className = 'shop-buy-btn';
-            coffeeBtn.disabled = false;
+            obstacles.push(new Obstacle('FLYING_DRONE', 1050));
         }
     }
 
-    if (shieldBtn) {
-        if (upgrades.shield_strength > 0) {
-            shieldBtn.textContent = 'BOUGHT ✓';
-            shieldBtn.className = 'shop-buy-btn bought';
-            shieldBtn.disabled = true;
-        } else {
-            shieldBtn.textContent = '60 P BUY';
-            shieldBtn.className = 'shop-buy-btn';
-            shieldBtn.disabled = false;
-        }
-    }
+    itemCooldown--;
+    if (itemCooldown <= 0 && items.length < 5) {
+        itemCooldown = Math.floor(65 + Math.random() * 40);
+        const spawnBlocked = obstacles.some(o => o.x > 900 && o.x < 1200);
 
-    if (magnetBtn) {
-        if (upgrades.magnet_duration > 0) {
-            magnetBtn.textContent = 'BOUGHT ✓';
-            magnetBtn.className = 'shop-buy-btn bought';
-            magnetBtn.disabled = true;
-        } else {
-            magnetBtn.textContent = '50 P BUY';
-            magnetBtn.className = 'shop-buy-btn';
-            magnetBtn.disabled = false;
+        if (!spawnBlocked) {
+            if (Math.random() < 0.68) {
+                const coinY = Math.random() > 0.4 ? 455 : 390;
+                items.push(new Item('COIN', 1050, coinY));
+            } else {
+                const pRand = Math.random();
+                let pType = 'COFFEE';
+                if (pRand < 0.35) pType = 'COFFEE';
+                else if (pRand < 0.65) pType = 'HEADPHONES';
+                else if (pRand < 0.85) pType = 'PTO';
+                else pType = 'OOO';
+                items.push(new Item(pType, 1050, 420));
+            }
         }
     }
 }
 
-// Global upgrade helper
-window.buyUpgrade = function(type, cost) {
-    if (upgrades[type] > 0) return; // already bought!
+function updateShopUI() {
+    const totalEl = document.getElementById('shop-total-coins');
+    if (totalEl) totalEl.textContent = `${totalCoins} P`;
+
+    const shopList = document.querySelector('#shop-screen .shop-list');
+    if (shopList) {
+        shopList.innerHTML = `
+            <div style="grid-column: 1/-1; font-size: 0.85rem; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase;">
+                ⭐ Permanent Corporate Upgrades
+            </div>
+            ${STORE_CATALOG.upgrades.map(up => {
+                const isBought = upgrades[up.id] > 0;
+                return `
+                    <div class="shop-item">
+                        <div class="shop-item-info">
+                            <div class="shop-icon">${up.icon}</div>
+                            <div>
+                                <div class="shop-item-name">${up.name}</div>
+                                <div class="shop-item-desc">${up.desc}</div>
+                            </div>
+                        </div>
+                        <button class="shop-buy-btn ${isBought ? 'bought' : ''}" ${isBought ? 'disabled' : ''} onclick="buyEscapeUpgrade('${up.id}', ${up.cost})">
+                            ${isBought ? 'BOUGHT ✓' : `${up.cost} P BUY`}
+                        </button>
+                    </div>
+                `;
+            }).join('')}
+
+            <div style="grid-column: 1/-1; font-size: 0.85rem; font-weight: 800; color: #fbbf24; letter-spacing: 1px; margin-top: 14px; margin-bottom: 4px; text-transform: uppercase;">
+                ⚡ Single-Use In-Run Gear
+            </div>
+            ${STORE_CATALOG.items.map(it => {
+                const count = inventory[it.id] || 0;
+                return `
+                    <div class="shop-item">
+                        <div class="shop-item-info">
+                            <div class="shop-icon">${it.icon}</div>
+                            <div>
+                                <div class="shop-item-name">${it.name} ${count > 0 ? `<span style="color:#10b981; font-size:0.75rem;">(Owned: ${count})</span>` : ''}</div>
+                                <div class="shop-item-desc">${it.desc}</div>
+                            </div>
+                        </div>
+                        <button class="shop-buy-btn" onclick="buyEscapeItem('${it.id}', ${it.cost})">
+                            ${it.cost} P BUY
+                        </button>
+                    </div>
+                `;
+            }).join('')}
+        `;
+    }
+}
+
+// Global Points & Upgrades Sync Engine
+window.updateGlobalPointsUI = function() {
+    totalCoins = storage.get('coins', totalCoins);
+    unlockedAvatars = storage.get('unlocked_avatars', unlockedAvatars);
+    activeAvatarId = storage.get('selected_avatar', activeAvatarId);
+    upgrades = storage.get('upgrades', upgrades);
+    inventory = storage.get('inventory', inventory);
+
+    window.inventory = inventory;
+    window.upgrades = upgrades;
+
+    // Nav & Hero Points Displays
+    const navPts = document.getElementById('nav-points-badge');
+    if (navPts) navPts.textContent = `🪙 ${totalCoins} P`;
+
+    const heroBank = document.getElementById('hero-bank-display');
+    if (heroBank) heroBank.textContent = `${totalCoins} P`;
+
+    const empBadge = document.getElementById('employees-points-badge');
+    if (empBadge) empBadge.textContent = `🪙 YOUR BALANCE: ${totalCoins} P`;
+
+    const storeBank = document.getElementById('store-bank-balance');
+    if (storeBank) storeBank.textContent = `BANK: ${totalCoins} P`;
+
+    const shopTotal = document.getElementById('shop-total-coins');
+    if (shopTotal) shopTotal.textContent = `🪙 ${totalCoins} P`;
+
+    const menuCoins = document.getElementById('menu-coins-display');
+    if (menuCoins) menuCoins.textContent = `🪙 ${totalCoins} P`;
+
+    const hudCoins = document.getElementById('hud-coins');
+    if (hudCoins) hudCoins.textContent = `${runCoins} P`;
+
+    // Sync Operative Badges on Homepage
+    Object.values(AVATARS).forEach(av => {
+        const badge = document.getElementById('badge-' + av.id);
+        const isUnlocked = unlockedAvatars.includes(av.id) || (av.id === 'dev');
+        const isEquipped = (activeAvatarId === av.id);
+
+        if (badge) {
+            if (isEquipped) {
+                badge.className = 'badge-status badge-equipped';
+                badge.textContent = 'EQUIPPED';
+            } else if (isUnlocked) {
+                badge.className = 'badge-status badge-bought';
+                badge.textContent = 'BOUGHT ✓';
+            } else {
+                badge.className = 'badge-status badge-locked';
+                badge.textContent = `🔒 ${av.cost} P`;
+            }
+        }
+    });
+
+    // Populate Store on Homepage
+    const homeStoreGrid = document.getElementById('homepage-store-grid');
+    if (homeStoreGrid) {
+        homeStoreGrid.innerHTML = `
+            ${STORE_CATALOG.upgrades.map(up => {
+                const isBought = (upgrades[up.id] || 0) > 0;
+                return `
+                    <div class="store-card">
+                        <div class="store-card-info">
+                            <div class="store-card-icon">${up.icon}</div>
+                            <div>
+                                <div class="store-card-name">${up.name}</div>
+                                <div class="store-card-desc">${up.desc}</div>
+                            </div>
+                        </div>
+                        <button class="store-btn ${isBought ? 'bought' : ''}" ${isBought ? 'disabled' : ''} onclick="buyEscapeUpgrade('${up.id}', ${up.cost})">
+                            ${isBought ? 'BOUGHT ✓' : `${up.cost} P BUY`}
+                        </button>
+                    </div>
+                `;
+            }).join('')}
+            ${STORE_CATALOG.items.map(it => {
+                const count = inventory[it.id] || 0;
+                return `
+                    <div class="store-card">
+                        <div class="store-card-info">
+                            <div class="store-card-icon">${it.icon}</div>
+                            <div>
+                                <div class="store-card-name">${it.name} ${count > 0 ? `<span style="color:#10b981; font-size:0.75rem;">(Owned: ${count})</span>` : ''}</div>
+                                <div class="store-card-desc">${it.desc}</div>
+                            </div>
+                        </div>
+                        <button class="store-btn" onclick="buyEscapeItem('${it.id}', ${it.cost})">
+                            ${it.cost} P BUY
+                        </button>
+                    </div>
+                `;
+            }).join('')}
+        `;
+    }
+};
+
+// Pre-Run Gear Loadout Check & Modal Handler
+window.checkAndOpenGearModal = function() {
+    inventory = storage.get('inventory', inventory);
+    const hasRocket = (inventory.rocket_start || 0) > 0;
+    const hasLife = (inventory.extra_life || 0) > 0;
+    const hasPoints = (inventory.double_points || 0) > 0;
+
+    if (!hasRocket && !hasLife && !hasPoints) {
+        return false; // No single-use gear owned, start run immediately
+    }
+
+    const modal = document.getElementById('gear-modal');
+    const list = document.getElementById('gear-items-list');
+    if (!modal || !list) return false;
+
+    list.innerHTML = '';
+    const gearCatalog = [
+        { id: 'rocket_start', name: 'Rocket Coffee Start', icon: '🚀', desc: 'Supersonic 300m invincibility rush at start', count: inventory.rocket_start || 0 },
+        { id: 'extra_life', name: 'HR Life Insurance', icon: '🛡️', desc: 'Automatically revives you once on a fatal obstacle crash', count: inventory.extra_life || 0 },
+        { id: 'double_points', name: 'Double Point Contract', icon: '💰', desc: '2x Point multiplier for this entire run', count: inventory.double_points || 0 }
+    ];
+
+    gearCatalog.forEach(it => {
+        if (it.count > 0) {
+            const row = document.createElement('label');
+            row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: rgba(14, 27, 43, 0.85); border: 1.5px solid rgba(168, 204, 229, 0.2); border-radius: 12px; padding: 10px 14px; cursor: pointer; transition: 0.2s; user-select: none;';
+            row.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <input type="checkbox" id="gear-chk-${it.id}" checked style="width: 18px; height: 18px; accent-color: #38bdf8; cursor: pointer;">
+                    <div>
+                        <div style="font-weight: 800; font-size: 0.88rem; color: #f4f8fb; display: flex; align-items: center; gap: 6px;">
+                            <span>${it.icon}</span> <span>${it.name}</span>
+                            <span style="font-size: 0.72rem; color: #10b981; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 6px;">x${it.count}</span>
+                        </div>
+                        <div style="font-size: 0.72rem; color: #8293a7; margin-top: 2px;">${it.desc}</div>
+                    </div>
+                </div>
+            `;
+            list.appendChild(row);
+        }
+    });
+
+    const btnDeploy = document.getElementById('btn-gear-deploy');
+    if (btnDeploy) {
+        btnDeploy.onclick = () => {
+            const chkRocket = document.getElementById('gear-chk-rocket_start');
+            const chkLife = document.getElementById('gear-chk-extra_life');
+            const chkPoints = document.getElementById('gear-chk-double_points');
+            const selectedGear = {
+                rocket_start: chkRocket ? chkRocket.checked : false,
+                extra_life: chkLife ? chkLife.checked : false,
+                double_points: chkPoints ? chkPoints.checked : false
+            };
+            modal.classList.add('hidden');
+            if (typeof window.executeGameStart === 'function') {
+                window.executeGameStart(selectedGear);
+            }
+        };
+    }
+
+    const btnSkip = document.getElementById('btn-gear-skip');
+    if (btnSkip) {
+        btnSkip.onclick = () => {
+            modal.classList.add('hidden');
+            if (typeof window.executeGameStart === 'function') {
+                window.executeGameStart({ rocket_start: false, extra_life: false, double_points: false });
+            }
+        };
+    }
+
+    modal.classList.remove('hidden');
+    return true;
+};
+
+// Start run with chosen gear loadout
+window.startGameWithGear = function(selectedGear) {
+    inventory = storage.get('inventory', inventory);
+    upgrades = storage.get('upgrades', upgrades);
+    totalCoins = storage.get('coins', totalCoins);
+
+    const gear = selectedGear || { rocket_start: false, extra_life: false, double_points: false };
+
+    let hasRocket = gear.rocket_start && (inventory.rocket_start || 0) > 0;
+    if (hasRocket) {
+        inventory.rocket_start--;
+    }
+
+    let hasExtraLife = gear.extra_life && (inventory.extra_life || 0) > 0;
+    if (hasExtraLife) {
+        inventory.extra_life--;
+    }
+
+    let hasDoublePts = gear.double_points && (inventory.double_points || 0) > 0;
+    if (hasDoublePts) {
+        inventory.double_points--;
+    }
+
+    storage.set('inventory', inventory);
+
+    player.reset();
+
+    if (hasRocket) {
+        player.coffeeTimer = 300; // 5s supersonic rocket speed + invincibility
+        player.invulnerableTimer = 300;
+        createScorePopup(canvas.width / 2, 180, '🚀 ROCKET START ENGAGED!', '#f59e0b');
+    }
+    player.hasExtraLife = hasExtraLife;
+    player.doublePointsActive = hasDoublePts;
+
+    obstacles = [];
+    items = [];
+    particles = [];
+    bossManager.active = false;
+    distance = 0;
+    lastMilestoneHundreds = 0;
+    runCoins = 0;
+    gameSpeed = DINO_CONFIG.SPEED;
+    window.smoothSpeed = DINO_CONFIG.SPEED;
+    spawnCooldown = 80;
+    itemCooldown = 30;
+    nextBossTriggerDist = 700;
+    runStartTime = performance.now();
+    survivalTime = 0;
+
+    currentState = GAME_STATE.PLAYING;
+    const startScr = document.getElementById('start-screen');
+    if (startScr) startScr.classList.add('hidden');
+    const govScr = document.getElementById('gameover-screen');
+    if (govScr) govScr.classList.add('hidden');
+    const pauScr = document.getElementById('pause-screen');
+    if (pauScr) pauScr.classList.add('hidden');
+    const shpScr = document.getElementById('shop-screen');
+    if (shpScr) shpScr.classList.add('hidden');
+
+    window.updateGlobalPointsUI();
+    if (window.soundManager) window.soundManager.startBGM();
+};
+
+window.startGame = function() {
+    window.startGameWithGear({
+        rocket_start: (inventory.rocket_start || 0) > 0,
+        extra_life: (inventory.extra_life || 0) > 0,
+        double_points: (inventory.double_points || 0) > 0
+    });
+};
+
+window.buyEscapeAvatar = function(id) {
+    const av = AVATARS[id];
+    if (!av) return;
+    if (unlockedAvatars.includes(id) || id === 'dev') {
+        window.selectEscapeOperative(id);
+        return;
+    }
+    if (totalCoins >= av.cost) {
+        totalCoins -= av.cost;
+        storage.set('coins', totalCoins);
+        unlockedAvatars.push(id);
+        storage.set('unlocked_avatars', unlockedAvatars);
+        activeAvatarId = id;
+        storage.set('selected_avatar', id);
+        if (player) player.reset();
+        if (window.soundManager) window.soundManager.playShieldUp();
+        window.updateGlobalPointsUI();
+        if (typeof syncHeroPreview === 'function') syncHeroPreview(id);
+        createScorePopup(canvas.width / 2, canvas.height / 2, `${av.name} UNLOCKED! 🎉`, '#10b981');
+    } else {
+        if (window.soundManager) window.soundManager.playTone(200, 'square', 0.1, 0.2);
+        alert(`Need ${av.cost} P Point Coins to unlock ${av.name}! Current Bank: ${totalCoins} P.`);
+    }
+};
+
+window.selectEscapeOperative = function(id) {
+    if (unlockedAvatars.includes(id) || id === 'dev') {
+        activeAvatarId = id;
+        storage.set('selected_avatar', id);
+        if (player) player.reset();
+        window.updateGlobalPointsUI();
+        if (typeof syncHeroPreview === 'function') syncHeroPreview(id);
+    }
+};
+
+window.buyEscapeUpgrade = function(type, cost) {
+    if ((upgrades[type] || 0) > 0) return;
     if (totalCoins >= cost) {
         totalCoins -= cost;
         storage.set('coins', totalCoins);
         upgrades[type] = 1;
         storage.set('upgrades', upgrades);
-        window.soundManager.playShieldUp();
+        if (window.soundManager) window.soundManager.playShieldUp();
+        window.updateGlobalPointsUI();
         updateShopUI();
-        renderAvatarSelection();
-        createScorePopup(canvas.width / 2, canvas.height / 2, 'PERK BOUGHT! ✨', '#10b981');
+        createScorePopup(canvas.width / 2, canvas.height / 2, 'UPGRADE BOUGHT! ✨', '#10b981');
     } else {
-        window.soundManager.playTone(200, 'square', 0.1, 0.2);
-        alert(`Need ${cost} P Point Coins!`);
+        if (window.soundManager) window.soundManager.playTone(200, 'square', 0.1, 0.2);
+        alert(`Need ${cost} P Point Coins! Current Bank: ${totalCoins} P.`);
     }
 };
+
+window.buyEscapeItem = function(type, cost) {
+    if (totalCoins >= cost) {
+        totalCoins -= cost;
+        storage.set('coins', totalCoins);
+        inventory[type] = (inventory[type] || 0) + 1;
+        storage.set('inventory', inventory);
+        if (window.soundManager) window.soundManager.playShieldUp();
+        window.updateGlobalPointsUI();
+        updateShopUI();
+        createScorePopup(canvas.width / 2, canvas.height / 2, 'ITEM PURCHASED! ⚡', '#38bdf8');
+    } else {
+        if (window.soundManager) window.soundManager.playTone(200, 'square', 0.1, 0.2);
+        alert(`Need ${cost} P Point Coins! Current Bank: ${totalCoins} P.`);
+    }
+};
+
+window.buyUpgrade = window.buyEscapeUpgrade;
 
 function requestGameFullScreen() {
     if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
@@ -2203,13 +3008,26 @@ function requestGameFullScreen() {
 // Return to game home page
 function goHome() {
     currentState = GAME_STATE.MENU;
-    window.soundManager.stopBGM();
-    document.getElementById('gameover-screen').classList.add('hidden');
-    document.getElementById('pause-screen').classList.add('hidden');
-    document.getElementById('shop-screen').classList.add('hidden');
-    document.getElementById('start-screen').classList.remove('hidden');
-    player.reset();
-    renderAvatarSelection();
+    if (window.soundManager) window.soundManager.stopBGM();
+    const gov = document.getElementById('gameover-screen');
+    if (gov) gov.classList.add('hidden');
+    const pau = document.getElementById('pause-screen');
+    if (pau) pau.classList.add('hidden');
+    const shp = document.getElementById('shop-screen');
+    if (shp) shp.classList.add('hidden');
+    
+    // Switch to homepage view
+    const homeView = document.getElementById('homepage-view');
+    const gameCont = document.getElementById('game-container');
+    if (homeView && gameCont) {
+        gameCont.classList.add('hidden');
+        homeView.classList.remove('hidden');
+        document.body.classList.remove('in-game');
+    }
+    
+    if (player) player.reset();
+    window.updateGlobalPointsUI();
+    if (typeof syncHeroPreview === 'function') syncHeroPreview(activeAvatarId);
 }
 
 function handleBackNavigation() {
@@ -2220,76 +3038,98 @@ function handleBackNavigation() {
     }
 }
 
-// Initialization on DOM load
-window.addEventListener('DOMContentLoaded', () => {
-    renderAvatarSelection();
+// Initialization on DOM load or immediate execution
+function initGameEngine() {
+    window.updateGlobalPointsUI();
     setupTouchControls();
     updateShopUI();
 
     const portalBackBtn = document.getElementById('btn-portal-back');
     if (portalBackBtn) {
         portalBackBtn.addEventListener('click', (e) => {
-            if (currentState === GAME_STATE.PLAYING || currentState === GAME_STATE.PAUSED || currentState === GAME_STATE.GAMEOVER) {
-                e.preventDefault();
-                goHome();
+            e.preventDefault();
+            goHome();
+        });
+    }
+
+    const playBtn = document.getElementById('btn-play');
+    if (playBtn) {
+        playBtn.addEventListener('click', () => {
+            if (window.soundManager) window.soundManager.init();
+            startGame();
+        });
+    }
+
+    const restartBtn = document.getElementById('btn-restart');
+    if (restartBtn) {
+        restartBtn.addEventListener('click', () => {
+            if (window.soundManager) window.soundManager.init();
+            startGame();
+        });
+    }
+
+    const pauseBtn = document.getElementById('btn-pause');
+    if (pauseBtn) {
+        pauseBtn.addEventListener('click', () => {
+            if (window.soundManager) window.soundManager.init();
+            if (currentState === GAME_STATE.PLAYING) pauseGame();
+            else if (currentState === GAME_STATE.PAUSED) resumeGame();
+        });
+    }
+
+    const resumeBtn = document.getElementById('btn-resume');
+    if (resumeBtn) resumeBtn.addEventListener('click', () => resumeGame());
+
+    const pauseRestartBtn = document.getElementById('btn-pause-restart');
+    if (pauseRestartBtn) {
+        pauseRestartBtn.addEventListener('click', () => {
+            const pauseScr = document.getElementById('pause-screen');
+            if (pauseScr) pauseScr.classList.add('hidden');
+            startGame();
+        });
+    }
+
+    const homeBtn = document.getElementById('btn-home');
+    if (homeBtn) homeBtn.addEventListener('click', () => goHome());
+
+    const gameoverHomeBtn = document.getElementById('btn-gameover-home');
+    if (gameoverHomeBtn) gameoverHomeBtn.addEventListener('click', () => goHome());
+
+    const shopOpenBtn = document.getElementById('btn-shop-open');
+    if (shopOpenBtn) {
+        shopOpenBtn.addEventListener('click', () => {
+            updateShopUI();
+            const shopScr = document.getElementById('shop-screen');
+            if (shopScr) shopScr.classList.remove('hidden');
+        });
+    }
+
+    const shopCloseBtn = document.getElementById('btn-shop-close');
+    if (shopCloseBtn) {
+        shopCloseBtn.addEventListener('click', () => {
+            const shopScr = document.getElementById('shop-screen');
+            if (shopScr) shopScr.classList.add('hidden');
+            window.updateGlobalPointsUI();
+        });
+    }
+
+    const muteBtn = document.getElementById('btn-mute');
+    if (muteBtn) {
+        muteBtn.addEventListener('click', () => {
+            if (window.soundManager) {
+                window.soundManager.init();
+                const isMuted = window.soundManager.toggleMute();
+                muteBtn.textContent = isMuted ? '🔇' : '🔊';
             }
         });
     }
 
-    document.getElementById('btn-play').addEventListener('click', () => {
-        requestGameFullScreen();
-        window.soundManager.init();
-        startGame();
-    });
-
-    document.getElementById('btn-restart').addEventListener('click', () => {
-        requestGameFullScreen();
-        window.soundManager.init();
-        startGame();
-    });
-
-    document.getElementById('btn-pause').addEventListener('click', () => {
-        window.soundManager.init();
-        if (currentState === GAME_STATE.PLAYING) {
-            pauseGame();
-        } else if (currentState === GAME_STATE.PAUSED) {
-            resumeGame();
-        }
-    });
-
-    document.getElementById('btn-resume').addEventListener('click', () => {
-        resumeGame();
-    });
-
-    document.getElementById('btn-pause-restart').addEventListener('click', () => {
-        document.getElementById('pause-screen').classList.add('hidden');
-        startGame();
-    });
-
-    document.getElementById('btn-home').addEventListener('click', () => {
-        goHome();
-    });
-
-    document.getElementById('btn-gameover-home').addEventListener('click', () => {
-        goHome();
-    });
-
-    document.getElementById('btn-shop-open').addEventListener('click', () => {
-        updateShopUI();
-        document.getElementById('shop-screen').classList.remove('hidden');
-    });
-
-    document.getElementById('btn-shop-close').addEventListener('click', () => {
-        document.getElementById('shop-screen').classList.add('hidden');
-        renderAvatarSelection();
-    });
-
-    document.getElementById('btn-mute').addEventListener('click', () => {
-        window.soundManager.init();
-        const isMuted = window.soundManager.toggleMute();
-        document.getElementById('btn-mute').textContent = isMuted ? '🔇' : '🔊';
-    });
-
     // Start render animation loop
     requestAnimationFrame(render);
-});
+}
+
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initGameEngine);
+} else {
+    initGameEngine();
+}

@@ -39,197 +39,138 @@ let bestDistance = storage.get('best_dist', 0);
 let unlockedAvatars = storage.get('unlocked_avatars', ['dev']);
 let activeAvatarId = storage.get('selected_avatar', 'dev');
 
-// Upgrades (Permanent upgrades)
+// Upgrades (Bought flags)
 let upgrades = storage.get('upgrades', {
     coffee_duration: 0,
     shield_strength: 0,
-    magnet_range: 0,
-    stamina_turbo: 0,
-    coin_boost: 0,
-    sneaker_spring: 0
+    magnet_duration: 0
 });
 
-// Consumable Items Inventory (Single-use items activated per run)
-let inventory = storage.get('inventory', {
-    rocket_start: 0,
-    extra_life: 0,
-    double_points: 0
-});
-
-// Avatar Definitions with clear unlock costs (in P Points)
+// Avatar Definitions (Dev unlocked, others purchased with P)
 const AVATARS = {
     dev: {
         id: 'dev',
-        name: 'DEV',
+        name: 'Dev',
         role: 'Core Developer',
         emoji: '💻',
         perk: 'Double Jump + Fast Stamina',
         color: '#38bdf8',
-        skinColor: '#fbd5b5',
-        hairColor: '#1e293b',
+        skinColor: '#fed7aa',
+        hairColor: '#f97316',
         shirtColor: '#0284c7',
-        pantsColor: '#0f172a',
-        tieColor: '#ef4444',
-        gender: 'male',
-        hairStyle: 'coder',
-        hasGlasses: true,
-        hasHeadphones: true,
-        cost: 0, // FREE / Starter
+        pantsColor: '#1e293b',
+        cost: 0,
         hasDoubleJump: true,
         coffeeBonus: 1.3,
         magnetBonus: 1.0,
         dashBonus: 1.2
     },
-    maya: {
-        id: 'maya',
-        name: 'MAYA',
-        role: 'Lead UX Designer',
-        emoji: '🎨',
-        perk: 'Agility Glide + High Speed Dash',
-        color: '#f43f5e',
-        skinColor: '#fed7aa',
-        hairColor: '#9a3412',
-        shirtColor: '#f43f5e',
-        pantsColor: '#4c0519',
-        tieColor: '#fb7185',
-        gender: 'female',
-        hairStyle: 'ponytail',
-        hasEarrings: true,
-        cost: 40, // 40 P
-        hasDoubleJump: true,
-        coffeeBonus: 1.2,
-        magnetBonus: 1.3,
-        dashBonus: 1.5
-    },
-    zack: {
-        id: 'zack',
-        name: 'ZACK',
-        role: 'Systems Architect',
-        emoji: '⚡',
-        perk: 'Overdrive Dash + Low Friction',
+    og_man: {
+        id: 'og_man',
+        name: 'OG Man',
+        role: 'Senior Specialist',
+        emoji: '👨',
+        perk: 'Balanced Agility & Low Friction',
         color: '#10b981',
-        skinColor: '#fcd34d',
-        hairColor: '#14532d',
-        shirtColor: '#065f46',
-        pantsColor: '#022c22',
-        tieColor: '#34d399',
-        gender: 'male',
-        hairStyle: 'spiky',
-        hasVisor: true,
-        hasHeadsetMic: true,
-        cost: 60, // 60 P
-        hasDoubleJump: true,
-        coffeeBonus: 1.3,
-        magnetBonus: 1.1,
-        dashBonus: 1.6
-    },
-    chloe: {
-        id: 'chloe',
-        name: 'CHLOE',
-        role: 'Product Lead',
-        emoji: '📊',
-        perk: 'Point Magnet Boost + 2x Coin Value',
-        color: '#f59e0b',
-        skinColor: '#ffedd5',
+        skinColor: '#fde047',
         hairColor: '#451a03',
-        shirtColor: '#d97706',
-        pantsColor: '#291508',
-        tieColor: '#fbbf24',
-        gender: 'female',
-        hairStyle: 'bob',
-        hasPearlEarrings: true,
-        cost: 80, // 80 P
-        hasDoubleJump: true,
-        coinMultiplier: 1.5,
-        coffeeBonus: 1.2,
-        magnetBonus: 2.2,
-        dashBonus: 1.2
-    },
-    kai: {
-        id: 'kai',
-        name: 'KAI',
-        role: 'Night Ops',
-        emoji: '🕶️',
-        perk: 'Stealth Phase + Protective Shield',
-        color: '#a855f7',
-        skinColor: '#e2e8f0',
-        hairColor: '#4c1d95',
-        shirtColor: '#1e1b4b',
-        pantsColor: '#0f0b24',
-        tieColor: '#9333ea',
-        gender: 'male',
-        hairStyle: 'hoodie',
-        hasDarkShades: true,
-        cost: 100, // 100 P
-        hasDoubleJump: true,
-        startShield: true,
-        coffeeBonus: 1.4,
+        shirtColor: '#10b981',
+        pantsColor: '#334155',
+        cost: 40,
+        hasDoubleJump: false,
+        coffeeBonus: 1.1,
         magnetBonus: 1.2,
         dashBonus: 1.3
     },
-    axel: {
-        id: 'axel',
-        name: 'AXEL',
-        role: 'Facilities Chief',
-        emoji: '🛡️',
-        perk: 'Ice Armor Shield + Hazard Deflect',
-        color: '#38bdf8',
-        skinColor: '#cbd5e1',
-        hairColor: '#334155',
-        shirtColor: '#0f172a',
-        pantsColor: '#020617',
-        tieColor: '#0ea5e9',
-        gender: 'male',
-        hairStyle: 'buzz',
-        hasArmorCollar: true,
-        cost: 150, // 150 P
-        hasDoubleJump: true,
-        startShield: true,
-        coffeeBonus: 1.5,
-        magnetBonus: 1.1,
+    og_woman: {
+        id: 'og_woman',
+        name: 'OG Woman',
+        role: 'Lead Strategist',
+        emoji: '👩',
+        perk: 'Extended Slide & Fast Dash Recharge',
+        color: '#ec4899',
+        skinColor: '#fed7aa',
+        hairColor: '#a855f7',
+        shirtColor: '#ec4899',
+        pantsColor: '#475569',
+        cost: 40,
+        hasDoubleJump: false,
+        coffeeBonus: 1.1,
+        magnetBonus: 1.3,
         dashBonus: 1.4
     },
-    nova: {
-        id: 'nova',
-        name: 'NOVA',
-        role: 'Executive VP',
-        emoji: '👑',
-        perk: 'Unlimited Override + 2.5x Score Multiplier',
-        color: '#f43f5e',
-        skinColor: '#18181b',
-        hairColor: '#4c0519',
-        shirtColor: '#09090b',
-        pantsColor: '#000000',
-        tieColor: '#fbbf24',
-        gender: 'executive',
-        hairStyle: 'vip',
-        hasCrownPin: true,
-        hasGlowingEyes: true,
-        cost: 250, // 250 P
-        hasDoubleJump: true,
+    black_man: {
+        id: 'black_man',
+        name: 'Black Man',
+        role: 'Chief Architect',
+        emoji: '👨🏿',
+        perk: 'Free Shield Every Run + 2x Point Coins',
+        color: '#8b5cf6',
+        skinColor: '#582f0e',
+        hairColor: '#1e1b4b',
+        shirtColor: '#8b5cf6',
+        pantsColor: '#0f172a',
+        cost: 60,
+        hasDoubleJump: false,
         startShield: true,
-        coinMultiplier: 2.5,
-        coffeeBonus: 1.6,
-        magnetBonus: 2.0,
-        dashBonus: 1.5
+        coinMultiplier: 2.0,
+        coffeeBonus: 1.2,
+        magnetBonus: 1.3,
+        dashBonus: 1.2
+    },
+    black_woman: {
+        id: 'black_woman',
+        name: 'Black Woman',
+        role: 'Director of Ops',
+        emoji: '👩🏿',
+        perk: '+80% Point Magnet Range',
+        color: '#f59e0b',
+        skinColor: '#582f0e',
+        hairColor: '#020617',
+        shirtColor: '#f59e0b',
+        pantsColor: '#1e293b',
+        cost: 60,
+        hasDoubleJump: false,
+        coffeeBonus: 1.2,
+        magnetBonus: 1.8,
+        dashBonus: 1.2
+    },
+    muscular_man: {
+        id: 'muscular_man',
+        name: 'Muscular Man',
+        role: 'Fitness Director',
+        emoji: '🏋️‍♂️',
+        perk: 'Smash Obstacles on Dash',
+        color: '#ef4444',
+        skinColor: '#fed7aa',
+        hairColor: '#b45309',
+        shirtColor: '#ef4444',
+        pantsColor: '#1e3a8a',
+        cost: 80,
+        hasDoubleJump: false,
+        coffeeBonus: 1.4,
+        magnetBonus: 1.1,
+        dashBonus: 1.5,
+        startShield: true
+    },
+    muscular_woman: {
+        id: 'muscular_woman',
+        name: 'Muscular Woman',
+        role: 'Power Exec',
+        emoji: '🏋️‍♀️',
+        perk: 'Protective Shield + Double Jump',
+        color: '#06b6d4',
+        skinColor: '#582f0e',
+        hairColor: '#7c2d12',
+        shirtColor: '#06b6d4',
+        pantsColor: '#312e81',
+        cost: 80,
+        hasDoubleJump: true,
+        coffeeBonus: 1.3,
+        magnetBonus: 1.2,
+        dashBonus: 1.3,
+        startShield: true
     }
-};
-
-// Store items catalog definition
-const STORE_CATALOG = {
-    upgrades: [
-        { id: 'coffee_duration', name: 'Quad-Shot Espresso', icon: '☕', cost: 50, desc: 'Extends invincibility rush by +3.5s per tier' },
-        { id: 'shield_strength', name: 'Noise-Canceling Shield', icon: '🎧', cost: 75, desc: 'Starts every run with an extra hazard protection bubble' },
-        { id: 'magnet_range', name: 'PTO Point Magnet', icon: '🧲', cost: 60, desc: 'Doubles Point Coin attraction range on screen' },
-        { id: 'stamina_turbo', name: 'Turbo Stamina Matrix', icon: '⚡', cost: 70, desc: 'Stamina recovers 60% faster for rapid dashes' },
-        { id: 'coin_boost', name: 'Stock Option Yield', icon: '🪙', cost: 100, desc: 'Permanently increases all Point Coin rewards by +50%' },
-        { id: 'sneaker_spring', name: 'Anti-Gravity Sneakers', icon: '👟', cost: 80, desc: 'Higher, floatier jumps & smoother air glide' }
-    ],
-    items: [
-        { id: 'rocket_start', name: 'Rocket Coffee Start', icon: '🚀', cost: 30, desc: 'Blasts through the first 300m at supersonic speed!' },
-        { id: 'extra_life', name: 'HR Life Insurance', icon: '🛡️', cost: 45, desc: 'Automatically revives you once on a fatal obstacle crash' },
-        { id: 'double_points', name: 'Double Point Contract', icon: '💰', cost: 40, desc: '2x multiplier on all Points earned in the next run' }
-    ]
 };
 
 // Biomes / Office Departments with rich unique color schemes & architecture
@@ -325,17 +266,13 @@ class Player {
     }
 
     reset() {
-        // Enforce that players can ONLY play with unlocked/purchased characters!
-        let playableId = activeAvatarId;
-        if (!unlockedAvatars.includes(playableId)) {
-            // Find first unlocked avatar, default to 'dev'
-            playableId = unlockedAvatars.find(id => AVATARS[id]) || 'dev';
+        let avatar = AVATARS[activeAvatarId];
+        if (!avatar) {
+            activeAvatarId = 'dev';
+            avatar = AVATARS.dev;
+            storage.set('selected_avatar', 'dev');
         }
-        
-        let avatar = AVATARS[playableId] || AVATARS.dev;
         this.avatar = avatar;
-        this.isUnlocked = unlockedAvatars.includes(avatar.id);
-
         this.width = 44 * (avatar.hitboxScale || 1.0);
         this.height = 68 * (avatar.hitboxScale || 1.0);
         this.standHeight = this.height;
@@ -344,38 +281,30 @@ class Player {
         this.groundY = 500 - this.standHeight;
         this.y = this.groundY;
         this.vy = 0;
-        this.gravity = upgrades.sneaker_spring > 0 ? 0.76 : 0.82; 
-        this.jumpForce = upgrades.sneaker_spring > 0 ? -16.8 : -15.6; 
+        this.gravity = 0.82; // Crisp, balanced Dino jump gravity
+        this.jumpForce = -15.6; // Responsive, punchy jump arc
         this.isGrounded = true;
         this.isSliding = false;
         this.isHoldingDuck = false;
         this.slideTimer = 0;
-        this.slideDuration = 32;
         this.jumpCount = 0;
-        
-        // Perks only active if character is bought / unlocked!
-        this.maxJumps = 2; // Double Jump enabled
+        const isAvatarUnlocked = unlockedAvatars.includes(avatar.id);
+        this.maxJumps = 2; // Double Jump enabled for all players/characters!
         this.jumpBuffer = 0;
         this.coyoteTimer = 0;
 
         // Stamina & Dash
         this.stamina = 100;
         this.maxStamina = 100;
-        this.staminaRechargeDelay = 0;
         this.isDashing = false;
         this.dashTimer = 0;
-        this.dashDuration = 18;
+        this.dashDuration = 16;
 
-        // Buffs & Upgrades (Perks only granted when unlocked/bought)
-        this.shield = ((this.isUnlocked && avatar.startShield) || (upgrades.shield_strength > 0)) ? 1 : 0;
+        // Buffs: Starting shield only active if avatar has perk AND is unlocked, or shop upgrade bought
+        this.shield = ((isAvatarUnlocked && avatar.startShield) || (upgrades.shield_strength > 0)) ? 1 : 0;
         this.coffeeTimer = 0;
         this.ptoTimer = 0;
         this.invulnerableTimer = 0;
-
-        // Single-use items equipped for run (activated in startGame)
-        this.hasExtraLife = false;
-        this.doublePointsActive = false;
-        this.rocketStartActive = false;
 
         // Animation
         this.animFrame = 0;
@@ -383,6 +312,7 @@ class Player {
     }
 
     jump() {
+        // If sliding/ducking, cancel slide and jump immediately
         if (this.isSliding) {
             this.isSliding = false;
             this.slideTimer = 0;
@@ -396,36 +326,28 @@ class Player {
             this.coyoteTimer = 0;
             this.jumpCount = 1;
             window.soundManager.playJump();
-            createDust(this.x + 20, 500, 5);
+            createDust(this.x + 20, this.y + this.height, 6);
         } else if (this.jumpCount < this.maxJumps) {
-            // Double Jump
-            this.vy = this.jumpForce * 0.94;
+            this.vy = this.jumpForce * 0.95;
             this.jumpCount++;
             window.soundManager.playDoubleJump();
-            createDust(this.x + 20, this.y + this.height, 4);
-            createScorePopup(this.x + 20, this.y, 'DOUBLE JUMP! 🚀', '#38bdf8');
+            createJumpRings(this.x + 20, this.y + this.height);
         } else {
-            this.jumpBuffer = 6;
+            // Buffer jump input
+            this.jumpBuffer = 8;
         }
-    }
-
-    slide() {
-        if (this.isSliding) return;
-        this.isSliding = true;
-        this.slideTimer = this.slideDuration;
-        this.height = this.slideHeight;
-        this.y = 500 - this.slideHeight;
-        window.soundManager.playSlide();
-        createDust(this.x + 10, 500, 4);
     }
 
     duckStart() {
         this.isHoldingDuck = true;
         if (this.isGrounded) {
-            this.slide();
+            this.isSliding = true;
+            this.height = this.slideHeight;
+            // Anchor feet to ground: top of hitbox moves DOWN, not character going underground
+            this.y = 500 - this.slideHeight;
             createSlideSparks(this.x + 10, 500);
         } else {
-            // Fast drop while in air
+            // Fast drop while in air (Classic Chrome Dino mechanic!)
             this.vy += 2.8;
         }
     }
@@ -439,69 +361,74 @@ class Player {
         }
     }
 
-    dash() {
-        if (this.isDashing) return;
-        if (this.stamina < 30) {
-            window.soundManager.playTone(180, 'sawtooth', 0.08, 0.15);
-            createScorePopup(this.x + 20, this.y - 15, 'LOW STAMINA! ⚠️', '#ef4444');
-            return;
-        }
+    slide() {
+        this.duckStart();
+        this.slideTimer = this.slideDuration;
+    }
 
-        this.stamina -= 30;
-        this.staminaRechargeDelay = 45;
-        this.isDashing = true;
-        this.dashTimer = this.dashDuration;
-        this.invulnerableTimer = this.dashDuration + 5;
-        window.soundManager.playDash();
-        createScorePopup(this.x + 30, this.y - 20, 'DASH! ⚡', '#38bdf8');
-        const fill = document.getElementById('stamina-fill');
-        if (fill) fill.style.width = (this.stamina / this.maxStamina * 100) + '%';
+    dash() {
+        if (this.stamina >= 35 && !this.isDashing) {
+            this.stamina -= 35;
+            this.isDashing = true;
+            this.dashTimer = this.dashDuration;
+            this.invulnerableTimer = Math.max(this.invulnerableTimer, this.dashDuration);
+            window.soundManager.playDash();
+            createGhostTrail(this);
+        }
     }
 
     update() {
         this.animFrame++;
 
-        // Stamina Recovery
-        const bonus = (this.isUnlocked && this.avatar.dashBonus) ? this.avatar.dashBonus : 1.0;
-        const staminaRate = (upgrades.stamina_turbo > 0 ? 0.95 : 0.6) * bonus;
-        if (this.staminaRechargeDelay > 0) {
-            this.staminaRechargeDelay--;
-        } else if (this.stamina < this.maxStamina) {
-            this.stamina = Math.min(this.maxStamina, this.stamina + staminaRate);
+        // Stamina recharge: bonus only active if avatar is unlocked
+        const isAvatarUnlocked = unlockedAvatars.includes(this.avatar.id);
+        const rechargeRate = 0.45 * (isAvatarUnlocked ? (this.avatar.dashBonus || 1.0) : 1.0);
+        if (this.stamina < this.maxStamina) {
+            this.stamina = Math.min(this.maxStamina, this.stamina + rechargeRate);
         }
 
-        // Dash Timer
-        if (this.isDashing) {
-            this.dashTimer--;
-            createDust(this.x, 500, 1);
-            if (this.dashTimer <= 0) {
-                this.isDashing = false;
-            }
-        }
-
-        // Slide Timer
+        // Slide / Duck timer & state
         if (this.isSliding) {
-            this.slideTimer--;
-            if (this.isGrounded) createSlideSparks(this.x, 500);
-
+            if (this.slideTimer > 0) this.slideTimer--;
+            if (this.animFrame % 5 === 0) {
+                createSlideSparks(this.x + 5, 500);
+            }
             if (this.slideTimer <= 0 && !this.isHoldingDuck) {
                 this.isSliding = false;
                 this.height = this.standHeight;
                 this.y = 500 - this.standHeight;
             }
+            // Always keep feet anchored to ground while sliding
             if (this.isGrounded) {
                 this.y = 500 - this.height;
             }
         }
 
+        // Dash Timer
+        if (this.isDashing) {
+            this.dashTimer--;
+            if (this.animFrame % 2 === 0) {
+                createGhostTrail(this);
+            }
+            if (this.dashTimer <= 0) {
+                this.isDashing = false;
+            }
+        }
+
         // Buff Timers
-        if (this.coffeeTimer > 0) this.coffeeTimer--;
+        if (this.coffeeTimer > 0) {
+            this.coffeeTimer--;
+            if (this.animFrame % 3 === 0) {
+                createCoffeeSteam(this.x + Math.random() * 30, this.y + 10);
+            }
+        }
         if (this.ptoTimer > 0) this.ptoTimer--;
         if (this.invulnerableTimer > 0) this.invulnerableTimer--;
 
-        // Gravity and Physics
+        // Gravity & Jump Physics
         if (!this.isGrounded) {
             if (this.coyoteTimer > 0) this.coyoteTimer--;
+            // Extra fast fall if holding down in air
             if (this.isHoldingDuck) {
                 this.vy += this.gravity * 1.6;
             } else {
@@ -530,19 +457,19 @@ class Player {
             }
         } else {
             this.coyoteTimer = 5;
-            this.runCycle += 0.05 + (gameSpeed * 0.025);
+            this.runCycle += 0.08 * (gameSpeed / 2.0);
         }
 
         if (this.jumpBuffer > 0) {
             this.jumpBuffer--;
         }
     }
-    // Authentic human baseball-slide pose with custom character features
+    // Authentic human baseball-slide pose:
+    // Head and torso at the back (left), leading leg & shoes extended forward (right)
     drawSlidePose(px, skin, accent) {
-        const av = this.avatar;
+        const isWoman = this.avatar.id.includes('woman');
         const groundY = 500; // floor track line
         const spark = Math.sin(this.animFrame * 0.25) * 1.5;
-        const isWoman = av.gender === 'female' || av.id === 'maya' || av.id === 'chloe';
 
         ctx.save();
         ctx.translate(px, groundY);
@@ -557,7 +484,7 @@ class Player {
         ctx.restore();
 
         // 1. Supporting rear arm bracing against the ground (on the left)
-        ctx.fillStyle = av.shirtColor || accent;
+        ctx.fillStyle = this.avatar.shirtColor || accent;
         ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.roundRect(-28, -20, 18, 8, 3);
@@ -569,7 +496,7 @@ class Player {
         ctx.fill();
 
         // 2. Secondary (tucked) leg underneath
-        ctx.fillStyle = av.pantsColor || '#17243b';
+        ctx.fillStyle = this.avatar.pantsColor || '#17243b';
         ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.roundRect(4, -18, 24, 10, 3);
@@ -579,7 +506,7 @@ class Player {
         ctx.beginPath(); ctx.arc(26, -13, 5, 0, Math.PI * 2); ctx.fill();
 
         // 3. Lead leg extended straight forward (shooting to the right)
-        ctx.fillStyle = av.pantsColor || '#17243b';
+        ctx.fillStyle = this.avatar.pantsColor || '#17243b';
         ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.roundRect(18, -12 + spark, 46, 10, 3);
@@ -596,11 +523,11 @@ class Player {
         const bodyGrad = ctx.createLinearGradient(-16, -30, 26, -12);
         bodyGrad.addColorStop(0, '#0c2236');
         bodyGrad.addColorStop(0.45, accent);
-        bodyGrad.addColorStop(1, av.shirtColor || accent);
+        bodyGrad.addColorStop(1, this.avatar.shirtColor || accent);
         ctx.fillStyle = bodyGrad;
         ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(-16, -28, 40, 18, isWoman ? [5, 8, 5, 5] : 5);
+        ctx.roundRect(-16, -28, 40, 18, 5);
         ctx.fill(); ctx.stroke();
 
         // Shirt collar & necktie / blouse
@@ -608,15 +535,15 @@ class Player {
         ctx.beginPath();
         ctx.moveTo(-10, -26); ctx.lineTo(-2, -26); ctx.lineTo(-6, -20); ctx.closePath();
         ctx.fill();
-        
-        // Necktie / scarf
-        ctx.fillStyle = av.tieColor || '#ef4444';
-        ctx.beginPath();
-        ctx.moveTo(-7, -24); ctx.lineTo(-4, -24); ctx.lineTo(8, -17); ctx.lineTo(5, -17);
-        ctx.closePath(); ctx.fill();
+        if (!isWoman) {
+            ctx.fillStyle = this.avatar.id === 'dev' ? '#0b5d8c' : '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(-7, -24); ctx.lineTo(-4, -24); ctx.lineTo(8, -17); ctx.lineTo(5, -17);
+            ctx.closePath(); ctx.fill();
+        }
 
         // 5. Front balancing arm (across chest)
-        ctx.fillStyle = av.shirtColor || accent;
+        ctx.fillStyle = this.avatar.shirtColor || accent;
         ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.roundRect(8, -26, 20, 8, 3);
@@ -628,97 +555,55 @@ class Player {
         // Neck
         ctx.fillStyle = skin;
         ctx.fillRect(-18, -32, 7, 7);
-        // Head base
+        // Head
         ctx.beginPath(); ctx.arc(-14, -36, 11, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = '#06101d'; ctx.lineWidth = 1.6; ctx.stroke();
 
-        // Distinct Hair & Headgear
-        ctx.fillStyle = av.hairColor || '#1b2430';
-
-        if (av.id === 'maya') {
-            // Maya: Flowing ponytail & bangs
+        // Distinct Hair & Features
+        ctx.fillStyle = this.avatar.hairColor || '#1b2430';
+        if (isWoman) {
+            // Feminine sleek hair + ponytail flowing back
             ctx.beginPath();
             ctx.arc(-15, -37, 11.5, Math.PI * 0.6, Math.PI * 2.2);
             ctx.fill();
-            // Ponytail streaming left
+            // Ponytail streaming to the left
             ctx.beginPath();
             ctx.moveTo(-24, -36);
-            ctx.quadraticCurveTo(-38, -40, -36, -28);
-            ctx.quadraticCurveTo(-27, -32, -24, -34);
+            ctx.quadraticCurveTo(-36, -38, -34, -28);
+            ctx.quadraticCurveTo(-26, -32, -24, -34);
             ctx.fill();
-            // Coral Scrunchie
-            ctx.fillStyle = '#f43f5e';
+            // Hair scrunchie
+            ctx.fillStyle = accent;
             ctx.beginPath(); ctx.arc(-24, -35, 2.5, 0, Math.PI * 2); ctx.fill();
-            // Drop Gold Earring
-            ctx.fillStyle = '#fbbf24';
-            ctx.beginPath(); ctx.arc(-16, -30, 1.8, 0, Math.PI * 2); ctx.fill();
-        } else if (av.id === 'chloe') {
-            // Chloe: Sleek bob haircut
-            ctx.beginPath();
-            ctx.arc(-14, -37, 12, Math.PI * 0.5, Math.PI * 2.3);
-            ctx.fill();
-            ctx.fillRect(-22, -36, 8, 12);
-            // Gold Pearl Earring
-            ctx.fillStyle = '#f59e0b';
-            ctx.beginPath(); ctx.arc(-15, -30, 2, 0, Math.PI * 2); ctx.fill();
-        } else if (av.id === 'kai') {
-            // Kai: Cowl Hoodie
-            ctx.fillStyle = '#4c1d95';
-            ctx.beginPath(); ctx.arc(-14, -36, 13, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = skin;
-            ctx.beginPath(); ctx.arc(-11, -36, 7.5, 0, Math.PI * 2); ctx.fill();
-        } else if (av.id === 'zack') {
-            // Zack: Spiky Hair
-            ctx.beginPath();
-            ctx.arc(-15, -38, 11.5, Math.PI * 0.7, Math.PI * 2.2);
-            ctx.fill();
-            // Spikes
-            ctx.beginPath();
-            ctx.moveTo(-24, -42); ctx.lineTo(-18, -49); ctx.lineTo(-13, -44);
-            ctx.lineTo(-7, -49); ctx.lineTo(-3, -43); ctx.closePath(); ctx.fill();
-        } else {
-            // Dev / Axel / Nova: Clean Crop
-            ctx.beginPath();
-            ctx.arc(-15, -38, 11.5, Math.PI * 0.7, Math.PI * 2.2);
-            ctx.fill();
-            ctx.fillRect(-22, -37, 4, 7);
-        }
 
-        // Eyes & Accessories
-        if (av.id === 'dev') {
-            // Dev Coder Glasses
-            ctx.fillStyle = '#38bdf8';
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.8;
-            ctx.strokeRect(-9, -38, 5, 4);
-            // Cyan Headphones
-            ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.2;
-            ctx.beginPath(); ctx.arc(-14, -37, 12.5, Math.PI * 0.8, Math.PI * 1.8); ctx.stroke();
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(-26, -38, 3, 6);
-        } else if (av.id === 'zack') {
-            // Zack Neon Visor
-            ctx.fillStyle = '#22c55e';
-            ctx.fillRect(-10, -38, 8, 3.5);
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(-8, -37, 5, 1);
-        } else if (av.id === 'kai') {
-            // Kai Neon Shades
-            ctx.fillStyle = '#a855f7';
-            ctx.fillRect(-10, -38, 8, 3.5);
-        } else if (av.id === 'nova') {
-            // Nova Glowing Eyes
-            ctx.fillStyle = '#f43f5e';
-            ctx.beginPath(); ctx.arc(-7.5, -36, 2, 0, Math.PI * 2); ctx.fill();
-        } else {
-            // Normal Eyes
+            // Female eye & lashes
             ctx.fillStyle = '#172033';
             ctx.beginPath(); ctx.arc(-7.5, -36, 1.8, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = '#fff';
             ctx.beginPath(); ctx.arc(-7, -36.5, 0.6, 0, Math.PI * 2); ctx.fill();
+            // Eyelash
+            ctx.strokeStyle = '#172033'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(-9, -38); ctx.lineTo(-6, -37.5); ctx.stroke();
+        } else {
+            // Masculine clean cropped haircut
+            ctx.beginPath();
+            ctx.arc(-15, -38, 11.5, Math.PI * 0.7, Math.PI * 2.2);
+            ctx.fill();
+            // Sideburn
+            ctx.fillRect(-22, -37, 4, 7);
+
+            // Male eye & brow
+            ctx.fillStyle = '#172033';
+            ctx.beginPath(); ctx.arc(-7.5, -36, 1.8, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.arc(-7, -36.5, 0.6, 0, Math.PI * 2); ctx.fill();
+            // Eyebrow
+            ctx.strokeStyle = '#172033'; ctx.lineWidth = 1.3;
+            ctx.beginPath(); ctx.moveTo(-10, -38.5); ctx.lineTo(-5.5, -38); ctx.stroke();
         }
 
-        // Determined mouth / smile
-        ctx.strokeStyle = isWoman ? '#be123c' : '#7b3f2b'; ctx.lineWidth = 1.2;
+        // Determined mouth
+        ctx.strokeStyle = '#7b3f2b'; ctx.lineWidth = 1.2;
         ctx.beginPath(); ctx.moveTo(-10, -31); ctx.lineTo(-6, -31); ctx.stroke();
 
         ctx.restore();
@@ -728,15 +613,13 @@ class Player {
         ctx.save();
         const px = this.x;
         const py = this.y;
-        const av = this.avatar;
-        const skin = av.skinColor || '#fbd5b5';
-        const accent = av.color || '#38bdf8';
+        const skin = this.avatar.skinColor || '#d9a77d';
+        const accent = this.avatar.color || '#39d8ff';
         const t = this.runCycle;
         const leg = Math.sin(t) * 7;
         const arm = Math.cos(t) * 5;
         const bob = this.isGrounded ? Math.abs(Math.sin(t * 1.05)) * 1.8 : 0;
         const cx = px + 22;
-        const isWoman = av.gender === 'female' || av.id === 'maya' || av.id === 'chloe';
 
         // Ground contact shadow
         ctx.save();
@@ -796,15 +679,17 @@ class Player {
             ctx.restore();
         }
 
-        const torsoX = isWoman ? 8 : 7;
-        const torsoW = isWoman ? 28 : 30;
+        const isWoman = this.avatar.id.includes('woman');
+        const isMuscular = this.avatar.id.includes('muscular');
+        const torsoX = isMuscular ? 5 : (isWoman ? 8 : 7);
+        const torsoW = isMuscular ? 34 : (isWoman ? 28 : 30);
 
         // 1. Legs & Shoes
         const drawLeg = (x, offset, back=false) => {
             ctx.save();
             ctx.translate(x, 40);
             ctx.rotate(offset * 0.018);
-            ctx.fillStyle = av.pantsColor || '#17243b';
+            ctx.fillStyle = this.avatar.pantsColor || '#17243b';
             ctx.strokeStyle = '#06101d';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -827,7 +712,7 @@ class Player {
 
         // 2. Torso / Jacket / Blouse
         const bodyGrad = ctx.createLinearGradient(torsoX, 13, torsoX + torsoW, 46);
-        bodyGrad.addColorStop(0, av.shirtColor || accent);
+        bodyGrad.addColorStop(0, this.avatar.shirtColor || accent);
         bodyGrad.addColorStop(0.55, accent);
         bodyGrad.addColorStop(1, '#0c2236');
         ctx.fillStyle = bodyGrad;
@@ -848,10 +733,12 @@ class Player {
         ctx.beginPath();
         ctx.moveTo(18, 16); ctx.lineTo(28, 16); ctx.lineTo(23, 23); ctx.closePath(); ctx.fill();
 
-        // Tie or scarf
-        ctx.fillStyle = av.tieColor || '#ef4444';
-        ctx.beginPath();
-        ctx.moveTo(21.5, 20); ctx.lineTo(25.5, 20); ctx.lineTo(24, 38); ctx.lineTo(21, 38); ctx.closePath(); ctx.fill();
+        if (!isWoman) {
+            // Necktie for men
+            ctx.fillStyle = this.avatar.id === 'dev' ? '#0b5d8c' : '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(21.5, 20); ctx.lineTo(25.5, 20); ctx.lineTo(24, 38); ctx.lineTo(21, 38); ctx.closePath(); ctx.fill();
+        }
 
         // ID badge
         ctx.fillStyle = '#f8fafc';
@@ -863,7 +750,7 @@ class Player {
         // 4. Arms & Hands
         const armDraw = (x, off, front) => {
             ctx.save(); ctx.translate(x, 21); ctx.rotate(off * 0.025);
-            ctx.fillStyle = av.shirtColor || accent;
+            ctx.fillStyle = this.avatar.shirtColor || accent;
             ctx.strokeStyle = '#06101d'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.roundRect(0, 0, front ? 9 : 8, 18, 3); ctx.fill(); ctx.stroke();
             // Human hand
@@ -879,98 +766,54 @@ class Player {
         ctx.beginPath(); ctx.arc(23, 7.5, 11.5, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = '#06101d'; ctx.lineWidth = 1.6; ctx.stroke();
 
-        // 6. Distinct Hairstyle & Character Features
-        ctx.fillStyle = av.hairColor || '#1b2430';
-
-        if (av.id === 'maya') {
-            // Maya: High flowing ponytail + coral scrunchie + bangs
+        // 6. Distinct Hairstyle & Human Facial Features
+        ctx.fillStyle = this.avatar.hairColor || '#1b2430';
+        if (isWoman) {
+            // Elegant feminine hair wrapped over crown + flowing ponytail
             ctx.beginPath();
             ctx.arc(22, 6, 12, Math.PI * 0.7, Math.PI * 2.2);
             ctx.fill();
-            // Ponytail streaming back
+            // Sleek flowing ponytail streaming back
             ctx.beginPath();
             ctx.moveTo(11, 7);
-            ctx.quadraticCurveTo(-2, 8 + Math.sin(t) * 2, 0, 22 + Math.sin(t) * 3);
+            ctx.quadraticCurveTo(-1, 9 + Math.sin(t) * 2, 2, 20 + Math.sin(t) * 3);
             ctx.quadraticCurveTo(8, 14, 11, 10);
             ctx.fill();
-            // Coral Scrunchie
-            ctx.fillStyle = '#f43f5e';
+            // Hair scrunchie band
+            ctx.fillStyle = accent;
             ctx.beginPath(); ctx.arc(11, 8, 2.5, 0, Math.PI * 2); ctx.fill();
-            // Drop Gold Earring
-            ctx.fillStyle = '#fbbf24';
-            ctx.beginPath(); ctx.arc(18, 14, 1.8, 0, Math.PI * 2); ctx.fill();
-        } else if (av.id === 'chloe') {
-            // Chloe: Sleek bob haircut
-            ctx.beginPath();
-            ctx.arc(22, 6, 12.5, Math.PI * 0.6, Math.PI * 2.3);
-            ctx.fill();
-            ctx.fillRect(12, 6, 8, 15);
-            // Gold Pearl Earring
-            ctx.fillStyle = '#f59e0b';
-            ctx.beginPath(); ctx.arc(18, 14, 2, 0, Math.PI * 2); ctx.fill();
-        } else if (av.id === 'kai') {
-            // Kai: Cowl Hoodie
-            ctx.fillStyle = '#4c1d95';
-            ctx.beginPath(); ctx.arc(23, 7.5, 13.5, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = skin;
-            ctx.beginPath(); ctx.arc(25, 7.5, 8, 0, Math.PI * 2); ctx.fill();
-        } else if (av.id === 'zack') {
-            // Zack: Spiky Hair
-            ctx.beginPath();
-            ctx.arc(22, 5, 12, Math.PI * 0.7, Math.PI * 2.25);
-            ctx.fill();
-            // Spikes
-            ctx.beginPath();
-            ctx.moveTo(11, 2); ctx.lineTo(16, -6); ctx.lineTo(21, 0);
-            ctx.lineTo(26, -6); ctx.lineTo(31, 1); ctx.closePath(); ctx.fill();
-        } else {
-            // Dev / Axel / Nova: Tapered crop
-            ctx.beginPath();
-            ctx.arc(22, 5, 12, Math.PI * 0.7, Math.PI * 2.25);
-            ctx.fill();
-            ctx.fillRect(13, 5, 4, 7);
-        }
 
-        // Eyes & Distinct Accessories
-        if (av.id === 'dev') {
-            // Dev Coder Glasses
-            ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.2;
-            ctx.strokeRect(26, 5.5, 5, 4);
-            // Dev Cyan Headphones
-            ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.5;
-            ctx.beginPath(); ctx.arc(22, 5, 13, Math.PI * 0.8, Math.PI * 1.8); ctx.stroke();
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(10, 4, 3, 6);
-        } else if (av.id === 'zack') {
-            // Zack Neon Cyber Visor
-            ctx.fillStyle = '#22c55e';
-            ctx.fillRect(25, 6, 8, 4);
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(26.5, 7.2, 5, 1);
-        } else if (av.id === 'kai') {
-            // Kai Neon Purple Sunglasses
-            ctx.fillStyle = '#a855f7';
-            ctx.fillRect(25, 6, 8, 4);
-        } else if (av.id === 'nova') {
-            // Nova Glowing Ruby Eyes
-            ctx.fillStyle = '#f43f5e';
-            ctx.beginPath(); ctx.arc(28.5, 8, 2, 0, Math.PI * 2); ctx.fill();
-        } else {
-            // Normal sparkling eye
+            // Feminine sparkling eye with lash
             ctx.fillStyle = '#172033';
             ctx.beginPath(); ctx.arc(28, 8, 1.9, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = '#fff';
             ctx.beginPath(); ctx.arc(28.6, 7.5, 0.65, 0, Math.PI * 2); ctx.fill();
-            if (isWoman) {
-                // Eyelash
-                ctx.strokeStyle = '#172033'; ctx.lineWidth = 1.2;
-                ctx.beginPath(); ctx.moveTo(26.5, 6.2); ctx.lineTo(29.8, 6.8); ctx.stroke();
-            }
-        }
+            // Eyelash
+            ctx.strokeStyle = '#172033'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(26.5, 6.2); ctx.lineTo(29.8, 6.8); ctx.stroke();
+            // Delicate lips / smile
+            ctx.strokeStyle = '#b91c1c'; ctx.lineWidth = 1.1;
+            ctx.beginPath(); ctx.arc(28, 12.5, 2.5, 0.1, 1.1); ctx.stroke();
+        } else {
+            // Clean masculine haircut (styled side taper, no floppy ear blobs!)
+            ctx.beginPath();
+            ctx.arc(22, 5, 12, Math.PI * 0.7, Math.PI * 2.25);
+            ctx.fill();
+            // Side part taper
+            ctx.fillRect(13, 5, 4, 7);
 
-        // Mouth / Smile
-        ctx.strokeStyle = isWoman ? '#be123c' : '#7b3f2b'; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.moveTo(26.5, 13); ctx.lineTo(29.5, 13); ctx.stroke();
+            // Masculine focused eye & strong brow
+            ctx.fillStyle = '#172033';
+            ctx.beginPath(); ctx.arc(28, 8.5, 1.9, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.arc(28.6, 8, 0.65, 0, Math.PI * 2); ctx.fill();
+            // Brow
+            ctx.strokeStyle = '#172033'; ctx.lineWidth = 1.4;
+            ctx.beginPath(); ctx.moveTo(26, 6.2); ctx.lineTo(30, 6.5); ctx.stroke();
+            // Determined mouth
+            ctx.strokeStyle = '#7b3f2b'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(26.5, 13); ctx.lineTo(29.5, 13); ctx.stroke();
+        }
 
         ctx.restore();
         ctx.restore();
@@ -1502,12 +1345,11 @@ class Item {
         this.anim += 0.08;
         this.x -= speed;
 
-        // Magnet logic: active if PTO powerup is running OR permanent magnet_range upgrade was bought!
+        // Magnet logic: only active during run if PTO pickup is active OR shop magnet upgrade was bought
         const isAvatarUnlocked = unlockedAvatars.includes(player.avatar.id);
         const magnetMultiplier = (isAvatarUnlocked && player.avatar.magnetBonus) ? player.avatar.magnetBonus : 1.0;
-        const hasMagnet = player.ptoTimer > 0 || (upgrades.magnet_range > 0);
-        const baseRadius = upgrades.magnet_range > 0 ? 300 : (player.ptoTimer > 0 ? 220 : 0);
-        const magnetRadius = hasMagnet ? (baseRadius * magnetMultiplier) : 0;
+        const hasMagnet = player.ptoTimer > 0 || (upgrades.magnet_duration > 0);
+        const magnetRadius = hasMagnet ? (190 * magnetMultiplier) : 0;
         if (magnetRadius > 0) {
             const dx = (player.x + player.width / 2) - (this.x + this.width / 2);
             const dy = (player.y + player.height / 2) - (this.y + this.height / 2);
@@ -1722,12 +1564,12 @@ class BossManager {
 // Game Core
 let player = new Player();
 let bgManager = new BackgroundManager();
-// Fast, Responsive Speed Progression (Faster start pace + intense distance acceleration)
+// Authentic Chromium Chrome Dinosaur Game Speed Configuration (Responsive, Crisp Start Pace)
 const DINO_CONFIG = {
-    SPEED: 6.8,              // Fast, punchy starting speed
-    MAX_SPEED: 21.0,         // Intense high-speed ceiling at long distances
-    DISTANCE_FACTOR: 0.0095, // Continuous speed progression
-    GAP_COEFFICIENT: 0.65
+    SPEED: 2.8,           // Crisp, responsive starting pace (balanced - not too slow, not too fast)
+    ACCELERATION: 0.00045, // Smooth, continuous distance-driven acceleration
+    MAX_SPEED: 8.0,       // Controlled top speed ceiling
+    GAP_COEFFICIENT: 0.6  // Gap coefficient scaling with speed
 };
 
 let bossManager = new BossManager();
@@ -1739,9 +1581,9 @@ let lastMilestoneHundreds = 0;
 let runStartTime = 0;
 let survivalTime = 0;
 let runCoins = 0;
-let spawnCooldown = 80;
+let spawnCooldown = 45;
 let itemCooldown = 30;
-let nextBossTriggerDist = 700;
+let nextBossTriggerDist = 800;
 
 // Collision Detection with generous forgiving hitboxes
 function checkCollision(p, obj, isItem = false) {
@@ -1781,36 +1623,7 @@ function checkCollision(p, obj, isItem = false) {
 
 // Start / Restart Game
 function startGame() {
-    // 1. Consume and activate single-use items from inventory for THIS run
-    let hasRocket = (inventory.rocket_start || 0) > 0;
-    if (hasRocket) {
-        inventory.rocket_start--;
-        storage.set('inventory', inventory);
-    }
-
-    let hasExtraLife = (inventory.extra_life || 0) > 0;
-    if (hasExtraLife) {
-        inventory.extra_life--;
-        storage.set('inventory', inventory);
-    }
-
-    let hasDoublePts = (inventory.double_points || 0) > 0;
-    if (hasDoublePts) {
-        inventory.double_points--;
-        storage.set('inventory', inventory);
-    }
-
     player.reset();
-
-    // 2. Attach single-use item powers to player
-    if (hasRocket) {
-        player.coffeeTimer = 300; // 5s supersonic rocket speed + invincibility
-        player.invulnerableTimer = 300;
-        createScorePopup(canvas.width / 2, 180, '🚀 ROCKET START ENGAGED!', '#f59e0b');
-    }
-    player.hasExtraLife = hasExtraLife;
-    player.doublePointsActive = hasDoublePts;
-
     obstacles = [];
     items = [];
     particles = [];
@@ -1819,10 +1632,9 @@ function startGame() {
     lastMilestoneHundreds = 0;
     runCoins = 0;
     gameSpeed = DINO_CONFIG.SPEED;
-    window.smoothSpeed = DINO_CONFIG.SPEED;
-    spawnCooldown = 80;
-    itemCooldown = 30;
-    nextBossTriggerDist = 700;
+    spawnCooldown = 50; // First obstacle arrives comfortably
+    itemCooldown = 25;
+    nextBossTriggerDist = 800;
     runStartTime = performance.now();
     survivalTime = 0;
 
@@ -1831,7 +1643,6 @@ function startGame() {
     document.getElementById('gameover-screen').classList.add('hidden');
     document.getElementById('shop-screen').classList.add('hidden');
 
-    window.updateGlobalPointsUI();
     window.soundManager.startBGM();
 }
 
@@ -1875,91 +1686,50 @@ function gameOver(customReason) {
     document.getElementById('gameover-screen').classList.remove('hidden');
 }
 
-// Spawner Logic — Distance-Escalating Multi-Hazard Gauntlet
+// Spawner Logic — Dynamic Rhythmic Stream with Chromium gap scaling
 function updateSpawner(effectiveSpeed) {
     spawnCooldown--;
+    if (spawnCooldown <= 0 && obstacles.length < 5) {
+        // Spawner cooldown scales with speed so player reaction window remains balanced
+        const speedRatio = (gameSpeed - DINO_CONFIG.SPEED) / (DINO_CONFIG.MAX_SPEED - DINO_CONFIG.SPEED);
+        spawnCooldown = Math.max(46, Math.floor(82 - speedRatio * 22 + (Math.random() * 20 - 10)));
 
-    // Max simultaneous obstacles climbs rapidly with distance: from 4 up to 9
-    const maxObstacles = Math.min(9, 4 + Math.floor(distance / 180));
-
-    if (spawnCooldown <= 0 && obstacles.length < maxObstacles) {
-        // Cooldown between hazards shrinks sharply as distance grows
-        const distReduction = Math.min(52, Math.floor(distance * 0.048));
-        spawnCooldown = Math.max(18, Math.floor(64 - distReduction + (Math.random() * 12 - 6)));
-
-        const distLevel = distance;
         const rand = Math.random();
-
-        // Pattern 1: High distance (>= 450m) Triple & Multi-Hazard Gauntlets
-        if (distLevel >= 450 && rand < 0.40) {
-            // Rapid alternating sequences
-            if (Math.random() < 0.5) {
-                // Slide under Drone -> Jump over Chair -> Slide under Drone
-                obstacles.push(new Obstacle('FLYING_DRONE', 1050));
-                obstacles.push(new Obstacle('CHAIR', 1210));
-                obstacles.push(new Obstacle('FLYING_DRONE', 1370));
-                spawnCooldown += 34;
-            } else {
-                // Double Jump over high Task Boulder -> Jump Laptop -> Slide Drone
-                obstacles.push(new Obstacle('TASK_BOULDER', 1050));
-                obstacles.push(new Obstacle('LAPTOP', 1200));
-                obstacles.push(new Obstacle('FLYING_DRONE', 1360));
-                spawnCooldown += 36;
-            }
-        }
-        // Pattern 2: Mid distance (>= 150m) Double Hazard Pairs (Ground + Air or Fast Rolling Pairs)
-        else if (distLevel >= 150 && rand < 0.52) {
-            const pairChoice = Math.random();
-            if (pairChoice < 0.40) {
-                // Jump over Laptop immediately into overhead Slide under Drone!
-                obstacles.push(new Obstacle('LAPTOP', 1050));
-                obstacles.push(new Obstacle('FLYING_DRONE', 1190));
-            } else if (pairChoice < 0.70) {
-                // Rapid Double Ground Jump (Chair + Meeting Calendar)!
-                obstacles.push(new Obstacle('CHAIR', 1050));
-                obstacles.push(new Obstacle('CALENDAR', 1190));
-            } else {
-                // Rolling Task Boulder into Ergonomic Chair!
-                obstacles.push(new Obstacle('TASK_BOULDER', 1050));
-                obstacles.push(new Obstacle('CHAIR', 1200));
-            }
-            spawnCooldown += 22;
-        }
-        // Pattern 3: Early distance (>= 50m) Single/Double Quick Hazards
-        else if (distLevel >= 50 && rand < 0.45) {
-            const types = ['CHAIR', 'CALENDAR', 'LAPTOP', 'TASK_BOULDER', 'FLYING_DRONE'];
-            const chosen = types[Math.floor(Math.random() * types.length)];
-            obstacles.push(new Obstacle(chosen, 1050));
-            if (Math.random() < 0.4) {
-                obstacles.push(new Obstacle('CHAIR', 1180));
-                spawnCooldown += 16;
-            }
-        }
-        // Pattern 4: Introductory single obstacle
-        else {
-            const types = ['CHAIR', 'CALENDAR', 'LAPTOP'];
-            const chosen = types[Math.floor(Math.random() * types.length)];
-            obstacles.push(new Obstacle(chosen, 1050));
+        if (rand < 0.24) {
+            obstacles.push(new Obstacle('CHAIR', 1050));
+        } else if (rand < 0.46) {
+            obstacles.push(new Obstacle('CALENDAR', 1050));
+        } else if (rand < 0.66) {
+            obstacles.push(new Obstacle('LAPTOP', 1050));
+        } else if (rand < 0.82) {
+            obstacles.push(new Obstacle('TASK_BOULDER', 1050));
+        } else {
+            // Overhead flying obstacle (requires duck / slide to dodge!)
+            obstacles.push(new Obstacle('FLYING_DRONE', 1050));
         }
     }
 
-    // Spawn Coins & Power-ups rhythmically
+    // Spawn Coins & Power-ups rhythmically — skip if an obstacle is near the spawn zone
     itemCooldown--;
-    if (itemCooldown <= 0 && items.length < 6) {
-        itemCooldown = Math.floor(45 + Math.random() * 30);
-        const spawnBlocked = obstacles.some(o => o.x > 930 && o.x < 1170);
+    if (itemCooldown <= 0 && items.length < 5) {
+        itemCooldown = Math.floor(65 + Math.random() * 40);
+
+        // Check if any obstacle occupies the right-side spawn zone (x > 900)
+        const spawnBlocked = obstacles.some(o => o.x > 900 && o.x < 1200);
 
         if (!spawnBlocked) {
             if (Math.random() < 0.68) {
-                const coinY = Math.random() > 0.4 ? 455 : 385;
-                const coinCount = Math.floor(Math.random() * 3) + 1;
+                // Place coins safely above obstacles: use y=390 (high arc) or y=455 (low row)
+                const coinY = Math.random() > 0.4 ? 455 : 390;
+                const coinCount = Math.floor(Math.random() * 2) + 1;
                 for (let i = 0; i < coinCount; i++) {
-                    items.push(new Item('COIN', 1080 + i * 40, coinY));
+                    items.push(new Item('COIN', 1100 + i * 42, coinY));
                 }
-            } else if (Math.random() < 0.42) {
+            } else if (Math.random() < 0.4) {
                 const powerups = ['COFFEE', 'HEADPHONES', 'PTO', 'OOO'];
                 const chosen = powerups[Math.floor(Math.random() * powerups.length)];
-                items.push(new Item(chosen, 1120, 395));
+                // Powerups always float at a safe mid-height
+                items.push(new Item(chosen, 1150, 405));
             }
         }
     }
@@ -1967,7 +1737,7 @@ function updateSpawner(effectiveSpeed) {
     // Boss Battle Trigger (Scales with distance milestones)
     if (distance >= nextBossTriggerDist && !bossManager.active) {
         bossManager.trigger();
-        nextBossTriggerDist += 750 + Math.random() * 200;
+        nextBossTriggerDist += 1000 + Math.random() * 300;
     }
 }
 
@@ -1981,28 +1751,30 @@ function getCurrentBiome() {
     return BIOMES[0];
 }
 
-// Main Game Loop — Gradual, distance-based smooth speed progression
+// Main Game Loop — Chromium Chrome Dino continuous acceleration mechanism
 function updateGame() {
     if (currentState !== GAME_STATE.PLAYING) return;
 
     survivalTime = (performance.now() - runStartTime) / 1000;
 
-    // Dynamic distance-driven speed scaling: starts at 6.8 and accelerates continuously with distance
-    const distSpeedGain = Math.min(14.2, (distance * 0.009) + Math.pow(distance / 180, 0.75) * 1.5);
-    const baseSpeed = Math.min(DINO_CONFIG.MAX_SPEED, DINO_CONFIG.SPEED + distSpeedGain);
-    gameSpeed = baseSpeed;
+    // Authentic Chrome Dino Speed Mechanism: Continuous incremental acceleration
+    if (gameSpeed < DINO_CONFIG.MAX_SPEED) {
+        gameSpeed += DINO_CONFIG.ACCELERATION;
+    }
 
-    // Active in-game temporary buff multipliers (Quad Espresso, Dash, and gentle Boss Alert)
-    const buffBoost = player.coffeeTimer > 0 ? 1.20 : (player.isDashing ? 1.25 : 1.0);
-    const bossBoost = bossManager.active ? 1.10 : 1.0;
+    // Active in-game temporary buff multipliers (Quad Espresso, Dash, and Boss Chase adrenaline!)
+    const buffBoost = player.coffeeTimer > 0 ? 1.18 : (player.isDashing ? 1.28 : 1.0);
+    // When boss is chasing, player gets a 1.38x adrenaline sprint so boss won't catch them!
+    // When boss leaves, bossBoost is 1.0, restoring baseline distance speed seamlessly!
+    const bossBoost = bossManager.active ? 1.38 : 1.0;
     const targetEffectiveSpeed = gameSpeed * buffBoost * bossBoost;
 
     if (typeof window.smoothSpeed === 'undefined') window.smoothSpeed = DINO_CONFIG.SPEED;
-    window.smoothSpeed += (targetEffectiveSpeed - window.smoothSpeed) * 0.06;
+    window.smoothSpeed += (targetEffectiveSpeed - window.smoothSpeed) * 0.08;
     const effectiveSpeed = window.smoothSpeed;
 
     // Distance accumulation
-    distance += effectiveSpeed * 0.04;
+    distance += effectiveSpeed * 0.045;
 
     // Authentic 100m Milestone Celebration (Dino 100m beep & score flash)
     const currentHundreds = Math.floor(distance / 100);
@@ -2063,17 +1835,19 @@ function updateGame() {
                     storage.set('coins', totalCoins);
                 }
                 createScorePopup(player.x, player.y - 20, `SHIELD BROKE! -${penalty} P`, '#ff4757');
-            } else if (player.hasExtraLife) {
-                // HR Extra Life Insurance Item Consumed!
-                player.hasExtraLife = false;
-                player.invulnerableTimer = 160;
-                player.shield = 1;
-                obs.markedForDeletion = true;
-                if (window.soundManager) window.soundManager.playShieldUp();
-                createBlastConfetti(player.x + 20, player.y);
-                createScorePopup(player.x, player.y - 30, 'REVIVED BY HR LIFE INSURANCE! 🛡️', '#10b981');
-                updateHUD(currentBiome);
             } else {
+                // Point deduction on fatal hit
+                const penalty = Math.min(15, totalCoins + runCoins);
+                if (runCoins >= penalty) {
+                    runCoins -= penalty;
+                } else {
+                    const rem = penalty - runCoins;
+                    runCoins = 0;
+                    totalCoins = Math.max(0, totalCoins - rem);
+                    storage.set('coins', totalCoins);
+                }
+                createScorePopup(player.x, player.y - 30, `-${penalty} P`, '#ef4444');
+
                 // Game Over Collision
                 let specificReason = null;
                 if (obs.type === 'CHAIR') specificReason = "Smashed into a rogue ergonomic office chair in the hallway.";
@@ -2102,22 +1876,18 @@ function updateGame() {
             switch (item.type) {
                 case 'COIN': {
                     const isAvUnlocked = unlockedAvatars.includes(player.avatar.id);
-                    const charMult = (isAvUnlocked && player.avatar.coinMultiplier) ? player.avatar.coinMultiplier : 1;
-                    const stockBoost = (upgrades.coin_boost > 0) ? 1.5 : 1.0;
-                    const contractMult = player.doublePointsActive ? 2 : 1;
-                    const earned = Math.max(1, Math.round(1 * charMult * stockBoost * contractMult));
-                    runCoins += earned;
+                    const coinMult = (isAvUnlocked && player.avatar.coinMultiplier) ? player.avatar.coinMultiplier : 1;
+                    runCoins += 1 * coinMult;
                     window.soundManager.playCoin();
-                    createScorePopup(item.x, item.y, `+${earned} P`, '#fbbf24');
+                    createScorePopup(item.x, item.y, coinMult > 1 ? `+${coinMult} P` : '+1 P', '#fbbf24');
                     break;
                 }
                 case 'COFFEE': {
                     const isAvUnlocked = unlockedAvatars.includes(player.avatar.id);
-                    const coffeeBonus = (isAvUnlocked && player.avatar.coffeeBonus) ? player.avatar.coffeeBonus : 1.0;
-                    const extraDuration = (upgrades.coffee_duration > 0) ? 210 : 0;
-                    const totalDuration = Math.round((240 + extraDuration) * coffeeBonus);
-                    player.coffeeTimer = totalDuration;
-                    player.invulnerableTimer = totalDuration;
+                    const coffeeMult = (isAvUnlocked && player.avatar.coffeeBonus) ? player.avatar.coffeeBonus : 1.0;
+                    const upgradeMult = upgrades.coffee_duration > 0 ? 1.4 : 1.0;
+                    const durationFrames = Math.floor(240 * upgradeMult * coffeeMult);
+                    player.coffeeTimer = durationFrames;
                     window.soundManager.playCoffeePowerup();
                     createScorePopup(player.x, player.y - 30, 'QUAD ESPRESSO! ☕', '#f59e0b');
                     break;
@@ -2213,25 +1983,7 @@ function updateHUD(biome) {
     document.getElementById('hud-time').textContent = survivalTime.toFixed(1) + 's';
     document.getElementById('hud-coins').textContent = (totalCoins + runCoins) + ' P';
     document.getElementById('hud-zone').textContent = biome.name;
-
-    const staminaFill = document.getElementById('stamina-fill');
-    if (staminaFill) {
-        const stamPct = Math.max(0, Math.min(100, Math.round(player.stamina / player.maxStamina * 100)));
-        staminaFill.style.width = stamPct + '%';
-        if (stamPct < 35) {
-            staminaFill.style.background = 'linear-gradient(90deg, #ef4444, #f59e0b)';
-            staminaFill.style.boxShadow = '0 0 8px rgba(239, 68, 68, 0.8)';
-        } else {
-            staminaFill.style.background = 'linear-gradient(90deg, #38bdf8, #10b981)';
-            staminaFill.style.boxShadow = '0 0 8px rgba(56, 189, 248, 0.8)';
-        }
-    }
-
-    const staminaVal = document.getElementById('hud-stamina-val');
-    if (staminaVal) {
-        staminaVal.textContent = Math.round(player.stamina) + '%';
-        staminaVal.style.color = player.stamina < 35 ? '#f87171' : '#38bdf8';
-    }
+    document.getElementById('stamina-fill').style.width = (player.stamina / player.maxStamina * 100) + '%';
 
     // Active powerups tag
     const powerupContainer = document.getElementById('active-powerup-bar');
@@ -2240,7 +1992,7 @@ function updateHUD(biome) {
     if (player.coffeeTimer > 0) {
         const tag = document.createElement('div');
         tag.className = 'powerup-tag';
-        tag.innerHTML = `🚀 Rocket / Espresso (${(player.coffeeTimer / 60).toFixed(1)}s)`;
+        tag.innerHTML = `☕ Espresso Rush (${(player.coffeeTimer / 60).toFixed(1)}s)`;
         powerupContainer.appendChild(tag);
     }
     if (player.shield > 0) {
@@ -2257,22 +2009,6 @@ function updateHUD(biome) {
         tag.innerHTML = `🏝️ PTO Coin Magnet (${(player.ptoTimer / 60).toFixed(1)}s)`;
         powerupContainer.appendChild(tag);
     }
-    if (player.hasExtraLife) {
-        const tag = document.createElement('div');
-        tag.className = 'powerup-tag';
-        tag.style.borderColor = '#10b981';
-        tag.style.color = '#34d399';
-        tag.innerHTML = `🛡️ HR Revive Ready`;
-        powerupContainer.appendChild(tag);
-    }
-    if (player.doublePointsActive) {
-        const tag = document.createElement('div');
-        tag.className = 'powerup-tag';
-        tag.style.borderColor = '#fbbf24';
-        tag.style.color = '#fbbf24';
-        tag.innerHTML = `💰 2x Points Active`;
-        powerupContainer.appendChild(tag);
-    }
 }
 
 function showBossWarning(quote) {
@@ -2284,19 +2020,15 @@ function showBossWarning(quote) {
     }, 2800);
 }
 
-// Pause and Navigation Functions (CrazyGames / Poki Paused Portal Docking Mode)
+// Pause and Navigation Functions
 let pauseStartTime = 0;
 
 function pauseGame() {
     if (currentState === GAME_STATE.PLAYING) {
         currentState = GAME_STATE.PAUSED;
         pauseStartTime = performance.now();
-        document.body.classList.add('portal-paused');
-        const pauseScr = document.getElementById('pause-screen');
-        if (pauseScr) pauseScr.classList.remove('hidden');
-        if (window.soundManager) window.soundManager.stopBGM();
-        const topBank = document.getElementById('portal-top-bank');
-        if (topBank) topBank.textContent = `🪙 ${totalCoins} P`;
+        document.getElementById('pause-screen').classList.remove('hidden');
+        window.soundManager.stopBGM();
     }
 }
 
@@ -2305,34 +2037,21 @@ function resumeGame() {
         currentState = GAME_STATE.PLAYING;
         const pauseDuration = performance.now() - pauseStartTime;
         runStartTime += pauseDuration; // adjust elapsed timer seamlessly
-        document.body.classList.remove('portal-paused');
-        const pauseScr = document.getElementById('pause-screen');
-        if (pauseScr) pauseScr.classList.add('hidden');
-        if (window.soundManager) window.soundManager.startBGM();
+        document.getElementById('pause-screen').classList.add('hidden');
+        window.soundManager.startBGM();
     }
 }
 
 function goHome() {
     currentState = GAME_STATE.MENU;
-    document.body.classList.remove('portal-paused');
-    document.body.classList.remove('in-game');
-    const gWrapper = document.getElementById('game-view-wrapper');
-    if (gWrapper) gWrapper.classList.add('hidden');
-    const hpView = document.getElementById('homepage-view');
-    if (hpView) hpView.classList.remove('hidden');
-    const pauseScr = document.getElementById('pause-screen');
-    if (pauseScr) pauseScr.classList.add('hidden');
-    const govScr = document.getElementById('gameover-screen');
-    if (govScr) govScr.classList.add('hidden');
-    const shpScr = document.getElementById('shop-screen');
-    if (shpScr) shpScr.classList.add('hidden');
-    if (window.soundManager) window.soundManager.stopBGM();
-    if (typeof updateGlobalPointsUI === 'function') updateGlobalPointsUI();
+    document.getElementById('pause-screen').classList.add('hidden');
+    document.getElementById('gameover-screen').classList.add('hidden');
+    document.getElementById('shop-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    window.soundManager.stopBGM();
+    renderAvatarSelection();
+    updateShopUI();
 }
-
-window.pauseGame = pauseGame;
-window.resumeGame = resumeGame;
-window.goHome = goHome;
 
 // Input Handlers (Classic Chrome Dinosaur Controls)
 window.addEventListener('keydown', (e) => {
@@ -2346,12 +2065,6 @@ window.addEventListener('keydown', (e) => {
         } else if (currentState === GAME_STATE.PAUSED) {
             resumeGame();
         }
-        return;
-    }
-
-    // Ignore key auto-repeats for Jump and Dash to avoid consuming double jump / stamina instantly
-    if (e.repeat && (e.code === 'Space' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === 'Shift' || e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D')) {
-        e.preventDefault();
         return;
     }
 
@@ -2531,469 +2244,68 @@ function renderAvatarSelection() {
     });
 }
 
-function gameOver(customReason) {
-    currentState = GAME_STATE.GAMEOVER;
-    window.soundManager.stopBGM();
-    window.soundManager.playGameOver();
-
-    const finalTime = survivalTime;
-    const finalDist = Math.floor(distance);
-
-    // Calculate Points Rewards
-    const distPoints = Math.floor(finalDist / 40); // 1 P per 40m
-    const boostMult = (player.doublePointsActive ? 2 : 1) * (upgrades.coin_boost > 0 ? 1.5 : 1.0);
-    const totalEarnedThisRun = Math.max(1, Math.round((runCoins + distPoints) * boostMult));
-
-    // Save records
-    totalCoins += totalEarnedThisRun;
-    storage.set('coins', totalCoins);
-
-    const isNewRecord = finalTime > bestSurvivalTime || finalDist > bestDistance;
-    if (finalTime > bestSurvivalTime) {
-        bestSurvivalTime = finalTime;
-        storage.set('best_time', bestSurvivalTime);
-    }
-    if (finalDist > bestDistance) {
-        bestDistance = finalDist;
-        storage.set('best_dist', bestDistance);
-    }
-
-    // Populate Game Over Screen
-    const reasonText = customReason || DEATH_REASONS[Math.floor(Math.random() * DEATH_REASONS.length)];
-    const reasonEl = document.getElementById('death-reason-text');
-    if (reasonEl) reasonEl.textContent = `"${reasonText}"`;
-    
-    const timeEl = document.getElementById('stat-time-val');
-    if (timeEl) timeEl.textContent = finalTime.toFixed(2) + 's';
-    
-    const distEl = document.getElementById('stat-dist-val');
-    if (distEl) distEl.textContent = finalDist + 'm';
-    
-    const coinsEl = document.getElementById('stat-coins-val');
-    if (coinsEl) {
-        coinsEl.innerHTML = `+${totalEarnedThisRun} P <small style="display:block; font-size:0.7rem; color:#94a3b8; font-weight:normal;">(${runCoins} coins + ${distPoints} dist${boostMult > 1 ? ` × ${boostMult}x` : ''})</small>`;
-    }
-
-    const bankEl = document.getElementById('stat-bank-val');
-    if (bankEl) bankEl.textContent = `${totalCoins} P`;
-
-    const bestEl = document.getElementById('stat-best-val');
-    if (bestEl) bestEl.textContent = bestSurvivalTime.toFixed(2) + 's';
-
-    const recordTag = document.getElementById('new-record-tag');
-    if (recordTag) {
-        recordTag.style.display = isNewRecord ? 'block' : 'none';
-    }
-
-    window.updateGlobalPointsUI();
-    document.getElementById('gameover-screen').classList.remove('hidden');
-}
-
-// Spawner Logic — Dynamic Rhythmic Stream with Chromium gap scaling
-function updateSpawner(effectiveSpeed) {
-    spawnCooldown--;
-    if (spawnCooldown <= 0 && obstacles.length < 5) {
-        const speedRatio = Math.min(1.0, (gameSpeed - DINO_CONFIG.SPEED) / (DINO_CONFIG.MAX_SPEED - DINO_CONFIG.SPEED));
-        spawnCooldown = Math.max(48, Math.floor(105 - speedRatio * 50 + (Math.random() * 20 - 10)));
-
-        const rand = Math.random();
-        if (rand < 0.24) {
-            obstacles.push(new Obstacle('CHAIR', 1050));
-        } else if (rand < 0.46) {
-            obstacles.push(new Obstacle('CALENDAR', 1050));
-        } else if (rand < 0.66) {
-            obstacles.push(new Obstacle('LAPTOP', 1050));
-        } else if (rand < 0.82) {
-            obstacles.push(new Obstacle('TASK_BOULDER', 1050));
-        } else {
-            obstacles.push(new Obstacle('FLYING_DRONE', 1050));
-        }
-    }
-
-    itemCooldown--;
-    if (itemCooldown <= 0 && items.length < 5) {
-        itemCooldown = Math.floor(65 + Math.random() * 40);
-        const spawnBlocked = obstacles.some(o => o.x > 900 && o.x < 1200);
-
-        if (!spawnBlocked) {
-            if (Math.random() < 0.68) {
-                const coinY = Math.random() > 0.4 ? 455 : 390;
-                items.push(new Item('COIN', 1050, coinY));
-            } else {
-                const pRand = Math.random();
-                let pType = 'COFFEE';
-                if (pRand < 0.35) pType = 'COFFEE';
-                else if (pRand < 0.65) pType = 'HEADPHONES';
-                else if (pRand < 0.85) pType = 'PTO';
-                else pType = 'OOO';
-                items.push(new Item(pType, 1050, 420));
-            }
-        }
-    }
-}
-
 function updateShopUI() {
     const totalEl = document.getElementById('shop-total-coins');
     if (totalEl) totalEl.textContent = `${totalCoins} P`;
 
-    const shopList = document.querySelector('#shop-screen .shop-list');
-    if (shopList) {
-        shopList.innerHTML = `
-            <div style="grid-column: 1/-1; font-size: 0.85rem; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase;">
-                ⭐ Permanent Corporate Upgrades
-            </div>
-            ${STORE_CATALOG.upgrades.map(up => {
-                const isBought = upgrades[up.id] > 0;
-                return `
-                    <div class="shop-item">
-                        <div class="shop-item-info">
-                            <div class="shop-icon">${up.icon}</div>
-                            <div>
-                                <div class="shop-item-name">${up.name}</div>
-                                <div class="shop-item-desc">${up.desc}</div>
-                            </div>
-                        </div>
-                        <button class="shop-buy-btn ${isBought ? 'bought' : ''}" ${isBought ? 'disabled' : ''} onclick="buyEscapeUpgrade('${up.id}', ${up.cost})">
-                            ${isBought ? 'BOUGHT ✓' : `${up.cost} P BUY`}
-                        </button>
-                    </div>
-                `;
-            }).join('')}
+    const coffeeBtn = document.getElementById('shop-btn-coffee');
+    const shieldBtn = document.getElementById('shop-btn-shield');
+    const magnetBtn = document.getElementById('shop-btn-magnet');
 
-            <div style="grid-column: 1/-1; font-size: 0.85rem; font-weight: 800; color: #fbbf24; letter-spacing: 1px; margin-top: 14px; margin-bottom: 4px; text-transform: uppercase;">
-                ⚡ Single-Use In-Run Gear
-            </div>
-            ${STORE_CATALOG.items.map(it => {
-                const count = inventory[it.id] || 0;
-                return `
-                    <div class="shop-item">
-                        <div class="shop-item-info">
-                            <div class="shop-icon">${it.icon}</div>
-                            <div>
-                                <div class="shop-item-name">${it.name} ${count > 0 ? `<span style="color:#10b981; font-size:0.75rem;">(Owned: ${count})</span>` : ''}</div>
-                                <div class="shop-item-desc">${it.desc}</div>
-                            </div>
-                        </div>
-                        <button class="shop-buy-btn" onclick="buyEscapeItem('${it.id}', ${it.cost})">
-                            ${it.cost} P BUY
-                        </button>
-                    </div>
-                `;
-            }).join('')}
-        `;
+    if (coffeeBtn) {
+        if (upgrades.coffee_duration > 0) {
+            coffeeBtn.textContent = 'BOUGHT ✓';
+            coffeeBtn.className = 'shop-buy-btn bought';
+            coffeeBtn.disabled = true;
+        } else {
+            coffeeBtn.textContent = '40 P BUY';
+            coffeeBtn.className = 'shop-buy-btn';
+            coffeeBtn.disabled = false;
+        }
+    }
+
+    if (shieldBtn) {
+        if (upgrades.shield_strength > 0) {
+            shieldBtn.textContent = 'BOUGHT ✓';
+            shieldBtn.className = 'shop-buy-btn bought';
+            shieldBtn.disabled = true;
+        } else {
+            shieldBtn.textContent = '60 P BUY';
+            shieldBtn.className = 'shop-buy-btn';
+            shieldBtn.disabled = false;
+        }
+    }
+
+    if (magnetBtn) {
+        if (upgrades.magnet_duration > 0) {
+            magnetBtn.textContent = 'BOUGHT ✓';
+            magnetBtn.className = 'shop-buy-btn bought';
+            magnetBtn.disabled = true;
+        } else {
+            magnetBtn.textContent = '50 P BUY';
+            magnetBtn.className = 'shop-buy-btn';
+            magnetBtn.disabled = false;
+        }
     }
 }
 
-// Global Points & Upgrades Sync Engine
-window.updateGlobalPointsUI = function() {
-    totalCoins = storage.get('coins', totalCoins);
-    unlockedAvatars = storage.get('unlocked_avatars', unlockedAvatars);
-    activeAvatarId = storage.get('selected_avatar', activeAvatarId);
-    upgrades = storage.get('upgrades', upgrades);
-    inventory = storage.get('inventory', inventory);
-
-    window.inventory = inventory;
-    window.upgrades = upgrades;
-
-    // Nav & Hero Points Displays
-    const navPts = document.getElementById('nav-points-badge');
-    if (navPts) navPts.textContent = `🪙 ${totalCoins} P`;
-
-    const heroBank = document.getElementById('hero-bank-display');
-    if (heroBank) heroBank.textContent = `${totalCoins} P`;
-
-    const empBadge = document.getElementById('employees-points-badge');
-    if (empBadge) empBadge.textContent = `🪙 YOUR BALANCE: ${totalCoins} P`;
-
-    const storeBank = document.getElementById('store-bank-balance');
-    if (storeBank) storeBank.textContent = `BANK: ${totalCoins} P`;
-
-    const shopTotal = document.getElementById('shop-total-coins');
-    if (shopTotal) shopTotal.textContent = `🪙 ${totalCoins} P`;
-
-    const menuCoins = document.getElementById('menu-coins-display');
-    if (menuCoins) menuCoins.textContent = `🪙 ${totalCoins} P`;
-
-    const hudCoins = document.getElementById('hud-coins');
-    if (hudCoins) hudCoins.textContent = `${runCoins} P`;
-
-    // Sync Operative Badges on Homepage
-    Object.values(AVATARS).forEach(av => {
-        const badge = document.getElementById('badge-' + av.id);
-        const isUnlocked = unlockedAvatars.includes(av.id) || (av.id === 'dev');
-        const isEquipped = (activeAvatarId === av.id);
-
-        if (badge) {
-            if (isEquipped) {
-                badge.className = 'badge-status badge-equipped';
-                badge.textContent = 'EQUIPPED';
-            } else if (isUnlocked) {
-                badge.className = 'badge-status badge-bought';
-                badge.textContent = 'BOUGHT ✓';
-            } else {
-                badge.className = 'badge-status badge-locked';
-                badge.textContent = `🔒 ${av.cost} P`;
-            }
-        }
-    });
-
-    // Populate Store on Homepage
-    const homeStoreGrid = document.getElementById('homepage-store-grid');
-    if (homeStoreGrid) {
-        homeStoreGrid.innerHTML = `
-            ${STORE_CATALOG.upgrades.map(up => {
-                const isBought = (upgrades[up.id] || 0) > 0;
-                return `
-                    <div class="store-card">
-                        <div class="store-card-info">
-                            <div class="store-card-icon">${up.icon}</div>
-                            <div>
-                                <div class="store-card-name">${up.name}</div>
-                                <div class="store-card-desc">${up.desc}</div>
-                            </div>
-                        </div>
-                        <button class="store-btn ${isBought ? 'bought' : ''}" ${isBought ? 'disabled' : ''} onclick="buyEscapeUpgrade('${up.id}', ${up.cost})">
-                            ${isBought ? 'BOUGHT ✓' : `${up.cost} P BUY`}
-                        </button>
-                    </div>
-                `;
-            }).join('')}
-            ${STORE_CATALOG.items.map(it => {
-                const count = inventory[it.id] || 0;
-                return `
-                    <div class="store-card">
-                        <div class="store-card-info">
-                            <div class="store-card-icon">${it.icon}</div>
-                            <div>
-                                <div class="store-card-name">${it.name} ${count > 0 ? `<span style="color:#10b981; font-size:0.75rem;">(Owned: ${count})</span>` : ''}</div>
-                                <div class="store-card-desc">${it.desc}</div>
-                            </div>
-                        </div>
-                        <button class="store-btn" onclick="buyEscapeItem('${it.id}', ${it.cost})">
-                            ${it.cost} P BUY
-                        </button>
-                    </div>
-                `;
-            }).join('')}
-        `;
-    }
-};
-
-// Pre-Run Gear Loadout Check & Modal Handler
-window.checkAndOpenGearModal = function() {
-    inventory = storage.get('inventory', inventory);
-    const hasRocket = (inventory.rocket_start || 0) > 0;
-    const hasLife = (inventory.extra_life || 0) > 0;
-    const hasPoints = (inventory.double_points || 0) > 0;
-
-    if (!hasRocket && !hasLife && !hasPoints) {
-        return false; // No single-use gear owned, start run immediately
-    }
-
-    const modal = document.getElementById('gear-modal');
-    const list = document.getElementById('gear-items-list');
-    if (!modal || !list) return false;
-
-    list.innerHTML = '';
-    const gearCatalog = [
-        { id: 'rocket_start', name: 'Rocket Coffee Start', icon: '🚀', desc: 'Supersonic 300m invincibility rush at start', count: inventory.rocket_start || 0 },
-        { id: 'extra_life', name: 'HR Life Insurance', icon: '🛡️', desc: 'Automatically revives you once on a fatal obstacle crash', count: inventory.extra_life || 0 },
-        { id: 'double_points', name: 'Double Point Contract', icon: '💰', desc: '2x Point multiplier for this entire run', count: inventory.double_points || 0 }
-    ];
-
-    gearCatalog.forEach(it => {
-        if (it.count > 0) {
-            const row = document.createElement('label');
-            row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: rgba(14, 27, 43, 0.85); border: 1.5px solid rgba(168, 204, 229, 0.2); border-radius: 12px; padding: 10px 14px; cursor: pointer; transition: 0.2s; user-select: none;';
-            row.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <input type="checkbox" id="gear-chk-${it.id}" checked style="width: 18px; height: 18px; accent-color: #38bdf8; cursor: pointer;">
-                    <div>
-                        <div style="font-weight: 800; font-size: 0.88rem; color: #f4f8fb; display: flex; align-items: center; gap: 6px;">
-                            <span>${it.icon}</span> <span>${it.name}</span>
-                            <span style="font-size: 0.72rem; color: #10b981; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 6px;">x${it.count}</span>
-                        </div>
-                        <div style="font-size: 0.72rem; color: #8293a7; margin-top: 2px;">${it.desc}</div>
-                    </div>
-                </div>
-            `;
-            list.appendChild(row);
-        }
-    });
-
-    const btnDeploy = document.getElementById('btn-gear-deploy');
-    if (btnDeploy) {
-        btnDeploy.onclick = () => {
-            const chkRocket = document.getElementById('gear-chk-rocket_start');
-            const chkLife = document.getElementById('gear-chk-extra_life');
-            const chkPoints = document.getElementById('gear-chk-double_points');
-            const selectedGear = {
-                rocket_start: chkRocket ? chkRocket.checked : false,
-                extra_life: chkLife ? chkLife.checked : false,
-                double_points: chkPoints ? chkPoints.checked : false
-            };
-            modal.classList.add('hidden');
-            if (typeof window.executeGameStart === 'function') {
-                window.executeGameStart(selectedGear);
-            }
-        };
-    }
-
-    const btnSkip = document.getElementById('btn-gear-skip');
-    if (btnSkip) {
-        btnSkip.onclick = () => {
-            modal.classList.add('hidden');
-            if (typeof window.executeGameStart === 'function') {
-                window.executeGameStart({ rocket_start: false, extra_life: false, double_points: false });
-            }
-        };
-    }
-
-    modal.classList.remove('hidden');
-    return true;
-};
-
-// Start run with chosen gear loadout
-window.startGameWithGear = function(selectedGear) {
-    inventory = storage.get('inventory', inventory);
-    upgrades = storage.get('upgrades', upgrades);
-    totalCoins = storage.get('coins', totalCoins);
-
-    const gear = selectedGear || { rocket_start: false, extra_life: false, double_points: false };
-
-    let hasRocket = gear.rocket_start && (inventory.rocket_start || 0) > 0;
-    if (hasRocket) {
-        inventory.rocket_start--;
-    }
-
-    let hasExtraLife = gear.extra_life && (inventory.extra_life || 0) > 0;
-    if (hasExtraLife) {
-        inventory.extra_life--;
-    }
-
-    let hasDoublePts = gear.double_points && (inventory.double_points || 0) > 0;
-    if (hasDoublePts) {
-        inventory.double_points--;
-    }
-
-    storage.set('inventory', inventory);
-
-    player.reset();
-
-    if (hasRocket) {
-        player.coffeeTimer = 300; // 5s supersonic rocket speed + invincibility
-        player.invulnerableTimer = 300;
-        createScorePopup(canvas.width / 2, 180, '🚀 ROCKET START ENGAGED!', '#f59e0b');
-    }
-    player.hasExtraLife = hasExtraLife;
-    player.doublePointsActive = hasDoublePts;
-
-    obstacles = [];
-    items = [];
-    particles = [];
-    bossManager.active = false;
-    distance = 0;
-    lastMilestoneHundreds = 0;
-    runCoins = 0;
-    gameSpeed = DINO_CONFIG.SPEED;
-    window.smoothSpeed = DINO_CONFIG.SPEED;
-    spawnCooldown = 80;
-    itemCooldown = 30;
-    nextBossTriggerDist = 700;
-    runStartTime = performance.now();
-    survivalTime = 0;
-
-    currentState = GAME_STATE.PLAYING;
-    const startScr = document.getElementById('start-screen');
-    if (startScr) startScr.classList.add('hidden');
-    const govScr = document.getElementById('gameover-screen');
-    if (govScr) govScr.classList.add('hidden');
-    const pauScr = document.getElementById('pause-screen');
-    if (pauScr) pauScr.classList.add('hidden');
-    const shpScr = document.getElementById('shop-screen');
-    if (shpScr) shpScr.classList.add('hidden');
-
-    window.updateGlobalPointsUI();
-    if (window.soundManager) window.soundManager.startBGM();
-};
-
-window.startGame = function() {
-    window.startGameWithGear({
-        rocket_start: (inventory.rocket_start || 0) > 0,
-        extra_life: (inventory.extra_life || 0) > 0,
-        double_points: (inventory.double_points || 0) > 0
-    });
-};
-
-window.buyEscapeAvatar = function(id) {
-    const av = AVATARS[id];
-    if (!av) return;
-    if (unlockedAvatars.includes(id) || id === 'dev') {
-        window.selectEscapeOperative(id);
-        return;
-    }
-    if (totalCoins >= av.cost) {
-        totalCoins -= av.cost;
-        storage.set('coins', totalCoins);
-        unlockedAvatars.push(id);
-        storage.set('unlocked_avatars', unlockedAvatars);
-        activeAvatarId = id;
-        storage.set('selected_avatar', id);
-        if (player) player.reset();
-        if (window.soundManager) window.soundManager.playShieldUp();
-        window.updateGlobalPointsUI();
-        if (typeof syncHeroPreview === 'function') syncHeroPreview(id);
-        createScorePopup(canvas.width / 2, canvas.height / 2, `${av.name} UNLOCKED! 🎉`, '#10b981');
-    } else {
-        if (window.soundManager) window.soundManager.playTone(200, 'square', 0.1, 0.2);
-        alert(`Need ${av.cost} P Point Coins to unlock ${av.name}! Current Bank: ${totalCoins} P.`);
-    }
-};
-
-window.selectEscapeOperative = function(id) {
-    if (unlockedAvatars.includes(id) || id === 'dev') {
-        activeAvatarId = id;
-        storage.set('selected_avatar', id);
-        if (player) player.reset();
-        window.updateGlobalPointsUI();
-        if (typeof syncHeroPreview === 'function') syncHeroPreview(id);
-    }
-};
-
-window.buyEscapeUpgrade = function(type, cost) {
-    if ((upgrades[type] || 0) > 0) return;
+// Global upgrade helper
+window.buyUpgrade = function(type, cost) {
+    if (upgrades[type] > 0) return; // already bought!
     if (totalCoins >= cost) {
         totalCoins -= cost;
         storage.set('coins', totalCoins);
         upgrades[type] = 1;
         storage.set('upgrades', upgrades);
-        if (window.soundManager) window.soundManager.playShieldUp();
-        window.updateGlobalPointsUI();
+        window.soundManager.playShieldUp();
         updateShopUI();
-        createScorePopup(canvas.width / 2, canvas.height / 2, 'UPGRADE BOUGHT! ✨', '#10b981');
+        renderAvatarSelection();
+        createScorePopup(canvas.width / 2, canvas.height / 2, 'PERK BOUGHT! ✨', '#10b981');
     } else {
-        if (window.soundManager) window.soundManager.playTone(200, 'square', 0.1, 0.2);
-        alert(`Need ${cost} P Point Coins! Current Bank: ${totalCoins} P.`);
+        window.soundManager.playTone(200, 'square', 0.1, 0.2);
+        alert(`Need ${cost} P Point Coins!`);
     }
 };
-
-window.buyEscapeItem = function(type, cost) {
-    if (totalCoins >= cost) {
-        totalCoins -= cost;
-        storage.set('coins', totalCoins);
-        inventory[type] = (inventory[type] || 0) + 1;
-        storage.set('inventory', inventory);
-        if (window.soundManager) window.soundManager.playShieldUp();
-        window.updateGlobalPointsUI();
-        updateShopUI();
-        createScorePopup(canvas.width / 2, canvas.height / 2, 'ITEM PURCHASED! ⚡', '#38bdf8');
-    } else {
-        if (window.soundManager) window.soundManager.playTone(200, 'square', 0.1, 0.2);
-        alert(`Need ${cost} P Point Coins! Current Bank: ${totalCoins} P.`);
-    }
-};
-
-window.buyUpgrade = window.buyEscapeUpgrade;
 
 function requestGameFullScreen() {
     if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
@@ -3008,26 +2320,13 @@ function requestGameFullScreen() {
 // Return to game home page
 function goHome() {
     currentState = GAME_STATE.MENU;
-    if (window.soundManager) window.soundManager.stopBGM();
-    const gov = document.getElementById('gameover-screen');
-    if (gov) gov.classList.add('hidden');
-    const pau = document.getElementById('pause-screen');
-    if (pau) pau.classList.add('hidden');
-    const shp = document.getElementById('shop-screen');
-    if (shp) shp.classList.add('hidden');
-    
-    // Switch to homepage view
-    const homeView = document.getElementById('homepage-view');
-    const gameCont = document.getElementById('game-container');
-    if (homeView && gameCont) {
-        gameCont.classList.add('hidden');
-        homeView.classList.remove('hidden');
-        document.body.classList.remove('in-game');
-    }
-    
-    if (player) player.reset();
-    window.updateGlobalPointsUI();
-    if (typeof syncHeroPreview === 'function') syncHeroPreview(activeAvatarId);
+    window.soundManager.stopBGM();
+    document.getElementById('gameover-screen').classList.add('hidden');
+    document.getElementById('pause-screen').classList.add('hidden');
+    document.getElementById('shop-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    player.reset();
+    renderAvatarSelection();
 }
 
 function handleBackNavigation() {
@@ -3038,98 +2337,76 @@ function handleBackNavigation() {
     }
 }
 
-// Initialization on DOM load or immediate execution
-function initGameEngine() {
-    window.updateGlobalPointsUI();
+// Initialization on DOM load
+window.addEventListener('DOMContentLoaded', () => {
+    renderAvatarSelection();
     setupTouchControls();
     updateShopUI();
 
     const portalBackBtn = document.getElementById('btn-portal-back');
     if (portalBackBtn) {
         portalBackBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            goHome();
-        });
-    }
-
-    const playBtn = document.getElementById('btn-play');
-    if (playBtn) {
-        playBtn.addEventListener('click', () => {
-            if (window.soundManager) window.soundManager.init();
-            startGame();
-        });
-    }
-
-    const restartBtn = document.getElementById('btn-restart');
-    if (restartBtn) {
-        restartBtn.addEventListener('click', () => {
-            if (window.soundManager) window.soundManager.init();
-            startGame();
-        });
-    }
-
-    const pauseBtn = document.getElementById('btn-pause');
-    if (pauseBtn) {
-        pauseBtn.addEventListener('click', () => {
-            if (window.soundManager) window.soundManager.init();
-            if (currentState === GAME_STATE.PLAYING) pauseGame();
-            else if (currentState === GAME_STATE.PAUSED) resumeGame();
-        });
-    }
-
-    const resumeBtn = document.getElementById('btn-resume');
-    if (resumeBtn) resumeBtn.addEventListener('click', () => resumeGame());
-
-    const pauseRestartBtn = document.getElementById('btn-pause-restart');
-    if (pauseRestartBtn) {
-        pauseRestartBtn.addEventListener('click', () => {
-            const pauseScr = document.getElementById('pause-screen');
-            if (pauseScr) pauseScr.classList.add('hidden');
-            startGame();
-        });
-    }
-
-    const homeBtn = document.getElementById('btn-home');
-    if (homeBtn) homeBtn.addEventListener('click', () => goHome());
-
-    const gameoverHomeBtn = document.getElementById('btn-gameover-home');
-    if (gameoverHomeBtn) gameoverHomeBtn.addEventListener('click', () => goHome());
-
-    const shopOpenBtn = document.getElementById('btn-shop-open');
-    if (shopOpenBtn) {
-        shopOpenBtn.addEventListener('click', () => {
-            updateShopUI();
-            const shopScr = document.getElementById('shop-screen');
-            if (shopScr) shopScr.classList.remove('hidden');
-        });
-    }
-
-    const shopCloseBtn = document.getElementById('btn-shop-close');
-    if (shopCloseBtn) {
-        shopCloseBtn.addEventListener('click', () => {
-            const shopScr = document.getElementById('shop-screen');
-            if (shopScr) shopScr.classList.add('hidden');
-            window.updateGlobalPointsUI();
-        });
-    }
-
-    const muteBtn = document.getElementById('btn-mute');
-    if (muteBtn) {
-        muteBtn.addEventListener('click', () => {
-            if (window.soundManager) {
-                window.soundManager.init();
-                const isMuted = window.soundManager.toggleMute();
-                muteBtn.textContent = isMuted ? '🔇' : '🔊';
+            if (currentState === GAME_STATE.PLAYING || currentState === GAME_STATE.PAUSED || currentState === GAME_STATE.GAMEOVER) {
+                e.preventDefault();
+                goHome();
             }
         });
     }
 
+    document.getElementById('btn-play').addEventListener('click', () => {
+        requestGameFullScreen();
+        window.soundManager.init();
+        startGame();
+    });
+
+    document.getElementById('btn-restart').addEventListener('click', () => {
+        requestGameFullScreen();
+        window.soundManager.init();
+        startGame();
+    });
+
+    document.getElementById('btn-pause').addEventListener('click', () => {
+        window.soundManager.init();
+        if (currentState === GAME_STATE.PLAYING) {
+            pauseGame();
+        } else if (currentState === GAME_STATE.PAUSED) {
+            resumeGame();
+        }
+    });
+
+    document.getElementById('btn-resume').addEventListener('click', () => {
+        resumeGame();
+    });
+
+    document.getElementById('btn-pause-restart').addEventListener('click', () => {
+        document.getElementById('pause-screen').classList.add('hidden');
+        startGame();
+    });
+
+    document.getElementById('btn-home').addEventListener('click', () => {
+        goHome();
+    });
+
+    document.getElementById('btn-gameover-home').addEventListener('click', () => {
+        goHome();
+    });
+
+    document.getElementById('btn-shop-open').addEventListener('click', () => {
+        updateShopUI();
+        document.getElementById('shop-screen').classList.remove('hidden');
+    });
+
+    document.getElementById('btn-shop-close').addEventListener('click', () => {
+        document.getElementById('shop-screen').classList.add('hidden');
+        renderAvatarSelection();
+    });
+
+    document.getElementById('btn-mute').addEventListener('click', () => {
+        window.soundManager.init();
+        const isMuted = window.soundManager.toggleMute();
+        document.getElementById('btn-mute').textContent = isMuted ? '🔇' : '🔊';
+    });
+
     // Start render animation loop
     requestAnimationFrame(render);
-}
-
-if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', initGameEngine);
-} else {
-    initGameEngine();
-}
+});

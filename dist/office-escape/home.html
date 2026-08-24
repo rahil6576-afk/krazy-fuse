@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Office Escape — Corporate Run</title>
+  <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#050a12;--panel:rgba(10,19,31,.76);--line:rgba(168,204,229,.14);--muted:#8293a7;--white:#f4f8fb;--cyan:#42dcff;--blue:#4d7cff;--violet:#9275ff;--orange:#ff9d3d;--red:#ff5265}
+html{scroll-behavior:smooth}
+body{min-height:100vh;background:radial-gradient(circle at 78% 17%,rgba(39,185,232,.12),transparent 28%),radial-gradient(circle at 12% 78%,rgba(91,76,230,.13),transparent 28%),linear-gradient(135deg,#03070d,#08121e 52%,#0b1725);color:var(--white);font-family:Outfit,system-ui,sans-serif;overflow-x:hidden}
+.noise{position:fixed;inset:0;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");z-index:10}
+.grid{position:fixed;left:-10%;right:-10%;bottom:-28%;height:55%;background:linear-gradient(rgba(66,220,255,.11) 1px,transparent 1px),linear-gradient(90deg,rgba(66,220,255,.08) 1px,transparent 1px);background-size:52px 52px;transform:perspective(340px) rotateX(62deg);transform-origin:center top;mask-image:linear-gradient(to bottom,transparent,black 22%,transparent 90%);pointer-events:none;opacity:.5}
+.orb{position:fixed;border-radius:50%;filter:blur(12px);pointer-events:none}.orb-one{width:380px;height:380px;right:-150px;top:110px;background:radial-gradient(circle,rgba(55,208,255,.13),transparent 68%)}.orb-two{width:460px;height:460px;left:-250px;bottom:-220px;background:radial-gradient(circle,rgba(119,86,255,.13),transparent 68%)}
+.nav{height:76px;max-width:1240px;margin:auto;padding:0 28px;display:flex;align-items:center;gap:30px;border-bottom:1px solid var(--line);position:relative;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}.brand img{width:34px;height:34px}.brand span{display:flex;flex-direction:column;line-height:.88}.brand b{font-size:.9rem;letter-spacing:.7px}.brand small{font-size:.48rem;color:#63758a;letter-spacing:2px;margin-top:5px}
+.nav nav{display:flex;gap:24px;margin-left:auto}.nav nav a{color:#7f91a5;text-decoration:none;font-size:.66rem;font-weight:800;letter-spacing:1.2px;transition:.2s}.nav nav a:hover{color:var(--cyan)}
+.nav-actions{display:flex;align-items:center;gap:10px}.status{font-size:.58rem;color:#8293a7;border:1px solid var(--line);padding:8px 11px;border-radius:999px;background:rgba(5,12,21,.55);font-weight:800}.status i{display:inline-block;width:6px;height:6px;background:#2ce08b;border-radius:50%;box-shadow:0 0 9px #2ce08b;margin-right:6px}.nav-play,.primary{color:white;text-decoration:none;border:1px solid rgba(102,220,255,.25);background:linear-gradient(135deg,#079ec2,#326ee8 65%,#7456dd);box-shadow:0 10px 28px rgba(38,110,232,.23);border-radius:10px;font-weight:900;transition:.2s}.nav-play{font-size:.64rem;padding:10px 14px}.nav-play:hover,.primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(38,110,232,.36)}.nav-play span,.primary>span:last-child{margin-left:10px}
+main{max-width:1240px;margin:auto;padding:0 28px;position:relative;z-index:2}
+.hero{min-height:530px;display:grid;grid-template-columns:1fr .9fr;gap:42px;align-items:center;padding:52px 0 30px}.hero-copy{padding-left:8px}.eyebrow{display:flex;align-items:center;gap:9px;color:#6de7ff;font-size:.63rem;font-weight:900;letter-spacing:1.8px}.eyebrow span{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 13px var(--cyan)}h1{font-size:clamp(4rem,7vw,6.8rem);line-height:.82;letter-spacing:-5px;margin:20px 0 22px;font-weight:900}h1 em{font-style:normal;background:linear-gradient(90deg,var(--cyan),#65a5ff 48%,#a177ff);-webkit-background-clip:text;color:transparent} .hero-text{max-width:500px;color:#8495a9;font-size:1rem;line-height:1.65}.hero-text strong{display:block;color:#e9f1f6;margin-top:4px}
+.actions{display:flex;gap:10px;margin-top:25px}.primary{display:inline-flex;align-items:center;padding:12px 15px;cursor:pointer}.primary .play-icon{font-size:1rem;margin-right:10px}.primary b{display:block;font-size:.75rem}.primary small{display:block;color:#c5e9f3;font-size:.48rem;letter-spacing:1px;margin-top:2px}.primary kbd{margin-left:22px;font-size:.5rem;padding:4px 6px;border:1px solid rgba(255,255,255,.22);border-radius:5px;background:rgba(0,0,0,.15)}.secondary{display:flex;align-items:center;padding:0 15px;border:1px solid var(--line);border-radius:10px;color:#b6c4d1;text-decoration:none;font-size:.63rem;font-weight:900;background:rgba(7,15,25,.58);cursor:pointer;transition:.2s}.secondary:hover{border-color:var(--cyan);color:#fff}.secondary span{margin-left:12px;color:var(--cyan)}
+.stats{display:flex;gap:25px;margin-top:28px}.stats div{display:flex;flex-direction:column;border-left:1px solid var(--line);padding-left:13px}.stats small{font-size:.48rem;color:#5f7186;letter-spacing:1.3px;font-weight:900}.stats b{font-size:.68rem;margin-top:5px}.stats .danger{color:#ff8794}
+.hero-art{max-width:550px;width:100%;justify-self:end}.art-top,.caption{display:flex;justify-content:space-between;align-items:center;font-size:.52rem;letter-spacing:1.2px;color:#617388;padding:0 8px 8px}.art-top b{color:#69e6ff;font-size:.5rem}.scene{height:340px;position:relative;overflow:hidden;border:1px solid rgba(151,195,222,.15);border-radius:24px;background:linear-gradient(145deg,rgba(18,34,51,.88),rgba(4,11,20,.92));box-shadow:inset 0 1px rgba(255,255,255,.06),0 30px 70px rgba(0,0,0,.42)}.scene:after{content:"";position:absolute;left:6%;right:6%;bottom:35px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),#668eff,transparent);box-shadow:0 0 18px rgba(66,220,255,.45)}.window{position:absolute;left:11%;right:11%;top:25px;height:135px;border:1px solid rgba(124,195,230,.1);background:linear-gradient(180deg,rgba(38,77,105,.14),rgba(5,15,25,.12))}.window i{position:absolute;top:0;bottom:0;width:1px;background:rgba(151,210,238,.09)}.window i:nth-child(1){left:25%}.window i:nth-child(2){left:50%}.window i:nth-child(3){left:75%}.window i:nth-child(4){left:92%;opacity:.5}.city{position:absolute;bottom:78px;background:linear-gradient(180deg,rgba(74,114,143,.18),rgba(14,31,47,.15));border:1px solid rgba(123,176,204,.07)}.c1{left:13%;width:55px;height:55px}.c2{left:30%;width:82px;height:85px}.c3{right:16%;width:65px;height:68px}.ring{position:absolute;border:1px solid rgba(66,220,255,.13);border-radius:50%;left:50%;top:54%;transform:translate(-50%,-50%)}.ring-a{width:260px;height:260px}.ring-b{width:190px;height:190px;border-color:rgba(146,117,255,.15)}.glow{position:absolute;width:230px;height:230px;left:50%;top:56%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(48,213,255,.18),transparent 67%);filter:blur(7px)}
+.character{position:absolute;left:50%;bottom:39px;width:92px;height:210px;transform:translateX(-50%);animation:float 2.7s ease-in-out infinite}.head{position:absolute;width:55px;height:55px;left:19px;top:5px;border-radius:45% 45% 48% 48%;background:linear-gradient(145deg,#f6c7a4,#d99370);box-shadow:inset -5px -6px 0 rgba(112,59,49,.14)}.hair{position:absolute;left:0;top:-7px;width:55px;height:27px;border-radius:55% 55% 35% 35%;background:#1d2630}.head i,.head b{position:absolute;width:5px;height:5px;border-radius:50%;background:#1a2530;top:26px}.head i{left:16px}.head b{right:16px}.body{position:absolute;left:18px;top:55px;width:57px;height:76px;border-radius:14px 14px 10px 10px;background:linear-gradient(145deg,#253f59,#13283c);border:1px solid rgba(143,215,239,.18)}.tie{position:absolute;left:25px;top:4px;width:8px;height:42px;background:linear-gradient(#ef4d62,#8d2c47);clip-path:polygon(25% 0,75% 0,100% 68%,50% 100%,0 68%)}.badge{position:absolute;right:6px;top:26px;font-size:7px;padding:3px 4px;background:#dceef5;color:#173247;border-radius:3px;font-weight:900}.arm{position:absolute;width:15px;height:70px;border-radius:10px;background:#25445d;top:64px}.arm-a{left:8px;transform:rotate(32deg)}.arm-b{right:7px;transform:rotate(-48deg)}.leg{position:absolute;width:17px;height:65px;top:124px;background:#152a3c;border-radius:8px}.leg-a{left:22px;transform:rotate(11deg)}.leg-b{right:21px;transform:rotate(-18deg)}.shoe{position:absolute;width:32px;height:12px;background:#0b1722;border-radius:10px;bottom:4px}.shoe-a{left:12px;transform:rotate(5deg)}.shoe-b{right:11px;transform:rotate(-9deg)}
+.float-card{position:absolute;background:rgba(5,14,24,.84);border:1px solid rgba(149,194,221,.16);border-radius:10px;padding:9px 11px;box-shadow:0 12px 30px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:2px;animation:floatCard 3.3s ease-in-out infinite}.float-card small{font-size:.42rem;color:#657a8f;letter-spacing:1px}.float-card b{font-size:.56rem}.float-card span{font-size:.55rem;color:var(--cyan);font-weight:900}.card-a{left:18px;top:132px}.card-b{right:16px;top:96px;animation-delay:-1.2s}.speed{position:absolute;left:10%;bottom:58px;display:flex;flex-direction:column;gap:7px}.speed i{height:2px;border-radius:5px;background:linear-gradient(90deg,transparent,var(--cyan));opacity:.5}.speed i:nth-child(1){width:75px}.speed i:nth-child(2){width:45px}.speed i:nth-child(3){width:95px}
+@keyframes float{50%{transform:translate(-50%,-7px)}}@keyframes floatCard{50%{transform:translateY(-7px)}}
+.caption{padding-top:9px}.caption span{display:flex;flex-direction:column;gap:3px}.caption small{font-size:.45rem}.caption b{font-size:.8rem;color:#e9f1f6}.caption strong{font-size:.52rem;color:#6ce9ff}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 42px}.quick-grid article{display:flex;gap:12px;padding:14px;border:1px solid var(--line);border-radius:13px;background:rgba(8,17,29,.62);box-shadow:inset 0 1px rgba(255,255,255,.035)}.quick-grid article>span{font-size:.55rem;color:var(--cyan);border:1px solid rgba(66,220,255,.2);height:22px;padding:4px 5px;border-radius:5px}.quick-grid small,.section-head small,.controls small{font-size:.48rem;letter-spacing:1.5px;color:#5e7287;font-weight:900}.quick-grid b{display:block;font-size:.68rem;margin-top:3px}.quick-grid p{font-size:.55rem;color:#708398;line-height:1.45;margin-top:4px}
+.employees{padding:5px 0 40px}.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:15px}.section-head h2,.controls h2{font-size:1.45rem;letter-spacing:-.5px;margin-top:4px}.section-head>span{font-size:.52rem;letter-spacing:1.2px;color:#687b8f;border:1px solid var(--line);padding:7px 9px;border-radius:999px}.employee-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.employee{position:relative;min-height:132px;padding:13px 8px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(180deg,rgba(21,36,52,.75),rgba(6,14,24,.9));text-align:center;transition:.22s;cursor:pointer}.employee:hover{transform:translateY(-4px);border-color:rgba(66,220,255,.4);box-shadow:0 15px 30px rgba(0,0,0,.25)}.employee.active{border-color:rgba(66,220,255,.55);box-shadow:0 0 25px rgba(66,220,255,.1);background:linear-gradient(180deg,rgba(16,72,91,.58),rgba(6,14,24,.92))}.mini {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255,255,255,.18);
+  box-shadow: inset 0 -4px 12px rgba(0,0,0,.35), 0 4px 12px rgba(0,0,0,.25);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.employee:hover .mini {
+  transform: scale(1.08);
+}
+.mini.dev { background: linear-gradient(135deg,#0284c7,#3b82f6); box-shadow: 0 0 14px rgba(56, 189, 248, 0.4); }
+.mini.maya { background: linear-gradient(135deg,#f43f5e,#fb7185); box-shadow: 0 0 14px rgba(244, 63, 94, 0.4); }
+.mini.zack { background: linear-gradient(135deg,#059669,#10b981); box-shadow: 0 0 14px rgba(16, 185, 129, 0.4); }
+.mini.chloe { background: linear-gradient(135deg,#d97706,#fbbf24); box-shadow: 0 0 14px rgba(245, 158, 11, 0.4); }
+.mini.kai { background: linear-gradient(135deg,#6b21a8,#a855f7); box-shadow: 0 0 14px rgba(168, 85, 247, 0.4); }
+.mini.axel { background: linear-gradient(135deg,#1e293b,#475569); }
+.mini.nova { background: linear-gradient(135deg,#4c0519,#831843); }
+
+/* Character Dynamic Customization */
+.character.char-dev .body { background: linear-gradient(145deg,#253f59,#13283c); }
+.character.char-dev .tie { background: linear-gradient(#ef4d62,#8d2c47); }
+.character.char-dev .hair { background: #1d2630; border-radius: 55% 55% 35% 35%; height: 27px; }
+
+.character.char-maya .body { background: linear-gradient(145deg,#831843,#4c0519); border-color: rgba(244,63,94,0.3); }
+.character.char-maya .tie { background: linear-gradient(#fb7185,#be123c); }
+.character.char-maya .hair { background: #9a3412; border-radius: 50% 50% 30% 30%; height: 32px; }
+
+.character.char-zack .body { background: linear-gradient(145deg,#064e3b,#022c22); border-color: rgba(16,185,129,0.3); }
+.character.char-zack .tie { background: linear-gradient(#34d399,#059669); }
+.character.char-zack .hair { background: #14532d; clip-path: polygon(0 100%, 15% 10%, 35% 80%, 55% 0%, 75% 70%, 90% 15%, 100% 100%); height: 34px; }
+
+.character.char-chloe .body { background: linear-gradient(145deg,#78350f,#451a03); border-color: rgba(245,158,11,0.3); }
+.character.char-chloe .tie { background: linear-gradient(#fbbf24,#d97706); }
+.character.char-chloe .hair { background: #451a03; border-radius: 50% 50% 45% 45%; height: 38px; }
+
+.character.char-kai .body { background: linear-gradient(145deg,#3b0764,#1e1b4b); border-color: rgba(168,85,247,0.3); }
+.character.char-kai .tie { background: linear-gradient(#c084fc,#7e22ce); }
+.character.char-kai .hair { background: #581c87; border-radius: 60% 60% 35% 35%; height: 35px; }
+
+.employee>b{display:block;font-size:.65rem}.employee>small{display:block;color:#687b8f;font-size:.43rem;margin-top:2px}.employee em{display:inline-block;font-style:normal;color:#62dcf6;background:rgba(66,220,255,.08);padding:3px 5px;border-radius:4px;font-size:.39rem;margin-top:7px}.employee.locked{opacity:.55}.employee.locked>span{position:absolute;top:7px;right:7px;font-size:.38rem;color:#ff9a72;background:rgba(255,86,66,.08);padding:3px 4px;border-radius:4px}
+.controls{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:28px;padding:22px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(100deg,rgba(11,27,42,.85),rgba(8,16,27,.7));margin-bottom:32px}.keys{display:flex;gap:10px}.keys span{display:flex;align-items:center;gap:6px}.keys kbd{font-size:.48rem;padding:6px 7px;border:1px solid rgba(255,255,255,.13);border-bottom-color:rgba(255,255,255,.28);border-radius:5px;background:rgba(255,255,255,.05);color:#d8e2e9}.keys b{font-size:.48rem;color:#6e8093}.primary.small{padding:11px 15px;font-size:.58rem}
+footer{max-width:1240px;margin:auto;padding:0 28px 22px;display:flex;justify-content:space-between;color:#526579;font-size:.47rem;letter-spacing:1.2px;position:relative;z-index:2}footer i{font-style:normal;color:#2e4052;margin:0 6px}
+@media(max-width:900px){.nav nav{display:none}.hero{grid-template-columns:1fr}.hero-art{justify-self:stretch;max-width:none}.quick-grid{grid-template-columns:1fr}.employee-grid{grid-template-columns:repeat(4,1fr)}.controls{grid-template-columns:1fr}.keys{flex-wrap:wrap}.nav-actions .status{display:none}}
+@media(max-width:620px){.nav{padding:0 16px;height:65px}.nav-play{font-size:.55rem;padding:9px}.nav-actions{margin-left:auto}main{padding:0 16px}.hero{padding:35px 0 25px;min-height:auto}.hero-copy{padding:0}h1{font-size:4rem;letter-spacing:-3px}.actions{flex-direction:column}.secondary{min-height:42px;justify-content:center}.scene{height:290px}.employee-grid{grid-template-columns:repeat(2,1fr)}.stats{gap:14px;flex-wrap:wrap}.controls{padding:17px}.keys{gap:8px}footer{padding:0 16px 18px;gap:10px;flex-direction:column}}
+</style>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="grid"></div>
+  <div class="orb orb-one"></div>
+  <div class="orb orb-two"></div>
+
+  <header class="nav">
+    <a class="brand" href="../index.html">
+      <img src="krazio-icon.svg" alt="Krazio">
+      <span><b>KRAZIO</b><small>GAMES</small></span>
+    </a>
+    <nav>
+      <a href="#features">MISSION</a>
+      <a href="#employees">EMPLOYEES</a>
+      <a href="#controls">CONTROLS</a>
+    </nav>
+    <div class="nav-actions">
+      <span class="status"><i></i> NETWORK ONLINE</span>
+      <a class="nav-play" href="index.html">PLAY NOW <span>→</span></a>
+    </div>
+  </header>
+
+  <main id="play">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span></span> CORPORATE SURVIVAL SIMULATOR</div>
+        <h1>ESCAPE<br><em>THE OFFICE.</em></h1>
+        <p class="hero-text">
+          Your shift is over. Your boss disagrees.
+          <strong>Run the office. Beat the clock. Clock out alive.</strong>
+        </p>
+
+        <div class="actions">
+          <a class="primary" href="index.html">
+            <span class="play-icon">▶</span>
+            <span><b>CLOCK OUT &amp; RUN</b><small>START YOUR ESCAPE</small></span>
+            <kbd>SPACE</kbd>
+          </a>
+          <a class="secondary" href="#employees">CHOOSE EMPLOYEE <span>↘</span></a>
+        </div>
+
+        <div class="stats">
+          <div><small>MISSION</small><b>MAKE IT TO THE EXIT</b></div>
+          <div><small>DEADLINE</small><b class="danger">05:00 PM</b></div>
+          <div><small>THREAT</small><b>CRITICAL</b></div>
+        </div>
+      </div>
+
+      <div class="hero-art">
+        <div class="art-top"><span>EMPLOYEE PROFILE</span><b>READY TO ESCAPE</b></div>
+        <div class="scene">
+          <div class="window">
+            <i></i><i></i><i></i><i></i>
+          </div>
+          <div class="city c1"></div><div class="city c2"></div><div class="city c3"></div>
+          <div class="ring ring-a"></div><div class="ring ring-b"></div>
+          <div class="glow"></div>
+
+          <div class="character char-dev" id="hero-character">
+            <div class="head"><div class="hair"></div><i></i><b></b></div>
+            <div class="body"><span class="tie"></span><span class="badge">ID</span></div>
+            <div class="arm arm-a"></div><div class="arm arm-b"></div>
+            <div class="leg leg-a"></div><div class="leg leg-b"></div>
+            <div class="shoe shoe-a"></div><div class="shoe shoe-b"></div>
+          </div>
+
+          <div class="float-card card-a"><small>PERK</small><b id="hero-perk">DOUBLE JUMP</b><span id="hero-icon">↑ ↑</span></div>
+          <div class="float-card card-b"><small>STATUS</small><b>OFF THE CLOCK</b><span>RUNNING</span></div>
+          <div class="speed"><i></i><i></i><i></i></div>
+        </div>
+        <div class="caption"><span><small id="hero-role">CORE DEVELOPER</small><b id="hero-name">DEV</b></span><strong>● EQUIPPED</strong></div>
+      </div>
+    </section>
+
+    <section class="quick-grid" id="features">
+      <article><span>01</span><div><small>MISSION</small><b>MAKE IT TO THE EXIT</b><p>Dodge meetings, laptops, coffee spills and every “quick sync” between you and freedom.</p></div></article>
+      <article><span>02</span><div><small>THREAT LEVEL</small><b>PRODUCTIVITY: CRITICAL</b><p>Every second raises the pressure. Collect Point Coins and keep moving.</p></div></article>
+      <article><span>03</span><div><small>GAME LOOP</small><b>RUN · DODGE · SURVIVE</b><p>Dash through the corporate maze, survive hazards and beat your best record.</p></div></article>
+    </section>
+
+    <section class="employees" id="employees">
+      <div class="section-head">
+        <div><small>CHOOSE YOUR EMPLOYEE</small><h2>Pick your escape specialist</h2></div>
+        <span>7 OPERATIVES</span>
+      </div>
+      <div class="employee-grid">
+        <!-- 1. DEV (Male - Core Developer) -->
+        <div class="employee active" data-id="dev" data-name="DEV" data-role="CORE DEVELOPER" data-perk="DOUBLE JUMP" data-icon="↑ ↑">
+          <div class="mini dev">
+            <svg viewBox="0 0 36 36" width="32" height="32" fill="none">
+              <path d="M10 14c0-5 3.5-8 8-8s8 3 8 8c0 1-1 2-2 2h-12c-1 0-2-1-2-2z" fill="#1e293b"/>
+              <ellipse cx="18" cy="18" rx="6" ry="7" fill="#fbd5b5"/>
+              <rect x="13" y="16" width="4" height="3" rx="1" fill="#0284c7" stroke="#fff" stroke-width="0.7"/>
+              <rect x="19" y="16" width="4" height="3" rx="1" fill="#0284c7" stroke="#fff" stroke-width="0.7"/>
+              <line x1="17" y1="17.5" x2="19" y2="17.5" stroke="#fff" stroke-width="0.7"/>
+              <path d="M10 18a8 8 0 0 1 16 0" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
+              <rect x="9" y="16" width="2.5" height="5" rx="1" fill="#38bdf8"/>
+              <rect x="24.5" y="16" width="2.5" height="5" rx="1" fill="#38bdf8"/>
+              <path d="M12 28c1-4 4-5 6-5s5 1 6 5v4H12v-4z" fill="#0f172a"/>
+              <path d="M17 23l1 5 1-5z" fill="#ef4444"/>
+            </svg>
+          </div>
+          <b>DEV</b><small>CORE DEVELOPER</small><em>DOUBLE JUMP</em>
+        </div>
+
+        <!-- 2. MAYA (Girl - Lead UX Designer) -->
+        <div class="employee" data-id="maya" data-name="MAYA" data-role="LEAD DESIGNER" data-perk="AGILITY GLIDE" data-icon="🎨">
+          <div class="mini maya">
+            <svg viewBox="0 0 36 36" width="32" height="32" fill="none">
+              <path d="M22 8c4-3 7 1 6 6-1 4-4 7-6 8" stroke="#7c2d12" stroke-width="3" stroke-linecap="round"/>
+              <path d="M11 15c0-5 3-9 7-9s7 4 7 9c0 1-1 3-3 3-2-2-4-2-8 0-2 0-3-2-3-3z" fill="#9a3412"/>
+              <ellipse cx="18" cy="18" rx="5.5" ry="6.5" fill="#fed7aa"/>
+              <circle cx="15.5" cy="17.5" r="1" fill="#431407"/>
+              <circle cx="20.5" cy="17.5" r="1" fill="#431407"/>
+              <circle cx="14" cy="19.5" r="1.2" fill="#fda4af" opacity="0.8"/>
+              <circle cx="22" cy="19.5" r="1.2" fill="#fda4af" opacity="0.8"/>
+              <path d="M16.5 20.5q1.5 1.2 3 0" stroke="#be123c" stroke-width="0.8" stroke-linecap="round"/>
+              <circle cx="12" cy="19" r="1.2" fill="#fbbf24"/>
+              <circle cx="24" cy="19" r="1.2" fill="#fbbf24"/>
+              <path d="M12 28c1-4 4-5 6-5s5 1 6 5v4H12v-4z" fill="#f43f5e"/>
+              <path d="M17 23l1 4 1-4z" fill="#fff"/>
+            </svg>
+          </div>
+          <b>MAYA</b><small>LEAD DESIGNER</small><em>AGILITY GLIDE</em>
+        </div>
+
+        <!-- 3. ZACK (Male - Systems Architect) -->
+        <div class="employee" data-id="zack" data-name="ZACK" data-role="SYSTEMS ARCHITECT" data-perk="OVERDRIVE DASH" data-icon="⚡">
+          <div class="mini zack">
+            <svg viewBox="0 0 36 36" width="32" height="32" fill="none">
+              <path d="M10 14l2-6 3 3 3-5 3 4 3-3 2 7c-2 2-14 2-16 0z" fill="#14532d"/>
+              <ellipse cx="18" cy="18" rx="6" ry="6.8" fill="#fcd34d"/>
+              <rect x="12.5" y="16" width="11" height="3.5" rx="1.5" fill="#22c55e" stroke="#ecfdf5" stroke-width="0.7"/>
+              <line x1="14" y1="17.7" x2="22" y2="17.7" stroke="#fff" stroke-width="0.8"/>
+              <path d="M12 18v3q0 2 3 2" stroke="#22c55e" stroke-width="0.9" fill="none"/>
+              <circle cx="15" cy="23" r="0.9" fill="#22c55e"/>
+              <path d="M12 28c1-4 4-5 6-5s5 1 6 5v4H12v-4z" fill="#065f46"/>
+              <path d="M17 23l1 5 1-5z" fill="#34d399"/>
+            </svg>
+          </div>
+          <b>ZACK</b><small>SYSTEMS ARCHITECT</small><em>OVERDRIVE DASH</em>
+        </div>
+
+        <!-- 4. CHLOE (Girl - Product Lead) -->
+        <div class="employee" data-id="chloe" data-name="CHLOE" data-role="PRODUCT LEAD" data-perk="MAGNET BOOST" data-icon="🧲">
+          <div class="mini chloe">
+            <svg viewBox="0 0 36 36" width="32" height="32" fill="none">
+              <path d="M10 17c0-6 3.5-10 8-10s8 4 8 10c0 4-1 6-2 7-1-3-2-6-6-6s-5 3-6 6c-1-1-2-3-2-7z" fill="#451a03"/>
+              <ellipse cx="18" cy="18.5" rx="5.5" ry="6.2" fill="#ffedd5"/>
+              <circle cx="15.5" cy="17.5" r="1" fill="#292524"/>
+              <circle cx="20.5" cy="17.5" r="1" fill="#292524"/>
+              <circle cx="14" cy="19.5" r="1" fill="#fbcfe8" opacity="0.7"/>
+              <circle cx="22" cy="19.5" r="1" fill="#fbcfe8" opacity="0.7"/>
+              <path d="M16.5 21q1.5 1 3 0" stroke="#e11d48" stroke-width="0.8" stroke-linecap="round"/>
+              <circle cx="12.5" cy="19.5" r="1.3" fill="#f59e0b"/>
+              <circle cx="23.5" cy="19.5" r="1.3" fill="#f59e0b"/>
+              <path d="M12 28c1-4 4-5 6-5s5 1 6 5v4H12v-4z" fill="#d97706"/>
+              <path d="M17 23l1 4 1-4z" fill="#fef3c7"/>
+            </svg>
+          </div>
+          <b>CHLOE</b><small>PRODUCT LEAD</small><em>MAGNET BOOST</em>
+        </div>
+
+        <!-- 5. KAI (Male - Night Ops) -->
+        <div class="employee" data-id="kai" data-name="KAI" data-role="NIGHT OPS" data-perk="STEALTH PHASE" data-icon="🕶️">
+          <div class="mini kai">
+            <svg viewBox="0 0 36 36" width="32" height="32" fill="none">
+              <path d="M10 20c0-7 3.5-12 8-12s8 5 8 12c-2-2-5-4-8-4s-6 2-8 4z" fill="#4c1d95"/>
+              <ellipse cx="18" cy="18.5" rx="5.5" ry="6.2" fill="#e2e8f0"/>
+              <polygon points="12.5,16.5 17,16.5 16.5,19.5 13,19.5" fill="#a855f7" stroke="#c084fc" stroke-width="0.6"/>
+              <polygon points="19,16.5 23.5,16.5 23,19.5 19.5,19.5" fill="#a855f7" stroke="#c084fc" stroke-width="0.6"/>
+              <line x1="17" y1="17.5" x2="19" y2="17.5" stroke="#c084fc" stroke-width="0.8"/>
+              <path d="M11 28c1-5 4-6 7-6s6 1 7 6v4H11v-4z" fill="#1e1b4b"/>
+              <path d="M17 22l1 5 1-5z" fill="#9333ea"/>
+            </svg>
+          </div>
+          <b>KAI</b><small>NIGHT OPS</small><em>STEALTH PHASE</em>
+        </div>
+
+        <!-- 6. AXEL (Male - Facilities Chief) [LOCKED] -->
+        <div class="employee locked" data-id="axel" data-name="AXEL" data-role="FACILITIES CHIEF" data-perk="ICE SHIELD" data-icon="🛡️">
+          <div class="mini axel">
+            <svg viewBox="0 0 36 36" width="32" height="32" fill="none">
+              <path d="M11 13c0-4 3-7 7-7s7 3 7 7v2H11v-2z" fill="#334155"/>
+              <ellipse cx="18" cy="18" rx="6" ry="6.8" fill="#cbd5e1"/>
+              <path d="M14 21q4 2 8 0" stroke="#64748b" stroke-width="1.2" stroke-linecap="round"/>
+              <rect x="13.5" y="16.5" width="3" height="1.8" rx="0.5" fill="#1e293b"/>
+              <rect x="19.5" y="16.5" width="3" height="1.8" rx="0.5" fill="#1e293b"/>
+              <path d="M11 28c1-4 4-5 7-5s6 1 7 5v4H11v-4z" fill="#0f172a"/>
+              <rect x="16" y="24" width="4" height="6" fill="#38bdf8"/>
+            </svg>
+          </div>
+          <b>AXEL</b><small>FACILITIES CHIEF</small><em>ICE SHIELD</em><span>LOCKED</span>
+        </div>
+
+        <!-- 7. NOVA (Executive VP) [LOCKED] -->
+        <div class="employee locked" data-id="nova" data-name="NOVA" data-role="EXECUTIVE VP" data-perk="UNKNOWN CLASSIFIED" data-icon="👑">
+          <div class="mini nova">
+            <svg viewBox="0 0 36 36" width="32" height="32" fill="none">
+              <path d="M13 11l2 3 3-4 3 4 2-3v4H13v-4z" fill="#fbbf24"/>
+              <ellipse cx="18" cy="19" rx="5.5" ry="6" fill="#18181b"/>
+              <circle cx="15.5" cy="18" r="1.2" fill="#f43f5e"/>
+              <circle cx="20.5" cy="18" r="1.2" fill="#f43f5e"/>
+              <path d="M11 28c1-5 4-6 7-6s6 1 7 6v4H11v-4z" fill="#09090b"/>
+              <path d="M17 22l1 6 1-6z" fill="#fbbf24"/>
+            </svg>
+          </div>
+          <b>NOVA</b><small>EXECUTIVE VP</small><em>CLASSIFIED</em><span>LOCKED</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls" id="controls">
+      <div><small>CONTROLS</small><h2>Learn the escape route.</h2></div>
+      <div class="keys"><span><kbd>SPACE</kbd><b>JUMP</b></span><span><kbd>↓ / S</kbd><b>SLIDE</b></span><span><kbd>SHIFT / D</kbd><b>DASH</b></span><span><kbd>ESC</kbd><b>PAUSE</b></span></div>
+      <a class="primary small" href="index.html">START RUN <span>→</span></a>
+    </section>
+  </main>
+
+  <footer><span>OFFICE ESCAPE <i>•</i> CORPORATE RUN</span><span>ESCAPE YOUR 9–5 <i>•</i> KRAZIO GAMES</span></footer>
+
+<script>
+// Interactive Employee Switcher
+const employees = document.querySelectorAll('.employee:not(.locked)');
+const heroName = document.getElementById('hero-name');
+const heroRole = document.getElementById('hero-role');
+const heroPerk = document.getElementById('hero-perk');
+const heroIcon = document.getElementById('hero-icon');
+const heroChar = document.getElementById('hero-character');
+
+employees.forEach(emp => {
+  emp.addEventListener('click', () => {
+    employees.forEach(e => e.classList.remove('active'));
+    emp.classList.add('active');
+    if (heroName) heroName.textContent = emp.dataset.name;
+    if (heroRole) heroRole.textContent = emp.dataset.role;
+    if (heroPerk) heroPerk.textContent = emp.dataset.perk;
+    if (heroIcon) heroIcon.textContent = emp.dataset.icon;
+
+    if (heroChar) {
+      heroChar.className = 'character char-' + emp.dataset.id;
+    }
+
+    try {
+      localStorage.setItem('office_escape_selected_avatar', JSON.stringify(emp.dataset.id));
+    } catch(e) {}
+  });
+});
+
+// Spacebar to launch game
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' || e.key === ' ') {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    }
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Office Escape: Corporate Run 🏃💼 — krazio games</title>
+    <!-- Favicon -->
+    <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="game-container">
+    <!-- Canvas for 60FPS Game Rendering -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Top HUD Overlay -->
+    <div id="hud">
+        <div class="hud-group">
+            <button type="button" id="btn-portal-back" class="hud-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 50%; width: 44px; height: 44px; color: #fff; cursor: pointer;" title="Back" aria-label="Back">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <div class="hud-pill time-pill">
+                ⏱️ <span id="hud-time">0.0s</span>
+            </div>
+            <div class="hud-pill zone-pill">
+                🏢 <span id="hud-zone">Cubicle Maze</span>
+            </div>
+        </div>
+
+        <div class="hud-group">
+            <div class="hud-pill stamina-pill">
+                <div class="stamina-label">DASH STAMINA</div>
+                <div class="stamina-bar-bg">
+                    <div id="stamina-fill" class="stamina-bar-fill"></div>
+                </div>
+            </div>
+            <div class="hud-pill coins-pill">
+                🪙 <span id="hud-coins">0 P</span>
+            </div>
+            <button id="btn-pause" class="hud-btn" title="Pause Game (Esc/P)">⏸️</button>
+            <button id="btn-mute" class="hud-btn" title="Toggle Sound">🔊</button>
+        </div>
+    </div>
+
+    <!-- Active Powerups List -->
+    <div id="active-powerup-bar"></div>
+
+    <!-- Boss Warning Banner -->
+    <div id="boss-warning-banner">🚨 BOSS ALERT: "CAN WE CIRCLE BACK?" 🚨</div>
+
+    <!-- Mobile Virtual Controls -->
+    <div id="mobile-controls">
+        <button id="touch-slide" class="touch-btn">
+            <span class="icon">⬇️</span>
+            <span>SLIDE</span>
+        </button>
+        <button id="touch-dash" class="touch-btn">
+            <span class="icon">⚡</span>
+            <span>DASH</span>
+        </button>
+        <button id="touch-jump" class="touch-btn">
+            <span class="icon">⬆️</span>
+            <span>JUMP</span>
+        </button>
+    </div>
+
+    <!-- Main Menu / Start Screen -->
+    <div id="start-screen" class="screen">
+        <div class="title-container">
+            <div class="urgent-badge">🔥 Urgent Action Required 🔥</div>
+            <h1 class="game-title">OFFICE ESCAPE</h1>
+            <p class="game-subtitle">Escape before your 5:00 PM sanity deadline hits zero</p>
+        </div>
+
+        <!-- Avatar Selection Carousel -->
+        <div class="avatar-selection-box">
+            <div class="avatar-selection-header">
+                <span style="font-weight: 800; font-size: 0.95rem; color: #94a3b8;">SELECT YOUR ESCAPE AVATAR</span>
+                <span style="font-size: 0.8rem; color: #38bdf8;" id="menu-coins-display">🪙 0 P</span>
+            </div>
+            <div id="avatar-grid-container" class="avatar-grid">
+                <!-- Injected via game.js -->
+            </div>
+        </div>
+
+        <div class="action-row">
+            <button id="btn-play" class="btn-primary">
+                <span>🏃 CLOCK OUT & RUN</span>
+            </button>
+            <button id="btn-shop-open" class="btn-secondary">
+                <span>🛒 PERKS & STORE</span>
+            </button>
+            <a href="javascript:history.back()" class="btn-secondary" style="text-decoration: none; display: flex; align-items: center; gap: 8px;" title="Back">
+                <img src="krazio-icon.svg" alt="krazio" style="width: 20px; height: 20px; border-radius: 50%; display: block;">
+                <span>🏠 KRAZY FUSE</span>
+            </a>
+        </div>
+
+        <!-- Desktop Controls Guide -->
+        <div class="controls-guide">
+            <div class="control-item">
+                <span class="key-badge">LEFT CLICK / SPACE / ↑</span>
+                <span>Jump / Double Jump</span>
+            </div>
+            <div class="control-item">
+                <span class="key-badge">RIGHT CLICK / ↓ / S</span>
+                <span>Slide Under Hazard</span>
+            </div>
+            <div class="control-item">
+                <span class="key-badge">SCROLL / SHIFT / D</span>
+                <span>Stamina Dash</span>
+            </div>
+            <div class="control-item">
+                <span class="key-badge">ESC / P</span>
+                <span>Pause</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen / Performance Review -->
+    <div id="gameover-screen" class="screen hidden">
+        <div class="gameover-card">
+            <div class="review-stamp">TERMINATED</div>
+            <h2 style="font-size: 1.6rem; font-weight: 900;">Official Performance Review</h2>
+            
+            <div id="death-reason-text" class="termination-reason">
+                "Trapped in a 2-hour sync without an agenda."
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Time Survived</div>
+                    <div id="stat-time-val" class="stat-value highlight">0.0s</div>
+                    <span id="new-record-tag" class="new-record-tag" style="display: none;">🏆 NEW RECORD!</span>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Distance Escaped</div>
+                    <div id="stat-dist-val" class="stat-value">0m</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Points Earned</div>
+                    <div id="stat-coins-val" class="stat-value gold">+0 P</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Best Record</div>
+                    <div id="stat-best-val" class="stat-value">0.0s</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 18px; display: flex; gap: 12px; justify-content: center; align-items: center;">
+                <button id="btn-restart" class="btn-primary" style="padding: 12px 28px; font-size: 1.1rem;">
+                    <span>⚡ TRY AGAIN (SPACE)</span>
+                </button>
+                <button id="btn-gameover-home" class="btn-secondary" style="padding: 12px 20px; font-size: 1.05rem;">
+                    <span>🏠 HOME</span>
+                </button>
+                <a href="../index.html" class="btn-secondary" style="padding: 12px 18px; font-size: 1.05rem; text-decoration: none;">
+                    <span>🌐 KRAZIO HUB</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Universal Pause Screen Modal -->
+    <div id="pause-screen" class="screen hidden">
+        <div class="gameover-card" style="border: 2.5px solid rgba(255, 255, 255, 0.18); max-width: 440px; background: #1e293b; border-radius: 24px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);">
+            <div class="review-stamp" style="border-color: #38bdf8; color: #38bdf8; transform: none; margin-bottom: 10px;">⏸️ PAUSED</div>
+            <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 6px;">Game Paused</h2>
+            <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 20px;">Taking a quick breather from corporate madness...</p>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; max-width: 280px; margin: 0 auto; width: 100%;">
+                <button id="btn-resume" class="btn-primary" style="justify-content: center; width: 100%; font-size: 1.1rem; padding: 12px 20px;">
+                    <span>▶️ RESUME (ESC)</span>
+                </button>
+                <button id="btn-pause-restart" class="btn-secondary" style="justify-content: center; width: 100%; font-size: 0.95rem; padding: 10px 20px;">
+                    <span>🔄 RESTART RUN</span>
+                </button>
+                <button id="btn-home" class="btn-secondary" style="justify-content: center; width: 100%; font-size: 0.95rem; padding: 10px 20px;">
+                    <span>🏠 AVATARS & STORE</span>
+                </button>
+                <a href="../index.html" class="btn-secondary" style="justify-content: center; width: 100%; font-size: 0.95rem; padding: 10px 20px; border-color: rgba(239, 68, 68, 0.4); color: #fca5a5; text-decoration: none;">
+                    <span>🌐 KRAZIO GAMES PORTAL</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Perks & Upgrades Store Screen -->
+    <div id="shop-screen" class="screen hidden">
+        <div class="shop-card">
+            <div class="shop-header">
+                <div>
+                    <h2 style="font-weight: 800; font-size: 1.4rem;">Corporate Perks & Benefits</h2>
+                    <p style="font-size: 0.85rem; color: #94a3b8;">Invest your Point Coins (P) to survive longer</p>
+                </div>
+                <div style="font-size: 1.2rem; font-weight: 800; color: #fbbf24;" id="shop-total-coins">0 P</div>
+            </div>
+
+            <div class="shop-list">
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <div class="shop-icon">☕</div>
+                        <div>
+                            <div class="shop-item-name">Quad-Shot Espresso Duration</div>
+                            <div class="shop-item-desc">Extends the invincible caffeine speed rush</div>
+                        </div>
+                    </div>
+                    <button class="shop-buy-btn" id="shop-btn-coffee" onclick="buyUpgrade('coffee_duration', 40)">40 P BUY</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <div class="shop-icon">🎧</div>
+                        <div>
+                            <div class="shop-item-name">Noise-Canceling Bubble</div>
+                            <div class="shop-item-desc">Absorbs hazard collisions with audio bliss</div>
+                        </div>
+                    </div>
+                    <button class="shop-buy-btn" id="shop-btn-shield" onclick="buyUpgrade('shield_strength', 60)">60 P BUY</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <div class="shop-icon">🏝️</div>
+                        <div>
+                            <div class="shop-item-name">PTO Coin Magnet Range</div>
+                            <div class="shop-item-desc">Pulls in distant Point tokens effortlessly</div>
+                        </div>
+                    </div>
+                    <button class="shop-buy-btn" id="shop-btn-magnet" onclick="buyUpgrade('magnet_duration', 50)">50 P BUY</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; text-align: center;">
+                <button id="btn-shop-close" class="btn-secondary" style="padding: 10px 30px;">
+                    <span>← Back to Office</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Game Scripts -->
+<script src="audio.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
