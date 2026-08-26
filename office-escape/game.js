@@ -39,22 +39,25 @@ let bestDistance = storage.get('best_dist', 0);
 let unlockedAvatars = storage.get('unlocked_avatars', ['dev']);
 let activeAvatarId = storage.get('selected_avatar', 'dev');
 
-// Upgrades (Permanent upgrades)
-let upgrades = storage.get('upgrades', {
+// Day & Night Theme State ('day' or 'night')
+let currentEscapeTheme = storage.get('theme', 'day');
+
+// Active 1-Run Gear loadout for currently ongoing run (depleted after every run)
+window.currentRunGear = {};
+
+// Consumable Store Items Inventory (All items are single-use per run)
+let inventory = storage.get('inventory', {
     coffee_duration: 0,
     shield_strength: 0,
     magnet_range: 0,
     stamina_turbo: 0,
     coin_boost: 0,
-    sneaker_spring: 0
-});
-
-// Consumable Items Inventory (Single-use items activated per run)
-let inventory = storage.get('inventory', {
+    sneaker_spring: 0,
     rocket_start: 0,
     extra_life: 0,
     double_points: 0
 });
+let upgrades = inventory; // Backward-compatibility alias
 
 // Avatar Definitions with clear unlock costs (in P Points)
 const AVATARS = {
@@ -215,22 +218,18 @@ const AVATARS = {
     }
 };
 
-// Store items catalog definition
-const STORE_CATALOG = {
-    upgrades: [
-        { id: 'coffee_duration', name: 'Quad-Shot Espresso', icon: '☕', cost: 50, desc: 'Extends invincibility rush by +3.5s per tier' },
-        { id: 'shield_strength', name: 'Noise-Canceling Shield', icon: '🎧', cost: 75, desc: 'Starts every run with an extra hazard protection bubble' },
-        { id: 'magnet_range', name: 'PTO Point Magnet', icon: '🧲', cost: 60, desc: 'Doubles Point Coin attraction range on screen' },
-        { id: 'stamina_turbo', name: 'Turbo Stamina Matrix', icon: '⚡', cost: 70, desc: 'Stamina recovers 60% faster for rapid dashes' },
-        { id: 'coin_boost', name: 'Stock Option Yield', icon: '🪙', cost: 100, desc: 'Permanently increases all Point Coin rewards by +50%' },
-        { id: 'sneaker_spring', name: 'Anti-Gravity Sneakers', icon: '👟', cost: 80, desc: 'Higher, floatier jumps & smoother air glide' }
-    ],
-    items: [
-        { id: 'rocket_start', name: 'Rocket Coffee Start', icon: '🚀', cost: 30, desc: 'Blasts through the first 300m at supersonic speed!' },
-        { id: 'extra_life', name: 'HR Life Insurance', icon: '🛡️', cost: 45, desc: 'Automatically revives you once on a fatal obstacle crash' },
-        { id: 'double_points', name: 'Double Point Contract', icon: '💰', cost: 40, desc: '2x multiplier on all Points earned in the next run' }
-    ]
-};
+// Store items catalog definition (All items are single-use 1-run perks)
+const STORE_CATALOG = [
+    { id: 'coffee_duration', name: 'Quad-Shot Espresso', icon: '☕', cost: 50, desc: 'Extends invincibility rush by +3.5s (1-Run Boost)' },
+    { id: 'shield_strength', name: 'Noise-Canceling Shield', icon: '🎧', cost: 75, desc: 'Starts next run with extra hazard protection bubble (1-Run Boost)' },
+    { id: 'magnet_range', name: 'PTO Point Magnet', icon: '🧲', cost: 60, desc: 'Doubles Point Coin attraction range on screen (1-Run Boost)' },
+    { id: 'stamina_turbo', name: 'Turbo Stamina Matrix', icon: '⚡', cost: 70, desc: 'Stamina recovers 60% faster for rapid dashes (1-Run Boost)' },
+    { id: 'coin_boost', name: 'Stock Option Yield', icon: '🪙', cost: 100, desc: 'Increases all Point Coin rewards by +50% (1-Run Boost)' },
+    { id: 'sneaker_spring', name: 'Anti-Gravity Sneakers', icon: '👟', cost: 80, desc: 'Higher, floatier jumps & smoother air glide (1-Run Boost)' },
+    { id: 'rocket_start', name: 'Rocket Coffee Start', icon: '🚀', cost: 30, desc: 'Blasts through the first 300m at supersonic speed! (1-Run Item)' },
+    { id: 'extra_life', name: 'HR Life Insurance', icon: '🛡️', cost: 45, desc: 'Automatically revives you once on a fatal obstacle crash (1-Run Item)' },
+    { id: 'double_points', name: 'Double Point Contract', icon: '💰', cost: 40, desc: '2x multiplier on all Points earned in the next run (1-Run Item)' }
+];
 
 // Biomes / Office Departments with rich unique color schemes & architecture
 const BIOMES = [
@@ -344,8 +343,9 @@ class Player {
         this.groundY = 500 - this.standHeight;
         this.y = this.groundY;
         this.vy = 0;
-        this.gravity = upgrades.sneaker_spring > 0 ? 0.76 : 0.82; 
-        this.jumpForce = upgrades.sneaker_spring > 0 ? -16.8 : -15.6; 
+        const hasSneakers = window.currentRunGear && window.currentRunGear.sneaker_spring;
+        this.gravity = hasSneakers ? 0.75 : 0.82; 
+        this.jumpForce = hasSneakers ? -16.9 : -15.6; 
         this.isGrounded = true;
         this.isSliding = false;
         this.isHoldingDuck = false;
@@ -366,16 +366,17 @@ class Player {
         this.dashTimer = 0;
         this.dashDuration = 18;
 
-        // Buffs & Upgrades (Perks only granted when unlocked/bought)
-        this.shield = ((this.isUnlocked && avatar.startShield) || (upgrades.shield_strength > 0)) ? 1 : 0;
+        // Buffs & 1-Run Boosts (Granted for this run if equipped / bought)
+        const hasShieldGear = window.currentRunGear && window.currentRunGear.shield_strength;
+        this.shield = ((this.isUnlocked && avatar.startShield) || hasShieldGear) ? 1 : 0;
         this.coffeeTimer = 0;
         this.ptoTimer = 0;
         this.invulnerableTimer = 0;
 
         // Single-use items equipped for run (activated in startGame)
-        this.hasExtraLife = false;
-        this.doublePointsActive = false;
-        this.rocketStartActive = false;
+        this.hasExtraLife = !!(window.currentRunGear && window.currentRunGear.extra_life);
+        this.doublePointsActive = !!(window.currentRunGear && window.currentRunGear.double_points);
+        this.rocketStartActive = !!(window.currentRunGear && window.currentRunGear.rocket_start);
 
         // Animation
         this.animFrame = 0;
@@ -463,7 +464,8 @@ class Player {
 
         // Stamina Recovery
         const bonus = (this.isUnlocked && this.avatar.dashBonus) ? this.avatar.dashBonus : 1.0;
-        const staminaRate = (upgrades.stamina_turbo > 0 ? 0.95 : 0.6) * bonus;
+        const turboMult = (window.currentRunGear && window.currentRunGear.stamina_turbo) ? 1.6 : 1.0;
+        const staminaRate = (0.62 * turboMult) * bonus;
         if (this.staminaRechargeDelay > 0) {
             this.staminaRechargeDelay--;
         } else if (this.stamina < this.maxStamina) {
@@ -1137,10 +1139,66 @@ class BackgroundManager {
     }
 
     draw(biome) {
+        const isDay = (currentEscapeTheme === 'day');
         const far = this.scrollFar, mid = this.scrollMid, near = this.scrollNear, accent = biome.accent;
-        const sky = ctx.createLinearGradient(0,0,0,510);
-        sky.addColorStop(0,biome.bg1); sky.addColorStop(0.42,biome.bg2); sky.addColorStop(1,'#17263a');
-        ctx.fillStyle=sky; ctx.fillRect(0,0,1000,600);
+        
+        // 1. Sky Gradient: Day Mode (Vibrant corporate blue/warm daylight) vs Night Mode (Midnight cyber)
+        const sky = ctx.createLinearGradient(0, 0, 0, 510);
+        if (isDay) {
+            if (biome.id === 'cubicles') {
+                sky.addColorStop(0, '#0284c7'); sky.addColorStop(0.35, '#38bdf8'); sky.addColorStop(1, '#bae6fd');
+            } else if (biome.id === 'conference') {
+                sky.addColorStop(0, '#1d4ed8'); sky.addColorStop(0.35, '#60a5fa'); sky.addColorStop(1, '#dbeafe');
+            } else if (biome.id === 'cafeteria') {
+                sky.addColorStop(0, '#b45309'); sky.addColorStop(0.35, '#f59e0b'); sky.addColorStop(1, '#fef3c7');
+            } else if (biome.id === 'hr_audit') {
+                sky.addColorStop(0, '#be123c'); sky.addColorStop(0.35, '#fb7185'); sky.addColorStop(1, '#ffe4e6');
+            } else if (biome.id === 'executive') {
+                sky.addColorStop(0, '#6d28d9'); sky.addColorStop(0.35, '#a855f7'); sky.addColorStop(1, '#ede9fe');
+            } else {
+                sky.addColorStop(0, '#047857'); sky.addColorStop(0.35, '#34d399'); sky.addColorStop(1, '#d1fae5');
+            }
+        } else {
+            sky.addColorStop(0, biome.bg1); sky.addColorStop(0.42, biome.bg2); sky.addColorStop(1, '#17263a');
+        }
+        ctx.fillStyle = sky; ctx.fillRect(0, 0, 1000, 600);
+
+        // 2. Celestial Elements (Day Sun & Clouds vs Night Moon & Twinkling Stars)
+        if (isDay) {
+            // Golden Daylight Sun
+            const sunX = ((780 + far * 0.1) % 1200) - 100;
+            const sunGrad = ctx.createRadialGradient(sunX, 105, 10, sunX, 105, 120);
+            sunGrad.addColorStop(0, '#ffffff');
+            sunGrad.addColorStop(0.2, '#fef08a');
+            sunGrad.addColorStop(0.55, 'rgba(253, 224, 71, 0.35)');
+            sunGrad.addColorStop(1, 'rgba(253, 224, 71, 0)');
+            ctx.fillStyle = sunGrad;
+            ctx.beginPath(); ctx.arc(sunX, 105, 120, 0, Math.PI * 2); ctx.fill();
+
+            // Fluffy Daylight Clouds
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+            for (let c = 0; c < 5; c++) {
+                const cx = ((c * 230 + far * 0.25) % 1200) - 100;
+                const cy = 85 + (c % 2) * 30;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+                ctx.arc(cx + 18, cy - 6, 16, 0, Math.PI * 2);
+                ctx.arc(cx + 34, cy, 18, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        } else {
+            // Night Twinkling Stars
+            ctx.fillStyle = '#ffffff';
+            for (let s = 0; s < 18; s++) {
+                const sx = (s * 58 + far * 0.08) % 1000;
+                const sy = 40 + (s * 37) % 180;
+                const twinkle = (Math.sin(this.time * 3 + s) + 1) * 0.35 + 0.15;
+                ctx.globalAlpha = twinkle;
+                ctx.fillRect(sx, sy, 2, 2);
+            }
+            ctx.globalAlpha = 1;
+        }
+
         switch(biome.id){
             case 'cubicles':      this._drawCubicles(far,mid,near,accent); break;
             case 'conference':    this._drawConference(far,mid,near,accent); break;
@@ -1151,12 +1209,11 @@ class BackgroundManager {
             default:              this._drawCubicles(far,mid,near,accent);
         }
 
-        // Atmospheric Depth Scrim: drapes background architecture in soft depth gradient
-        // ensuring active gameplay hazards & collectibles on the floor lane have crisp, unmistakable contrast
+        // Atmospheric Depth Scrim: ensures floor lane hazards pop with crisp contrast
         const depthScrim = ctx.createLinearGradient(0, 300, 0, 492);
         depthScrim.addColorStop(0, 'rgba(4, 8, 16, 0.0)');
-        depthScrim.addColorStop(0.55, 'rgba(4, 8, 16, 0.38)');
-        depthScrim.addColorStop(1, 'rgba(4, 8, 16, 0.78)');
+        depthScrim.addColorStop(0.55, isDay ? 'rgba(4, 8, 16, 0.22)' : 'rgba(4, 8, 16, 0.38)');
+        depthScrim.addColorStop(1, isDay ? 'rgba(4, 8, 16, 0.65)' : 'rgba(4, 8, 16, 0.78)');
         ctx.fillStyle = depthScrim;
         ctx.fillRect(0, 300, 1000, 192);
 
@@ -1165,22 +1222,45 @@ class BackgroundManager {
     }
 
     _drawCeiling(near,accent){
-        const c=ctx.createLinearGradient(0,0,0,88); c.addColorStop(0,'#050a12'); c.addColorStop(1,'#101b2b');
-        ctx.fillStyle=c; ctx.fillRect(0,0,1000,78);
-        ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(0,77,1000,2);
-        for(let i=-1;i<8;i++){const x=i*165+near; ctx.fillStyle='#eaf3fb'; ctx.fillRect(x,70,70,4); ctx.fillStyle=accent; ctx.globalAlpha=.34; ctx.fillRect(x,74,70,2); ctx.globalAlpha=1;}
+        const isDay = (currentEscapeTheme === 'day');
+        const c = ctx.createLinearGradient(0,0,0,88);
+        if (isDay) {
+            c.addColorStop(0, '#1e293b'); c.addColorStop(1, '#334155');
+        } else {
+            c.addColorStop(0, '#050a12'); c.addColorStop(1, '#101b2b');
+        }
+        ctx.fillStyle = c; ctx.fillRect(0, 0, 1000, 78);
+        ctx.fillStyle = isDay ? 'rgba(255,255,255,.25)' : 'rgba(255,255,255,.08)'; ctx.fillRect(0, 77, 1000, 2);
+        for(let i=-1; i<8; i++){
+            const x = i * 165 + near;
+            ctx.fillStyle = isDay ? '#ffffff' : '#eaf3fb';
+            ctx.fillRect(x, 70, 70, 4);
+            ctx.fillStyle = accent;
+            ctx.globalAlpha = isDay ? 0.55 : 0.34;
+            ctx.fillRect(x, 74, 70, 2);
+            ctx.globalAlpha = 1;
+        }
     }
 
     _drawFloor(near,accent,biome){
-        const f=ctx.createLinearGradient(0,492,0,600); f.addColorStop(0,biome.floorColor||'#142233'); f.addColorStop(.25,'#0c1625'); f.addColorStop(1,'#050a12');
-        ctx.fillStyle=f; ctx.fillRect(0,492,1000,108);
-        ctx.fillStyle=accent; ctx.globalAlpha=.85; ctx.fillRect(0,492,1000,2); ctx.globalAlpha=1;
-        ctx.fillStyle='#f5a623'; ctx.globalAlpha=.9; ctx.fillRect(0,499,1000,3); ctx.globalAlpha=1;
-        ctx.strokeStyle='rgba(135,162,184,.13)'; ctx.lineWidth=1;
-        for(let i=-1;i<17;i++){const x=i*72+near; ctx.beginPath(); ctx.moveTo(x,503); ctx.lineTo(x,600); ctx.stroke();}
-        for(let y=520;y<600;y+=25){ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(1000,y); ctx.stroke();}
-        const v=ctx.createRadialGradient(500,300,230,500,300,650); v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(.75,'rgba(0,0,0,.08)'); v.addColorStop(1,'rgba(0,0,0,.40)');
-        ctx.fillStyle=v; ctx.fillRect(0,0,1000,600);
+        const isDay = (currentEscapeTheme === 'day');
+        const f = ctx.createLinearGradient(0,492,0,600);
+        if (isDay) {
+            f.addColorStop(0, biome.floorColor || '#1e3a5f'); f.addColorStop(.25, '#172554'); f.addColorStop(1, '#0f172a');
+        } else {
+            f.addColorStop(0, biome.floorColor || '#142233'); f.addColorStop(.25, '#0c1625'); f.addColorStop(1, '#050a12');
+        }
+        ctx.fillStyle = f; ctx.fillRect(0, 492, 1000, 108);
+        ctx.fillStyle = accent; ctx.globalAlpha = .85; ctx.fillRect(0, 492, 1000, 2); ctx.globalAlpha = 1;
+        ctx.fillStyle = '#f5a623'; ctx.globalAlpha = .9; ctx.fillRect(0, 499, 1000, 3); ctx.globalAlpha = 1;
+        ctx.strokeStyle = isDay ? 'rgba(186, 230, 253, 0.2)' : 'rgba(135,162,184,.13)'; ctx.lineWidth = 1;
+        for(let i=-1; i<17; i++){ const x = i*72 + near; ctx.beginPath(); ctx.moveTo(x, 503); ctx.lineTo(x, 600); ctx.stroke(); }
+        for(let y=520; y<600; y+=25){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1000, y); ctx.stroke(); }
+        const v = ctx.createRadialGradient(500, 300, 230, 500, 300, 650);
+        v.addColorStop(0, 'rgba(0,0,0,0)');
+        v.addColorStop(.75, isDay ? 'rgba(0,0,0,.03)' : 'rgba(0,0,0,.08)');
+        v.addColorStop(1, isDay ? 'rgba(0,0,0,.25)' : 'rgba(0,0,0,.40)');
+        ctx.fillStyle = v; ctx.fillRect(0, 0, 1000, 600);
     }
 
     // ── BIOME 1: CUBICLE MAZE ─────────────────────────────────────────
@@ -1502,11 +1582,12 @@ class Item {
         this.anim += 0.08;
         this.x -= speed;
 
-        // Magnet logic: active if PTO powerup is running OR permanent magnet_range upgrade was bought!
+        // Magnet logic: active if PTO powerup is running OR 1-run magnet boost is equipped!
         const isAvatarUnlocked = unlockedAvatars.includes(player.avatar.id);
         const magnetMultiplier = (isAvatarUnlocked && player.avatar.magnetBonus) ? player.avatar.magnetBonus : 1.0;
-        const hasMagnet = player.ptoTimer > 0 || (upgrades.magnet_range > 0);
-        const baseRadius = upgrades.magnet_range > 0 ? 300 : (player.ptoTimer > 0 ? 220 : 0);
+        const hasMagnetBoost = !!(window.currentRunGear && window.currentRunGear.magnet_range);
+        const hasMagnet = player.ptoTimer > 0 || hasMagnetBoost;
+        const baseRadius = hasMagnetBoost ? 320 : (player.ptoTimer > 0 ? 220 : 0);
         const magnetRadius = hasMagnet ? (baseRadius * magnetMultiplier) : 0;
         if (magnetRadius > 0) {
             const dx = (player.x + player.width / 2) - (this.x + this.width / 2);
@@ -1722,12 +1803,12 @@ class BossManager {
 // Game Core
 let player = new Player();
 let bgManager = new BackgroundManager();
-// Fast, Responsive Speed Progression (Faster start pace + intense distance acceleration)
+// Balanced, Responsive Speed Progression
 const DINO_CONFIG = {
-    SPEED: 6.8,              // Fast, punchy starting speed
-    MAX_SPEED: 21.0,         // Intense high-speed ceiling at long distances
-    DISTANCE_FACTOR: 0.0095, // Continuous speed progression
-    GAP_COEFFICIENT: 0.65
+    SPEED: 5.6,              // Smooth, readable, crisp starting pace
+    MAX_SPEED: 13.5,         // Balanced maximum speed ceiling at deep distance
+    DISTANCE_FACTOR: 0.0032, // Smooth gradual progression
+    GAP_COEFFICIENT: 0.75
 };
 
 let bossManager = new BossManager();
@@ -1739,7 +1820,7 @@ let lastMilestoneHundreds = 0;
 let runStartTime = 0;
 let survivalTime = 0;
 let runCoins = 0;
-let spawnCooldown = 80;
+let spawnCooldown = 75;
 let itemCooldown = 30;
 let nextBossTriggerDist = 700;
 
@@ -1779,167 +1860,66 @@ function checkCollision(p, obj, isItem = false) {
     );
 }
 
-// Start / Restart Game
-function startGame() {
-    // 1. Consume and activate single-use items from inventory for THIS run
-    let hasRocket = (inventory.rocket_start || 0) > 0;
-    if (hasRocket) {
-        inventory.rocket_start--;
-        storage.set('inventory', inventory);
-    }
-
-    let hasExtraLife = (inventory.extra_life || 0) > 0;
-    if (hasExtraLife) {
-        inventory.extra_life--;
-        storage.set('inventory', inventory);
-    }
-
-    let hasDoublePts = (inventory.double_points || 0) > 0;
-    if (hasDoublePts) {
-        inventory.double_points--;
-        storage.set('inventory', inventory);
-    }
-
-    player.reset();
-
-    // 2. Attach single-use item powers to player
-    if (hasRocket) {
-        player.coffeeTimer = 300; // 5s supersonic rocket speed + invincibility
-        player.invulnerableTimer = 300;
-        createScorePopup(canvas.width / 2, 180, '🚀 ROCKET START ENGAGED!', '#f59e0b');
-    }
-    player.hasExtraLife = hasExtraLife;
-    player.doublePointsActive = hasDoublePts;
-
-    obstacles = [];
-    items = [];
-    particles = [];
-    bossManager.active = false;
-    distance = 0;
-    lastMilestoneHundreds = 0;
-    runCoins = 0;
-    gameSpeed = DINO_CONFIG.SPEED;
-    window.smoothSpeed = DINO_CONFIG.SPEED;
-    spawnCooldown = 80;
-    itemCooldown = 30;
-    nextBossTriggerDist = 700;
-    runStartTime = performance.now();
-    survivalTime = 0;
-
-    currentState = GAME_STATE.PLAYING;
-    document.getElementById('start-screen').classList.add('hidden');
-    document.getElementById('gameover-screen').classList.add('hidden');
-    document.getElementById('shop-screen').classList.add('hidden');
-
-    window.updateGlobalPointsUI();
-    window.soundManager.startBGM();
-}
-
-function gameOver(customReason) {
-    currentState = GAME_STATE.GAMEOVER;
-    window.soundManager.stopBGM();
-    window.soundManager.playGameOver();
-
-    const finalTime = survivalTime;
-    const finalDist = Math.floor(distance);
-
-    // Save records
-    totalCoins += runCoins;
-    storage.set('coins', totalCoins);
-
-    const isNewRecord = finalTime > bestSurvivalTime || finalDist > bestDistance;
-    if (finalTime > bestSurvivalTime) {
-        bestSurvivalTime = finalTime;
-        storage.set('best_time', bestSurvivalTime);
-    }
-    if (finalDist > bestDistance) {
-        bestDistance = finalDist;
-        storage.set('best_dist', bestDistance);
-    }
-
-    // Populate Game Over Screen
-    const reasonText = customReason || DEATH_REASONS[Math.floor(Math.random() * DEATH_REASONS.length)];
-    document.getElementById('death-reason-text').textContent = `"${reasonText}"`;
-    document.getElementById('stat-time-val').textContent = finalTime.toFixed(2) + 's';
-    document.getElementById('stat-dist-val').textContent = finalDist + 'm';
-    document.getElementById('stat-coins-val').textContent = '+' + runCoins + ' P';
-    document.getElementById('stat-best-val').textContent = bestSurvivalTime.toFixed(2) + 's';
-
-    const recordTag = document.getElementById('new-record-tag');
-    if (isNewRecord) {
-        recordTag.style.display = 'block';
-    } else {
-        recordTag.style.display = 'none';
-    }
-
-    document.getElementById('gameover-screen').classList.remove('hidden');
-}
-
-// Spawner Logic — Distance-Escalating Multi-Hazard Gauntlet
+// Spawner Logic — Fair, Skill-Based Distance Escalation with Speed-Scaled Gaps
 function updateSpawner(effectiveSpeed) {
     spawnCooldown--;
 
-    // Max simultaneous obstacles climbs rapidly with distance: from 4 up to 9
-    const maxObstacles = Math.min(9, 4 + Math.floor(distance / 180));
+    // Max simultaneous obstacles scaled comfortably with distance
+    const maxObstacles = Math.min(6, 3 + Math.floor(distance / 250));
 
     if (spawnCooldown <= 0 && obstacles.length < maxObstacles) {
-        // Cooldown between hazards shrinks sharply as distance grows
-        const distReduction = Math.min(52, Math.floor(distance * 0.048));
-        spawnCooldown = Math.max(18, Math.floor(64 - distReduction + (Math.random() * 12 - 6)));
+        const gap = Math.max(260, Math.floor(effectiveSpeed * 34));
+        const droneGap = Math.max(240, Math.floor(effectiveSpeed * 30));
 
         const distLevel = distance;
         const rand = Math.random();
 
-        // Pattern 1: High distance (>= 450m) Triple & Multi-Hazard Gauntlets
-        if (distLevel >= 450 && rand < 0.40) {
-            // Rapid alternating sequences
+        // Pattern 1: High distance (>= 500m) Triple sequences with fair gaps
+        if (distLevel >= 500 && rand < 0.35) {
             if (Math.random() < 0.5) {
-                // Slide under Drone -> Jump over Chair -> Slide under Drone
+                // Slide Drone -> Jump Chair -> Slide Drone
                 obstacles.push(new Obstacle('FLYING_DRONE', 1050));
-                obstacles.push(new Obstacle('CHAIR', 1210));
-                obstacles.push(new Obstacle('FLYING_DRONE', 1370));
-                spawnCooldown += 34;
+                obstacles.push(new Obstacle('CHAIR', 1050 + droneGap));
+                obstacles.push(new Obstacle('FLYING_DRONE', 1050 + droneGap * 2));
             } else {
-                // Double Jump over high Task Boulder -> Jump Laptop -> Slide Drone
+                // Boulder -> Laptop -> Drone
                 obstacles.push(new Obstacle('TASK_BOULDER', 1050));
-                obstacles.push(new Obstacle('LAPTOP', 1200));
-                obstacles.push(new Obstacle('FLYING_DRONE', 1360));
-                spawnCooldown += 36;
+                obstacles.push(new Obstacle('LAPTOP', 1050 + gap));
+                obstacles.push(new Obstacle('FLYING_DRONE', 1050 + gap + droneGap));
             }
+            spawnCooldown = Math.max(48, Math.floor(effectiveSpeed * 6.5));
         }
-        // Pattern 2: Mid distance (>= 150m) Double Hazard Pairs (Ground + Air or Fast Rolling Pairs)
-        else if (distLevel >= 150 && rand < 0.52) {
+        // Pattern 2: Mid distance (>= 180m) Double Hazard Pairs
+        else if (distLevel >= 180 && rand < 0.48) {
             const pairChoice = Math.random();
-            if (pairChoice < 0.40) {
-                // Jump over Laptop immediately into overhead Slide under Drone!
+            if (pairChoice < 0.45) {
+                // Jump over Laptop -> Slide under Drone
                 obstacles.push(new Obstacle('LAPTOP', 1050));
-                obstacles.push(new Obstacle('FLYING_DRONE', 1190));
-            } else if (pairChoice < 0.70) {
-                // Rapid Double Ground Jump (Chair + Meeting Calendar)!
+                obstacles.push(new Obstacle('FLYING_DRONE', 1050 + droneGap));
+            } else if (pairChoice < 0.75) {
+                // Double Ground Jump (Chair + Meeting Calendar)
                 obstacles.push(new Obstacle('CHAIR', 1050));
-                obstacles.push(new Obstacle('CALENDAR', 1190));
+                obstacles.push(new Obstacle('CALENDAR', 1050 + gap));
             } else {
-                // Rolling Task Boulder into Ergonomic Chair!
+                // Rolling Task Boulder into Chair
                 obstacles.push(new Obstacle('TASK_BOULDER', 1050));
-                obstacles.push(new Obstacle('CHAIR', 1200));
+                obstacles.push(new Obstacle('CHAIR', 1050 + gap));
             }
-            spawnCooldown += 22;
+            spawnCooldown = Math.max(40, Math.floor(effectiveSpeed * 5.2));
         }
-        // Pattern 3: Early distance (>= 50m) Single/Double Quick Hazards
-        else if (distLevel >= 50 && rand < 0.45) {
+        // Pattern 3: Early distance (>= 60m) Single Hazard
+        else if (distLevel >= 60 && rand < 0.50) {
             const types = ['CHAIR', 'CALENDAR', 'LAPTOP', 'TASK_BOULDER', 'FLYING_DRONE'];
             const chosen = types[Math.floor(Math.random() * types.length)];
             obstacles.push(new Obstacle(chosen, 1050));
-            if (Math.random() < 0.4) {
-                obstacles.push(new Obstacle('CHAIR', 1180));
-                spawnCooldown += 16;
-            }
+            spawnCooldown = Math.max(36, Math.floor(62 - Math.min(26, distance * 0.02)));
         }
         // Pattern 4: Introductory single obstacle
         else {
             const types = ['CHAIR', 'CALENDAR', 'LAPTOP'];
             const chosen = types[Math.floor(Math.random() * types.length)];
             obstacles.push(new Obstacle(chosen, 1050));
+            spawnCooldown = 55;
         }
     }
 
@@ -1987,22 +1967,22 @@ function updateGame() {
 
     survivalTime = (performance.now() - runStartTime) / 1000;
 
-    // Dynamic distance-driven speed scaling: starts at 6.8 and accelerates continuously with distance
-    const distSpeedGain = Math.min(14.2, (distance * 0.009) + Math.pow(distance / 180, 0.75) * 1.5);
+    // Smooth, gradual distance-driven speed scaling
+    const distSpeedGain = Math.min(7.9, (distance * 0.0030) + Math.sqrt(distance) * 0.06);
     const baseSpeed = Math.min(DINO_CONFIG.MAX_SPEED, DINO_CONFIG.SPEED + distSpeedGain);
     gameSpeed = baseSpeed;
 
-    // Active in-game temporary buff multipliers (Quad Espresso, Dash, and gentle Boss Alert)
+    // Active in-game temporary buff multipliers (Quad Espresso: +20%, Dash: +25%, Boss Alert: +8%)
     const buffBoost = player.coffeeTimer > 0 ? 1.20 : (player.isDashing ? 1.25 : 1.0);
-    const bossBoost = bossManager.active ? 1.10 : 1.0;
+    const bossBoost = bossManager.active ? 1.08 : 1.0;
     const targetEffectiveSpeed = gameSpeed * buffBoost * bossBoost;
 
     if (typeof window.smoothSpeed === 'undefined') window.smoothSpeed = DINO_CONFIG.SPEED;
-    window.smoothSpeed += (targetEffectiveSpeed - window.smoothSpeed) * 0.06;
+    window.smoothSpeed += (targetEffectiveSpeed - window.smoothSpeed) * 0.05;
     const effectiveSpeed = window.smoothSpeed;
 
     // Distance accumulation
-    distance += effectiveSpeed * 0.04;
+    distance += effectiveSpeed * 0.035;
 
     // Authentic 100m Milestone Celebration (Dino 100m beep & score flash)
     const currentHundreds = Math.floor(distance / 100);
@@ -2103,7 +2083,7 @@ function updateGame() {
                 case 'COIN': {
                     const isAvUnlocked = unlockedAvatars.includes(player.avatar.id);
                     const charMult = (isAvUnlocked && player.avatar.coinMultiplier) ? player.avatar.coinMultiplier : 1;
-                    const stockBoost = (upgrades.coin_boost > 0) ? 1.5 : 1.0;
+                    const stockBoost = (window.currentRunGear && window.currentRunGear.coin_boost) ? 1.5 : 1.0;
                     const contractMult = player.doublePointsActive ? 2 : 1;
                     const earned = Math.max(1, Math.round(1 * charMult * stockBoost * contractMult));
                     runCoins += earned;
@@ -2114,7 +2094,7 @@ function updateGame() {
                 case 'COFFEE': {
                     const isAvUnlocked = unlockedAvatars.includes(player.avatar.id);
                     const coffeeBonus = (isAvUnlocked && player.avatar.coffeeBonus) ? player.avatar.coffeeBonus : 1.0;
-                    const extraDuration = (upgrades.coffee_duration > 0) ? 210 : 0;
+                    const extraDuration = (window.currentRunGear && window.currentRunGear.coffee_duration) ? 210 : 0;
                     const totalDuration = Math.round((240 + extraDuration) * coffeeBonus);
                     player.coffeeTimer = totalDuration;
                     player.invulnerableTimer = totalDuration;
@@ -2286,8 +2266,82 @@ function showBossWarning(quote) {
 
 // Pause and Navigation Functions (CrazyGames / Poki Paused Portal Docking Mode)
 let pauseStartTime = 0;
+let __countdownTimerOffice = null;
+
+function playCountdownAudioOffice(freq = 440, type = 'sine', duration = 0.15) {
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!window.__cdAudioCtxOffice) window.__cdAudioCtxOffice = new AudioCtx();
+        const ctx = window.__cdAudioCtxOffice;
+        if (ctx.state === 'suspended') ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+    } catch (e) {}
+}
+
+function runResumeCountdownOffice(onComplete) {
+    if (__countdownTimerOffice) {
+        clearInterval(__countdownTimerOffice);
+        __countdownTimerOffice = null;
+    }
+    let overlay = document.getElementById('resumeCountdownOverlayOffice');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'resumeCountdownOverlayOffice';
+        overlay.className = 'resume-countdown-overlay';
+        document.body.appendChild(overlay);
+    }
+    overlay.classList.add('active');
+
+    let count = 3;
+    const updateDisplay = () => {
+        if (count > 0) {
+            overlay.innerHTML = `
+                <div class="resume-countdown-number" key="${count}">${count}</div>
+                <div class="resume-countdown-sub">⚡ GET READY • RESUMING</div>
+            `;
+            playCountdownAudioOffice(count === 3 ? 440 : count === 2 ? 554 : 659, 'sine', 0.18);
+            count--;
+        } else if (count === 0) {
+            overlay.innerHTML = `
+                <div class="resume-countdown-number" style="color: #4ade80; text-shadow: 0 0 45px rgba(74, 222, 128, 0.9);">GO!</div>
+                <div class="resume-countdown-sub" style="color: #4ade80;">🏃 SPRINT!</div>
+            `;
+            playCountdownAudioOffice(880, 'triangle', 0.3);
+            count--;
+        } else {
+            if (__countdownTimerOffice) {
+                clearInterval(__countdownTimerOffice);
+                __countdownTimerOffice = null;
+            }
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            }, 200);
+            if (typeof onComplete === 'function') onComplete();
+        }
+    };
+
+    updateDisplay();
+    __countdownTimerOffice = setInterval(updateDisplay, 1000);
+}
 
 function pauseGame() {
+    if (__countdownTimerOffice) {
+        clearInterval(__countdownTimerOffice);
+        __countdownTimerOffice = null;
+        const overlay = document.getElementById('resumeCountdownOverlayOffice');
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }
     if (currentState === GAME_STATE.PLAYING) {
         currentState = GAME_STATE.PAUSED;
         pauseStartTime = performance.now();
@@ -2300,15 +2354,27 @@ function pauseGame() {
     }
 }
 
-function resumeGame() {
+function resumeGame(requestFullscreen = true) {
     if (currentState === GAME_STATE.PAUSED) {
-        currentState = GAME_STATE.PLAYING;
-        const pauseDuration = performance.now() - pauseStartTime;
-        runStartTime += pauseDuration; // adjust elapsed timer seamlessly
+        // 1. Immediately expand back to fullscreen and dismiss paused portal UI
         document.body.classList.remove('portal-paused');
         const pauseScr = document.getElementById('pause-screen');
         if (pauseScr) pauseScr.classList.add('hidden');
-        if (window.soundManager) window.soundManager.startBGM();
+        if (requestFullscreen && !document.fullscreenElement && !document.webkitFullscreenElement) {
+            const docEl = document.documentElement;
+            const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
+            if (req) req.call(docEl).catch(() => {});
+        }
+
+        // 2. Start 3-second countdown before unfreezing player runner
+        runResumeCountdownOffice(() => {
+            if (currentState === GAME_STATE.PAUSED) {
+                currentState = GAME_STATE.PLAYING;
+                const pauseDuration = performance.now() - pauseStartTime;
+                runStartTime += pauseDuration; // adjust elapsed timer seamlessly
+                if (window.soundManager) window.soundManager.startBGM();
+            }
+        });
     }
 }
 
@@ -2339,6 +2405,13 @@ window.addEventListener('keydown', (e) => {
     // Audio context resume on first user interaction
     window.soundManager.init();
 
+    if (e.key === 't' || e.key === 'T') {
+        if (typeof window.toggleEscapeTheme === 'function') {
+            window.toggleEscapeTheme();
+        }
+        return;
+    }
+
     if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
         e.preventDefault();
         if (currentState === GAME_STATE.PLAYING) {
@@ -2348,6 +2421,18 @@ window.addEventListener('keydown', (e) => {
         }
         return;
     }
+
+// Instant trigger on first Escape when exiting native browser fullscreen
+const handleFullscreenExitOffice = () => {
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    if (!isFs && currentState === GAME_STATE.PLAYING) {
+        pauseGame();
+    }
+};
+document.addEventListener('fullscreenchange', handleFullscreenExitOffice);
+document.addEventListener('webkitfullscreenchange', handleFullscreenExitOffice);
+document.addEventListener('mozfullscreenchange', handleFullscreenExitOffice);
+document.addEventListener('MSFullscreenChange', handleFullscreenExitOffice);
 
     // Ignore key auto-repeats for Jump and Dash to avoid consuming double jump / stamina instantly
     if (e.repeat && (e.code === 'Space' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === 'Shift' || e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D')) {
@@ -2541,12 +2626,18 @@ function gameOver(customReason) {
 
     // Calculate Points Rewards
     const distPoints = Math.floor(finalDist / 40); // 1 P per 40m
-    const boostMult = (player.doublePointsActive ? 2 : 1) * (upgrades.coin_boost > 0 ? 1.5 : 1.0);
+    const stockBoost = (window.currentRunGear && window.currentRunGear.coin_boost) ? 1.5 : 1.0;
+    const boostMult = (player.doublePointsActive ? 2 : 1) * stockBoost;
     const totalEarnedThisRun = Math.max(1, Math.round((runCoins + distPoints) * boostMult));
 
     // Save records
     totalCoins += totalEarnedThisRun;
     storage.set('coins', totalCoins);
+
+    // Consumed single-use gear is no longer active for the next run
+    window.currentRunGear = {};
+    updateShopUI();
+    window.updateGlobalPointsUI();
 
     const isNewRecord = finalTime > bestSurvivalTime || finalDist > bestDistance;
     if (finalTime > bestSurvivalTime) {
@@ -2740,69 +2831,83 @@ window.updateGlobalPointsUI = function() {
     // Populate Store on Homepage
     const homeStoreGrid = document.getElementById('homepage-store-grid');
     if (homeStoreGrid) {
-        homeStoreGrid.innerHTML = `
-            ${STORE_CATALOG.upgrades.map(up => {
-                const isBought = (upgrades[up.id] || 0) > 0;
-                return `
-                    <div class="store-card">
-                        <div class="store-card-info">
-                            <div class="store-card-icon">${up.icon}</div>
-                            <div>
-                                <div class="store-card-name">${up.name}</div>
-                                <div class="store-card-desc">${up.desc}</div>
-                            </div>
+        homeStoreGrid.innerHTML = STORE_CATALOG.map(it => {
+            const count = inventory[it.id] || 0;
+            const isReadyForRun = count > 0;
+            return `
+                <div class="store-card">
+                    <div class="store-card-info">
+                        <div class="store-card-icon">${it.icon}</div>
+                        <div>
+                            <div class="store-card-name">${it.name} ${count > 1 ? `<span style="color:#10b981; font-size:0.75rem; font-weight:800;">(x${count})</span>` : ''}</div>
+                            <div class="store-card-desc">${it.desc}</div>
                         </div>
-                        <button class="store-btn ${isBought ? 'bought' : ''}" ${isBought ? 'disabled' : ''} onclick="buyEscapeUpgrade('${up.id}', ${up.cost})">
-                            ${isBought ? 'BOUGHT ✓' : `${up.cost} P BUY`}
-                        </button>
                     </div>
-                `;
-            }).join('')}
-            ${STORE_CATALOG.items.map(it => {
-                const count = inventory[it.id] || 0;
-                return `
-                    <div class="store-card">
-                        <div class="store-card-info">
-                            <div class="store-card-icon">${it.icon}</div>
-                            <div>
-                                <div class="store-card-name">${it.name} ${count > 0 ? `<span style="color:#10b981; font-size:0.75rem;">(Owned: ${count})</span>` : ''}</div>
-                                <div class="store-card-desc">${it.desc}</div>
-                            </div>
-                        </div>
-                        <button class="store-btn" onclick="buyEscapeItem('${it.id}', ${it.cost})">
-                            ${it.cost} P BUY
-                        </button>
-                    </div>
-                `;
-            }).join('')}
-        `;
+                    <button class="store-btn ${isReadyForRun ? 'bought' : ''}" onclick="buyEscapeItem('${it.id}', ${it.cost})">
+                        ${isReadyForRun ? `BOUGHT (1 RUN) ✓` : `${it.cost} P BUY`}
+                    </button>
+                </div>
+            `;
+        }).join('');
     }
+};
+
+// Day & Night Theme Handlers
+window.setEscapeTheme = function(theme) {
+    currentEscapeTheme = (theme === 'night') ? 'night' : 'day';
+    storage.set('theme', currentEscapeTheme);
+    
+    // Update theme toggle icons on HUD and homepage
+    const hudThemeBtn = document.getElementById('btn-hud-theme');
+    if (hudThemeBtn) {
+        hudThemeBtn.innerHTML = currentEscapeTheme === 'day' ? '☀️' : '🌙';
+        hudThemeBtn.title = `Current: ${currentEscapeTheme.toUpperCase()} (Press 'T' or Click to Switch)`;
+    }
+    const homeThemeBtn = document.getElementById('btn-home-theme');
+    if (homeThemeBtn) {
+        homeThemeBtn.innerHTML = currentEscapeTheme === 'day' ? '☀️' : '🌙';
+        homeThemeBtn.title = `Current: ${currentEscapeTheme.toUpperCase()} (Click to Toggle)`;
+    }
+    
+    // Update body class
+    if (currentEscapeTheme === 'day') {
+        document.body.classList.add('theme-day');
+        document.body.classList.remove('theme-night');
+    } else {
+        document.body.classList.add('theme-night');
+        document.body.classList.remove('theme-day');
+    }
+};
+
+window.toggleEscapeTheme = function() {
+    const next = (currentEscapeTheme === 'day') ? 'night' : 'day';
+    window.setEscapeTheme(next);
+    if (window.soundManager) window.soundManager.playTone(480, 'sine', 0.08, 0.15);
+    createScorePopup(canvas.width / 2, 120, `${next.toUpperCase()} MODE ☀️🌙`, '#38bdf8');
 };
 
 // Pre-Run Gear Loadout Check & Modal Handler
 window.checkAndOpenGearModal = function() {
     inventory = storage.get('inventory', inventory);
-    const hasRocket = (inventory.rocket_start || 0) > 0;
-    const hasLife = (inventory.extra_life || 0) > 0;
-    const hasPoints = (inventory.double_points || 0) > 0;
-
-    if (!hasRocket && !hasLife && !hasPoints) {
-        return false; // No single-use gear owned, start run immediately
+    
+    // Check if player owns any single-use items
+    const ownedKeys = Object.keys(inventory).filter(k => (inventory[k] || 0) > 0);
+    if (ownedKeys.length === 0) {
+        window.startGameWithGear();
+        return false;
     }
 
     const modal = document.getElementById('gear-modal');
     const list = document.getElementById('gear-items-list');
-    if (!modal || !list) return false;
+    if (!modal || !list) {
+        window.startGameWithGear();
+        return false;
+    }
 
     list.innerHTML = '';
-    const gearCatalog = [
-        { id: 'rocket_start', name: 'Rocket Coffee Start', icon: '🚀', desc: 'Supersonic 300m invincibility rush at start', count: inventory.rocket_start || 0 },
-        { id: 'extra_life', name: 'HR Life Insurance', icon: '🛡️', desc: 'Automatically revives you once on a fatal obstacle crash', count: inventory.extra_life || 0 },
-        { id: 'double_points', name: 'Double Point Contract', icon: '💰', desc: '2x Point multiplier for this entire run', count: inventory.double_points || 0 }
-    ];
-
-    gearCatalog.forEach(it => {
-        if (it.count > 0) {
+    STORE_CATALOG.forEach(it => {
+        const count = inventory[it.id] || 0;
+        if (count > 0) {
             const row = document.createElement('label');
             row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: rgba(14, 27, 43, 0.85); border: 1.5px solid rgba(168, 204, 229, 0.2); border-radius: 12px; padding: 10px 14px; cursor: pointer; transition: 0.2s; user-select: none;';
             row.innerHTML = `
@@ -2811,7 +2916,7 @@ window.checkAndOpenGearModal = function() {
                     <div>
                         <div style="font-weight: 800; font-size: 0.88rem; color: #f4f8fb; display: flex; align-items: center; gap: 6px;">
                             <span>${it.icon}</span> <span>${it.name}</span>
-                            <span style="font-size: 0.72rem; color: #10b981; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 6px;">x${it.count}</span>
+                            <span style="font-size: 0.72rem; color: #10b981; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 6px;">x${count}</span>
                         </div>
                         <div style="font-size: 0.72rem; color: #8293a7; margin-top: 2px;">${it.desc}</div>
                     </div>
@@ -2824,17 +2929,16 @@ window.checkAndOpenGearModal = function() {
     const btnDeploy = document.getElementById('btn-gear-deploy');
     if (btnDeploy) {
         btnDeploy.onclick = () => {
-            const chkRocket = document.getElementById('gear-chk-rocket_start');
-            const chkLife = document.getElementById('gear-chk-extra_life');
-            const chkPoints = document.getElementById('gear-chk-double_points');
-            const selectedGear = {
-                rocket_start: chkRocket ? chkRocket.checked : false,
-                extra_life: chkLife ? chkLife.checked : false,
-                double_points: chkPoints ? chkPoints.checked : false
-            };
+            const selectedGear = {};
+            STORE_CATALOG.forEach(it => {
+                const chk = document.getElementById(`gear-chk-${it.id}`);
+                if (chk && chk.checked) selectedGear[it.id] = true;
+            });
             modal.classList.add('hidden');
             if (typeof window.executeGameStart === 'function') {
                 window.executeGameStart(selectedGear);
+            } else {
+                window.startGameWithGear(selectedGear);
             }
         };
     }
@@ -2844,7 +2948,9 @@ window.checkAndOpenGearModal = function() {
         btnSkip.onclick = () => {
             modal.classList.add('hidden');
             if (typeof window.executeGameStart === 'function') {
-                window.executeGameStart({ rocket_start: false, extra_life: false, double_points: false });
+                window.executeGameStart({});
+            } else {
+                window.startGameWithGear({});
             }
         };
     }
@@ -2853,40 +2959,41 @@ window.checkAndOpenGearModal = function() {
     return true;
 };
 
-// Start run with chosen gear loadout
+// Start run with chosen gear loadout (Single-use items are consumed for 1 run!)
 window.startGameWithGear = function(selectedGear) {
     inventory = storage.get('inventory', inventory);
-    upgrades = storage.get('upgrades', upgrades);
+    upgrades = inventory;
     totalCoins = storage.get('coins', totalCoins);
 
-    const gear = selectedGear || { rocket_start: false, extra_life: false, double_points: false };
-
-    let hasRocket = gear.rocket_start && (inventory.rocket_start || 0) > 0;
-    if (hasRocket) {
-        inventory.rocket_start--;
-    }
-
-    let hasExtraLife = gear.extra_life && (inventory.extra_life || 0) > 0;
-    if (hasExtraLife) {
-        inventory.extra_life--;
-    }
-
-    let hasDoublePts = gear.double_points && (inventory.double_points || 0) > 0;
-    if (hasDoublePts) {
-        inventory.double_points--;
+    // If selectedGear is provided, only consume chosen items. Otherwise, consume all owned items.
+    window.currentRunGear = {};
+    if (selectedGear && Object.keys(selectedGear).length > 0) {
+        for (const key of Object.keys(selectedGear)) {
+            if (selectedGear[key] && (inventory[key] || 0) > 0) {
+                window.currentRunGear[key] = true;
+                inventory[key]--; // Consumed for this run! Must buy again after!
+            }
+        }
+    } else if (!selectedGear) {
+        // Auto-deploy all owned boosts
+        for (const key of Object.keys(inventory)) {
+            if ((inventory[key] || 0) > 0) {
+                window.currentRunGear[key] = true;
+                inventory[key]--; // Consumed for this run! Must buy again after!
+            }
+        }
     }
 
     storage.set('inventory', inventory);
+    upgrades = inventory;
 
     player.reset();
 
-    if (hasRocket) {
+    if (window.currentRunGear.rocket_start) {
         player.coffeeTimer = 300; // 5s supersonic rocket speed + invincibility
         player.invulnerableTimer = 300;
         createScorePopup(canvas.width / 2, 180, '🚀 ROCKET START ENGAGED!', '#f59e0b');
     }
-    player.hasExtraLife = hasExtraLife;
-    player.doublePointsActive = hasDoublePts;
 
     obstacles = [];
     items = [];
@@ -2914,15 +3021,12 @@ window.startGameWithGear = function(selectedGear) {
     if (shpScr) shpScr.classList.add('hidden');
 
     window.updateGlobalPointsUI();
+    updateShopUI();
     if (window.soundManager) window.soundManager.startBGM();
 };
 
 window.startGame = function() {
-    window.startGameWithGear({
-        rocket_start: (inventory.rocket_start || 0) > 0,
-        extra_life: (inventory.extra_life || 0) > 0,
-        double_points: (inventory.double_points || 0) > 0
-    });
+    window.startGameWithGear();
 };
 
 window.buyEscapeAvatar = function(id) {
@@ -2960,39 +3064,25 @@ window.selectEscapeOperative = function(id) {
     }
 };
 
-window.buyEscapeUpgrade = function(type, cost) {
-    if ((upgrades[type] || 0) > 0) return;
-    if (totalCoins >= cost) {
-        totalCoins -= cost;
-        storage.set('coins', totalCoins);
-        upgrades[type] = 1;
-        storage.set('upgrades', upgrades);
-        if (window.soundManager) window.soundManager.playShieldUp();
-        window.updateGlobalPointsUI();
-        updateShopUI();
-        createScorePopup(canvas.width / 2, canvas.height / 2, 'UPGRADE BOUGHT! ✨', '#10b981');
-    } else {
-        if (window.soundManager) window.soundManager.playTone(200, 'square', 0.1, 0.2);
-        alert(`Need ${cost} P Point Coins! Current Bank: ${totalCoins} P.`);
-    }
-};
-
 window.buyEscapeItem = function(type, cost) {
     if (totalCoins >= cost) {
         totalCoins -= cost;
         storage.set('coins', totalCoins);
         inventory[type] = (inventory[type] || 0) + 1;
         storage.set('inventory', inventory);
+        upgrades = inventory;
         if (window.soundManager) window.soundManager.playShieldUp();
         window.updateGlobalPointsUI();
         updateShopUI();
-        createScorePopup(canvas.width / 2, canvas.height / 2, 'ITEM PURCHASED! ⚡', '#38bdf8');
+        const catalogItem = STORE_CATALOG.find(it => it.id === type);
+        createScorePopup(canvas.width / 2, canvas.height / 2, `${catalogItem ? catalogItem.name : 'ITEM'} BOUGHT! ⚡`, '#10b981');
     } else {
         if (window.soundManager) window.soundManager.playTone(200, 'square', 0.1, 0.2);
         alert(`Need ${cost} P Point Coins! Current Bank: ${totalCoins} P.`);
     }
 };
 
+window.buyEscapeUpgrade = window.buyEscapeItem;
 window.buyUpgrade = window.buyEscapeUpgrade;
 
 function requestGameFullScreen() {
@@ -3008,6 +3098,7 @@ function requestGameFullScreen() {
 // Return to game home page
 function goHome() {
     currentState = GAME_STATE.MENU;
+    window.currentRunGear = {};
     if (window.soundManager) window.soundManager.stopBGM();
     const gov = document.getElementById('gameover-screen');
     if (gov) gov.classList.add('hidden');
@@ -3018,15 +3109,19 @@ function goHome() {
     
     // Switch to homepage view
     const homeView = document.getElementById('homepage-view');
+    const gViewWrapper = document.getElementById('game-view-wrapper');
     const gameCont = document.getElementById('game-container');
-    if (homeView && gameCont) {
-        gameCont.classList.add('hidden');
+    if (gViewWrapper) gViewWrapper.classList.add('hidden');
+    if (gameCont) gameCont.classList.add('hidden');
+    if (homeView) {
         homeView.classList.remove('hidden');
         document.body.classList.remove('in-game');
+        document.body.classList.remove('portal-paused');
     }
     
     if (player) player.reset();
     window.updateGlobalPointsUI();
+    updateShopUI();
     if (typeof syncHeroPreview === 'function') syncHeroPreview(activeAvatarId);
 }
 
@@ -3040,6 +3135,7 @@ function handleBackNavigation() {
 
 // Initialization on DOM load or immediate execution
 function initGameEngine() {
+    window.setEscapeTheme(currentEscapeTheme);
     window.updateGlobalPointsUI();
     setupTouchControls();
     updateShopUI();

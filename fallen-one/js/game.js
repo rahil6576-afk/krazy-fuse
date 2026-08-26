@@ -2,7 +2,7 @@
 
 import { 
     CANVAS_WIDTH, CANVAS_HEIGHT, GAME_STATES, GAME_MODES, 
-    FIGHTER_STATES, ATTACK_TYPES 
+    AI_DIFFICULTIES, FIGHTER_STATES, ATTACK_TYPES, ROUNDS_TO_WIN 
 } from './core/constants.js';
 import { ROSTER } from './entities/roster.js';
 import { inputManager } from './core/input.js';
@@ -49,20 +49,35 @@ export class GameEngine {
 
         this.initTouchControls();
         this.initPauseKey();
+        window.fallenOneGame = this;
     }
 
     initPauseKey() {
+        this.__wasInFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Escape' || e.code === 'KeyP') {
-                if (this.gameState === GAME_STATES.IN_GAME || this.gameState === GAME_STATES.TRAINING) {
-                    this.togglePause();
-                }
+                e.preventDefault();
+                this.togglePause();
             }
         });
+
+        // Instant trigger on first Escape when exiting native browser fullscreen
+        const handleFullscreenExitFO = () => {
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+            if (!isFs && this.__wasInFullscreen && (this.gameState === GAME_STATES.IN_GAME || this.gameState === GAME_STATES.TRAINING) && !this.isPaused && !document.body.classList.contains('portal-paused')) {
+                this.pause();
+            }
+            this.__wasInFullscreen = isFs;
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenExitFO);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenExitFO);
+        document.addEventListener('mozfullscreenchange', handleFullscreenExitFO);
+        document.addEventListener('MSFullscreenChange', handleFullscreenExitFO);
     }
 
     togglePause() {
-        if (this.isPaused) {
+        if (this.isPaused || document.body.classList.contains('portal-paused')) {
             this.resume();
         } else {
             this.pause();
@@ -70,16 +85,108 @@ export class GameEngine {
     }
 
     pause() {
-        if (this.gameState !== GAME_STATES.IN_GAME && this.gameState !== GAME_STATES.TRAINING) return;
+        if (this.__countdownTimerFO) {
+            clearInterval(this.__countdownTimerFO);
+            this.__countdownTimerFO = null;
+            const overlay = document.getElementById('resumeCountdownOverlayFO');
+            if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        }
         this.isPaused = true;
-        document.getElementById('pause-modal')?.classList.remove('hidden');
+        document.body.classList.add('portal-paused');
+        const bankBadge = document.getElementById('portal-top-bank');
+        if (bankBadge) {
+            const pts = localStorage.getItem('krazio_user_points') || localStorage.getItem('coins') || localStorage.getItem('office_escape_coins') || '76';
+            bankBadge.textContent = `🪙 ${pts} P`;
+        }
         soundEngine.playMenuSelect();
     }
 
-    resume() {
-        this.isPaused = false;
-        document.getElementById('pause-modal')?.classList.add('hidden');
-        soundEngine.playMenuSelect();
+    resume(requestFullscreen = true) {
+        if (this.__countdownTimerFO) {
+            clearInterval(this.__countdownTimerFO);
+            this.__countdownTimerFO = null;
+        }
+
+        // 1. Immediately expand back to fullscreen and dismiss paused portal UI
+        document.body.classList.remove('portal-paused');
+        if (requestFullscreen && !document.fullscreenElement && !document.webkitFullscreenElement) {
+            const docEl = document.documentElement;
+            const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
+            if (req) req.call(docEl).catch(() => {});
+        }
+
+        // 2. If in active combat match, run 3-second countdown before unpausing combat physics
+        if (this.gameState === GAME_STATES.IN_GAME || this.gameState === GAME_STATES.TRAINING) {
+            this.runResumeCountdown(() => {
+                this.isPaused = false;
+                soundEngine.playMenuSelect();
+            });
+        } else {
+            this.isPaused = false;
+            soundEngine.playMenuSelect();
+        }
+    }
+
+    runResumeCountdown(onComplete) {
+        let overlay = document.getElementById('resumeCountdownOverlayFO');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'resumeCountdownOverlayFO';
+            overlay.className = 'resume-countdown-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.classList.add('active');
+
+        let count = 3;
+        const playBeep = (freq, type = 'sine', duration = 0.15) => {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                if (!this.__cdCtx) this.__cdCtx = new AudioCtx();
+                if (this.__cdCtx.state === 'suspended') this.__cdCtx.resume();
+                const osc = this.__cdCtx.createOscillator();
+                const gain = this.__cdCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.__cdCtx.currentTime);
+                gain.gain.setValueAtTime(0.18, this.__cdCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.__cdCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.__cdCtx.destination);
+                osc.start();
+                osc.stop(this.__cdCtx.currentTime + duration);
+            } catch (e) {}
+        };
+
+        const updateDisplay = () => {
+            if (count > 0) {
+                overlay.innerHTML = `
+                    <div class="resume-countdown-number" key="${count}">${count}</div>
+                    <div class="resume-countdown-sub">⚡ GET READY • RESUMING</div>
+                `;
+                playBeep(count === 3 ? 440 : count === 2 ? 554 : 659, 'sine', 0.18);
+                count--;
+            } else if (count === 0) {
+                overlay.innerHTML = `
+                    <div class="resume-countdown-number" style="color: #4ade80; text-shadow: 0 0 45px rgba(74, 222, 128, 0.9);">FIGHT!</div>
+                    <div class="resume-countdown-sub" style="color: #4ade80;">⚔️ CLASH OF CHAMPIONS!</div>
+                `;
+                playBeep(880, 'triangle', 0.3);
+                count--;
+            } else {
+                if (this.__countdownTimerFO) {
+                    clearInterval(this.__countdownTimerFO);
+                    this.__countdownTimerFO = null;
+                }
+                overlay.classList.remove('active');
+                setTimeout(() => {
+                    if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                }, 200);
+                if (typeof onComplete === 'function') onComplete();
+            }
+        };
+
+        updateDisplay();
+        this.__countdownTimerFO = setInterval(updateDisplay, 1000);
     }
 
     restartMatch() {
@@ -99,6 +206,7 @@ export class GameEngine {
     }
 
     startTowerMatch() {
+        document.body.classList.remove('portal-paused');
         const floorData = towerManager.getCurrentFloorData();
         const p1Config = ROSTER.find(c => c.id === towerManager.playerCharId) || ROSTER[0];
         const p2Config = ROSTER.find(c => c.id === floorData.opponentId) || ROSTER[1];
@@ -132,36 +240,45 @@ export class GameEngine {
         hud.initFighters(this.p1, this.p2, this.p3, `FLOOR ${floorData.floor}/10: ${floorData.title}`);
         comboTracker.reset();
         particleSystem.reset();
-        matchManager.startNewMatch(floorData.floor === 10 ? 1 : 2);
+        matchManager.startNewMatch(floorData.floor === 10 ? 1 : 2, false);
 
         this.trainingOverlay.hide();
         musicEngine.startTrack(arenaManager.currentArena.id);
 
         if (!this.isRunning) {
             this.isRunning = true;
+            this.lastFrameTime = performance.now();
             requestAnimationFrame((t) => this.gameLoop(t));
         }
     }
 
     startMatch(p1Config, p2Config, mode = GAME_MODES.LOCAL_VS) {
-        this.gameMode = mode;
-        this.gameState = mode === GAME_MODES.TRAINING ? GAME_STATES.TRAINING : GAME_STATES.IN_GAME;
+        document.body.classList.remove('portal-paused');
+        this.gameMode = mode || GAME_MODES.AI_BATTLE;
+        this.gameState = this.gameMode === GAME_MODES.TRAINING ? GAME_STATES.TRAINING : GAME_STATES.IN_GAME;
         this.isPaused = false;
         this.p3 = null;
         this.ai2 = null;
         document.getElementById('pause-modal')?.classList.add('hidden');
 
+        const isP2AI = this.gameMode !== GAME_MODES.LOCAL_VS;
         this.p1 = new Fighter(p1Config, 'P1', false);
-        this.p2 = new Fighter(p2Config, 'P2', mode === GAME_MODES.AI_BATTLE || mode === GAME_MODES.TRAINING);
+        this.p2 = new Fighter(p2Config, 'P2', isP2AI);
+
+        if (isP2AI) {
+            this.ai = new FighterAI('NORMAL');
+        } else {
+            this.ai = null;
+        }
 
         hud.initFighters(this.p1, this.p2, null, null);
         comboTracker.reset();
         particleSystem.reset();
-        matchManager.startNewMatch();
-
-        if (mode === GAME_MODES.TRAINING) {
+        if (this.gameMode === GAME_MODES.TRAINING) {
+            matchManager.startNewMatch(ROUNDS_TO_WIN, true);
             this.trainingOverlay.show();
         } else {
+            matchManager.startNewMatch(ROUNDS_TO_WIN, false);
             this.trainingOverlay.hide();
         }
 
@@ -169,19 +286,28 @@ export class GameEngine {
 
         if (!this.isRunning) {
             this.isRunning = true;
+            this.lastFrameTime = performance.now();
             requestAnimationFrame((t) => this.gameLoop(t));
         }
     }
 
     gameLoop(timestamp) {
-        const delta = timestamp - this.lastFrameTime;
-        this.lastFrameTime = timestamp;
+        if (!this.lastFrameTime) this.lastFrameTime = timestamp || performance.now();
+        const now = timestamp || performance.now();
+        const delta = Math.min(now - this.lastFrameTime, 100);
+        this.lastFrameTime = now;
 
         if (!this.isPaused) {
-            inputManager.update();
+            this.accumulator = (this.accumulator || 0) + delta;
+            const targetStep = 1000 / 60; // Locked 60 FPS update rate
 
-            if (this.gameState === GAME_STATES.IN_GAME || this.gameState === GAME_STATES.TRAINING) {
-                this.updateCombat();
+            while (this.accumulator >= targetStep) {
+                inputManager.update();
+
+                if (this.gameState === GAME_STATES.IN_GAME || this.gameState === GAME_STATES.TRAINING) {
+                    this.updateCombat();
+                }
+                this.accumulator -= targetStep;
             }
         }
 
@@ -207,13 +333,14 @@ export class GameEngine {
         comboTracker.update();
 
         // 3. Obtain Player 1 & Player 2 Inputs
-        const p1Input = inputManager.playerInputs.P1;
+        const p1Input = inputManager.playerInputs.P1 || { left: false, right: false, up: false, down: false, light: false, heavy: false, special: false, super: false, guard: false };
         let p2Input;
         let p3Input;
 
         if (this.gameMode === GAME_MODES.LOCAL_VS) {
             p2Input = inputManager.playerInputs.P2;
         } else if (this.gameMode === GAME_MODES.AI_BATTLE || this.gameMode === GAME_MODES.TOWER_CLIMB) {
+            if (!this.ai) this.ai = new FighterAI('NORMAL');
             p2Input = this.ai.update(this.p2, this.p1);
             if (this.p3 && this.ai2) {
                 p3Input = this.ai2.update(this.p3, this.p1);
@@ -222,7 +349,15 @@ export class GameEngine {
             p2Input = this.getDummyInput();
         } else if (this.gameMode === GAME_MODES.ONLINE_PVP) {
             networkManager.sendInput(p1Input, matchManager.phaseTimer);
+            if (!this.ai) this.ai = new FighterAI('NORMAL');
             p2Input = networkManager.remoteInput || this.ai.update(this.p2, this.p1);
+        } else {
+            if (!this.ai) this.ai = new FighterAI('NORMAL');
+            p2Input = this.ai.update(this.p2, this.p1);
+        }
+
+        if (!p2Input) {
+            p2Input = { left: false, right: false, up: false, down: false, light: false, heavy: false, special: false, super: false, guard: false };
         }
 
         // 4. Update Fighters
@@ -377,9 +512,92 @@ export class GameEngine {
             }
         });
     }
+
+    getDummyInput() {
+        if (!this.__dummyInput) {
+            this.__dummyInput = {
+                left: false, right: false, up: false, down: false,
+                lightPunch: false, heavyPunch: false,
+                lightKick: false, heavyKick: false,
+                special: false, ultimate: false,
+                block: false, dash: false,
+                justPressed: {}
+            };
+        }
+        const input = { ...this.__dummyInput, justPressed: {} };
+        
+        // Reset all keys
+        input.left = false;
+        input.right = false;
+        input.up = false;
+        input.down = false;
+        input.block = false;
+        input.lightPunch = false;
+        input.heavyPunch = false;
+
+        const state = this.dummyBehavior || 'IDLE';
+        if (state === 'CROUCH') {
+            input.down = true;
+        } else if (state === 'JUMP') {
+            if (this.p2 && this.p2.isGrounded) {
+                input.up = true;
+                input.justPressed.up = true;
+            }
+        } else if (state === 'GUARD_ALL') {
+            input.block = true;
+        } else if (state === 'COUNTER') {
+            input.block = true;
+            if (this.p2 && this.p2.state === FIGHTER_STATES.BLOCKSTUN && Math.random() < 0.25) {
+                input.lightPunch = true;
+                input.justPressed.lightPunch = true;
+            }
+        }
+
+        // Training mode dummy health reset so dummy never dies
+        if (this.p2 && this.p2.health < this.p2.maxHealth * 0.25) {
+            this.p2.health = this.p2.maxHealth;
+            this.p2.displayHealth = this.p2.health;
+        }
+
+        this.__dummyInput = input;
+        return input;
+    }
+
+    resetTrainingPositions() {
+        if (!this.p1 || !this.p2) return;
+        this.p1.x = 420;
+        this.p1.y = 0;
+        this.p1.vx = 0;
+        this.p1.vy = 0;
+        this.p1.facing = 1;
+        this.p1.health = this.p1.maxHealth;
+        this.p1.displayHealth = this.p1.health;
+        this.p1.state = FIGHTER_STATES.IDLE;
+
+        this.p2.x = 860;
+        this.p2.y = 0;
+        this.p2.vx = 0;
+        this.p2.vy = 0;
+        this.p2.facing = -1;
+        this.p2.health = this.p2.maxHealth;
+        this.p2.displayHealth = this.p2.health;
+        this.p2.state = FIGHTER_STATES.IDLE;
+
+        comboTracker.reset();
+        soundEngine.playMenuSelect();
+    }
 }
 
-// Initialize on DOM load
-window.addEventListener('DOMContentLoaded', () => {
-    window.game = new GameEngine();
-});
+// Initialize on DOM load or immediately if already loaded
+function initGameEngine() {
+    if (!window.game) {
+        window.game = new GameEngine();
+        window.fallenOneGame = window.game;
+    }
+}
+
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initGameEngine);
+} else {
+    initGameEngine();
+}

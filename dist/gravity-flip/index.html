@@ -930,6 +930,19 @@
                 }
             }
         });
+
+        // Instant trigger on first Escape when exiting native browser fullscreen
+        const handleFullscreenExitGravity = () => {
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+            if (!isFs && window.game && window.game.gameState === 'PLAYING') {
+                window.pauseGravityGame();
+            }
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenExitGravity);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenExitGravity);
+        document.addEventListener('mozfullscreenchange', handleFullscreenExitGravity);
+        document.addEventListener('MSFullscreenChange', handleFullscreenExitGravity);
     </script>
+    <script src="../assets/krazy-screenshot.js"></script>
 </body>
 </html>

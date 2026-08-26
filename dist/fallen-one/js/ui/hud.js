@@ -94,20 +94,20 @@ export class HUD {
 
         // Match Timer
         if (this.dom.timer && matchManager) {
-            this.dom.timer.textContent = matchManager.roundTimer.toString().padStart(2, '0');
+            this.dom.timer.textContent = matchManager.isTraining ? '∞' : matchManager.roundTimer.toString().padStart(2, '0');
         }
 
         // Round Win Pips
         if (this.dom.p1Rounds && matchManager) {
             const pips = this.dom.p1Rounds.children;
             for (let i = 0; i < pips.length; i++) {
-                pips[i].classList.toggle('won', i < matchManager.p1RoundsWon);
+                pips[i].classList.toggle('won', !matchManager.isTraining && i < matchManager.p1RoundsWon);
             }
         }
         if (this.dom.p2Rounds && matchManager) {
             const pips = this.dom.p2Rounds.children;
             for (let i = 0; i < pips.length; i++) {
-                pips[i].classList.toggle('won', i < matchManager.p2RoundsWon);
+                pips[i].classList.toggle('won', !matchManager.isTraining && i < matchManager.p2RoundsWon);
             }
         }
 

@@ -1233,17 +1233,22 @@ body.portal-paused .pause-modal-card {
 }
 
 body.portal-paused #game-view-wrapper {
-    padding-top: 60px;
+    padding-top: 0;
 }
 
 body.portal-paused .portal-center-col {
-    padding: 16px 300px 24px 90px;
+    padding: 76px 300px 24px 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 body.portal-paused #game-container {
+    width: 860px !important;
     max-width: 860px !important;
-    height: 516px !important;
-    max-height: 516px !important;
+    height: 500px !important;
+    max-height: 500px !important;
     border-radius: 18px !important;
     border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
     box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 35px rgba(56, 189, 248, 0.25) !important;
@@ -1634,4 +1639,50 @@ body.portal-paused #game-container {
     background: rgba(56, 189, 248, 0.15);
     color: #38bdf8;
     border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+/* 3-Second Resume Countdown Overlay */
+.resume-countdown-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 15, 29, 0.72);
+    backdrop-filter: blur(12px);
+    pointer-events: all;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.resume-countdown-overlay.active {
+    opacity: 1;
+}
+.resume-countdown-number {
+    font-family: 'Outfit', sans-serif;
+    font-size: 8rem;
+    font-weight: 900;
+    color: #38bdf8;
+    text-shadow: 0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(56, 189, 248, 0.5);
+    line-height: 1;
+    transform: scale(1.5);
+    opacity: 0;
+    animation: countdownPop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+.resume-countdown-sub {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.95);
+    margin-top: 14px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+}
+@keyframes countdownPop {
+    0% { transform: scale(1.6); opacity: 0; }
+    20% { transform: scale(1); opacity: 1; }
+    80% { transform: scale(0.95); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0; }
 }

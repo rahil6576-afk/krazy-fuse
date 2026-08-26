@@ -5,51 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <base href="/dart-board/">
     <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Lilita One (Headings/Logo/Play) + Rubik (UI/Nav/Meta) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
-    <style>
-      #krazio-floating-back {
-        position: fixed;
-        top: 14px;
-        left: 16px;
-        z-index: 99999;
-        width: 40px;
-        height: 40px;
-        background: rgba(15, 23, 42, 0.85);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #f8fafc;
-        border-radius: 50%;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        transition: all 0.2s ease;
-        cursor: pointer;
-      }
-      #krazio-floating-back:hover {
-        background: rgba(249, 115, 22, 0.9);
-        border-color: #f97316;
-        color: #ffffff;
-        transform: translateX(-3px) scale(1.08);
-        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
-      }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik:wght@400;500;600;700;800;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --wall-color-you: #e07a67;
-            --wall-stripe-you: #d96f5b;
-            --wall-color-bot: #5b9eb8;
-            --wall-stripe-bot: #4f91aa;
-            --floor-color: #8c4c3b;
-            --floor-stripe: #7b3e2e;
-            --you-color: #ff4757;
-            --bot-color: #2ed573;
-            --rival-blue: #00d2d3;
+            --font-heading: 'Lilita One', cursive, sans-serif;
+            --font-body: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --color-gold: #FFCC00;
+            --color-gold-shadow: #C79F00;
+            --color-p1: #FF4D4D;
+            --color-p1-shadow: #D63031;
+            --color-p2: #38BDF8;
+            --color-p2-shadow: #0284C7;
+            --bg-dark: #0b0f19;
+            --card-bg: #1B1E26;
         }
 
         * {
@@ -60,159 +31,248 @@
             -webkit-user-select: none;
         }
 
-        body {
-            background-color: #0b0f19;
-            font-family: 'Fredoka', 'Outfit', sans-serif;
+        html, body {
+            background-color: #0b0f19 !important;
+            color: #ffffff;
+            font-family: var(--font-body);
             width: 100vw;
             height: 100vh;
             overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Fullscreen Responsive 3D Arena */
+        #gameApp {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0b0f19 !important;
+            background-image: url('venue_wood_classic.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            transition: background-image 0.4s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        #gameApp.venue-wood {
+            background-image: url('venue_wood_classic.jpg');
+        }
+
+        #gameApp.venue-brick {
+            background-image: url('venue_brick_pub.jpg');
+        }
+
+        #gameApp.venue-painted {
+            background-image: url('venue_painted_wood.jpg');
+        }
+
+        #gameApp.venue-stone {
+            background-image: url('venue_stone_tavern.jpg');
+        }
+
+        /* 3D Real-Time Atmospheric Lighting Overlays */
+        .room-lighting-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 15;
+            transition: all 0.4s ease;
+        }
+
+        /* 1. Warm Overhead (Authentic Tungsten 2700K pendant lamp light cone) */
+        #gameApp.lighting-warm {
+            filter: saturate(1.05) brightness(1.0);
+        }
+
+        #gameApp.lighting-warm .room-lighting-overlay {
+            background: radial-gradient(ellipse 850px 650px at 50% 12%, rgba(255, 210, 130, 0.2) 0%, rgba(255, 160, 40, 0.08) 38%, rgba(0, 0, 0, 0.45) 85%);
+            mix-blend-mode: soft-light;
+            opacity: 0.95;
+        }
+
+        /* 2. Side Light (Soft Directional Left Beam - Preserves Background Details) */
+        #gameApp.lighting-side {
+            filter: contrast(1.05) brightness(0.98);
+        }
+
+        #gameApp.lighting-side .room-lighting-overlay {
+            background: linear-gradient(108deg, rgba(255, 230, 160, 0.22) 0%, rgba(255, 180, 60, 0.10) 30%, rgba(0, 0, 0, 0.05) 55%, rgba(0, 0, 0, 0.35) 100%);
+            mix-blend-mode: soft-light;
+            opacity: 0.70;
+        }
+
+        /* 3. Cool Ambient (Subtle Steel Slate-Blue Tone & High Clarity) */
+        #gameApp.lighting-cool {
+            filter: hue-rotate(150deg) saturate(0.88) brightness(0.96) contrast(1.04);
+        }
+
+        #gameApp.lighting-cool .room-lighting-overlay {
+            background: radial-gradient(ellipse 750px 580px at 50% 12%, rgba(210, 240, 255, 0.20) 0%, rgba(56, 189, 248, 0.08) 35%, rgba(6, 14, 26, 0.25) 80%, rgba(2, 6, 16, 0.45) 100%);
+            mix-blend-mode: soft-light;
+            opacity: 0.65;
+        }
+
+        #gameApp.turn-bot .room-lighting-overlay {
+            filter: hue-rotate(180deg) saturate(1.2);
+        }
+
+        /* Wooden Floor: Hidden because 3D background image contains shelf & floor */
+        .room-floor {
+            display: none;
+        }
+
+        /* Top HUD Bar - True Centered 3-Column Grid */
+        .top-hud {
+            position: absolute;
+            top: max(28px, env(safe-area-inset-top, 28px));
+            left: 0;
+            right: 0;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            padding: 0 32px;
+            z-index: 60;
+            pointer-events: auto;
+        }
+
+        .top-hud-left {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .top-hud-center {
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* Fullscreen Responsive Arena for Laptop & Desktop */
-        #gameApp {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background: repeating-linear-gradient(
-                90deg,
-                var(--wall-color-you) 0px,
-                var(--wall-color-you) 50px,
-                var(--wall-stripe-you) 50px,
-                var(--wall-stripe-you) 100px
-            );
-            transition: background 0.6s ease;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #gameApp.turn-bot {
-            background: repeating-linear-gradient(
-                90deg,
-                var(--wall-color-bot) 0px,
-                var(--wall-color-bot) 50px,
-                var(--wall-stripe-bot) 50px,
-                var(--wall-stripe-bot) 100px
-            );
-        }
-
-        /* Wooden Floor at bottom */
-        .room-floor {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 18%;
-            background: repeating-linear-gradient(
-                90deg,
-                var(--floor-color) 0px,
-                var(--floor-color) 60px,
-                var(--floor-stripe) 60px,
-                var(--floor-stripe) 120px
-            );
-            border-top: 12px solid #5a2c20;
-            z-index: 1;
-            box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Top HUD Bar */
-        .top-hud {
-            position: absolute;
-            top: 24px;
-            left: 0;
-            right: 0;
+        .top-hud-right {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 36px;
-            z-index: 30;
+            justify-content: flex-end;
+            gap: 10px;
         }
 
+        /* Perfectly Smooth 3D Circular Forged-Iron Tavern Buttons */
         .hud-btn {
-            width: 52px;
-            height: 52px;
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            min-height: 48px;
             border-radius: 50%;
-            background: rgba(45, 52, 54, 0.55);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            color: #fff;
-            font-size: 1.6rem;
-            display: flex;
+            aspect-ratio: 1 / 1;
+            background: radial-gradient(circle at 35% 32%, #3a475a 0%, #1e2837 55%, #0e1622 100%);
+            border: 2px solid rgba(255, 255, 255, 0.22);
+            color: #f1f5f9;
+            font-size: 1.35rem;
+            line-height: 1;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             text-decoration: none;
-            backdrop-filter: blur(10px);
-            transition: transform 0.15s ease, background 0.2s ease;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.12s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.85), inset 0 2px 4px rgba(255, 255, 255, 0.35), inset 0 -3px 6px rgba(0, 0, 0, 0.75);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
+            flex-shrink: 0;
+            overflow: visible;
+            box-sizing: border-box;
         }
 
         .hud-btn:hover {
-            transform: scale(1.08);
-            background: rgba(45, 52, 54, 0.8);
+            transform: translateY(-2px) scale(1.06);
+            border-color: #38bdf8;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.85), inset 0 2px 4px rgba(255, 255, 255, 0.45), 0 0 16px rgba(56, 189, 248, 0.4);
         }
 
         .hud-btn:active {
-            transform: scale(0.95);
+            transform: translateY(3px) scale(0.94);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), inset 0 4px 8px rgba(0, 0, 0, 0.95);
+            filter: brightness(0.88);
         }
 
-        /* Score Pill Center */
+        /* Rough 3D Tavern Match Scoreboard Plaque */
         .score-pill-container {
             display: flex;
             align-items: center;
-            background: rgba(30, 39, 46, 0.75);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 9999px;
-            padding: 6px 24px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-            cursor: pointer;
-            transition: transform 0.15s ease;
-        }
-
-        .score-pill-container:hover {
-            transform: scale(1.03);
+            justify-content: center;
+            background: linear-gradient(180deg, #1B1E26 0%, #111318 100%);
+            border: 2.5px solid rgba(255, 255, 255, 0.14);
+            border-top: 3px solid rgba(255, 255, 255, 0.32);
+            border-bottom: 3.5px solid #000000;
+            border-radius: 18px;
+            padding: 5px 22px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), inset 0 2px 3px rgba(255, 255, 255, 0.15), inset 0 -2px 5px rgba(0, 0, 0, 0.7);
+            cursor: default;
+            gap: 16px;
         }
 
         .score-side {
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 80px;
+            min-width: 65px;
         }
 
         .score-side-label {
-            font-size: 0.85rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            color: rgba(255, 255, 255, 0.85);
+            font-family: var(--font-heading);
+            font-size: 0.95rem;
+            letter-spacing: 1.5px;
+            color: #9CA3AF;
             text-transform: uppercase;
+            margin-bottom: -3px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
         }
 
         .score-side-val {
-            font-size: 1.8rem;
-            font-weight: 900;
-            line-height: 1.1;
+            font-family: var(--font-heading);
+            font-size: 2.1rem;
+            line-height: 1;
+            letter-spacing: 0.5px;
         }
 
-        .score-you .score-side-val { color: #ff5252; }
-        .score-bot .score-side-val { color: #00d2d3; }
+        .score-you .score-side-val {
+            color: #FF4D4D;
+            text-shadow: 0 3px 0 #991b1b, 0 6px 14px rgba(239, 68, 68, 0.55);
+        }
 
-        .score-vs-divider {
-            margin: 0 16px;
+        .score-bot .score-side-val {
+            color: #38BDF8;
+            text-shadow: 0 3px 0 #0369a1, 0 6px 14px rgba(56, 189, 248, 0.55);
+        }
+
+        /* 3D Gold Rivet VS Center Badge */
+        .score-vs-badge {
+            font-family: var(--font-heading);
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            background: linear-gradient(180deg, #FFCC00 0%, #E6B800 100%);
+            color: #111318;
+            border: 2px solid #FFFFFF;
+            border-bottom: 3.5px solid #C79F00;
+            border-radius: 8px;
+            padding: 2px 10px;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
             display: flex;
-            flex-direction: column;
             align-items: center;
-        }
-
-        .score-vs-text {
-            font-size: 1.2rem;
-            font-weight: 900;
-            color: #fff;
-            border-bottom: 2px solid #fff;
-            padding: 0 4px;
+            justify-content: center;
+            flex-shrink: 0;
+            line-height: 1;
         }
 
         /* Canvas Stage */
@@ -236,35 +296,61 @@
             bottom: 20%;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 1.6rem;
-            font-weight: 900;
+            font-family: var(--font-heading);
+            font-size: 1.55rem;
             letter-spacing: 2px;
-            color: #fff;
-            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            color: #FFCC00;
+            text-shadow: 0 3px 0 #855e00, 0 6px 16px rgba(0, 0, 0, 0.85);
             z-index: 25;
             pointer-events: none;
             text-transform: uppercase;
+            background: linear-gradient(180deg, #1B1E26 0%, #111318 100%);
+            border: 2.5px solid rgba(255, 255, 255, 0.18);
+            border-top: 3px solid rgba(255, 255, 255, 0.35);
+            border-bottom: 3.5px solid #000000;
+            border-radius: 14px;
+            padding: 6px 24px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.85);
         }
 
-        /* Help Icon Button */
+        /* Perfectly Smooth 3D Circular Settings Icon Button */
         .btn-help {
             position: absolute;
             bottom: 22%;
             left: 36px;
             width: 48px;
             height: 48px;
+            min-width: 48px;
+            min-height: 48px;
             border-radius: 50%;
-            background: rgba(45, 52, 54, 0.55);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            color: #fff;
-            font-size: 1.5rem;
-            font-weight: 900;
-            display: flex;
+            aspect-ratio: 1 / 1;
+            background: radial-gradient(circle at 35% 32%, #3a475a 0%, #1e2837 55%, #0e1622 100%);
+            border: 2px solid rgba(255, 255, 255, 0.22);
+            color: #f1f5f9;
+            font-size: 1.35rem;
+            line-height: 1;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.85), inset 0 2px 4px rgba(255, 255, 255, 0.35), inset 0 -3px 6px rgba(0, 0, 0, 0.75);
             z-index: 30;
-            backdrop-filter: blur(8px);
+            transition: transform 0.12s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+            flex-shrink: 0;
+            overflow: visible;
+            box-sizing: border-box;
+        }
+
+        .btn-help:hover {
+            transform: translateY(-2px) scale(1.06);
+            border-color: #38bdf8;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.85), inset 0 2px 4px rgba(255, 255, 255, 0.45), 0 0 16px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn-help:active {
+            transform: translateY(3px) scale(0.94);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), inset 0 4px 8px rgba(0, 0, 0, 0.95);
+            filter: brightness(0.88);
         }
 
         /* Throw Tip Banner */
@@ -273,36 +359,39 @@
             bottom: 4%;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.55);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(8, 14, 26, 0.96));
+            border: 1.5px solid rgba(255, 255, 255, 0.14);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.28);
+            border-radius: 12px;
             padding: 8px 24px;
-            border-radius: 9999px;
-            font-size: 0.95rem;
-            font-weight: 800;
-            z-index: 30;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            font-weight: 700;
+            z-index: 25;
             pointer-events: none;
-            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+            white-space: nowrap;
         }
 
         .throw-tip span {
             color: #fbc531;
         }
 
-        /* Mode & Settings Modal */
+        /* Photo-Realistic Dart Master Home Screen Viewport */
         .modal-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(10, 15, 25, 0.85);
-            backdrop-filter: blur(14px);
+            background: #000000;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 100;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.25s ease;
-            padding: 24px;
+            transition: opacity 0.3s ease;
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: 10px;
         }
 
         .modal-overlay.active {
@@ -310,102 +399,642 @@
             pointer-events: auto;
         }
 
-        .modal-box {
-            background: #1e293b;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
-            padding: 28px;
-            width: 100%;
-            max-width: 420px;
+        /* Match Result Modal Styling */
+        #resultModal {
+            background: rgba(4, 8, 18, 0.88) !important;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            z-index: 100;
+        }
+
+        .result-modal-box {
+            background: linear-gradient(165deg, rgba(26, 38, 57, 0.96), rgba(13, 20, 36, 0.98));
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            padding: 34px 36px 30px;
+            max-width: 440px;
+            width: 90%;
             text-align: center;
-            color: #fff;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            animation: modalPopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-family: 'Outfit', sans-serif;
         }
 
-        .modal-title {
-            font-size: 2rem;
+        @keyframes modalPopIn {
+            0% { transform: scale(0.85); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .result-title {
+            font-size: 2.3rem;
             font-weight: 900;
-            margin-bottom: 6px;
-            color: #fbc531;
+            margin: 0;
+            line-height: 1.15;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .modal-sub {
+        .result-title.win {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 18px rgba(251, 191, 36, 0.45));
+        }
+
+        .result-title.lose {
+            background: linear-gradient(135deg, #ff6b81, #ff4757, #ee5253);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 18px rgba(255, 71, 87, 0.45));
+        }
+
+        .result-sub {
             font-size: 0.95rem;
             color: #94a3b8;
+            margin-top: 8px;
             margin-bottom: 22px;
+            font-weight: 500;
+            line-height: 1.4;
         }
 
-        .mode-button-group {
+        .result-score-grid {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .result-score-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-score-label {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #94a3b8;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .result-score-val {
+            font-size: 2.2rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .result-score-card.p1 .result-score-val {
+            color: #ff4757;
+            text-shadow: 0 0 12px rgba(255, 71, 87, 0.35);
+        }
+
+        .result-score-card.p2 .result-score-val {
+            color: #00d2d3;
+            text-shadow: 0 0 12px rgba(0, 210, 211, 0.35);
+        }
+
+        .result-actions {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 22px;
         }
 
-        .mode-choice-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            border-radius: 16px;
-            padding: 14px 18px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 1.15rem;
-            font-weight: 800;
+        .result-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: var(--font-heading);
+            text-decoration: none;
             cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            box-sizing: border-box;
+            letter-spacing: 0.5px;
+        }
+
+        .result-btn-primary {
+            background: linear-gradient(180deg, #27D17F 0%, #1fae68 100%);
+            border: 2px solid #ffffff;
+            border-bottom: 4px solid #15803d;
+            border-radius: 9999px;
+            color: #ffffff;
+            font-size: 1.15rem;
+            padding: 12px 26px;
+            box-shadow: 0 6px 18px rgba(39, 209, 127, 0.4);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .result-btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(39, 209, 127, 0.6);
+            background: linear-gradient(180deg, #34d399 0%, #27D17F 100%);
+        }
+
+        .result-btn-primary:active {
+            transform: translateY(3px) scale(0.96);
+            box-shadow: 0 2px 6px rgba(39, 209, 127, 0.4), inset 0 3px 6px rgba(0, 0, 0, 0.6);
+            filter: brightness(0.88);
+        }
+
+        .result-btn-secondary {
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            border-radius: 14px;
+            color: #f1f5f9;
+            font-size: 1.02rem;
+            padding: 12px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 2px 3px rgba(255, 255, 255, 0.2), inset 0 -2px 5px rgba(0, 0, 0, 0.6);
+            box-sizing: border-box;
+        }
+
+        .result-btn-secondary:hover {
+            background: linear-gradient(180deg, #475569 0%, #334155 100%);
+            border-color: rgba(255, 255, 255, 0.35);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .result-btn-secondary:active {
+            transform: translateY(3px) scale(0.96);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), inset 0 3px 6px rgba(0, 0, 0, 0.8);
+            filter: brightness(0.88);
+        }
+
+        .result-btn-hub {
+            background: rgba(14, 165, 233, 0.12);
+            border: 1.5px solid rgba(56, 189, 248, 0.35);
+            border-radius: 12px;
+            color: #38bdf8;
+            font-size: 0.95rem;
+            padding: 10px 18px;
+        }
+
+        .result-btn-hub:hover {
+            background: rgba(14, 165, 233, 0.22);
+            border-color: rgba(56, 189, 248, 0.6);
+            color: #7dd3fc;
+            transform: translateY(-1px);
+        }
+
+        /* 3D Venue & Lighting Modal */
+        #venueModal {
+            background: rgba(4, 8, 18, 0.9) !important;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            z-index: 100;
+        }
+
+        .venue-modal-box {
+            background: linear-gradient(180deg, #1B1E26 0%, #111318 100%);
+            border: 2px solid rgba(255, 255, 255, 0.16);
+            border-top: 3px solid rgba(255, 255, 255, 0.3);
+            border-bottom: 4px solid #000000;
+            border-radius: 24px;
+            padding: 26px 28px;
+            max-width: 520px;
+            width: 92%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 45px rgba(56, 189, 248, 0.15);
+            font-family: var(--font-body);
+            animation: modalPopIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-sizing: border-box;
+        }
+
+        .venue-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #cbd5e1;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            transition: all 0.2s ease;
-        }
-
-        .mode-choice-btn.active {
-            background: #ff4757;
-            border-color: #ff6b81;
-            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
-        }
-
-        .score-choice-row {
-            display: flex;
-            gap: 12px;
             justify-content: center;
-            margin-bottom: 26px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
 
-        .score-btn {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-            padding: 12px;
+        .venue-close-btn:hover {
+            background: rgba(239, 68, 68, 0.8);
             color: #fff;
-            font-family: inherit;
-            font-size: 1.05rem;
-            font-weight: 800;
-            cursor: pointer;
         }
 
-        .score-btn.active {
-            background: #2ed573;
-            border-color: #7bed9f;
-        }
-
-        .btn-start-game {
-            width: 100%;
-            background: linear-gradient(135deg, #fbc531, #e1b12c);
-            color: #2f3640;
-            border: none;
-            border-radius: 16px;
-            padding: 16px;
-            font-size: 1.3rem;
+        .venue-section-label {
+            font-size: 0.78rem;
             font-weight: 900;
-            font-family: inherit;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(251, 197, 49, 0.4);
-            transition: transform 0.15s ease;
+            letter-spacing: 1.5px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-align: left;
         }
 
-        .btn-start-game:hover {
-            transform: scale(1.03);
+        .venue-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .venue-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .venue-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(56, 189, 248, 0.6);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .venue-card.active {
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4), inset 0 0 0 1px #38bdf8;
+            background: rgba(14, 165, 233, 0.14);
+        }
+
+        .venue-card-img {
+            width: 100%;
+            height: 68px;
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .venue-card-info {
+            padding: 8px 10px 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .venue-card-name {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .venue-card-tag {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .lighting-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .lighting-btn {
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            border-radius: 14px;
+            color: #cbd5e1;
+            font-size: 0.88rem;
+            font-weight: 800;
+            padding: 10px 6px;
+            cursor: pointer;
+            font-family: var(--font-heading);
+            letter-spacing: 0.5px;
+            transition: all 0.15s ease;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 2px 3px rgba(255, 255, 255, 0.2), inset 0 -2px 5px rgba(0, 0, 0, 0.6);
+            box-sizing: border-box;
+        }
+
+        .lighting-btn:hover {
+            background: linear-gradient(180deg, #475569 0%, #334155 100%);
+            border-color: rgba(255, 255, 255, 0.35);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.65), inset 0 2px 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .lighting-btn.active {
+            background: linear-gradient(180deg, #0284c7 0%, #1d4ed8 100%);
+            border: 2px solid #38bdf8;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.55), inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.6);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+        }
+
+        /* 16:9 Image/Video Viewport (Using Master Animated Background) */
+        .dart-home-viewport {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: calc((100vh - 20px) * (1672 / 941));
+            max-height: calc((100vw - 20px) * (941 / 1672));
+            aspect-ratio: 1672 / 941;
+            background: #000 url('dart_home_bg.webp') no-repeat center center / contain;
+            margin: auto;
+            border-radius: 16px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
+            perspective: 1200px;
+            transform-style: preserve-3d;
+            overflow: hidden;
+        }
+
+        .dart-home-bg-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            z-index: 1;
+            display: block;
+        }
+
+        /* 3D UI Overlay Container Positioned Over Left Wooden Signboard Planks */
+        .home-board-ui-container {
+            position: absolute;
+            left: 13.8%;
+            top: 32.2%;
+            width: 22.6%;
+            height: 52.0%;
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            row-gap: 2.2%;
+            box-sizing: border-box;
+            z-index: 20;
+            transform-style: preserve-3d;
+            padding: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(8px);
+        }
+
+        .home-board-ui-container.ready {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        /* Settings Gear Button at Top-Left of Screen */
+        .menu-gear-btn {
+            position: absolute;
+            top: 24px;
+            left: 28px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 32%, #3a475a 0%, #1e2837 55%, #0e1622 100%);
+            border: 2px solid rgba(255, 255, 255, 0.22);
+            color: #f1f5f9;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.8), inset 0 2px 3px rgba(255,255,255,0.3);
+            transition: transform 0.15s ease, border-color 0.15s ease, opacity 0.4s ease;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .menu-gear-btn.ready {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .menu-gear-btn:hover {
+            transform: rotate(45deg) scale(1.08);
+            border-color: #38bdf8;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.9), 0 0 16px rgba(56,189,248,0.4);
+        }
+
+        .home-board-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            width: 100%;
+            height: 100%;
+            max-height: 36px;
+            box-sizing: border-box;
+            margin: auto 0;
+        }
+
+        /* GameButton Base Component (Tailwind/React Specs with Real 3D Physical Board Presence) */
+        .game-btn {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-height: 36px;
+            min-height: 28px;
+            margin: auto 0;
+            border-radius: 9px;
+            border: 1.5px solid;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            padding: 0 12px;
+            color: #ffffff;
+            font-family: 'Rubik', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            font-size: clamp(0.72rem, 0.88vw, 0.82rem);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            text-decoration: none;
+            box-sizing: border-box;
+            overflow: hidden;
+            transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* 2px White Highlight Line at Top */
+        .game-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1.5px;
+            background: rgba(255, 255, 255, 0.25);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Subtle Top-to-Bottom White Fade Sheen */
+        .game-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, transparent 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* 3D Physical Push into Panel */
+        .game-btn:active {
+            transform: translateY(3.5px) !important;
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        .game-btn-icon {
+            position: relative;
+            z-index: 10;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .game-btn-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .game-btn-label {
+            position: relative;
+            z-index: 10;
+            white-space: nowrap;
+            font-weight: 700;
+        }
+
+        .game-btn-arrow {
+            position: absolute;
+            right: 12px;
+            z-index: 10;
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1;
+            font-family: sans-serif;
+        }
+
+        /* Variant: RED */
+        .game-btn-red {
+            background-color: #9f2424;
+            border-color: #d84b43;
+            box-shadow: 0 3.5px 0 #641313, 0 6px 12px rgba(0, 0, 0, 0.6);
+        }
+        .game-btn-red:hover {
+            background-color: #b52d2d;
+        }
+        .game-btn-red.active {
+            border-color: #ff7675;
+            box-shadow: 0 3.5px 0 #641313, 0 6px 14px rgba(216, 75, 67, 0.45);
+        }
+
+        /* Variant: BLUE / DARK SLATE */
+        .game-btn-blue {
+            background-color: #182a35;
+            border-color: #31566b;
+            box-shadow: 0 3.5px 0 #0b151b, 0 6px 12px rgba(0, 0, 0, 0.6);
+        }
+        .game-btn-blue:hover {
+            background-color: #213946;
+        }
+        .game-btn-blue.active {
+            border-color: #38bdf8;
+            box-shadow: 0 3.5px 0 #0b151b, 0 6px 14px rgba(56, 189, 248, 0.4);
+        }
+
+        /* Variant: GREEN */
+        .game-btn-green {
+            background-color: #126238;
+            border-color: #269457;
+            box-shadow: 0 3.5px 0 #08351f, 0 6px 12px rgba(0, 0, 0, 0.6);
+        }
+        .game-btn-green:hover {
+            background-color: #167546;
+        }
+        .game-btn-green.active {
+            border-color: #4ade80;
+            box-shadow: 0 3.5px 0 #08351f, 0 6px 14px rgba(38, 148, 87, 0.45);
+        }
+
+        /* Variant: GOLD */
+        .game-btn-gold {
+            background-color: #d99a00;
+            border-color: #ffc72c;
+            box-shadow: 0 3.5px 0 #875c00, 0 6px 12px rgba(0, 0, 0, 0.65);
+            color: #ffffff;
+            justify-content: center;
+        }
+        .game-btn-gold:hover {
+            background-color: #e9a900;
+        }
+
+        /* Variant: PURPLE */
+        .game-btn-purple {
+            background-color: #171d3d;
+            border-color: #414b91;
+            box-shadow: 0 3.5px 0 #0b0e20, 0 6px 12px rgba(0, 0, 0, 0.6);
+            justify-content: center;
+        }
+        .game-btn-purple:hover {
+            background-color: #202752;
+        }
+
+        /* Split Row Buttons (301 Fast & 501 Official) */
+        .game-btn-split {
+            height: 36px;
+            max-height: 36px;
+            justify-content: center;
+            padding: 0 6px;
+            font-size: 0.80rem;
+        }
+
+        /* Dynamic 3D Touch Push & Spring Bounce-Back Animation */
+        @keyframes tactile3DPushBounce {
+            0% {
+                transform: scale(1) translateY(0);
+            }
+            35% {
+                transform: scale(0.91) translateY(5px);
+                filter: brightness(0.85);
+            }
+            70% {
+                transform: scale(1.05) translateY(-3px);
+                filter: brightness(1.12);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                filter: brightness(1);
+            }
+        }
+
+        .btn-3d-active-anim {
+            animation: tactile3DPushBounce 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        }
+
+        /* Match Result Modal Styling */
+        .result-modal-box {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 2.5px solid rgba(255, 255, 255, 0.18);
+            border-radius: 24px;
+            padding: 28px 24px;
+            width: 90%;
+            max-width: 420px;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            font-family: 'Outfit', sans-serif;
         }
 
         .result-title.win {
@@ -608,37 +1237,25 @@
         }
 
         body.portal-paused #game-view-wrapper {
-            padding-top: 60px;
+            padding-top: 0;
         }
 
         body.portal-paused .portal-center-col {
-            padding: 16px 300px 24px 90px;
+            padding: 76px 300px 24px 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
         }
 
         body.portal-paused #gameApp {
+            width: 860px !important;
             max-width: 860px !important;
-            height: 520px !important;
-            max-height: 520px !important;
+            height: 500px !important;
+            max-height: 500px !important;
             border-radius: 18px !important;
             border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
             box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.25) !important;
-        }
-
-        .portal-topbar {
-            height: 60px;
-            background: rgba(11, 18, 32, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            gap: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            font-family: 'Outfit', sans-serif;
         }
 
         .portal-nav-left {
@@ -769,13 +1386,13 @@
         .portal-resume-btn {
             display: inline-flex;
             align-items: center;
-            padding: 8px 16px;
+            padding: 8px 18px;
             background: linear-gradient(135deg, #0284c7, #2563eb);
             border: 1px solid rgba(56, 189, 248, 0.4);
             border-radius: 999px;
             color: #fff;
             font-weight: 900;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             cursor: pointer;
             box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
             transition: 0.2s;
@@ -785,18 +1402,6 @@
         .portal-resume-btn:hover {
             transform: scale(1.04);
             box-shadow: 0 6px 20px rgba(2, 132, 199, 0.6);
-        }
-
-        .portal-sidebar {
-            width: 68px;
-            background: #080d19;
-            border-right: 1px solid rgba(255, 255, 255, 0.06);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 16px 0;
-            gap: 10px;
-            font-family: 'Outfit', sans-serif;
         }
 
         .side-btn {
@@ -811,6 +1416,7 @@
             text-decoration: none;
             transition: 0.2s;
             background: transparent;
+            font-family: 'Outfit', sans-serif;
         }
 
         .side-btn span {
@@ -827,22 +1433,6 @@
             background: rgba(56, 189, 248, 0.15);
             color: #38bdf8;
             border: 1px solid rgba(56, 189, 248, 0.3);
-        }
-
-        .game-meta-bar {
-            width: 100%;
-            max-width: 860px;
-            margin-top: 12px;
-            padding: 14px 18px;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            font-family: 'Outfit', sans-serif;
         }
 
         .game-meta-info {
@@ -919,17 +1509,6 @@
             color: #38bdf8;
         }
 
-        .portal-rec-col {
-            width: 290px;
-            background: #080d19;
-            border-left: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 16px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            font-family: 'Outfit', sans-serif;
-        }
-
         .rec-header {
             display: flex;
             justify-content: space-between;
@@ -939,6 +1518,7 @@
             letter-spacing: 1px;
             color: #94a3b8;
             margin-bottom: 4px;
+            font-family: 'Outfit', sans-serif;
         }
 
         .rec-header a {
@@ -966,6 +1546,7 @@
             transition: 0.2s;
             position: relative;
             overflow: hidden;
+            font-family: 'Outfit', sans-serif;
         }
 
         .rec-card:hover {
@@ -1015,35 +1596,59 @@
             border: 1px solid rgba(56, 189, 248, 0.3);
         }
 
-        /* Frosted Pause Screen Inside Game Container */
-        .pause-modal-card {
-            position: absolute;
+        body.portal-paused #krazio-floating-back {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 3-Second Resume Countdown Overlay */
+        .resume-countdown-overlay {
+            position: fixed;
             inset: 0;
-            background: rgba(7, 13, 24, 0.88);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            display: none;
+            z-index: 999999;
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 50;
-            padding: 20px;
-            font-family: 'Outfit', sans-serif;
+            background: rgba(10, 15, 29, 0.72);
+            backdrop-filter: blur(12px);
+            pointer-events: all;
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
-
-        body.portal-paused .pause-modal-card {
-            display: flex;
+        .resume-countdown-overlay.active {
+            opacity: 1;
+        }
+        .resume-countdown-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 8rem;
+            font-weight: 900;
+            color: #38bdf8;
+            text-shadow: 0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(56, 189, 248, 0.5);
+            line-height: 1;
+            transform: scale(1.5);
+            opacity: 0;
+            animation: countdownPop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .resume-countdown-sub {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.95);
+            margin-top: 14px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+        }
+        @keyframes countdownPop {
+            0% { transform: scale(1.6); opacity: 0; }
+            20% { transform: scale(1); opacity: 1; }
+            80% { transform: scale(0.95); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Simple Backward Arrow Button -->
-    <a href="../index.html" id="krazio-floating-back" title="Back to Portal" aria-label="Back">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5M12 19l-7-7 7-7"/>
-      </svg>
-    </a>
 
     <!-- Master Game View Wrapper -->
     <div id="game-view-wrapper">
@@ -1071,7 +1676,7 @@
         <div class="portal-nav-right">
           <div class="portal-bank-badge" id="portal-top-bank">🪙 70 P</div>
           <button id="btn-portal-maximize" class="portal-resume-btn" onclick="resumeDartGame()">
-            <span>▶️ RESUME (ESC)</span>
+            <span>▶️ RESUME</span>
           </button>
         </div>
       </header>
@@ -1093,24 +1698,38 @@
           <div id="gameApp">
             <!-- Top HUD -->
             <header class="top-hud">
-                <button class="hud-btn" id="btnOpenMenu" title="Home Menu & Game Settings">📋</button>
+                <div class="top-hud-left">
+                    <a href="../index.html" class="hud-btn" id="btnBackHome" title="Back to Arcade Portal" aria-label="Back">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                      </svg>
+                    </a>
+                    <button class="hud-btn" id="btnOpenMenu" title="Home Menu & Game Settings">📋</button>
+                </div>
 
-                <div class="score-pill-container" id="scorePillHUD" title="Current Score">
-                    <div class="score-side score-you">
-                        <span class="score-side-label" id="p1Label">YOU</span>
-                        <span class="score-side-val" id="p1Score">301</span>
+                <div class="top-hud-center">
+                    <div class="score-pill-container" id="scorePillHUD" title="Current Match Score">
+                        <div class="score-side score-you">
+                            <span class="score-side-label" id="p1Label">YOU</span>
+                            <span class="score-side-val" id="p1Score">301</span>
+                        </div>
+                        <div class="score-vs-badge">VS</div>
+                        <div class="score-side score-bot">
+                            <span class="score-side-label" id="p2Label">BOT</span>
+                            <span class="score-side-val" id="p2Score">301</span>
+                        </div>
                     </div>
-                <div class="score-vs-divider">
-                    <span class="score-vs-text">VS</span>
                 </div>
-                <div class="score-side score-bot">
-                    <span class="score-side-label" id="p2Label">BOT</span>
-                    <span class="score-side-val" id="p2Score">301</span>
-                </div>
-            </div>
 
-            <button class="hud-btn" id="btnRestart" title="Restart Match">↻</button>
-        </header>
+                <div class="top-hud-right">
+                    <button class="hud-btn" id="btnVenueSelect" title="Change 3D Venue & Lighting">🏟️</button>
+                    <button class="hud-btn" id="btnPause" title="Pause Game" onclick="window.pauseDartGame()">⏸️</button>
+                    <button class="hud-btn" id="btnRestart" title="Restart Match">↻</button>
+                </div>
+            </header>
+
+        <!-- Dynamic 3D Room Lighting Overlay (Warm, Side, Cool) -->
+        <div class="room-lighting-overlay"></div>
 
         <!-- Main Interactive Canvas Stage -->
         <div class="canvas-container">
@@ -1129,36 +1748,70 @@
         <!-- Throw Instructions -->
         <div class="throw-tip">🎯 <span>CLICK / TAP:</span> Stop horizontal meter, then vertical meter to throw!</div>
 
-        <!-- Dedicated Start / Home Screen Modal -->
+        <!-- Dedicated Start / Home Screen Viewport (Using Master Animated Background Video) -->
         <div class="modal-overlay active" id="modalOverlay">
-            <div class="modal-box">
-                <h2 class="modal-title">🎯 DART MASTER</h2>
-                <p class="modal-sub">Select Game Mode & Opponent</p>
+            <div class="dart-home-viewport">
+                <!-- Atmospheric Animated Background Video (Plays Once On Entry, Then Remains Static Image) -->
+                <video id="dartHomeBgVideo" class="dart-home-bg-video" autoplay muted playsinline poster="dart_home_bg.webp">
+                    <source src="dart_home_bg.webm" type="video/webm">
+                </video>
 
-                <div class="mode-button-group">
-                    <button class="mode-choice-btn active" data-mode="bot">
-                        <span>🤖 Play vs Bot (1v1 Turns)</span>
-                        <span>›</span>
-                    </button>
-                    <button class="mode-choice-btn" data-mode="pass">
-                        <span>👥 Pass & Play (2 Players)</span>
-                        <span>›</span>
-                    </button>
-                    <button class="mode-choice-btn" data-mode="multiplayer">
-                        <span>🌐 Multiplayer Arena</span>
-                        <span>›</span>
-                    </button>
-                </div>
+                <!-- Settings Gear Button at Top-Left of Screen -->
+                <button class="menu-gear-btn" id="btnHomeSettings" title="Game Settings & Help">⚙️</button>
 
-                <div class="score-choice-row">
-                    <button class="score-btn active" data-score="301">301 Fast</button>
-                    <button class="score-btn" data-score="501">501 Official</button>
-                </div>
+                <!-- Interactive 3D UI Overlay Container Over Wooden Signboard (Exactly 6 Planks) -->
+                <div class="home-board-ui-container" id="homeBoardUI">
+                    <!-- Plank 1: Play vs Bot -->
+                    <button class="game-btn game-btn-red btn-home-mode active" data-mode="bot">
+                        <span class="game-btn-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                        </span>
+                        <span class="game-btn-label">Play vs Bot (1v1 Turns)</span>
+                        <span class="game-btn-arrow">›</span>
+                    </button>
 
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn-start-game" id="btnStartGame">🎯 START MATCH</button>
-                    <a href="../index.html" class="mode-choice-btn" style="text-decoration: none; justify-content: center; font-size: 1rem; border-color: rgba(99, 102, 241, 0.4); color: #818cf8;">
-                        <span>🌐 KRAZY FUSE HUB</span>
+                    <!-- Plank 2: Pass & Play -->
+                    <button class="game-btn game-btn-blue btn-home-mode" data-mode="pass">
+                        <span class="game-btn-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </span>
+                        <span class="game-btn-label">Pass & Play (2 Players)</span>
+                        <span class="game-btn-arrow">›</span>
+                    </button>
+
+                    <!-- Plank 3: Multiplayer Arena -->
+                    <button class="game-btn game-btn-blue btn-home-mode" data-mode="multiplayer">
+                        <span class="game-btn-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                        </span>
+                        <span class="game-btn-label">Multiplayer Arena</span>
+                        <span class="game-btn-arrow">›</span>
+                    </button>
+
+                    <!-- Plank 4: 301 Fast / 501 Official Split Row -->
+                    <div class="home-board-row">
+                        <button class="game-btn game-btn-green game-btn-split btn-home-score active" data-score="301">
+                            <span class="game-btn-label">301 Fast</span>
+                        </button>
+                        <button class="game-btn game-btn-blue game-btn-split btn-home-score" data-score="501">
+                            <span class="game-btn-label">501 Official</span>
+                        </button>
+                    </div>
+
+                    <!-- Plank 5: START MATCH -->
+                    <button class="game-btn game-btn-gold" id="btnStartGame">
+                        <span class="game-btn-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                        </span>
+                        <span class="game-btn-label">START MATCH</span>
+                    </button>
+
+                    <!-- Plank 6: KRAZY FUSE HUB -->
+                    <a href="../index.html" target="_top" class="game-btn game-btn-purple">
+                        <span class="game-btn-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                        </span>
+                        <span class="game-btn-label">KRAZY FUSE HUB</span>
                     </a>
                 </div>
             </div>
@@ -1166,29 +1819,91 @@
 
         <!-- Match Result Modal (You Win / You Lose) -->
         <div class="modal-overlay" id="resultModal">
-            <div class="modal-box" style="text-align: center;">
-                <h2 class="modal-title" id="resultTitle" style="font-size: 2.2rem;">YOU WIN! 🏆</h2>
-                <p class="modal-sub" id="resultSub" style="font-size: 0.95rem; color: #a4b0be;">You reached 0 points first!</p>
+            <div class="result-modal-box">
+                <h2 class="result-title win" id="resultTitle">YOU WIN! 🏆</h2>
+                <p class="result-sub" id="resultSub">You reached 0 points first!</p>
 
-                <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 14px; margin: 16px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <div style="font-size: 0.8rem; color: #a4b0be; font-weight: 800;">YOU</div>
-                        <div id="resP1Score" style="font-size: 1.6rem; font-weight: 900; color: #ff4757;">0</div>
+                <div class="result-score-grid">
+                    <div class="result-score-card p1">
+                        <div class="result-score-label">YOU</div>
+                        <div class="result-score-val" id="resP1Score">0</div>
                     </div>
-                    <div>
-                        <div style="font-size: 0.8rem; color: #a4b0be; font-weight: 800;" id="resP2Name">BOT</div>
-                        <div id="resP2Score" style="font-size: 1.6rem; font-weight: 900; color: #00d2d3;">142</div>
+                    <div class="result-score-card p2">
+                        <div class="result-score-label" id="resP2Name">BOT</div>
+                        <div class="result-score-val" id="resP2Score">142</div>
                     </div>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn-start-game" id="btnResultPlayAgain">🔄 PLAY AGAIN</button>
-                    <button class="mode-choice-btn" id="btnResultHome" style="justify-content: center; font-size: 1rem;">
+                <div class="result-actions">
+                    <button class="result-btn result-btn-primary" id="btnResultPlayAgain">
+                        <span>🔄 PLAY AGAIN</span>
+                    </button>
+                    <button class="result-btn result-btn-secondary" id="btnResultHome">
                         <span>🏠 MAIN MENU (HOME)</span>
                     </button>
-                    <a href="../index.html" class="mode-choice-btn" style="text-decoration: none; justify-content: center; font-size: 1rem; border-color: rgba(99, 102, 241, 0.4); color: #818cf8;">
+                    <a href="../index.html" target="_top" class="result-btn result-btn-hub">
                         <span>🌐 KRAZY FUSE HUB</span>
                     </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D Venue & Lighting Selector Modal -->
+        <div class="modal-overlay" id="venueModal">
+            <div class="venue-modal-box">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <h2 style="font-size: 1.5rem; font-weight: 900; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <span>🏟️ 3D VENUES & LIGHTING</span>
+                    </h2>
+                    <button class="venue-close-btn" id="btnVenueClose" title="Close">✕</button>
+                </div>
+
+                <div class="venue-section-label">BACKGROUND VARIATIONS</div>
+                <div class="venue-grid">
+                    <div class="venue-card active" data-venue="wood">
+                        <div class="venue-card-img" style="background-image: url('venue_wood_classic.jpg');"></div>
+                        <div class="venue-card-info">
+                            <span class="venue-card-name">🪵 Wood Wall</span>
+                            <span class="venue-card-tag">Classic Warmth</span>
+                        </div>
+                    </div>
+
+                    <div class="venue-card" data-venue="brick">
+                        <div class="venue-card-img" style="background-image: url('venue_brick_pub.jpg');"></div>
+                        <div class="venue-card-info">
+                            <span class="venue-card-name">🧱 Brick Wall</span>
+                            <span class="venue-card-tag">English Pub</span>
+                        </div>
+                    </div>
+
+                    <div class="venue-card" data-venue="painted">
+                        <div class="venue-card-img" style="background-image: url('venue_painted_wood.jpg');"></div>
+                        <div class="venue-card-info">
+                            <span class="venue-card-name">🌲 Painted Wood</span>
+                            <span class="venue-card-tag">Rustic Green</span>
+                        </div>
+                    </div>
+
+                    <div class="venue-card" data-venue="stone">
+                        <div class="venue-card-img" style="background-image: url('venue_stone_tavern.jpg');"></div>
+                        <div class="venue-card-info">
+                            <span class="venue-card-name">🏰 Stone Wall</span>
+                            <span class="venue-card-tag">Medieval Tavern</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="venue-section-label" style="margin-top: 18px;">3D LIGHTING ATMOSPHERE</div>
+                <div class="lighting-row">
+                    <button class="lighting-btn active" data-lighting="warm">💡 Warm Overhead</button>
+                    <button class="lighting-btn" data-lighting="side">🌓 Side Light</button>
+                    <button class="lighting-btn" data-lighting="cool">❄️ Cool Ambient</button>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button class="result-btn result-btn-primary" id="btnVenueApply">
+                        <span>✓ APPLY & PLAY</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1201,7 +1916,7 @@
             <p style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 20px;">Taking a quick tactical breather...</p>
             <div style="display: flex; flex-direction: column; gap: 10px; max-width: 280px; margin: 0 auto; width: 100%;">
               <button class="portal-resume-btn" onclick="resumeDartGame()" style="justify-content: center; width: 100%; font-size: 1.05rem; padding: 12px 20px; background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56,189,248,0.4); border-radius: 999px; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.4);">
-                <span>▶️ RESUME (ESC)</span>
+                <span>▶️ RESUME</span>
               </button>
               <button onclick="resumeDartGame(); if (window.offlineDarts) window.offlineDarts.resetMatch();" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
                 <span>🔄 RESTART MATCH</span>
@@ -1452,10 +2167,114 @@
                 // 0 = X-axis (H) moving only, 1 = X locked & Y-axis (V) moving, 2 = Locked & Throw
                 this.meterStep = 0;
 
+                // 3D Background Venue & Lighting Preferences
+                this.currentVenue = localStorage.getItem('krazio_dart_venue') || 'wood';
+                this.currentLighting = localStorage.getItem('krazio_dart_lighting') || 'warm';
+                this.applyVenueAndLighting();
+
+                this.load3DAssets();
                 this.resizeCanvas();
                 this.setupEvents();
                 this.updateUI();
                 this.loop();
+            }
+
+            setVenue(venue) {
+                this.currentVenue = venue;
+                try { localStorage.setItem('krazio_dart_venue', venue); } catch(e) {}
+                this.applyVenueAndLighting();
+            }
+
+            setLighting(lighting) {
+                this.currentLighting = lighting;
+                try { localStorage.setItem('krazio_dart_lighting', lighting); } catch(e) {}
+                this.applyVenueAndLighting();
+            }
+
+            applyVenueAndLighting() {
+                if (!this.app) return;
+                this.app.classList.remove('venue-wood', 'venue-brick', 'venue-painted', 'venue-stone');
+                this.app.classList.remove('lighting-warm', 'lighting-side', 'lighting-cool');
+                this.app.classList.add(`venue-${this.currentVenue}`);
+                this.app.classList.add(`lighting-${this.currentLighting}`);
+
+                document.querySelectorAll('.venue-card').forEach(card => {
+                    card.classList.toggle('active', card.getAttribute('data-venue') === this.currentVenue);
+                });
+                document.querySelectorAll('.lighting-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-lighting') === this.currentLighting);
+                });
+            }
+
+            load3DAssets() {
+                this.assets = {
+                    boardReady: false,
+                    boardCanvas: null,
+                    dartRedReady: false,
+                    dartRedCanvas: null,
+                    dartBlueReady: false,
+                    dartBlueCanvas: null
+                };
+
+                // 1. Process 3D Dartboard Image
+                const imgBoard = new Image();
+                imgBoard.onload = () => {
+                    try {
+                        const c = document.createElement('canvas');
+                        c.width = imgBoard.width || 1024;
+                        c.height = imgBoard.height || 1024;
+                        const octx = c.getContext('2d');
+                        octx.beginPath();
+                        octx.arc(c.width / 2, c.height / 2, c.width * 0.485, 0, Math.PI * 2);
+                        octx.clip();
+                        octx.drawImage(imgBoard, 0, 0);
+                        this.assets.boardCanvas = c;
+                        this.assets.boardReady = true;
+                    } catch (err) {
+                        console.warn('Board asset load error:', err);
+                    }
+                };
+                imgBoard.src = 'dartboard_3d.jpg';
+
+                // 2. Helper for processing 3D Darts (Remove solid black background with soft alpha)
+                const processDart = (src, isRed) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        try {
+                            const c = document.createElement('canvas');
+                            c.width = img.width || 576;
+                            c.height = img.height || 1024;
+                            const octx = c.getContext('2d');
+                            octx.drawImage(img, 0, 0);
+
+                            const imgData = octx.getImageData(0, 0, c.width, c.height);
+                            const d = imgData.data;
+                            for (let i = 0; i < d.length; i += 4) {
+                                const maxLum = Math.max(d[i], d[i+1], d[i+2]);
+                                if (maxLum < 16) {
+                                    d[i+3] = 0;
+                                } else if (maxLum < 48) {
+                                    d[i+3] = Math.round(((maxLum - 16) / 32) * 255);
+                                }
+                            }
+                            octx.putImageData(imgData, 0, 0);
+
+                            if (isRed) {
+                                this.assets.dartRedCanvas = c;
+                                this.assets.dartRedReady = true;
+                            } else {
+                                this.assets.dartBlueCanvas = c;
+                                this.assets.dartBlueReady = true;
+                            }
+                        } catch (err) {
+                            console.warn('Dart asset alpha processing:', err);
+                        }
+                    };
+                    img.src = src;
+                };
+
+                processDart('dart_red_3d.jpg', true);
+                processDart('dart_blue_3d.jpg', false);
             }
 
             resizeCanvas() {
@@ -1469,8 +2288,15 @@
                 this.canvas.style.height = `${this.height}px`;
 
                 this.board.x = this.width / 2;
-                this.board.y = this.height * 0.38;
-                this.board.r = Math.min(this.width * 0.22, this.height * 0.25, 175);
+
+                // Adaptive dynamic clearance: Dartboard is lowered so overhead ceiling lamp is clearly visible
+                const maxRadiusByWidth = this.width * 0.17;
+                const maxRadiusByHeight = this.height * 0.20;
+                this.board.r = Math.max(88, Math.min(maxRadiusByWidth, maxRadiusByHeight, 138));
+
+                // Position board vertically centered around 44% of viewport height (full clearance for overhead pendant lamp)
+                this.board.y = Math.max(270, Math.min(this.height * 0.44, this.height - this.board.r - 170));
+
                 this.board.rInnerBull = this.board.r * 0.052;
                 this.board.rOuterBull = this.board.r * 0.12;
                 this.board.rTrebleIn = this.board.r * 0.54;
@@ -1479,13 +2305,13 @@
                 this.board.rDoubleOut = this.board.r * 1.0;
 
                 // Sliders positioned relative to dartboard
-                this.sliderV.x = this.board.x - this.board.r - 45;
+                this.sliderV.x = this.board.x - this.board.r - 42;
                 this.sliderV.y = this.board.y - this.board.r;
                 this.sliderV.w = 10;
                 this.sliderV.h = this.board.r * 2;
 
                 this.sliderH.x = this.board.x - this.board.r * 0.85;
-                this.sliderH.y = this.board.y + this.board.r + 42;
+                this.sliderH.y = this.board.y + this.board.r + 38;
                 this.sliderH.w = this.board.r * 1.7;
                 this.sliderH.h = 10;
 
@@ -1497,9 +2323,19 @@
 
             setupEvents() {
                 window.addEventListener('resize', () => this.resizeCanvas());
+                document.addEventListener('fullscreenchange', () => setTimeout(() => this.resizeCanvas(), 60));
+                document.addEventListener('webkitfullscreenchange', () => setTimeout(() => this.resizeCanvas(), 60));
+                window.addEventListener('orientationchange', () => setTimeout(() => this.resizeCanvas(), 100));
 
                 const handleTap = (e) => {
+                    const modal = document.getElementById('modalOverlay');
+                    const resultModal = document.getElementById('resultModal');
+                    const venueModal = document.getElementById('venueModal');
+                    if (modal && modal.classList.contains('active')) return;
+                    if (resultModal && resultModal.classList.contains('active')) return;
+                    if (venueModal && venueModal.classList.contains('active')) return;
                     if (this.isPaused || this.gameOver || this.flyingDart || (this.turn === 1 && this.gameMode === 'bot')) return;
+                    ensureFullScreen();
                     audio.init();
 
                     if (this.meterStep === 0) {
@@ -1537,26 +2373,119 @@
                 const btnResultPlayAgain = document.getElementById('btnResultPlayAgain');
                 const btnResultHome = document.getElementById('btnResultHome');
 
+                const venueModal = document.getElementById('venueModal');
+                const btnVenueSelect = document.getElementById('btnVenueSelect');
+                const btnVenueClose = document.getElementById('btnVenueClose');
+                const btnVenueApply = document.getElementById('btnVenueApply');
+
+                if (btnVenueSelect && venueModal) {
+                    btnVenueSelect.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        audio.playHit();
+                        if (resultModal) resultModal.classList.remove('active');
+                        venueModal.classList.add('active');
+                    });
+                }
+
+                if (btnVenueClose && venueModal) {
+                    btnVenueClose.addEventListener('click', () => {
+                        venueModal.classList.remove('active');
+                    });
+                }
+
+                if (btnVenueApply && venueModal) {
+                    btnVenueApply.addEventListener('click', () => {
+                        ensureFullScreen();
+                        audio.playHit();
+                        venueModal.classList.remove('active');
+                    });
+                }
+
+                // Venue selection cards
+                document.querySelectorAll('.venue-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const venue = card.getAttribute('data-venue');
+                        if (venue) {
+                            audio.playHit();
+                            this.setVenue(venue);
+                        }
+                    });
+                });
+
+                // Lighting selection buttons
+                document.querySelectorAll('.lighting-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const lighting = btn.getAttribute('data-lighting');
+                        if (lighting) {
+                            audio.playHit();
+                            this.setLighting(lighting);
+                        }
+                    });
+                });
+
+                // Global 3D Touch Push & Spring Bounce-Back Animation Trigger
+                document.addEventListener('pointerdown', (e) => {
+                    const btn = e.target.closest('.hud-btn, .btn-help, .dart-home-btn, .lighting-btn, .venue-card, .result-btn, .result-btn-primary, .result-btn-secondary, .result-btn-hub, .portal-resume-btn, .btn-home-mode, .btn-home-score, .btn-home-start, .btn-home-hub, .btn-home-settings, button, a.hud-btn');
+                    if (btn) {
+                        btn.classList.remove('btn-3d-active-anim');
+                        void btn.offsetWidth; // Force CSS reflow to re-trigger spring bounce animation
+                        btn.classList.add('btn-3d-active-anim');
+                    }
+                });
+
+                const btnHomeSettings = document.getElementById('btnHomeSettings');
+                if (btnHomeSettings) {
+                    btnHomeSettings.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        audio.playHit();
+                        alert('⚙️ DART MASTER SETTINGS:\n\n• Sound & Audio Effects: ON\n• High-Precision Timing: ENABLED\n• 3D Trajectory Physics: ACTIVE\n\n🎯 HOW TO PLAY:\n1. Click/tap to stop the horizontal aiming bar.\n2. Click/tap again to set vertical elevation and throw!');
+                    });
+                }
+
+                const triggerHomeVideoPlay = () => {
+                    const v = document.querySelector('.dart-home-bg-video');
+                    if (v && v.paused) {
+                        v.play().catch(() => {});
+                    }
+                };
+                document.addEventListener('pointerdown', triggerHomeVideoPlay, { once: true, passive: true });
+
                 if (btnOpenMenu && modal) {
                     btnOpenMenu.addEventListener('click', () => {
                         if (resultModal) resultModal.classList.remove('active');
+                        if (venueModal) venueModal.classList.remove('active');
                         modal.classList.add('active');
+                        triggerHomeVideoPlay();
                     });
                 }
                 if (btnHelp && modal) {
                     btnHelp.addEventListener('click', () => {
                         if (resultModal) resultModal.classList.remove('active');
+                        if (venueModal) venueModal.classList.remove('active');
                         modal.classList.add('active');
+                        triggerHomeVideoPlay();
                     });
                 }
 
                 function ensureFullScreen() {
-                    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+                    if (!isFs) {
                         const el = document.documentElement;
-                        const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-                        if (req) req.call(el).catch(() => {});
+                        const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+                        if (req) {
+                            req.call(el).then(() => {
+                                if (window.offlineDarts) window.offlineDarts.resizeCanvas();
+                            }).catch(() => {});
+                        }
                     }
                 }
+
+                // Any user click on the game or home screen triggers seamless native fullscreen
+                document.addEventListener('pointerdown', (e) => {
+                    if (!document.body.classList.contains('portal-paused')) {
+                        ensureFullScreen();
+                    }
+                }, { passive: true });
 
                 if (btnResultPlayAgain) {
                     btnResultPlayAgain.addEventListener('click', () => {
@@ -1569,22 +2498,29 @@
                 if (btnResultHome) {
                     btnResultHome.addEventListener('click', () => {
                         if (resultModal) resultModal.classList.remove('active');
+                        if (venueModal) venueModal.classList.remove('active');
                         if (modal) modal.classList.add('active');
                     });
                 }
 
-                const modeBtns = document.querySelectorAll('.mode-choice-btn');
+                const modeBtns = document.querySelectorAll('.btn-home-mode, .btn-mode-3d, .btn-hitbox-mode, .mode-choice-btn');
                 modeBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        ensureFullScreen();
+                        audio.playHit();
                         modeBtns.forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                         this.gameMode = btn.getAttribute('data-mode');
                     });
                 });
 
-                const scoreBtns = document.querySelectorAll('.score-btn');
+                const scoreBtns = document.querySelectorAll('.btn-home-score, .btn-score-3d, .btn-hitbox-score, .score-btn');
                 scoreBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        ensureFullScreen();
+                        audio.playHit();
                         scoreBtns.forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                         this.startScore = parseInt(btn.getAttribute('data-score'), 10) || 301;
@@ -1596,6 +2532,7 @@
                         ensureFullScreen();
                         modal.classList.remove('active');
                         if (resultModal) resultModal.classList.remove('active');
+                        if (venueModal) venueModal.classList.remove('active');
                         this.resetMatch();
                     });
                 }
@@ -1618,6 +2555,8 @@
                 this.camera.targetZoom = 1;
                 const resultModal = document.getElementById('resultModal');
                 if (resultModal) resultModal.classList.remove('active');
+                const venueModal = document.getElementById('venueModal');
+                if (venueModal) venueModal.classList.remove('active');
                 this.updateUI();
             }
 
@@ -1836,14 +2775,14 @@
                     if (winner === this.p1) {
                         if (resultTitle) {
                             resultTitle.textContent = 'YOU WIN! 🏆';
-                            resultTitle.className = 'modal-title result-title win';
+                            resultTitle.className = 'result-title win';
                         }
                         if (resultSub) resultSub.textContent = 'Outstanding darts! You reached 0 first and defeated the Bot!';
                         if (turnBanner) turnBanner.textContent = '🏆 YOU WIN! 🏆';
                     } else {
                         if (resultTitle) {
                             resultTitle.textContent = 'YOU LOSE! 💀';
-                            resultTitle.className = 'modal-title result-title lose';
+                            resultTitle.className = 'result-title lose';
                         }
                         if (resultSub) resultSub.textContent = 'The Bot reached 0 points first! Better luck next match!';
                         if (turnBanner) turnBanner.textContent = '💀 BOT WINS! 💀';
@@ -1851,14 +2790,14 @@
                 } else if (this.gameMode === 'pass') {
                     if (resultTitle) {
                         resultTitle.textContent = `🏆 ${winner.name} WINS! 🏆`;
-                        resultTitle.className = 'modal-title result-title win';
+                        resultTitle.className = 'result-title win';
                     }
                     if (resultSub) resultSub.textContent = `Match completed! ${winner.name} is the Dart Champion!`;
                     if (turnBanner) turnBanner.textContent = `🏆 ${winner.name} WINS! 🏆`;
                 } else {
                     if (resultTitle) {
                         resultTitle.textContent = `🏆 ${winner.name} VICTORIOUS! 🏆`;
-                        resultTitle.className = 'modal-title result-title win';
+                        resultTitle.className = 'result-title win';
                     }
                     if (resultSub) resultSub.textContent = 'Multiplayer Arena champion!';
                     if (turnBanner) turnBanner.textContent = `🏆 ${winner.name} WINS! 🏆`;
@@ -1932,15 +2871,15 @@
                 const ctx = this.ctx;
                 const b = this.board;
 
-                // Vertical Slider
+                // Vertical Slider Track
                 const sv = this.sliderV;
                 ctx.save();
                 ctx.beginPath();
                 ctx.roundRect(sv.x, sv.y, sv.w, sv.h, 5);
-                ctx.fillStyle = 'rgba(45, 52, 54, 0.45)';
+                ctx.fillStyle = 'rgba(100, 116, 139, 0.45)';
                 ctx.fill();
 
-                // Exact Center Line on Y-Axis
+                // Exact Center Line on Y-Axis (Yellow accent)
                 const centerVy = sv.y + 0.5 * sv.h;
                 ctx.beginPath();
                 ctx.moveTo(sv.x - 7, centerVy);
@@ -1949,25 +2888,29 @@
                 ctx.lineWidth = 2.5;
                 ctx.stroke();
 
+                // Vertical Slider Knob (Active crimson with white border or inactive dark grey)
                 const knobY = sv.y + sv.val * sv.h;
+                const isVertActive = (this.meterStep === 1);
                 ctx.beginPath();
-                ctx.roundRect(sv.x - 8, knobY - 5, sv.w + 16, 10, 5);
-                ctx.fillStyle = (this.meterStep === 1) ? '#ff4757' : '#2d3436';
+                ctx.roundRect(sv.x - 7, knobY - 6, sv.w + 14, 12, 6);
+                ctx.fillStyle = isVertActive ? '#ff4757' : '#1e293b';
+                ctx.shadowColor = isVertActive ? 'rgba(255, 71, 87, 0.6)' : 'rgba(0, 0, 0, 0.4)';
+                ctx.shadowBlur = isVertActive ? 10 : 4;
                 ctx.fill();
-                ctx.strokeStyle = (this.meterStep === 1) ? '#fff' : 'transparent';
-                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = isVertActive ? '#ffffff' : 'rgba(255, 255, 255, 0.4)';
+                ctx.lineWidth = 2;
                 ctx.stroke();
                 ctx.restore();
 
-                // Horizontal Slider
+                // Horizontal Slider Track
                 const sh = this.sliderH;
                 ctx.save();
                 ctx.beginPath();
                 ctx.roundRect(sh.x, sh.y, sh.w, sh.h, 5);
-                ctx.fillStyle = 'rgba(45, 52, 54, 0.45)';
+                ctx.fillStyle = 'rgba(100, 116, 139, 0.45)';
                 ctx.fill();
 
-                // Exact Center Line on X-Axis
+                // Exact Center Line on X-Axis (Yellow accent)
                 const centerHx = sh.x + 0.5 * sh.w;
                 ctx.beginPath();
                 ctx.moveTo(centerHx, sh.y - 7);
@@ -1976,37 +2919,31 @@
                 ctx.lineWidth = 2.5;
                 ctx.stroke();
 
+                // Horizontal Slider Knob (Active crimson with white border or inactive dark grey)
                 const knobX = sh.x + sh.val * sh.w;
+                const isHorizActive = (this.meterStep === 0);
                 ctx.beginPath();
-                ctx.roundRect(knobX - 5, sh.y - 8, 10, sh.h + 16, 5);
-                ctx.fillStyle = (this.meterStep === 0) ? '#ff4757' : '#2d3436';
+                ctx.roundRect(knobX - 6, sh.y - 7, 12, sh.h + 14, 6);
+                ctx.fillStyle = isHorizActive ? '#ff4757' : '#1e293b';
+                ctx.shadowColor = isHorizActive ? 'rgba(255, 71, 87, 0.6)' : 'rgba(0, 0, 0, 0.4)';
+                ctx.shadowBlur = isHorizActive ? 10 : 4;
                 ctx.fill();
-                ctx.strokeStyle = (this.meterStep === 0) ? '#fff' : 'transparent';
-                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = isHorizActive ? '#ffffff' : 'rgba(255, 255, 255, 0.4)';
+                ctx.lineWidth = 2;
                 ctx.stroke();
                 ctx.restore();
 
-                // Center Alignment Crosshairs & Projected Target on Dartboard
+                // Target Reticle & Crosshair Grid matching Picture 2
                 if (!this.flyingDart && this.camera.zoom < 1.15) {
                     const targetX = b.x + (this.sliderH.val - 0.5) * (b.r * 2.2);
                     const targetY = b.y + (this.sliderV.val - 0.5) * (b.r * 2.2);
-                    const isBot = this.turn === 1 && this.gameMode === 'bot';
 
-                    // Center reference crosshairs (subtle dashed gold through center of board)
                     ctx.save();
-                    ctx.setLineDash([4, 4]);
-                    ctx.strokeStyle = 'rgba(251, 191, 36, 0.28)';
-                    ctx.lineWidth = 1.5;
-                    ctx.beginPath();
-                    ctx.moveTo(b.x - b.r - 25, b.y);
-                    ctx.lineTo(b.x + b.r + 25, b.y);
-                    ctx.moveTo(b.x, b.y - b.r - 25);
-                    ctx.lineTo(b.x, b.y + b.r + 25);
-                    ctx.stroke();
 
-                    // Aim guide lines
-                    ctx.strokeStyle = isBot ? 'rgba(0, 210, 211, 0.35)' : 'rgba(255, 71, 87, 0.35)';
-                    ctx.lineWidth = 1.2;
+                    // Dashed cyan crosshair lines across dartboard
+                    ctx.setLineDash([4, 4]);
+                    ctx.strokeStyle = 'rgba(0, 210, 211, 0.65)';
+                    ctx.lineWidth = 1.4;
                     ctx.beginPath();
                     ctx.moveTo(targetX, b.y - b.r);
                     ctx.lineTo(targetX, b.y + b.r);
@@ -2015,14 +2952,28 @@
                     ctx.stroke();
                     ctx.setLineDash([]);
 
-                    // Projected Target Reticle
+                    // Outer Glowing Cyan Target Ring
+                    ctx.shadowColor = '#00d2d3';
+                    ctx.shadowBlur = 12;
+                    ctx.beginPath();
+                    ctx.arc(targetX, targetY, 8, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#00d2d3';
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+
+                    // Inner White Ring
                     ctx.beginPath();
                     ctx.arc(targetX, targetY, 7, 0, Math.PI * 2);
-                    ctx.fillStyle = isBot ? 'rgba(0, 210, 211, 0.85)' : 'rgba(255, 71, 87, 0.85)';
-                    ctx.fill();
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = '#fff';
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
                     ctx.stroke();
+
+                    // Solid Center Core Dot
+                    ctx.beginPath();
+                    ctx.arc(targetX, targetY, 3, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+
                     ctx.restore();
                 }
             }
@@ -2033,215 +2984,339 @@
 
                 ctx.save();
 
-                // Drop shadow
+                // 1. Deep 3D Ambient Drop Shadow on Wood Floor / Wall
                 ctx.beginPath();
-                ctx.arc(b.x + 10, b.y + 14, b.r + 18, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.arc(b.x + 14, b.y + 22, b.r + 34, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+                ctx.filter = 'blur(14px)';
                 ctx.fill();
+                ctx.filter = 'none';
 
-                // Outer Black Number Ring
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, b.r + 18, 0, Math.PI * 2);
-                ctx.fillStyle = '#1e272e';
-                ctx.fill();
+                if (this.assets && this.assets.boardReady && this.assets.boardCanvas) {
+                    // Draw 3D Photorealistic Tournament Dartboard Asset
+                    const totalR = b.r * 1.25;
+                    ctx.drawImage(
+                        this.assets.boardCanvas,
+                        b.x - totalR,
+                        b.y - totalR,
+                        totalR * 2,
+                        totalR * 2
+                    );
 
-                // 20 Alternating Sectors
-                for (let i = 0; i < 20; i++) {
-                    const startA = -Math.PI / 2 + (i - 0.5) * ANGLE_SLICE;
-                    const endA = startA + ANGLE_SLICE;
-                    const isEven = i % 2 === 0;
-
-                    // Single segment base
+                    // Natural 3D Disk Lighting Overlay (Clipped directly to circular board disk - Zero Square Artifacts)
+                    ctx.save();
                     ctx.beginPath();
-                    ctx.moveTo(b.x, b.y);
-                    ctx.arc(b.x, b.y, b.rDoubleOut, startA, endA);
-                    ctx.closePath();
-                    ctx.fillStyle = isEven ? '#18181b' : '#f8f9fa';
+                    ctx.arc(b.x, b.y, totalR * 0.98, 0, Math.PI * 2);
+                    ctx.clip();
+
+                    if (this.currentLighting === 'warm') {
+                        // Soft Overhead Incandescent Falloff (Top brighter, subtle bottom shading)
+                        const lGrad = ctx.createLinearGradient(b.x, b.y - totalR, b.x, b.y + totalR);
+                        lGrad.addColorStop(0, 'rgba(255, 235, 180, 0.16)');
+                        lGrad.addColorStop(0.5, 'rgba(255, 200, 100, 0.04)');
+                        lGrad.addColorStop(1, 'rgba(0, 0, 0, 0.22)');
+                        ctx.fillStyle = lGrad;
+                        ctx.fill();
+                    } else if (this.currentLighting === 'side') {
+                        // Soft Side Light (Balanced Left-Side Highlight, Gentle Right-Side Shadow)
+                        const lGrad = ctx.createLinearGradient(b.x - totalR * 0.95, b.y - totalR * 0.3, b.x + totalR * 0.95, b.y + totalR * 0.3);
+                        lGrad.addColorStop(0, 'rgba(255, 240, 180, 0.18)');
+                        lGrad.addColorStop(0.35, 'rgba(255, 200, 100, 0.05)');
+                        lGrad.addColorStop(0.6, 'rgba(0, 0, 0, 0.12)');
+                        lGrad.addColorStop(1, 'rgba(0, 0, 0, 0.32)');
+                        ctx.fillStyle = lGrad;
+                        ctx.fill();
+                    } else if (this.currentLighting === 'cool') {
+                        // Soft Cool White-Cyan Top Spotlight (Preserves Vivid Segment Colors)
+                        const lGrad = ctx.createLinearGradient(b.x, b.y - totalR, b.x, b.y + totalR);
+                        lGrad.addColorStop(0, 'rgba(215, 240, 255, 0.15)');
+                        lGrad.addColorStop(0.4, 'rgba(125, 211, 252, 0.04)');
+                        lGrad.addColorStop(0.75, 'rgba(2, 8, 20, 0.12)');
+                        lGrad.addColorStop(1, 'rgba(2, 8, 20, 0.28)');
+                        ctx.fillStyle = lGrad;
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                } else {
+                    // 1. Solid Circular Wood Backboard / Mount (from Asset Breakdown)
+                    const mountR = b.r + 36;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(b.x + 12, b.y + 18, mountR + 12, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+                    ctx.filter = 'blur(10px)';
+                    ctx.fill();
+                    ctx.filter = 'none';
+
+                    const mountGrad = ctx.createRadialGradient(b.x - mountR * 0.3, b.y - mountR * 0.3, 10, b.x, b.y, mountR);
+                    mountGrad.addColorStop(0, '#5a3014');
+                    mountGrad.addColorStop(0.45, '#3b1e0a');
+                    mountGrad.addColorStop(0.85, '#261206');
+                    mountGrad.addColorStop(1, '#150903');
+
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, mountR, 0, Math.PI * 2);
+                    ctx.fillStyle = mountGrad;
+                    ctx.fill();
+                    ctx.lineWidth = 4;
+                    ctx.strokeStyle = '#6f3d1a';
+                    ctx.stroke();
+
+                    // Wood mount inner bevel edge
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, mountR - 6, 0, Math.PI * 2);
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // 2. Heavy Steel Outer Bezel Rim with Metallic Gradient & Rivets
+                    const outerRimR = b.r + 24;
+                    const rimGrad = ctx.createLinearGradient(b.x - outerRimR, b.y - outerRimR, b.x + outerRimR, b.y + outerRimR);
+                    rimGrad.addColorStop(0, '#334155');
+                    rimGrad.addColorStop(0.3, '#1e293b');
+                    rimGrad.addColorStop(0.5, '#475569');
+                    rimGrad.addColorStop(0.8, '#0f172a');
+                    rimGrad.addColorStop(1, '#1e293b');
+
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, outerRimR, 0, Math.PI * 2);
+                    ctx.fillStyle = rimGrad;
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#64748b';
+                    ctx.stroke();
+
+                    // Metallic Rivet Studs around Bezel
+                    for (let r = 0; r < 12; r++) {
+                        const rAngle = (r * Math.PI * 2) / 12;
+                        const rx = b.x + Math.cos(rAngle) * (outerRimR - 5);
+                        const ry = b.y + Math.sin(rAngle) * (outerRimR - 5);
+                        ctx.beginPath();
+                        ctx.arc(rx, ry, 2.5, 0, Math.PI * 2);
+                        ctx.fillStyle = '#cbd5e1';
+                        ctx.fill();
+                        ctx.strokeStyle = '#0f172a';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+
+                    // 3. Matte Black Outer Number Band
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.r + 14, 0, Math.PI * 2);
+                    ctx.fillStyle = '#0f172a';
                     ctx.fill();
 
-                    // Double Ring
+                    // Inner rim separator ring
                     ctx.beginPath();
-                    ctx.arc(b.x, b.y, b.rDoubleOut, startA, endA);
-                    ctx.arc(b.x, b.y, b.rDoubleIn, endA, startA, true);
-                    ctx.closePath();
-                    ctx.fillStyle = isEven ? '#eb4d4b' : '#2ed573';
+                    ctx.arc(b.x, b.y, b.rDoubleOut, 0, Math.PI * 2);
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = '#cbd5e1';
+                    ctx.stroke();
+
+                    // 4. 20 Alternating High-Detail Sisal Segments
+                    for (let i = 0; i < 20; i++) {
+                        const startA = -Math.PI / 2 + (i - 0.5) * ANGLE_SLICE;
+                        const endA = startA + ANGLE_SLICE;
+                        const isEven = i % 2 === 0;
+
+                        // Single segment base
+                        ctx.beginPath();
+                        ctx.moveTo(b.x, b.y);
+                        ctx.arc(b.x, b.y, b.rDoubleOut, startA, endA);
+                        ctx.closePath();
+                        ctx.fillStyle = isEven ? '#141416' : '#f5f0e6';
+                        ctx.fill();
+
+                        // Double Ring
+                        ctx.beginPath();
+                        ctx.arc(b.x, b.y, b.rDoubleOut, startA, endA);
+                        ctx.arc(b.x, b.y, b.rDoubleIn, endA, startA, true);
+                        ctx.closePath();
+                        ctx.fillStyle = isEven ? '#d92525' : '#0d9448';
+                        ctx.fill();
+
+                        // Treble Ring
+                        ctx.beginPath();
+                        ctx.arc(b.x, b.y, b.rTrebleOut, startA, endA);
+                        ctx.arc(b.x, b.y, b.rTrebleIn, endA, startA, true);
+                        ctx.closePath();
+                        ctx.fillStyle = isEven ? '#d92525' : '#0d9448';
+                        ctx.fill();
+                    }
+
+                    // 5. Outer Bull (Green 25)
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.rOuterBull, 0, Math.PI * 2);
+                    ctx.fillStyle = '#0d9448';
                     ctx.fill();
 
-                    // Treble Ring
+                    // 6. Inner Bull (Red 50)
                     ctx.beginPath();
-                    ctx.arc(b.x, b.y, b.rTrebleOut, startA, endA);
-                    ctx.arc(b.x, b.y, b.rTrebleIn, endA, startA, true);
-                    ctx.closePath();
-                    ctx.fillStyle = isEven ? '#eb4d4b' : '#2ed573';
+                    ctx.arc(b.x, b.y, b.rInnerBull, 0, Math.PI * 2);
+                    ctx.fillStyle = '#d92525';
                     ctx.fill();
-                }
 
-                // Outer Bull (Green 25)
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, b.rOuterBull, 0, Math.PI * 2);
-                ctx.fillStyle = '#2ed573';
-                ctx.fill();
+                    // 7. Ultra-Thin Silver Blade Spider Wires
+                    ctx.save();
+                    ctx.strokeStyle = '#e2e8f0';
+                    ctx.lineWidth = 1.6;
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+                    ctx.shadowBlur = 1.5;
 
-                // Inner Bull (Red 50 with white ring)
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, b.rInnerBull + 2.5, 0, Math.PI * 2);
-                ctx.fillStyle = '#fff';
-                ctx.fill();
+                    for (let i = 0; i < 20; i++) {
+                        const a = -Math.PI / 2 + (i - 0.5) * ANGLE_SLICE;
+                        ctx.beginPath();
+                        ctx.moveTo(b.x + Math.cos(a) * b.rOuterBull, b.y + Math.sin(a) * b.rOuterBull);
+                        ctx.lineTo(b.x + Math.cos(a) * b.rDoubleOut, b.y + Math.sin(a) * b.rDoubleOut);
+                        ctx.stroke();
+                    }
 
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, b.rInnerBull, 0, Math.PI * 2);
-                ctx.fillStyle = '#eb4d4b';
-                ctx.fill();
+                    const wireRings = [b.rInnerBull, b.rOuterBull, b.rTrebleIn, b.rTrebleOut, b.rDoubleIn, b.rDoubleOut];
+                    wireRings.forEach(r => {
+                        ctx.beginPath();
+                        ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+                        ctx.stroke();
+                    });
+                    ctx.restore();
 
-                // Numbers Ring
-                ctx.font = `900 ${Math.round(b.r * 0.12)}px Outfit, sans-serif`;
-                ctx.fillStyle = '#fff';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+                    // 8. Tournament Numbers
+                    ctx.save();
+                    ctx.font = `900 ${Math.round(b.r * 0.13)}px 'Outfit', sans-serif`;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+                    ctx.shadowBlur = 4;
+                    ctx.shadowOffsetY = 1.5;
 
-                for (let i = 0; i < 20; i++) {
-                    const a = -Math.PI / 2 + i * ANGLE_SLICE;
-                    const nx = b.x + Math.cos(a) * (b.r + 9);
-                    const ny = b.y + Math.sin(a) * (b.r + 9);
-                    ctx.fillText(SECTORS[i], nx, ny);
+                    for (let i = 0; i < 20; i++) {
+                        const a = -Math.PI / 2 + i * ANGLE_SLICE;
+                        const nx = b.x + Math.cos(a) * (b.r + 13);
+                        const ny = b.y + Math.sin(a) * (b.r + 13);
+                        ctx.fillText(SECTORS[i], nx, ny);
+                    }
+                    ctx.restore();
                 }
 
                 ctx.restore();
             }
 
-            // Stylized 3D Dart with needle point aligned precisely at (0, 0)
-            drawStylizedDart(x, y, scale = 1, isBot = false, shadow = true) {
+            // High-Precision 3D Tournament Dart (Tungsten Knurled Barrel, Anodized Rings, 3D Aero Flights)
+            drawStylizedDart(x, y, scale = 1, isBot = false, shadow = true, angle = 0) {
                 const ctx = this.ctx;
                 ctx.save();
                 ctx.translate(x, y);
+                ctx.rotate(angle);
                 ctx.scale(scale, scale);
 
-                const flightPrimary = isBot ? '#06b6d4' : '#ef4444';
-                const flightAccent = isBot ? '#a5f3fc' : '#fef08a';
-                const barrelMetal = isBot ? '#38bdf8' : '#f59e0b';
+                const isReady = isBot ? (this.assets && this.assets.dartBlueReady) : (this.assets && this.assets.dartRedReady);
+                const dartCanvas = isBot ? (this.assets && this.assets.dartBlueCanvas) : (this.assets && this.assets.dartRedCanvas);
 
-                // 1. Realistic Soft 3D Drop Shadow near impact point
-                if (shadow) {
-                    ctx.save();
+                if (isReady && dartCanvas) {
+                    // 1. Realistic 3D Soft Drop Shadow
+                    if (shadow) {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.ellipse(12, 32, 22, 10, Math.PI / 4, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.52)';
+                        ctx.filter = 'blur(4px)';
+                        ctx.fill();
+                        ctx.restore();
+                    }
+
+                    // 2. Render 3D Photorealistic Tungsten Dart
+                    const dw = 110;
+                    const dh = dw * (dartCanvas.height / dartCanvas.width);
+                    ctx.drawImage(dartCanvas, -dw * 0.503, -dh * 0.042, dw, dh);
+                } else {
+                    // Fallback to high-precision vector dart
+                    const themeColor = isBot ? '#2563eb' : '#dc2626';
+
+                    if (shadow) {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.ellipse(10, 16, 16, 8, Math.PI / 4, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                        ctx.filter = 'blur(2.5px)';
+                        ctx.fill();
+                        ctx.restore();
+                    }
+
+                    // Needle tip
                     ctx.beginPath();
-                    ctx.ellipse(8, 14, 14, 7, Math.PI / 4, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
-                    ctx.filter = 'blur(2px)';
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-3.2, 22);
+                    ctx.lineTo(3.2, 22);
+                    ctx.closePath();
+                    ctx.fillStyle = '#cbd5e1';
                     ctx.fill();
-                    ctx.restore();
+                    ctx.lineWidth = 1.2;
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.stroke();
+
+                    // Barrel
+                    const barrelGrad = ctx.createLinearGradient(-8, 0, 8, 0);
+                    barrelGrad.addColorStop(0, '#64748b');
+                    barrelGrad.addColorStop(0.25, '#f8fafc');
+                    barrelGrad.addColorStop(0.6, '#94a3b8');
+                    barrelGrad.addColorStop(1, '#1e293b');
+
+                    ctx.beginPath();
+                    ctx.moveTo(-4, 22);
+                    ctx.lineTo(4, 22);
+                    ctx.lineTo(8, 28);
+                    ctx.lineTo(7.5, 52);
+                    ctx.lineTo(-7.5, 52);
+                    ctx.lineTo(-8, 28);
+                    ctx.closePath();
+                    ctx.fillStyle = barrelGrad;
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.stroke();
+
+                    // Ribbed Grip
+                    [28, 33, 38, 43, 48].forEach(gy => {
+                        ctx.fillStyle = themeColor;
+                        ctx.fillRect(-7.5, gy, 15, 2.5);
+                    });
+
+                    // Stem
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillRect(-3.5, 52, 7, 24);
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 1.4;
+                    ctx.strokeRect(-3.5, 52, 7, 24);
+
+                    // Flights
+                    ctx.beginPath();
+                    ctx.moveTo(-3.5, 76);
+                    ctx.lineTo(-26, 68);
+                    ctx.lineTo(-32, 114);
+                    ctx.lineTo(0, 100);
+                    ctx.lineTo(32, 114);
+                    ctx.lineTo(26, 68);
+                    ctx.lineTo(3.5, 76);
+                    ctx.closePath();
+
+                    const flightGrad = ctx.createLinearGradient(-32, 0, 32, 0);
+                    flightGrad.addColorStop(0, themeColor);
+                    flightGrad.addColorStop(0.5, '#0f172a');
+                    flightGrad.addColorStop(1, themeColor);
+                    ctx.fillStyle = flightGrad;
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.stroke();
                 }
-
-                // 2. Stainless Steel Needle Tip (Needle Point sticks EXACTLY at 0, 0)
-                ctx.save();
-                const tipGrad = ctx.createLinearGradient(-3, 0, 3, 0);
-                tipGrad.addColorStop(0, '#94a3b8');
-                tipGrad.addColorStop(0.5, '#ffffff');
-                tipGrad.addColorStop(1, '#475569');
-
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(-3, 18);
-                ctx.lineTo(3, 18);
-                ctx.closePath();
-                ctx.fillStyle = tipGrad;
-                ctx.fill();
-                ctx.lineWidth = 1.5;
-                ctx.strokeStyle = '#0f172a';
-                ctx.stroke();
-                ctx.restore();
-
-                // 3. Knurled Tungsten / Brass Grip Barrel
-                ctx.save();
-                const barrelGrad = ctx.createLinearGradient(-7, 0, 7, 0);
-                barrelGrad.addColorStop(0, '#64748b');
-                barrelGrad.addColorStop(0.3, '#f8fafc');
-                barrelGrad.addColorStop(0.7, '#94a3b8');
-                barrelGrad.addColorStop(1, '#334155');
-
-                ctx.beginPath();
-                ctx.moveTo(-4, 18);
-                ctx.lineTo(4, 18);
-                ctx.lineTo(7, 24);
-                ctx.lineTo(6, 44);
-                ctx.lineTo(-6, 44);
-                ctx.lineTo(-7, 24);
-                ctx.closePath();
-                ctx.fillStyle = barrelGrad;
-                ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#0f172a';
-                ctx.stroke();
-
-                // Knurling Grip Rings
-                ctx.fillStyle = barrelMetal;
-                ctx.fillRect(-6.5, 24, 13, 3);
-                ctx.fillRect(-6.5, 30, 13, 3);
-                ctx.fillRect(-6.5, 36, 13, 3);
-                ctx.restore();
-
-                // 4. Aluminum Stem / Shaft
-                ctx.save();
-                ctx.fillStyle = '#cbd5e1';
-                ctx.fillRect(-3.5, 44, 7, 22);
-                ctx.strokeStyle = '#334155';
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(-3.5, 44, 7, 22);
-
-                // Stem Accent Rings
-                ctx.fillStyle = '#64748b';
-                ctx.fillRect(-3.5, 52, 7, 2.5);
-                ctx.restore();
-
-                // 5. Aerodynamic 3D Flight Fins (4-Fin Perspective)
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(-4, 66);
-                ctx.lineTo(-24, 58);
-                ctx.lineTo(-30, 98);
-                ctx.lineTo(0, 84);
-                ctx.lineTo(30, 98);
-                ctx.lineTo(24, 58);
-                ctx.lineTo(4, 66);
-                ctx.closePath();
-
-                const flightGrad = ctx.createLinearGradient(-30, 0, 30, 0);
-                flightGrad.addColorStop(0, flightPrimary);
-                flightGrad.addColorStop(0.5, '#1e293b');
-                flightGrad.addColorStop(1, flightPrimary);
-                ctx.fillStyle = flightGrad;
-                ctx.fill();
-                ctx.lineWidth = 2.5;
-                ctx.strokeStyle = '#0f172a';
-                ctx.stroke();
-
-                // Flight Wing Graphic Chevron
-                ctx.beginPath();
-                ctx.moveTo(-18, 72);
-                ctx.lineTo(-24, 88);
-                ctx.lineTo(-6, 78);
-                ctx.moveTo(18, 72);
-                ctx.lineTo(24, 88);
-                ctx.lineTo(6, 78);
-                ctx.fillStyle = flightAccent;
-                ctx.fill();
-
-                // Center Vertical Fin Shading
-                ctx.beginPath();
-                ctx.moveTo(-4, 56);
-                ctx.lineTo(4, 56);
-                ctx.lineTo(3, 92);
-                ctx.lineTo(-3, 92);
-                ctx.closePath();
-                ctx.fillStyle = '#0f172a';
-                ctx.fill();
-                ctx.restore();
 
                 ctx.restore();
             }
 
             drawLandedDarts() {
                 this.landedDarts.forEach(d => {
-                    this.drawStylizedDart(d.x, d.y, 0.52, d.isBot, true);
+                    this.drawStylizedDart(d.x, d.y, 0.40, d.isBot, true, d.angle || 0);
                 });
             }
 
@@ -2260,20 +3335,22 @@
                 const t = fd.t;
                 fd.x = fd.startX + (fd.targetX - fd.startX) * t;
                 const linearY = fd.startY + (fd.targetY - fd.startY) * t;
-                const arc = -Math.sin(t * Math.PI) * 70;
+                const arc = -Math.sin(t * Math.PI) * 75;
                 fd.y = linearY + arc;
-                const scale = 1.1 - t * 0.58;
+                const scale = 0.95 - t * 0.55;
+                const flightAngle = (fd.targetX - fd.startX) * 0.0006 * Math.sin(t * Math.PI);
 
-                this.drawStylizedDart(fd.x, fd.y, scale, fd.isBot, true);
+                this.drawStylizedDart(fd.x, fd.y, scale, fd.isBot, true, flightAngle);
             }
 
             drawDartInHand() {
                 if (this.flyingDart || this.gameOver) return;
                 const isBot = this.turn === 1 && this.gameMode === 'bot';
                 const handX = this.width / 2;
-                const handY = this.height * 0.78;
+                const handY = this.height * 0.76;
+                const bob = Math.sin(Date.now() * 0.004) * 3;
 
-                this.drawStylizedDart(handX, handY, 1.25, isBot, true);
+                this.drawStylizedDart(handX, handY + bob, 0.95, isBot, true);
             }
 
             drawFloatingPopups() {
@@ -2298,20 +3375,20 @@
                     ctx.strokeStyle = p.color;
                     ctx.lineWidth = 3;
 
-                    ctx.font = '900 15px Outfit, sans-serif';
+                    ctx.font = "900 17px 'Lilita One', cursive, sans-serif";
                     const textWidth = ctx.measureText(p.text).width;
                     const boxW = textWidth + 24;
-                    const boxH = 30;
+                    const boxH = 32;
 
                     ctx.beginPath();
-                    ctx.roundRect(-boxW / 2, -boxH / 2, boxW, boxH, 15);
+                    ctx.roundRect(-boxW / 2, -boxH / 2, boxW, boxH, 16);
                     ctx.fill();
                     ctx.stroke();
 
                     ctx.fillStyle = p.color;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.shadowBlur = 6;
+                    ctx.shadowBlur = 8;
                     ctx.fillText(p.text, 0, 1);
 
                     ctx.restore();
@@ -2323,6 +3400,14 @@
             }
 
             render() {
+                const modal = document.getElementById('modalOverlay');
+                if (modal && modal.classList.contains('active')) {
+                    const dpr = window.devicePixelRatio || 1;
+                    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                    this.ctx.clearRect(0, 0, this.width, this.height);
+                    return;
+                }
+
                 const dpr = window.devicePixelRatio || 1;
                 this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                 this.ctx.clearRect(0, 0, this.width, this.height);
@@ -2340,9 +3425,9 @@
                 }
 
                 this.drawDartboard();
-                this.drawSliders();
                 this.drawLandedDarts();
                 this.drawFlyingDart();
+                this.drawSliders();
                 this.drawFloatingPopups();
 
                 this.ctx.restore();
@@ -2359,39 +3444,182 @@
             }
         }
 
+        function playCountdownAudio(freq = 440, type = 'sine', duration = 0.15) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                if (!window.__cdAudioCtx) window.__cdAudioCtx = new AudioCtx();
+                const ctx = window.__cdAudioCtx;
+                if (ctx.state === 'suspended') ctx.resume();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.18, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        window.__countdownTimerDart = null;
+        function runResumeCountdownDart(onComplete) {
+            if (window.__countdownTimerDart) {
+                clearInterval(window.__countdownTimerDart);
+                window.__countdownTimerDart = null;
+            }
+            let overlay = document.getElementById('resumeCountdownOverlayDart');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'resumeCountdownOverlayDart';
+                overlay.className = 'resume-countdown-overlay';
+                document.body.appendChild(overlay);
+            }
+            overlay.classList.add('active');
+
+            let count = 3;
+            const updateDisplay = () => {
+                if (count > 0) {
+                    overlay.innerHTML = `
+                        <div class="resume-countdown-number" key="${count}">${count}</div>
+                        <div class="resume-countdown-sub">⚡ GET READY • RESUMING</div>
+                    `;
+                    playCountdownAudio(count === 3 ? 440 : count === 2 ? 554 : 659, 'sine', 0.18);
+                    count--;
+                } else if (count === 0) {
+                    overlay.innerHTML = `
+                        <div class="resume-countdown-number" style="color: #4ade80; text-shadow: 0 0 45px rgba(74, 222, 128, 0.9);">GO!</div>
+                        <div class="resume-countdown-sub" style="color: #4ade80;">🎯 BULLSEYE!</div>
+                    `;
+                    playCountdownAudio(880, 'triangle', 0.3);
+                    count--;
+                } else {
+                    if (window.__countdownTimerDart) {
+                        clearInterval(window.__countdownTimerDart);
+                        window.__countdownTimerDart = null;
+                    }
+                    overlay.classList.remove('active');
+                    setTimeout(() => {
+                        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                    }, 200);
+                    if (typeof onComplete === 'function') onComplete();
+                }
+            };
+
+            updateDisplay();
+            window.__countdownTimerDart = setInterval(updateDisplay, 1000);
+        }
+
         window.pauseDartGame = function() {
+            if (window.__countdownTimerDart) {
+                clearInterval(window.__countdownTimerDart);
+                window.__countdownTimerDart = null;
+                const overlay = document.getElementById('resumeCountdownOverlayDart');
+                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            }
             if (window.offlineDarts) {
                 window.offlineDarts.isPaused = true;
                 document.body.classList.add('portal-paused');
                 const bankBadge = document.getElementById('portal-top-bank');
-                if (bankBadge) bankBadge.textContent = `🪙 ${localStorage.getItem('coins') || 70} P`;
+                if (bankBadge) {
+                    const pts = localStorage.getItem('krazio_user_points') || localStorage.getItem('coins') || localStorage.getItem('office_escape_coins') || '76';
+                    bankBadge.textContent = `🪙 ${pts} P`;
+                }
             }
         };
 
-        window.resumeDartGame = function() {
-            if (window.offlineDarts) {
-                window.offlineDarts.isPaused = false;
-                document.body.classList.remove('portal-paused');
+        let isResumingDart = false;
+
+        window.resumeDartGame = function(requestFullscreen = true) {
+            if (!window.offlineDarts) return;
+
+            isResumingDart = true;
+
+            // 1. Immediately expand back to fullscreen and dismiss paused portal UI
+            document.body.classList.remove('portal-paused');
+            if (requestFullscreen && !document.fullscreenElement && !document.webkitFullscreenElement) {
+                const docEl = document.documentElement;
+                const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+                if (req) req.call(docEl).catch(() => {});
             }
+            setTimeout(() => {
+                if (window.offlineDarts) window.offlineDarts.resize();
+            }, 60);
+
+            // 2. Start 3-second countdown before unfreezing game physics
+            runResumeCountdownDart(() => {
+                isResumingDart = false;
+                if (window.offlineDarts) {
+                    window.offlineDarts.isPaused = false;
+                    if (window.offlineDarts.turn === 1 && window.offlineDarts.gameMode === 'bot' && !window.offlineDarts.flyingDart && !window.offlineDarts.gameOver) {
+                        window.offlineDarts.triggerBotThrow();
+                    }
+                    if (window.offlineDarts) window.offlineDarts.resize();
+                }
+            });
         };
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
                 e.preventDefault();
-                if (window.offlineDarts) {
-                    if (window.offlineDarts.isPaused) {
-                        window.resumeDartGame();
-                    } else {
-                        window.pauseDartGame();
-                    }
+                if (document.body.classList.contains('portal-paused') || (window.offlineDarts && window.offlineDarts.isPaused)) {
+                    window.resumeDartGame();
+                } else {
+                    window.pauseDartGame();
                 }
             }
         });
 
+        // Instant trigger on first Escape when exiting native browser fullscreen
+        const handleFullscreenExitDart = () => {
+            if (isResumingDart) return;
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+            if (!isFs && !document.body.classList.contains('portal-paused')) {
+                // User pressed ESC to exit fullscreen: immediately show pause screen on the FIRST press!
+                if (window.offlineDarts && !window.offlineDarts.gameOver && !document.getElementById('modalOverlay').classList.contains('active')) {
+                    window.pauseDartGame();
+                }
+            }
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenExitDart);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenExitDart);
+        document.addEventListener('mozfullscreenchange', handleFullscreenExitDart);
+        document.addEventListener('MSFullscreenChange', handleFullscreenExitDart);
+
         window.addEventListener('DOMContentLoaded', () => {
             window.offlineDarts = new OfflineDartsGame();
+            const homeBgVideo = document.getElementById('dartHomeBgVideo');
+            const homeBoardUI = document.getElementById('homeBoardUI');
+            const btnHomeSettings = document.getElementById('btnHomeSettings');
+
+            const showBoardButtons = () => {
+                if (homeBoardUI) homeBoardUI.classList.add('ready');
+                if (btnHomeSettings) btnHomeSettings.classList.add('ready');
+            };
+
+            if (homeBgVideo) {
+                homeBgVideo.loop = false;
+                let revealed = false;
+                const onAnimationDone = () => {
+                    if (revealed) return;
+                    revealed = true;
+                    try { homeBgVideo.pause(); } catch(e) {}
+                    showBoardButtons();
+                };
+
+                homeBgVideo.addEventListener('ended', onAnimationDone);
+                homeBgVideo.addEventListener('error', onAnimationDone);
+                
+                // Fallback: if browser blocks autoplay or video takes longer than 4.5s
+                setTimeout(onAnimationDone, 4500);
+            } else {
+                showBoardButtons();
+            }
         });
     })();
     </script>
+    <script src="../assets/krazy-screenshot.js"></script>
 </body>
 </html>

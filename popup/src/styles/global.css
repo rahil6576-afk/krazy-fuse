@@ -122,3 +122,605 @@ button {
     opacity: 0;
   }
 }
+
+/* ==========================================
+   KRAZY FUSE ARCADE PORTAL DOCKED PAUSE THEME
+   ========================================== */
+body.portal-paused #krazio-floating-back {
+  display: none !important;
+}
+
+body.portal-paused .game-hud {
+  display: none !important;
+}
+
+body.portal-paused .game-root-container {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  border-radius: 16px !important;
+}
+
+body.portal-paused .balloon-stream,
+body.portal-paused .game-theme-background,
+body.portal-paused .cannon-trajectory-svg,
+body.portal-paused .shooter-wrapper,
+body.portal-paused .pop-effects-container {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+body.portal-paused .balloon-wrapper,
+body.portal-paused .blackbuck-deer,
+body.portal-paused .cyber-zombie,
+body.portal-paused .beach-environment,
+body.portal-paused .dystopian-environment,
+body.portal-paused .slimy-environment,
+body.portal-paused .salman-environment,
+body.portal-paused .nebula-layer,
+body.portal-paused .stars-layer-1 {
+  animation-play-state: paused !important;
+}
+
+#game-view-wrapper {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #080c14;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+#main-game-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.portal-paused #main-game-stage {
+  width: 480px !important;
+  max-width: 480px !important;
+  height: 480px !important;
+  max-height: 480px !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 18px !important;
+  border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.25) !important;
+  background: rgba(14, 20, 36, 0.95);
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(11, 18, 32, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  gap: 20px;
+  z-index: 1000;
+  font-family: 'Outfit', sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+}
+
+body.portal-paused .portal-topbar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.portal-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+  max-width: 520px;
+}
+
+.portal-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 900;
+}
+
+.portal-brand-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #0284c7, #6366f1);
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  box-shadow: 0 0 14px rgba(2, 132, 199, 0.5);
+}
+
+.portal-brand b {
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.portal-brand small {
+  font-size: 0.6rem;
+  color: #38bdf8;
+  letter-spacing: 1px;
+  display: block;
+  font-weight: 800;
+}
+
+.portal-search-box {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+}
+
+.portal-search-box input {
+  width: 100%;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 0 16px 0 38px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.portal-search-box .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.portal-nav-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.nav-pill:hover, .nav-pill.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.portal-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.portal-bank-badge {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.portal-resume-btn {
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.4);
+  transition: 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.portal-resume-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+}
+
+.portal-layout-body {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  width: 100%;
+}
+
+.portal-sidebar {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  bottom: 0;
+  width: 72px;
+  background: rgba(11, 18, 32, 0.95);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  gap: 12px;
+  z-index: 900;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+}
+
+body.portal-paused .portal-sidebar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.side-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 1.15rem;
+  gap: 2px;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: 0.2s;
+}
+
+.side-btn small {
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.side-btn:hover, .side-btn.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.portal-center-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  transition: padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.portal-paused .portal-center-col {
+  padding: 76px 300px 24px 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.game-meta-bar {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(14, 23, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  font-family: 'Outfit', sans-serif;
+  box-sizing: border-box;
+}
+
+body.portal-paused .game-meta-bar {
+  display: flex;
+}
+
+.game-meta-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.game-avatar-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.game-meta-info h3 {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.game-meta-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.tag-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+.meta-rating {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+.game-meta-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.meta-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: 0.2s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-btn:hover, .meta-btn.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+/* Right Column: Recommended Games */
+.portal-rec-col {
+  position: fixed;
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  background: rgba(11, 18, 32, 0.95);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px 16px;
+  overflow-y: auto;
+  z-index: 900;
+  font-family: 'Outfit', sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+}
+
+body.portal-paused .portal-rec-col {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.rec-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+.rec-header a {
+  color: #38bdf8;
+  text-decoration: none;
+  font-size: 0.75rem;
+}
+
+.rec-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rec-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: 0.2s;
+  position: relative;
+}
+
+.rec-card:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.3);
+  transform: translateX(-3px);
+}
+
+.rec-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+}
+
+.rec-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rec-info b {
+  font-size: 0.82rem;
+  color: #f8fafc;
+}
+
+.rec-info small {
+  font-size: 0.65rem;
+  color: #94a3b8;
+}
+
+.rec-badge {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  font-size: 0.52rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+/* Frosted Pause Screen Inside Game Container */
+.pause-modal-card {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 13, 24, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 20px;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* 3-Second Resume Countdown Overlay */
+.resume-countdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 15, 29, 0.72);
+  backdrop-filter: blur(12px);
+  pointer-events: all;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.resume-countdown-overlay.active {
+  opacity: 1;
+}
+
+.resume-countdown-number {
+  font-family: 'Outfit', sans-serif;
+  font-size: 8rem;
+  font-weight: 900;
+  color: #38bdf8;
+  text-shadow: 0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(56, 189, 248, 0.5);
+  line-height: 1;
+  transform: scale(1.5);
+  opacity: 0;
+  animation: countdownPop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.resume-countdown-sub {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #94a3b8;
+  margin-top: 14px;
+  text-transform: uppercase;
+}
+
+@keyframes countdownPop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

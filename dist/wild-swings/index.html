@@ -1165,6 +1165,52 @@
       body.portal-paused .pause-modal-card {
           display: flex;
       }
+
+      /* 3-Second Resume Countdown Overlay */
+      .resume-countdown-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 999999;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: rgba(10, 15, 29, 0.72);
+          backdrop-filter: blur(12px);
+          pointer-events: all;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+      }
+      .resume-countdown-overlay.active {
+          opacity: 1;
+      }
+      .resume-countdown-number {
+          font-family: 'Outfit', sans-serif;
+          font-size: 8rem;
+          font-weight: 900;
+          color: #38bdf8;
+          text-shadow: 0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(56, 189, 248, 0.5);
+          line-height: 1;
+          transform: scale(1.5);
+          opacity: 0;
+          animation: countdownPop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      }
+      .resume-countdown-sub {
+          font-family: 'Outfit', sans-serif;
+          font-size: 1.2rem;
+          font-weight: 800;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.95);
+          margin-top: 14px;
+          text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+      }
+      @keyframes countdownPop {
+          0% { transform: scale(1.6); opacity: 0; }
+          20% { transform: scale(1); opacity: 1; }
+          80% { transform: scale(0.95); opacity: 1; }
+          100% { transform: scale(0.8); opacity: 0; }
+      }
     </style>
 </head>
 <body>
@@ -3659,20 +3705,109 @@
           });
         }
 
+        function playCountdownAudioSwings(freq = 440, type = 'sine', duration = 0.15) {
+          try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            if (!window.__cdAudioCtxSwings) window.__cdAudioCtxSwings = new AudioCtx();
+            const ctx = window.__cdAudioCtxSwings;
+            if (ctx.state === 'suspended') ctx.resume();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+            gain.gain.setValueAtTime(0.18, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + duration);
+          } catch (e) {}
+        }
+
+        window.__countdownTimerSwings = null;
+        function runResumeCountdownSwings(onComplete) {
+          if (window.__countdownTimerSwings) {
+            clearInterval(window.__countdownTimerSwings);
+            window.__countdownTimerSwings = null;
+          }
+          let overlay = document.getElementById('resumeCountdownOverlaySwings');
+          if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'resumeCountdownOverlaySwings';
+            overlay.className = 'resume-countdown-overlay';
+            document.body.appendChild(overlay);
+          }
+          overlay.classList.add('active');
+
+          let count = 3;
+          const updateDisplay = () => {
+            if (count > 0) {
+              overlay.innerHTML = `
+                <div class="resume-countdown-number" key="${count}">${count}</div>
+                <div class="resume-countdown-sub">⚡ GET READY • RESUMING</div>
+              `;
+              playCountdownAudioSwings(count === 3 ? 440 : count === 2 ? 554 : 659, 'sine', 0.18);
+              count--;
+            } else if (count === 0) {
+              overlay.innerHTML = `
+                <div class="resume-countdown-number" style="color: #4ade80; text-shadow: 0 0 45px rgba(74, 222, 128, 0.9);">GO!</div>
+                <div class="resume-countdown-sub" style="color: #4ade80;">🕸️ SWING!</div>
+              `;
+              playCountdownAudioSwings(880, 'triangle', 0.3);
+              count--;
+            } else {
+              if (window.__countdownTimerSwings) {
+                clearInterval(window.__countdownTimerSwings);
+                window.__countdownTimerSwings = null;
+              }
+              overlay.classList.remove('active');
+              setTimeout(() => {
+                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+              }, 200);
+              if (typeof onComplete === 'function') onComplete();
+            }
+          };
+
+          updateDisplay();
+          window.__countdownTimerSwings = setInterval(updateDisplay, 1000);
+        }
+
         window.pauseSwingsGame = function() {
+          if (window.__countdownTimerSwings) {
+            clearInterval(window.__countdownTimerSwings);
+            window.__countdownTimerSwings = null;
+            const overlay = document.getElementById('resumeCountdownOverlaySwings');
+            if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+          }
           if (window.stickmanGame && !window.stickmanGame.isPaused) {
             window.stickmanGame.togglePause();
             document.body.classList.add('portal-paused');
             const bankBadge = document.getElementById('portal-top-bank');
-            if (bankBadge) bankBadge.textContent = `🪙 ${localStorage.getItem('coins') || 70} P`;
+            if (bankBadge) {
+              const pts = localStorage.getItem('krazio_user_points') || localStorage.getItem('coins') || localStorage.getItem('office_escape_coins') || '76';
+              bankBadge.textContent = `🪙 ${pts} P`;
+            }
           }
         };
 
-        window.resumeSwingsGame = function() {
-          if (window.stickmanGame && window.stickmanGame.isPaused) {
-            window.stickmanGame.togglePause();
-            document.body.classList.remove('portal-paused');
+        window.resumeSwingsGame = function(requestFullscreen = true) {
+          if (!window.stickmanGame) return;
+
+          // 1. Immediately expand back to fullscreen and dismiss paused portal UI
+          document.body.classList.remove('portal-paused');
+          if (requestFullscreen && !document.fullscreenElement && !document.webkitFullscreenElement) {
+            const docEl = document.documentElement;
+            const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
+            if (req) req.call(docEl).catch(() => {});
           }
+
+          // 2. Start 3-second countdown before unpausing physics
+          runResumeCountdownSwings(() => {
+            if (window.stickmanGame && window.stickmanGame.isPaused) {
+              window.stickmanGame.togglePause();
+            }
+          });
         };
 
         window.addEventListener('keydown', (e) => {
@@ -3687,6 +3822,18 @@
             }
           }
         });
+
+        // Instant trigger on first Escape when exiting native browser fullscreen
+        const handleFullscreenExitSwings = () => {
+          const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+          if (!isFs && window.stickmanGame && !window.stickmanGame.isPaused) {
+            window.pauseSwingsGame();
+          }
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenExitSwings);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenExitSwings);
+        document.addEventListener('mozfullscreenchange', handleFullscreenExitSwings);
+        document.addEventListener('MSFullscreenChange', handleFullscreenExitSwings);
 
         if (pauseBtn) {
           pauseBtn.addEventListener('click', () => {
@@ -3726,5 +3873,6 @@
         }
       });
     </script>
+    <script src="../assets/krazy-screenshot.js"></script>
 </body>
 </html>

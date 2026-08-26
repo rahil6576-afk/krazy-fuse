@@ -34,7 +34,8 @@ export class MatchManager {
         this.p2TotalDamage = 0;
     }
 
-    startNewMatch(roundsToWin = ROUNDS_TO_WIN) {
+    startNewMatch(roundsToWin = ROUNDS_TO_WIN, isTraining = false) {
+        this.isTraining = isTraining;
         this.currentRound = 1;
         this.roundTimer = ROUND_TIME;
         this.lastTimerTimestamp = Date.now();
@@ -46,7 +47,15 @@ export class MatchManager {
         this.p1TotalDamage = 0;
         this.p2TotalDamage = 0;
         this.startTime = Date.now();
-        this.startRoundIntro();
+
+        if (this.isTraining) {
+            this.phase = MATCH_PHASES.ACTIVE;
+            this.bannerText = '';
+            this.bannerSubText = '';
+            this.bannerScale = 1.0;
+        } else {
+            this.startRoundIntro();
+        }
     }
 
     startRoundIntro() {
@@ -68,6 +77,13 @@ export class MatchManager {
     }
 
     update(p1, p2, onMatchEndCallback, p3 = null) {
+        if (this.isTraining) {
+            this.phase = MATCH_PHASES.ACTIVE;
+            this.bannerText = '';
+            this.bannerSubText = '';
+            return;
+        }
+
         this.phaseTimer++;
 
         switch (this.phase) {

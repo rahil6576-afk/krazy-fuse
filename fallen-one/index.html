@@ -7,7 +7,7 @@
     <base href="/fallen-one/">
     <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
     <meta name="description" content="Fast-paced 2D competitive PvP action fighting game featuring Aarav and champions with combos, specials, parries, training mode, and online PvP.">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=20260825_5">
     <style>
       #krazio-floating-back {
         position: fixed;
@@ -47,7 +47,53 @@
       </svg>
     </a>
 
-    <div id="game-container">
+    <!-- Master Game View Wrapper -->
+    <div id="game-view-wrapper">
+      <!-- Topbar for Paused Portal Mode -->
+      <header id="portal-paused-topbar" class="portal-topbar">
+        <div class="portal-nav-left">
+          <a class="portal-brand" href="../index.html" title="Krazy Fuse Arcade Portal">
+            <span class="portal-brand-icon">⚡</span>
+            <span><b>KRAZY FUSE</b><small>ARCADE PORTAL</small></span>
+          </a>
+          <div class="portal-search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search 250+ free arcade games..." readonly onclick="window.location.href='../index.html'">
+          </div>
+        </div>
+
+        <div class="portal-nav-pills">
+          <a href="../index.html" class="nav-pill active">🔥 HOT</a>
+          <a href="../dart-board/index.html" class="nav-pill">🎯 2-PLAYER</a>
+          <a href="../office-escape/index.html" class="nav-pill">🏃 RUNNER</a>
+          <a href="../flappy-man/index.html" class="nav-pill">🦸 SUPERHERO</a>
+          <a href="../wild-swings/index.html" class="nav-pill">🕸️ ACTION</a>
+          <a href="../bomb-panic/index.html" class="nav-pill">💣 PARTY</a>
+        </div>
+
+        <div class="portal-nav-right">
+          <div class="portal-bank-badge" id="portal-top-bank">🪙 76 P</div>
+          <button id="btn-portal-maximize" class="portal-resume-btn" onclick="window.fallenOneGame && window.fallenOneGame.resume()">
+            <span>▶️ RESUME (ESC)</span>
+          </button>
+        </div>
+      </header>
+
+      <div id="portal-paused-body" class="portal-layout-body">
+        <!-- Left Sidebar Navigation -->
+        <aside class="portal-sidebar">
+          <a href="../index.html" class="side-btn active" title="Home"><span>🏠</span><small>Home</small></a>
+          <a href="../index.html" class="side-btn" title="Trending"><span>🔥</span><small>Hot</small></a>
+          <a href="../dart-board/index.html" class="side-btn" title="2 Player"><span>👥</span><small>2-Player</small></a>
+          <a href="../flappy-man/index.html" class="side-btn" title="Arcade"><span>🕹️</span><small>Arcade</small></a>
+          <a href="../wild-swings/index.html" class="side-btn" title="Action"><span>⚡</span><small>Action</small></a>
+          <a href="../bomb-panic/index.html" class="side-btn" title="Party"><span>💣</span><small>Party</small></a>
+          <a href="../gravity-flip/index.html" class="side-btn" title="Reflex"><span>🔄</span><small>Reflex</small></a>
+        </aside>
+
+        <!-- Center Column -->
+        <main class="portal-center-col">
+          <div id="game-container">
         <!-- Game Canvas -->
         <canvas id="game-canvas"></canvas>
 
@@ -246,7 +292,7 @@
                     ← HOME
                 </button>
                 <h2 class="select-title">SELECT FIGHTER</h2>
-                <button id="btn-confirm-char" class="arcade-btn primary-btn" style="width: auto; padding: 10px 26px;">
+                <button id="btn-confirm-char" class="arcade-btn primary-btn" style="width: auto; padding: 10px 26px;" onclick="window.fallenOneGame && window.fallenOneGame.menuManager && window.fallenOneGame.menuManager.confirmCharacterSelection()">
                     CONFIRM ➔
                 </button>
             </div>
@@ -294,7 +340,7 @@
                     ← FIGHTERS
                 </button>
                 <h2 class="select-title">SELECT BATTLE ARENA</h2>
-                <button id="btn-start-match" class="arcade-btn primary-btn" style="width: auto; padding: 10px 26px;">
+                <button id="btn-start-match" class="arcade-btn primary-btn" style="width: auto; padding: 10px 26px;" onclick="window.fallenOneGame && window.fallenOneGame.menuManager && window.fallenOneGame.menuManager.startMatchFromStageSelect()">
                     FIGHT! ➔
                 </button>
             </div>
@@ -528,9 +574,122 @@
                 </div>
             </div>
         </div>
+
+        <!-- Universal Paused Screen Overlay -->
+        <div class="pause-modal-card">
+          <div style="background: rgba(14, 23, 38, 0.96); border: 2.5px solid rgba(56, 189, 248, 0.4); border-radius: 20px; padding: 20px 22px; text-align: center; max-width: 360px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(56,189,248,0.3); backdrop-filter: blur(16px); font-family: 'Outfit', sans-serif;">
+            <div style="display: inline-block; border: 2px solid #38bdf8; color: #38bdf8; font-weight: 900; font-size: 1rem; padding: 2px 14px; border-radius: 8px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">⏸️ PAUSED</div>
+            <h2 style="font-size: 1.6rem; font-weight: 900; color: #fff; margin-bottom: 4px;">Game Paused</h2>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 16px;">Combat is halted. Taking a quick breather...</p>
+            <div style="display: flex; flex-direction: column; gap: 8px; max-width: 250px; margin: 0 auto; width: 100%;">
+              <button class="portal-resume-btn" onclick="window.fallenOneGame && window.fallenOneGame.resume()" style="justify-content: center; width: 100%; font-size: 0.95rem; padding: 10px 18px; background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56,189,248,0.4); border-radius: 999px; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.4);">
+                <span>▶️ RESUME (ESC)</span>
+              </button>
+              <button onclick="window.fallenOneGame && window.fallenOneGame.restartMatch()" style="justify-content: center; width: 100%; font-size: 0.85rem; padding: 8px 16px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
+                <span>🔄 RESTART MATCH</span>
+              </button>
+              <button onclick="window.fallenOneGame && window.fallenOneGame.returnToMainMenu()" style="justify-content: center; width: 100%; font-size: 0.85rem; padding: 8px 16px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
+                <span>🏠 MAIN MENU</span>
+              </button>
+              <a href="../index.html" style="justify-content: center; width: 100%; font-size: 0.85rem; padding: 8px 16px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; text-decoration: none; text-align: center; display: inline-block;">
+                <span>🌐 PORTAL HOME</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+          <!-- Under-Game Meta Action Bar -->
+          <div id="game-meta-bar" class="game-meta-bar">
+            <div class="game-meta-info">
+              <div class="game-avatar-icon">⚔️</div>
+              <div style="min-width: 0; flex: 1;">
+                <h3>Fallen One</h3>
+                <div class="game-meta-tags">
+                  <span class="tag-badge">Fighting</span>
+                  <span class="meta-rating">⭐ 4.9</span>
+                </div>
+              </div>
+            </div>
+            <div class="game-meta-actions">
+              <button class="meta-btn" id="btn-meta-like" onclick="this.classList.toggle('active'); const s = this.querySelector('span'); if(s) s.textContent = this.classList.contains('active') ? '68.3k' : '68.2k';">
+                👍 <span>68.2k</span>
+              </button>
+              <button class="meta-btn" id="btn-meta-fav" onclick="this.classList.toggle('active')">
+                ⭐ Fav
+              </button>
+              <button class="meta-btn" id="btn-meta-expand" onclick="window.fallenOneGame && window.fallenOneGame.resume()">
+                ⛶ Expand
+              </button>
+              <button class="meta-btn" id="btn-meta-share" onclick="if(navigator.clipboard){navigator.clipboard.writeText(window.location.href); alert('Game link copied!');}">
+                🔗
+              </button>
+            </div>
+          </div>
+        </main>
+
+        <!-- Right Column: Recommended Games Grid -->
+        <aside id="portal-rec-col" class="portal-rec-col">
+          <div class="rec-header">
+            <span>🔥 RECOMMENDED GAMES</span>
+            <a href="../index.html">ALL <span>→</span></a>
+          </div>
+          <div class="rec-grid">
+            <a href="../office-escape/index.html" class="rec-card">
+              <div class="rec-badge">⚡ SPRINT</div>
+              <div class="rec-preview">🏃💼</div>
+              <div class="rec-info">
+                <b>Office Escape</b>
+                <small>Runner • Satire</small>
+              </div>
+            </a>
+            <a href="../dart-board/index.html" class="rec-card">
+              <div class="rec-badge">🎯 BULLSEYE</div>
+              <div class="rec-preview">🎯🍺</div>
+              <div class="rec-info">
+                <b>Dart Master</b>
+                <small>PvP • 2-Player</small>
+              </div>
+            </a>
+            <a href="../flappy-man/index.html" class="rec-card">
+              <div class="rec-badge">🦸 HERO</div>
+              <div class="rec-preview">🦸‍♂️🚀</div>
+              <div class="rec-info">
+                <b>Flappy Man</b>
+                <small>Arcade • 10 Levels</small>
+              </div>
+            </a>
+            <a href="../wild-swings/index.html" class="rec-card">
+              <div class="rec-badge">🕸️ PHYSICS</div>
+              <div class="rec-preview">🕸️🐒</div>
+              <div class="rec-info">
+                <b>Wild Swings</b>
+                <small>Action • 20 Levels</small>
+              </div>
+            </a>
+            <a href="../bomb-panic/index.html" class="rec-card">
+              <div class="rec-badge">💣 MULTI</div>
+              <div class="rec-preview">💣💥</div>
+              <div class="rec-info">
+                <b>Bomb Panic</b>
+                <small>Party • Hot Potato</small>
+              </div>
+            </a>
+            <a href="../gravity-flip/index.html" class="rec-card">
+              <div class="rec-badge">⛏️ CAVERN</div>
+              <div class="rec-preview">⛏️🔄</div>
+              <div class="rec-info">
+                <b>Gravity Flip</b>
+                <small>Runner • Reflex</small>
+              </div>
+            </a>
+          </div>
+        </aside>
+      </div>
     </div>
 
     <!-- Script Entrypoint -->
-    <script type="module" src="js/game.js"></script>
+    <script type="module" src="js/game.js?v=20260825_5"></script>
+    <script src="../assets/krazy-screenshot.js"></script>
 </body>
 </html>

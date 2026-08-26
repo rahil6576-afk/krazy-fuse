@@ -185,22 +185,40 @@ const GAMES_CATALOG = [
 let activeCategory = 'all';
 let searchQuery = '';
 
-// Universal Fullscreen Game Launcher
+// Universal Fullscreen Game Launcher (Never drops native fullscreen or displays Chrome/Windows bars)
 function launchFullscreenGame(event, url) {
     if (event) {
         event.preventDefault();
         event.stopPropagation();
     }
-    const docEl = document.documentElement;
-    const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
-    if (req) {
-        req.call(docEl).then(() => {
-            window.location.href = url;
-        }).catch(() => {
-            window.location.href = url;
+
+    let stage = document.getElementById('portal-fullscreen-stage');
+    if (!stage) {
+        stage = document.createElement('div');
+        stage.id = 'portal-fullscreen-stage';
+        stage.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:999999;background:#000;display:none;flex-direction:column;overflow:hidden;';
+        stage.innerHTML = `
+            <iframe id="portal-game-frame" src="" allow="fullscreen; autoplay; gamepad; clipboard-write" style="width:100vw;height:100vh;border:none;flex:1;display:block;"></iframe>
+        `;
+        document.body.appendChild(stage);
+
+        document.addEventListener('fullscreenchange', () => {
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+            if (!isFs && stage.style.display === 'flex') {
+                // If exited native fullscreen, gracefully sync
+            }
         });
-    } else {
-        window.location.href = url;
+    }
+
+    const frame = document.getElementById('portal-game-frame');
+    frame.src = url;
+    stage.style.display = 'flex';
+
+    // Request true native browser fullscreen immediately in click gesture
+    const docEl = document.documentElement;
+    const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+    if (req) {
+        req.call(docEl).catch(() => {});
     }
 }
 window.launchFullscreenGame = launchFullscreenGame;

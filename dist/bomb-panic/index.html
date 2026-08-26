@@ -2930,6 +2930,31 @@
             }
         };
 
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+                if (window.bombPanic) {
+                    if (window.bombPanic.state === 'PAUSED' || document.body.classList.contains('portal-paused')) {
+                        window.resumeBombGame();
+                    } else if (window.bombPanic.state === 'PLAYING') {
+                        window.pauseBombGame();
+                    }
+                }
+            }
+        });
+
+        // Instant trigger on first Escape when exiting native browser fullscreen
+        const handleFullscreenExitBomb = () => {
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+            if (!isFs && window.bombPanic && window.bombPanic.state === 'PLAYING') {
+                window.pauseBombGame();
+            }
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenExitBomb);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenExitBomb);
+        document.addEventListener('mozfullscreenchange', handleFullscreenExitBomb);
+        document.addEventListener('MSFullscreenChange', handleFullscreenExitBomb);
+
         window.addEventListener('DOMContentLoaded', () => {
             window.bombPanic = new BombPanicGame();
         });
@@ -2938,5 +2963,6 @@
         }
     })();
     </script>
+    <script src="../assets/krazy-screenshot.js"></script>
 </body>
 </html>

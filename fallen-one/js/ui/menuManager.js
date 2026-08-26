@@ -18,7 +18,7 @@ export class MenuManager {
 
         this.dom = {
             screens: {
-                mainMenu: document.getElementById('main-menu-screen'),
+                mainMenu: document.getElementById('mainMenuScreen') || document.getElementById('main-menu-screen'),
                 charSelect: document.getElementById('char-select-screen'),
                 stageSelect: document.getElementById('stage-select-screen'),
                 inGameHud: document.getElementById('game-hud'),
@@ -267,28 +267,12 @@ export class MenuManager {
 
         // Character Select Confirm -> Stage Select or Start Tower
         document.getElementById('btn-confirm-char')?.addEventListener('click', () => {
-            ensureFullScreen();
-            soundEngine.playModeStart();
-            if (this.currentMode === GAME_MODES.TOWER_CLIMB) {
-                towerManager.startTower(ROSTER[this.selectedP1Index].id);
-                this.game.startTowerMatch();
-                this.showScreen('inGameHud');
-            } else {
-                this.showScreen('stageSelect');
-            }
+            this.confirmCharacterSelection();
         });
 
         // Stage Select Confirm -> Start Game
         document.getElementById('btn-start-match')?.addEventListener('click', () => {
-            ensureFullScreen();
-            soundEngine.playModeStart();
-            arenaManager.setArena(ARENA_LIST[this.selectedStageIndex].id);
-            this.game.startMatch(
-                ROSTER[this.selectedP1Index],
-                ROSTER[this.selectedP2Index],
-                this.currentMode
-            );
-            this.showScreen('inGameHud');
+            this.startMatchFromStageSelect();
         });
 
         // In-game Pause Button & Modal Actions
@@ -388,14 +372,53 @@ export class MenuManager {
         });
     }
 
-    showScreen(screenKey) {
-        Object.values(this.dom.screens).forEach(screen => {
-            if (screen) screen.classList.add('hidden');
-        });
+    confirmCharacterSelection() {
+        try {
+            if (soundEngine && soundEngine.playModeStart) soundEngine.playModeStart();
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                const el = document.documentElement;
+                const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+                if (req) req.call(el).catch(() => {});
+            }
+            if (this.currentMode === GAME_MODES.TOWER_CLIMB) {
+                const p1 = ROSTER[this.selectedP1Index] || ROSTER[0];
+                towerManager.startTower(p1.id);
+                this.game.startTowerMatch();
+                this.showScreen('inGameHud');
+            } else {
+                this.showScreen('stageSelect');
+            }
+        } catch (err) {
+            console.error("confirmCharacterSelection failed:", err);
+        }
+    }
 
-        Object.values(this.dom.modals).forEach(modal => {
-            if (modal) modal.classList.add('hidden');
-        });
+    startMatchFromStageSelect() {
+        try {
+            if (soundEngine && soundEngine.playModeStart) soundEngine.playModeStart();
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                const el = document.documentElement;
+                const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+                if (req) req.call(el).catch(() => {});
+            }
+            const stage = ARENA_LIST[this.selectedStageIndex] || ARENA_LIST[0];
+            arenaManager.setArena(stage.id);
+            const p1 = ROSTER[this.selectedP1Index] || ROSTER[0];
+            const p2 = ROSTER[this.selectedP2Index] || ROSTER[1];
+            this.game.startMatch(
+                p1,
+                p2,
+                this.currentMode || GAME_MODES.AI_BATTLE
+            );
+            this.showScreen('inGameHud');
+        } catch (err) {
+            console.error("startMatchFromStageSelect failed:", err);
+        }
+    }
+
+    showScreen(screenKey) {
+        document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.classList.add('hidden'));
 
         if (this.dom.screens[screenKey]) {
             this.dom.screens[screenKey].classList.remove('hidden');

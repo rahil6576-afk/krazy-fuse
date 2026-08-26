@@ -15,25 +15,95 @@
 </head>
 <body>
 
-<div id="game-wrapper">
+    <!-- Simple Backward Arrow Button -->
+    <a href="../index.html" id="krazio-floating-back" title="Back to Portal" aria-label="Back">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+    </a>
+
+    <!-- Master Game View Wrapper -->
+    <div id="game-view-wrapper">
+      <!-- Topbar for Paused Portal Mode -->
+      <header id="portal-paused-topbar" class="portal-topbar">
+        <div class="portal-nav-left">
+          <a class="portal-brand" href="../index.html" title="Krazy Fuse Arcade Portal">
+            <span class="portal-brand-icon">⚡</span>
+            <span><b>KRAZY FUSE</b><small>ARCADE PORTAL</small></span>
+          </a>
+          <div class="portal-search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search 250+ free arcade games..." readonly onclick="window.location.href='../index.html'">
+          </div>
+        </div>
+
+        <div class="portal-nav-pills">
+          <a href="../index.html" class="nav-pill active">🔥 HOT</a>
+          <a href="../dart-board/index.html" class="nav-pill">🎯 2-PLAYER</a>
+          <a href="../office-escape/index.html" class="nav-pill">🏃 RUNNER</a>
+          <a href="../flappy-man/index.html" class="nav-pill">🦸 SUPERHERO</a>
+          <a href="../wild-swings/index.html" class="nav-pill">🕸️ ACTION</a>
+          <a href="../bomb-panic/index.html" class="nav-pill">💣 PARTY</a>
+        </div>
+
+        <div class="portal-nav-right">
+          <div class="portal-bank-badge" id="portal-top-bank">🪙 76 P</div>
+          <button id="btn-portal-maximize" class="portal-resume-btn" onclick="resumeElevatorGame()">
+            <span>▶️ RESUME (ESC)</span>
+          </button>
+        </div>
+      </header>
+
+      <div id="portal-paused-body" class="portal-layout-body">
+        <!-- Left Sidebar Navigation -->
+        <aside class="portal-sidebar">
+          <a href="../index.html" class="side-btn active" title="Home"><span>🏠</span><small>Home</small></a>
+          <a href="../index.html" class="side-btn" title="Trending"><span>🔥</span><small>Hot</small></a>
+          <a href="../dart-board/index.html" class="side-btn" title="2 Player"><span>👥</span><small>2-Player</small></a>
+          <a href="../flappy-man/index.html" class="side-btn" title="Arcade"><span>🕹️</span><small>Arcade</small></a>
+          <a href="../wild-swings/index.html" class="side-btn" title="Action"><span>⚡</span><small>Action</small></a>
+          <a href="../bomb-panic/index.html" class="side-btn" title="Party"><span>💣</span><small>Party</small></a>
+          <a href="../gravity-flip/index.html" class="side-btn" title="Reflex"><span>🔄</span><small>Reflex</small></a>
+        </aside>
+
+        <!-- Center Column -->
+        <main class="portal-center-col">
+          <div id="game-wrapper">
     <!-- Canvas for rendering -->
     <canvas id="elevatorCanvas" width="900" height="600"></canvas>
 
-    <!-- Top HUD Overlay -->
+    <!-- Master Roguelite Top HUD Overlay -->
     <div id="hud">
         <div class="hud-left">
-            <a href="../index.html" class="hud-btn" title="Back to krazio games">
+            <a href="../index.html" class="hud-btn" title="Back to Krazy Fuse Portal">
                 <img src="krazio-icon.svg" alt="krazio" style="width: 20px; height: 20px; border-radius: 50%;">
             </a>
             <div class="hud-pill floor-pill">
                 🛗 <span id="hud-floor-text">FLOOR 1</span>
             </div>
-            <div class="hud-pill alive-pill">
-                👥 <span id="hud-alive-count">8/8 ALIVE</span>
+            <div class="hud-pill health-pill" id="hud-hp-pill">
+                ❤️ <span id="hud-hp-text">100/100</span>
+                <div class="hp-bar-track"><div id="hud-hp-bar" class="hp-bar-fill" style="width: 100%;"></div></div>
+            </div>
+            <div class="hud-pill coins-pill">
+                🪙 <span id="hud-run-coins">0</span> <small>(BANK: <span id="hud-bank-coins">0</span>)</small>
             </div>
         </div>
 
         <div class="hud-center">
+            <!-- Dynamic 5-Tier Doom Meter -->
+            <div class="doom-meter-container" id="hud-doom-container" title="Doom increases over time! At 100%, Doom Catastrophe begins!">
+                <div class="doom-meter-header">
+                    <span class="doom-meter-title">💀 DOOM LEVEL</span>
+                    <strong class="doom-meter-val" id="hud-doom-val">0%</strong>
+                </div>
+                <div class="doom-meter-track">
+                    <div id="hud-doom-bar" class="doom-meter-fill" style="width: 0%;"></div>
+                </div>
+                <div class="doom-tier-pips" id="hud-doom-tier-text">TIER 1: CALM</div>
+            </div>
+
+            <!-- Floor Event Banner -->
             <div id="doom-event-banner" class="event-banner hidden">
                 <span id="doom-event-icon">⚠️</span>
                 <span id="doom-event-text">WARNING: PREPARE FOR DOOM</span>
@@ -42,11 +112,34 @@
         </div>
 
         <div class="hud-right">
-            <div class="hud-pill power-pill" id="hud-ability-pill" title="Press E or Shift to Sabotage!">
-                <span>⚡ SABOTAGE:</span>
-                <strong id="hud-ability-name">PUSH (E)</strong>
+            <!-- Active Weapon & Ability Build HUD -->
+            <div class="hud-pill weapon-pill" id="hud-weapon-pill" title="Attack with SPACE or Click!">
+                <span id="hud-weapon-icon">🗡️</span>
+                <strong id="hud-weapon-name">RUSTY KNIFE</strong>
+            </div>
+            <div class="hud-pill ability-pill" id="hud-ability-pill" title="Press E, Q, or SHIFT to use ability!">
+                <span id="hud-ability-icon">💨</span>
+                <strong id="hud-ability-name">DASH (SHIFT)</strong>
             </div>
             <button id="btn-sound-toggle" class="hud-btn" title="Toggle Sound">🔊</button>
+            <button id="btn-hud-pause" class="hud-btn" title="Pause Game (ESC)" onclick="pauseElevatorGame()">⏸️</button>
+        </div>
+    </div>
+
+    <!-- Active Passives Row (Bottom-Left HUD) -->
+    <div id="hud-passives-row" class="passives-hud-strip">
+        <!-- Injected dynamically by JS -->
+    </div>
+
+    <!-- Milestone Boss Health Bar Overlay -->
+    <div id="boss-hud-overlay" class="boss-health-card hidden">
+        <div class="boss-title-row">
+            <span class="boss-icon" id="boss-icon">🧹</span>
+            <span class="boss-name" id="boss-name">THE JANITOR PRIME</span>
+            <span class="boss-phase" id="boss-phase">PHASE 1</span>
+        </div>
+        <div class="boss-bar-track">
+            <div id="boss-bar-fill" class="boss-bar-fill" style="width: 100%;"></div>
         </div>
     </div>
 
@@ -54,51 +147,112 @@
     <div id="door-left" class="elevator-door left"></div>
     <div id="door-right" class="elevator-door right"></div>
 
+    <!-- Floor Decision Choice Modal (2–3 Strategic Decisions On Door Opening) -->
+    <div id="decision-modal" class="decision-overlay hidden">
+        <div class="decision-card-box">
+            <div class="decision-badge" id="decision-floor-badge">🛗 FLOOR 12 REACHED</div>
+            <h2 class="decision-title" id="decision-title">CHOOSE YOUR PATH</h2>
+            <p class="decision-subtitle" id="decision-desc">The elevator doors slide open. What will you risk?</p>
+            <div class="choices-grid" id="choices-grid">
+                <!-- Injected by JS: 2 to 3 choice cards -->
+            </div>
+        </div>
+    </div>
+
+    <!-- In-Elevator Safe Room & "DO I GO HIGHER?" Risk Console -->
+    <div id="safe-room-modal" class="safe-room-overlay hidden">
+        <div class="safe-room-box">
+            <div class="safe-header">
+                <div class="safe-badge">🛗 ELEVATOR SAFE ROOM — DOORS SEALED</div>
+                <h2 class="safe-title" id="safe-floor-title">FLOOR 14 SURVIVED</h2>
+                <div class="radio-lore-ticker">
+                    <span class="radio-icon">📻</span>
+                    <marquee id="safe-radio-text" scrollamount="4">Radio: "Security scans report abnormal bio-signatures on higher floors..."</marquee>
+                </div>
+            </div>
+
+            <!-- In-Elevator Vending Kiosk -->
+            <div class="safe-vendor-section">
+                <div class="vendor-header">
+                    <span>🛒 IN-ELEVATOR EMERGENCY VENDOR</span>
+                    <small>Run Coins: 🪙 <strong id="safe-coins-val">120</strong></small>
+                </div>
+                <div class="vendor-grid" id="safe-vendor-grid">
+                    <!-- Dynamic Kiosk Items (Heal, Ammo, Weapon Upgrade, Passive Perk) -->
+                </div>
+            </div>
+
+            <!-- Core "DO I GO HIGHER?" Push-Your-Luck Decision Console -->
+            <div class="risk-decision-console">
+                <div class="risk-info-panel">
+                    <h3>⚖️ PUSH YOUR LUCK</h3>
+                    <p>You have <strong id="risk-bank-coins-text">140 RUN COINS</strong> at stake. Higher floors feature deadlier hazards, rare weapons, and boss encounters. If you die, unbanked run coins are lost!</p>
+                </div>
+                <div class="risk-actions-row">
+                    <button id="btn-cash-out" class="btn-cash-out">
+                        <span class="btn-icon">💰</span>
+                        <div class="btn-text">
+                            <strong>EXIT & BANK COINS</strong>
+                            <small id="btn-cash-out-sub">Escape with 140 Coins</small>
+                        </div>
+                    </button>
+                    <button id="btn-go-higher" class="btn-go-higher">
+                        <span class="btn-icon">🛗</span>
+                        <div class="btn-text">
+                            <strong id="btn-higher-title">GO TO FLOOR 15 →</strong>
+                            <small>Greater Risk • Legendary Loot</small>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Start / Lobby Screen -->
     <div id="start-screen" class="screen">
         <div class="title-box">
-            <div class="danger-tag">⚠️ MULTIPLAYER SURVIVAL CHAOS ⚠️</div>
+            <div class="danger-tag">🔥 ROGUELITE SURVIVAL ELEVATOR 🔥</div>
             <h1 class="game-title">ELEVATOR OF DOOM 99</h1>
-            <p class="game-subtitle">Survive 99 floors of unpredictable hazards, collapsing floors & sabotage!</p>
+            <p class="game-subtitle">Make choices • Build weapons • Manage Doom • Risk going higher!</p>
         </div>
 
         <!-- How To Play / Rules Explanation Card -->
         <div class="rules-explanation-card">
             <div class="rules-header">
-                <span style="font-size: 1.1rem; font-weight: 800; color: #facc15;">📜 HOW TO PLAY & RULES</span>
-                <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">30–60s Party Survival</span>
+                <span style="font-size: 1.1rem; font-weight: 800; color: #facc15;">📜 THE ROGUELITE LOOP</span>
+                <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">Tactical Decision Survival</span>
             </div>
             
             <div class="rules-grid">
                 <div class="rule-box">
-                    <div class="rule-icon">🛗</div>
-                    <div class="rule-title">1. The Goal</div>
-                    <div class="rule-desc">You are trapped with 7 other passengers. Survive random floor hazards all the way to <strong>Floor 99</strong>.</div>
+                    <div class="rule-icon">🔀</div>
+                    <div class="rule-title">1. Make Decisions</div>
+                    <div class="rule-desc">Every floor offers 2–3 paths: <strong>Safe routes</strong>, <strong>High-Risk Danger</strong>, or <strong>High-Stakes Gambles</strong>!</div>
                 </div>
 
                 <div class="rule-box">
-                    <div class="rule-icon">⚠️</div>
-                    <div class="rule-title">2. Random Doom</div>
-                    <div class="rule-desc">Every floor triggers a surprise hazard: <strong>Collapsing tiles</strong>, <strong>Laser sweeps</strong>, or <strong>Ticking bombs</strong>!</div>
+                    <div class="rule-icon">⚔️</div>
+                    <div class="rule-title">2. Combat & Weapons</div>
+                    <div class="rule-desc">Attack with <strong>Space/Click</strong>. Use <strong>Blasters, Shock Batons, Doom Launchers</strong> & <strong>Dash</strong>!</div>
                 </div>
 
                 <div class="rule-box">
-                    <div class="rule-icon">🥊</div>
-                    <div class="rule-title">3. Sabotage & Push</div>
-                    <div class="rule-desc">Press <strong>E</strong> or <strong>Shift</strong> to shove rivals into hazards. Avoid getting pushed off yourself!</div>
+                    <div class="rule-icon">💀</div>
+                    <div class="rule-title">3. Watch Doom Meter</div>
+                    <div class="rule-desc">Doom rises continuously! Triggers flickering lights, enraged foes, malfunctioning elevators & Doom Events!</div>
                 </div>
 
                 <div class="rule-box">
-                    <div class="rule-icon">🏆</div>
-                    <div class="rule-title">4. Floor 99 Escape</div>
-                    <div class="rule-desc">At Floor 99, the <strong>Golden Escape Hatch</strong> opens. First survivor to leap in wins the crown!</div>
+                    <div class="rule-icon">💰</div>
+                    <div class="rule-title">4. Do I Go Higher?</div>
+                    <div class="rule-desc">Between floors, decide: <strong>Bank your coins and escape safely</strong>, or <strong>risk going higher for glory!</strong></div>
                 </div>
             </div>
         </div>
 
-        <!-- Character Roster -->
+        <!-- Character & Loadout Select -->
         <div class="lobby-roster-card">
-            <h3>👥 8 ELEVATOR PASSENGERS (YOU + 7 BOTS)</h3>
+            <h3>👥 CHOOSE YOUR SURVIVOR & STARTING WEAPON</h3>
             <div class="passenger-preview-grid" id="passenger-grid">
                 <!-- Rendered by JS -->
             </div>
@@ -108,26 +262,29 @@
             <button id="btn-start-game" class="btn-play-primary">
                 <span>🚪 ENTER ELEVATOR & SURVIVE</span>
             </button>
-            <a href="index.html" class="btn-secondary-lobby">
-                <span>🏠 KRAZIO HUB</span>
+            <a href="../index.html" class="btn-secondary-lobby">
+                <span>🏠 KRAZY FUSE HUB</span>
             </a>
         </div>
 
         <!-- Controls Guide -->
         <div class="controls-pill-strip">
-            <div class="ctrl-item"><span class="key-k">A / D / ← →</span> Walk</div>
-            <div class="ctrl-item"><span class="key-k">W / SPACE / ↑</span> Jump</div>
-            <div class="ctrl-item"><span class="key-k">S / ↓</span> Duck / Crouch</div>
-            <div class="ctrl-item"><span class="key-k">E / SHIFT</span> Push / Sabotage</div>
+            <div class="ctrl-item"><span class="key-k">A / D / ← →</span> Move</div>
+            <div class="ctrl-item"><span class="key-k">W / ↑</span> Jump</div>
+            <div class="ctrl-item"><span class="key-k">SPACE / CLICK</span> Attack</div>
+            <div class="ctrl-item"><span class="key-k">SHIFT / E / Q</span> Dash / Ability</div>
         </div>
     </div>
 
-    <!-- Game Over / Victory Screen -->
+    <!-- Satirical Comedic Game Over / Victory Screen -->
     <div id="gameover-screen" class="screen hidden">
         <div class="gameover-box">
             <div id="gameover-badge" class="result-badge">💀 ELEVATOR CRUSHED</div>
-            <h2 id="gameover-title" class="result-title">You Were Eliminated!</h2>
-            <p id="gameover-subtitle" class="result-subtitle">Floor 37: Knocked into the abyss by Chad.</p>
+            <h2 id="gameover-title" class="result-title">You Were Doomed!</h2>
+            <div class="cause-of-death-box">
+                <span class="cod-label">CAUSE OF DEATH:</span>
+                <p id="gameover-subtitle" class="cod-text">"Tried to high-five The Elevator Man on Floor 37."</p>
+            </div>
 
             <div class="stats-matrix">
                 <div class="stat-card">
@@ -135,38 +292,158 @@
                     <strong class="sc-val" id="res-floor">Floor 37</strong>
                 </div>
                 <div class="stat-card">
-                    <span class="sc-label">Dooms Survived</span>
-                    <strong class="sc-val" id="res-dooms">12</strong>
+                    <span class="sc-label">Coins Banked</span>
+                    <strong class="sc-val" id="res-coins">🪙 840</strong>
                 </div>
                 <div class="stat-card">
-                    <span class="sc-label">Players Sabotaged</span>
-                    <strong class="sc-val" id="res-sabotages">4</strong>
+                    <span class="sc-label">Enemies Slain</span>
+                    <strong class="sc-val" id="res-kills">48</strong>
                 </div>
                 <div class="stat-card">
-                    <span class="sc-label">Rank</span>
-                    <strong class="sc-val" id="res-rank">Certified Splat 💀</strong>
+                    <span class="sc-label">Bosses Defeated</span>
+                    <strong class="sc-val" id="res-bosses">3/5</strong>
                 </div>
+                <div class="stat-card">
+                    <span class="sc-label">Secrets Found</span>
+                    <strong class="sc-val" id="res-secrets">2/10</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="sc-label">Survivor Rank</span>
+                    <strong class="sc-val" id="res-rank">Doom Glutton 💀</strong>
+                </div>
+            </div>
+
+            <!-- Final Build Summary -->
+            <div class="final-build-summary" id="res-build-summary">
+                <span>FINAL BUILD: 🗡️ Rusty Knife + 💨 Dash (3 Passives)</span>
             </div>
 
             <div class="action-row" style="margin-top: 20px;">
                 <button id="btn-restart" class="btn-play-primary">
                     <span>⚡ RIDE AGAIN (SPACE)</span>
                 </button>
-                <a href="index.html" class="btn-secondary-lobby">
-                    <span>🌐 KRAZIO HUB</span>
+                <a href="../index.html" class="btn-secondary-lobby">
+                    <span>🌐 KRAZY FUSE HUB</span>
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- Ghost Spectator Overlay (when dead before match ends) -->
-    <div id="spectator-hud" class="spectator-banner hidden">
-        👻 YOU ARE A GHOST! Click anywhere to haunt & throw slime at survivors!
+    <!-- Universal Paused Screen Overlay -->
+    <div class="pause-modal-card">
+      <div style="background: rgba(14, 23, 38, 0.96); border: 2.5px solid rgba(56, 189, 248, 0.4); border-radius: 24px; padding: 28px 32px; text-align: center; max-width: 440px; width: 90%; box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 35px rgba(56,189,248,0.3); backdrop-filter: blur(16px); font-family: 'Outfit', sans-serif;">
+        <div style="display: inline-block; border: 2.5px solid #38bdf8; color: #38bdf8; font-weight: 900; font-size: 1.1rem; padding: 4px 16px; border-radius: 8px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">⏸️ PAUSED</div>
+        <h2 style="font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 6px;">Game Paused</h2>
+        <p style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 20px;">Elevator halted between floors. Taking a breather...</p>
+        <div style="display: flex; flex-direction: column; gap: 10px; max-width: 280px; margin: 0 auto; width: 100%;">
+          <button class="portal-resume-btn" onclick="resumeElevatorGame()" style="justify-content: center; width: 100%; font-size: 1.05rem; padding: 12px 20px; background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56,189,248,0.4); border-radius: 999px; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.4);">
+            <span>▶️ RESUME (ESC)</span>
+          </button>
+          <button onclick="resumeElevatorGame(); initMatch();" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
+            <span>🔄 RESTART RUN</span>
+          </button>
+          <a href="../index.html" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; text-decoration: none; text-align: center; display: inline-block;">
+            <span>🏠 HOME</span>
+          </a>
+        </div>
+      </div>
     </div>
 </div>
+
+          <!-- Under-Game Meta Action Bar -->
+          <div id="game-meta-bar" class="game-meta-bar">
+            <div class="game-meta-info">
+              <div class="game-avatar-icon">🛗💀</div>
+              <div>
+                <h3>Elevator of Doom 99</h3>
+                <div class="game-meta-tags">
+                  <span class="tag-badge">Survival</span>
+                  <span class="tag-badge">Multiplayer Party</span>
+                  <span class="tag-badge">60 FPS</span>
+                  <span class="meta-rating">⭐ 4.9 (51.8k votes)</span>
+                </div>
+              </div>
+            </div>
+            <div class="game-meta-actions">
+              <button class="meta-btn" id="btn-meta-like" onclick="this.classList.toggle('active'); const s = this.querySelector('span'); if(s) s.textContent = this.classList.contains('active') ? '51.9k' : '51.8k';">
+                👍 <span>51.8k</span>
+              </button>
+              <button class="meta-btn" id="btn-meta-fav" onclick="this.classList.toggle('active')">
+                ⭐ Favorite
+              </button>
+              <button class="meta-btn" id="btn-meta-expand" onclick="resumeElevatorGame()">
+                ⛶ Expand (ESC)
+              </button>
+              <button class="meta-btn" id="btn-meta-share" onclick="if(navigator.clipboard){navigator.clipboard.writeText(window.location.href); alert('Game link copied!');}">
+                🔗 Share
+              </button>
+            </div>
+          </div>
+        </main>
+
+        <!-- Right Column: Recommended Games Grid -->
+        <aside id="portal-rec-col" class="portal-rec-col">
+          <div class="rec-header">
+            <span>🔥 RECOMMENDED GAMES</span>
+            <a href="../index.html">ALL <span>→</span></a>
+          </div>
+          <div class="rec-grid">
+            <a href="../office-escape/index.html" class="rec-card">
+              <div class="rec-badge">⚡ SPRINT</div>
+              <div class="rec-preview">🏃💼</div>
+              <div class="rec-info">
+                <b>Office Escape</b>
+                <small>Runner • Satire</small>
+              </div>
+            </a>
+            <a href="../dart-board/index.html" class="rec-card">
+              <div class="rec-badge">🎯 BULLSEYE</div>
+              <div class="rec-preview">🎯🍺</div>
+              <div class="rec-info">
+                <b>Dart Master</b>
+                <small>PvP • 2-Player</small>
+              </div>
+            </a>
+            <a href="../flappy-man/index.html" class="rec-card">
+              <div class="rec-badge">🦸 HERO</div>
+              <div class="rec-preview">🦸‍♂️🚀</div>
+              <div class="rec-info">
+                <b>Flappy Man</b>
+                <small>Arcade • 10 Levels</small>
+              </div>
+            </a>
+            <a href="../wild-swings/index.html" class="rec-card">
+              <div class="rec-badge">🕸️ PHYSICS</div>
+              <div class="rec-preview">🕸️🐒</div>
+              <div class="rec-info">
+                <b>Wild Swings</b>
+                <small>Action • 20 Levels</small>
+              </div>
+            </a>
+            <a href="../bomb-panic/index.html" class="rec-card">
+              <div class="rec-badge">💣 MULTI</div>
+              <div class="rec-preview">💣💥</div>
+              <div class="rec-info">
+                <b>Bomb Panic</b>
+                <small>Party • Hot Potato</small>
+              </div>
+            </a>
+            <a href="../gravity-flip/index.html" class="rec-card">
+              <div class="rec-badge">⛏️ CAVERN</div>
+              <div class="rec-preview">⛏️🔄</div>
+              <div class="rec-info">
+                <b>Gravity Flip</b>
+                <small>Runner • Reflex</small>
+              </div>
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
 
 <!-- Audio Engine & Game Engine -->
 <script src="elevator-audio.js"></script>
 <script src="elevator-game.js"></script>
+<script src="../assets/krazy-screenshot.js"></script>
 </body>
 </html>

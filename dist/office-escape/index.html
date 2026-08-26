@@ -102,6 +102,98 @@ main{max-width:1240px;margin:auto;padding:0 28px;position:relative;z-index:2}
 .store-btn:hover{transform:scale(1.04);box-shadow:0 0 15px rgba(245,158,11,.4)}
 .store-btn.bought{background:rgba(16,185,129,.2);color:#10b981;border:1px solid #10b981;cursor:default}
 
+/* Comprehensive Day & Night Theme Styles */
+body.theme-day {
+  background: radial-gradient(circle at 80% 15%, rgba(251, 191, 36, 0.22) 0%, rgba(56, 189, 248, 0.18) 35%, transparent 60%), radial-gradient(circle at 10% 85%, rgba(56, 189, 248, 0.2) 0%, transparent 45%), linear-gradient(145deg, #07223d 0%, #0d3862 48%, #144e82 100%);
+  color: #f8fafc;
+}
+body.theme-day.in-game {
+  background: #0c1a2e;
+}
+body.theme-day .orb-one {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 68%);
+}
+body.theme-day .orb-two {
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.25), transparent 68%);
+}
+body.theme-day .scene {
+  background: linear-gradient(180deg, #0284c7 0%, #38bdf8 52%, #bae6fd 100%);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.3), 0 30px 70px rgba(2, 132, 199, 0.4);
+}
+body.theme-day .scene:after {
+  background: linear-gradient(90deg, transparent, #fbbf24, #38bdf8, transparent);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+}
+body.theme-day .scene .window {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(186, 230, 253, 0.18) 100%);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+body.theme-day .scene .window i {
+  background: rgba(255, 255, 255, 0.3);
+}
+body.theme-day .scene .city {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(14, 116, 144, 0.35) 100%);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+body.theme-day .scene .glow {
+  background: radial-gradient(circle, rgba(254, 240, 138, 0.5) 0%, rgba(251, 191, 36, 0.3) 45%, transparent 70%);
+}
+body.theme-day .scene .ring {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+body.theme-day .employee, 
+body.theme-day .store-card, 
+body.theme-day .quick-grid article, 
+body.theme-day .controls {
+  background: linear-gradient(180deg, rgba(14, 45, 76, 0.85), rgba(7, 26, 48, 0.94));
+  border-color: rgba(56, 189, 248, 0.28);
+}
+body.theme-day .employee:hover, 
+body.theme-day .store-card:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 15px 35px rgba(2, 132, 199, 0.3);
+}
+body.theme-day .employee.active {
+  border-color: #38bdf8;
+  background: linear-gradient(180deg, rgba(2, 132, 199, 0.65), rgba(7, 26, 48, 0.94));
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+}
+body.theme-day .nav {
+  border-bottom-color: rgba(56, 189, 248, 0.25);
+}
+body.theme-day .status {
+  background: rgba(14, 45, 76, 0.7);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.theme-toggle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+.theme-toggle-btn:hover {
+  transform: scale(1.15) rotate(18deg);
+  border-color: #38bdf8;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.6);
+}
+body.theme-day .theme-toggle-btn {
+  background: rgba(254, 240, 138, 0.2);
+  border-color: #fbbf24;
+  color: #fbbf24;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+
 .controls{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:28px;padding:22px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(100deg,rgba(11,27,42,.85),rgba(8,16,27,.7));margin-bottom:32px}.keys{display:flex;gap:10px}.keys span{display:flex;align-items:center;gap:6px}.keys kbd{font-size:.48rem;padding:6px 7px;border:1px solid rgba(255,255,255,.13);border-bottom-color:rgba(255,255,255,.28);border-radius:5px;background:rgba(255,255,255,.05);color:#d8e2e9}.keys b{font-size:.48rem;color:#6e8093}.primary.small{padding:11px 15px;font-size:.58rem}
 footer{max-width:1240px;margin:auto;padding:0 28px 22px;display:flex;justify-content:space-between;color:#526579;font-size:.47rem;letter-spacing:1.2px;position:relative;z-index:2}footer i{font-style:normal;color:#2e4052;margin:0 6px}
 .hidden{display:none !important}
@@ -129,6 +221,7 @@ footer{max-width:1240px;margin:auto;padding:0 28px 22px;display:flex;justify-con
         <a href="#controls">CONTROLS</a>
       </nav>
       <div class="nav-actions">
+        <button id="btn-home-theme" class="theme-toggle-btn" title="Toggle Day / Night Mode" onclick="window.toggleEscapeTheme &amp;&amp; window.toggleEscapeTheme()">☀️</button>
         <div class="points-badge" id="nav-points-badge">🪙 0 P</div>
         <a class="nav-play btn-trigger-game" href="#play" onclick="launchGame(); return false;">PLAY NOW <span>→</span></a>
       </div>
@@ -421,6 +514,7 @@ footer{max-width:1240px;margin:auto;padding:0 28px 22px;display:flex;justify-con
                   <path d="M19 12H5M12 19l-7-7 7-7"/>
                 </svg>
               </button>
+              <button id="btn-hud-theme" class="hud-btn" title="Toggle Day / Night Theme (Shortcut: T)" onclick="window.toggleEscapeTheme &amp;&amp; window.toggleEscapeTheme()">☀️</button>
               <div class="hud-pill time-pill">⏱️ <span id="hud-time">0.0s</span></div>
               <div class="hud-pill zone-pill">🏢 <span id="hud-zone">Cubicle Maze</span></div>
             </div>
@@ -836,5 +930,6 @@ footer{max-width:1240px;margin:auto;padding:0 28px 22px;display:flex;justify-con
       syncHeroPreview(activeAvatarId || 'dev');
     }
   </script>
+  <script src="../assets/krazy-screenshot.js"></script>
 </body>
 </html>

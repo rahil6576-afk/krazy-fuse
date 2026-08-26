@@ -520,6 +520,20 @@
             transform: scale(1.04);
         }
 
+        .level-select-btn.locked {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+            color: #64748b !important;
+            opacity: 0.55 !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+        .level-select-btn.locked:hover {
+            border-color: rgba(255, 255, 255, 0.08) !important;
+            transform: none !important;
+        }
+
         /* Level Indicator HUD */
         .level-hud-badge {
             position: absolute;
@@ -636,25 +650,26 @@
         /* Portal UI Elements (Fixed and Hardware Accelerated) */
         .portal-topbar {
             height: 60px;
-            background: rgba(11, 18, 32, 0.95);
+            background: rgba(11, 18, 32, 0.96);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
-            gap: 20px;
+            padding: 0 18px;
+            gap: 12px;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            font-family: 'Fredoka', 'Outfit', sans-serif;
+            font-family: 'Outfit', sans-serif;
+            box-sizing: border-box;
             opacity: 0;
             pointer-events: none;
             transform: translateY(-100%);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
         }
 
         .portal-sidebar {
@@ -674,7 +689,7 @@
             opacity: 0;
             pointer-events: none;
             transform: translateX(-100%);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
         }
 
         .portal-rec-col {
@@ -693,49 +708,57 @@
             opacity: 0;
             pointer-events: none;
             transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
             overflow-y: auto;
         }
 
         .game-meta-bar {
             width: 100%;
-            max-width: 440px;
+            max-width: 480px;
             margin-top: 14px;
             background: rgba(14, 23, 38, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
-            padding: 12px 20px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
+            gap: 8px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            font-family: 'Fredoka', 'Outfit', sans-serif;
+            font-family: 'Outfit', sans-serif;
             opacity: 0;
             pointer-events: none;
             transform: translateY(20px);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+            box-sizing: border-box;
         }
 
         .pause-modal-card {
-            position: absolute !important;
-            inset: 0 !important;
-            background: rgba(4, 8, 16, 0.78) !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            z-index: 9999 !important;
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 9, 18, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
             opacity: 0;
             pointer-events: none;
-            transform: scale(0.92);
-            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            transform: scale(0.95);
         }
 
         /* Active Paused State */
         body.portal-paused {
             overflow: hidden !important;
+        }
+
+        body.portal-paused .top-bar,
+        body.portal-paused .score-hud,
+        body.portal-paused .level-hud-badge {
+            display: none !important;
         }
 
         body.portal-paused .portal-topbar {
@@ -769,45 +792,39 @@
         }
 
         body.portal-paused #game-view-wrapper {
-            padding-top: 60px;
+            padding-top: 0;
         }
 
         body.portal-paused .portal-center-col {
-            padding: 16px 300px 24px 90px;
+            padding: 76px 300px 24px 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
         }
 
         body.portal-paused #gameWrapper {
-            max-width: 440px !important;
-            height: 600px !important;
-            max-height: 600px !important;
+            width: 480px !important;
+            max-width: 480px !important;
+            height: 480px !important;
+            max-height: 480px !important;
+            aspect-ratio: 1 / 1 !important;
             border-radius: 18px !important;
             border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
             box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.25) !important;
-        }
-
-        .portal-topbar {
-            height: 60px;
-            background: rgba(11, 18, 32, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            gap: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            font-family: 'Outfit', sans-serif;
+            position: relative !important;
+            overflow: hidden !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
         .portal-nav-left {
             display: flex;
             align-items: center;
-            gap: 20px;
-            flex: 1;
-            max-width: 520px;
+            gap: 14px;
+            flex-shrink: 0;
+            max-width: 480px;
         }
 
         .portal-brand {
@@ -930,13 +947,13 @@
         .portal-resume-btn {
             display: inline-flex;
             align-items: center;
-            padding: 8px 16px;
+            padding: 8px 18px;
             background: linear-gradient(135deg, #0284c7, #2563eb);
             border: 1px solid rgba(56, 189, 248, 0.4);
             border-radius: 999px;
             color: #fff;
             font-weight: 900;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             cursor: pointer;
             box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
             transition: 0.2s;
@@ -946,18 +963,6 @@
         .portal-resume-btn:hover {
             transform: scale(1.04);
             box-shadow: 0 6px 20px rgba(2, 132, 199, 0.6);
-        }
-
-        .portal-sidebar {
-            width: 68px;
-            background: #080d19;
-            border-right: 1px solid rgba(255, 255, 255, 0.06);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 16px 0;
-            gap: 10px;
-            font-family: 'Outfit', sans-serif;
         }
 
         .side-btn {
@@ -972,6 +977,7 @@
             text-decoration: none;
             transition: 0.2s;
             background: transparent;
+            font-family: 'Outfit', sans-serif;
         }
 
         .side-btn span {
@@ -988,22 +994,6 @@
             background: rgba(56, 189, 248, 0.15);
             color: #38bdf8;
             border: 1px solid rgba(56, 189, 248, 0.3);
-        }
-
-        .game-meta-bar {
-            width: 100%;
-            max-width: 440px;
-            margin-top: 12px;
-            padding: 14px 18px;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            font-family: 'Outfit', sans-serif;
         }
 
         .game-meta-info {
@@ -1080,17 +1070,6 @@
             color: #38bdf8;
         }
 
-        .portal-rec-col {
-            width: 290px;
-            background: #080d19;
-            border-left: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 16px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            font-family: 'Outfit', sans-serif;
-        }
-
         .rec-header {
             display: flex;
             justify-content: space-between;
@@ -1100,6 +1079,7 @@
             letter-spacing: 1px;
             color: #94a3b8;
             margin-bottom: 4px;
+            font-family: 'Outfit', sans-serif;
         }
 
         .rec-header a {
@@ -1127,6 +1107,7 @@
             transition: 0.2s;
             position: relative;
             overflow: hidden;
+            font-family: 'Outfit', sans-serif;
         }
 
         .rec-card:hover {
@@ -1176,24 +1157,55 @@
             border: 1px solid rgba(56, 189, 248, 0.3);
         }
 
-        /* Frosted Pause Screen Inside Game Container */
-        .pause-modal-card {
-            position: absolute;
+        body.portal-paused #krazio-floating-back {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 3-Second Resume Countdown Overlay */
+        .resume-countdown-overlay {
+            position: fixed;
             inset: 0;
-            background: rgba(7, 13, 24, 0.88);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            display: none;
+            z-index: 999999;
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 50;
-            padding: 20px;
-            font-family: 'Outfit', sans-serif;
+            background: rgba(10, 15, 29, 0.72);
+            backdrop-filter: blur(12px);
+            pointer-events: all;
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
-
-        body.portal-paused .pause-modal-card {
-            display: flex;
+        .resume-countdown-overlay.active {
+            opacity: 1;
+        }
+        .resume-countdown-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 8rem;
+            font-weight: 900;
+            color: #38bdf8;
+            text-shadow: 0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(56, 189, 248, 0.5);
+            line-height: 1;
+            transform: scale(1.5);
+            opacity: 0;
+            animation: countdownPop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .resume-countdown-sub {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.95);
+            margin-top: 14px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+        }
+        @keyframes countdownPop {
+            0% { transform: scale(1.6); opacity: 0; }
+            20% { transform: scale(1); opacity: 1; }
+            80% { transform: scale(0.95); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0; }
         }
     </style>
 </head>
@@ -1253,7 +1265,8 @@
         <main class="portal-center-col">
           <div id="gameWrapper">
             <!-- Top Navigation -->
-            <header class="top-bar" style="justify-content: flex-end; padding-right: 20px;">
+            <header class="top-bar" style="justify-content: flex-end; padding-right: 20px; gap: 8px;">
+                <button class="btn-icon" id="btnPauseFlappy" title="Pause Game (Esc/P)" onclick="window.pauseFlappyGame()">⏸️</button>
                 <button class="btn-icon" id="btnMute" title="Toggle Sound">🔊</button>
             </header>
 
@@ -1382,18 +1395,18 @@
 
             <!-- Universal Paused Screen Overlay -->
             <div class="pause-modal-card">
-              <div style="background: rgba(14, 23, 38, 0.96); border: 2.5px solid rgba(56, 189, 248, 0.4); border-radius: 24px; padding: 28px 32px; text-align: center; max-width: 440px; width: 90%; box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 35px rgba(56,189,248,0.3); backdrop-filter: blur(16px); font-family: 'Outfit', sans-serif;">
-                <div style="display: inline-block; border: 2.5px solid #38bdf8; color: #38bdf8; font-weight: 900; font-size: 1.1rem; padding: 4px 16px; border-radius: 8px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">⏸️ PAUSED</div>
-                <h2 style="font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 6px;">Game Paused</h2>
-                <p style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 20px;">Taking a quick tactical breather...</p>
-                <div style="display: flex; flex-direction: column; gap: 10px; max-width: 280px; margin: 0 auto; width: 100%;">
-                  <button class="portal-resume-btn" onclick="resumeFlappyGame()" style="justify-content: center; width: 100%; font-size: 1.05rem; padding: 12px 20px; background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56,189,248,0.4); border-radius: 999px; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.4);">
+              <div style="background: rgba(14, 23, 38, 0.96); border: 2.5px solid rgba(56, 189, 248, 0.4); border-radius: 20px; padding: 20px 22px; text-align: center; max-width: 360px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(56,189,248,0.3); backdrop-filter: blur(16px); font-family: 'Outfit', sans-serif;">
+                <div style="display: inline-block; border: 2px solid #38bdf8; color: #38bdf8; font-weight: 900; font-size: 1rem; padding: 2px 14px; border-radius: 8px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">⏸️ PAUSED</div>
+                <h2 style="font-size: 1.6rem; font-weight: 900; color: #fff; margin-bottom: 4px;">Game Paused</h2>
+                <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 16px;">Taking a quick tactical breather from superhero duties...</p>
+                <div style="display: flex; flex-direction: column; gap: 8px; max-width: 250px; margin: 0 auto; width: 100%;">
+                  <button class="portal-resume-btn" onclick="resumeFlappyGame()" style="justify-content: center; width: 100%; font-size: 0.95rem; padding: 10px 18px; background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56,189,248,0.4); border-radius: 999px; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.4);">
                     <span>▶️ RESUME (ESC)</span>
                   </button>
-                  <button onclick="resumeFlappyGame(); if(window.flappyGame){ window.flappyGame.reset(); window.flappyGame.startGame(); }" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
+                  <button onclick="resumeFlappyGame(); if(window.flappyGame){ window.flappyGame.reset(); window.flappyGame.startGame(); }" style="justify-content: center; width: 100%; font-size: 0.85rem; padding: 8px 16px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
                     <span>🔄 RESTART RUN</span>
                   </button>
-                  <a href="../index.html" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; text-decoration: none; text-align: center; display: inline-block;">
+                  <a href="../index.html" style="justify-content: center; width: 100%; font-size: 0.85rem; padding: 8px 16px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; text-decoration: none; text-align: center; display: inline-block;">
                     <span>🏠 HOME</span>
                   </a>
                 </div>
@@ -1403,30 +1416,30 @@
 
       <!-- Under-Game Meta Action Bar -->
       <div id="game-meta-bar" class="game-meta-bar">
-        <div class="game-meta-info">
-          <div class="game-avatar-icon">🦸‍♂️🚀</div>
-          <div>
-            <h3>Flappy Man: Superhero Flight</h3>
-            <div class="game-meta-tags">
+        <div class="game-meta-info" style="min-width: 0; flex: 1;">
+          <div class="game-avatar-icon" style="flex-shrink: 0;">🦸‍♂️</div>
+          <div style="min-width: 0;">
+            <h3 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem;">Flappy Man: Superhero Flight</h3>
+            <div class="game-meta-tags" style="display: flex; align-items: center; gap: 6px;">
               <span class="tag-badge">Arcade</span>
               <span class="tag-badge">Superhero</span>
               <span class="tag-badge">60 FPS</span>
-              <span class="meta-rating">⭐ 4.9 (42.1k votes)</span>
+              <span class="meta-rating">⭐ 4.9</span>
             </div>
           </div>
         </div>
-        <div class="game-meta-actions">
-          <button class="meta-btn" id="btn-meta-like" onclick="this.classList.toggle('active')">
-            👍 <span>42.1k</span>
+        <div class="game-meta-actions" style="flex-shrink: 0; gap: 6px;">
+          <button class="meta-btn" id="btn-meta-like" onclick="this.classList.toggle('active'); const s = this.querySelector('span'); if(s) s.textContent = this.classList.contains('active') ? '53.5k' : '53.4k';">
+            👍 <span>53.4k</span>
           </button>
           <button class="meta-btn" id="btn-meta-fav" onclick="this.classList.toggle('active')">
-            ⭐ Favorite
+            ⭐ Fav
           </button>
           <button class="meta-btn" id="btn-meta-expand" onclick="resumeFlappyGame()">
-            ⛶ Expand (ESC)
+            ⛶ Expand
           </button>
           <button class="meta-btn" id="btn-meta-share" onclick="if(navigator.clipboard){navigator.clipboard.writeText(window.location.href); alert('Game link copied!');}">
-            🔗 Share
+            🔗
           </button>
         </div>
       </div>
@@ -1668,17 +1681,18 @@
         // ==========================================
         // 10 Distinct Difficulty Levels
         // ==========================================
+        // 10 Distinct Difficulty Levels (Restored Original Smooth Speed)
         const LEVELS_CONFIG = [
-            { level: 1, goal: 5, speed: 1.8, gap: 175, title: 'Novice Cruise', osc: false },
-            { level: 2, goal: 8, speed: 2.0, gap: 168, title: 'Airborne Drift', osc: false },
-            { level: 3, goal: 12, speed: 2.2, gap: 160, title: 'Skyscraper Run', osc: false },
-            { level: 4, goal: 16, speed: 2.4, gap: 154, title: 'Velocity Rush', osc: false },
-            { level: 5, goal: 20, speed: 2.6, gap: 148, title: 'Moving Pillars', osc: true, oscSpeed: 0.02, oscAmp: 25 },
-            { level: 6, goal: 25, speed: 2.8, gap: 142, title: 'Turbulence Zone', osc: true, oscSpeed: 0.025, oscAmp: 30 },
-            { level: 7, goal: 30, speed: 3.0, gap: 138, title: 'Supersonic Flight', osc: true, oscSpeed: 0.03, oscAmp: 35 },
-            { level: 8, goal: 35, speed: 3.2, gap: 134, title: 'Heroic Crucible', osc: true, oscSpeed: 0.035, oscAmp: 40 },
-            { level: 9, goal: 40, speed: 3.4, gap: 130, title: "Titan's Gauntlet", osc: true, oscSpeed: 0.04, oscAmp: 45 },
-            { level: 10, goal: 50, speed: 3.7, gap: 126, title: 'Grandmaster Ascent 👑', osc: true, oscSpeed: 0.045, oscAmp: 50 }
+            { level: 1, goal: 5, speed: 1.6, gap: 180, title: 'Novice Cruise', osc: false },
+            { level: 2, goal: 8, speed: 1.8, gap: 172, title: 'Airborne Drift', osc: false },
+            { level: 3, goal: 12, speed: 2.0, gap: 165, title: 'Skyscraper Run', osc: false },
+            { level: 4, goal: 16, speed: 2.2, gap: 158, title: 'Velocity Rush', osc: false },
+            { level: 5, goal: 20, speed: 2.4, gap: 152, title: 'Moving Pillars', osc: true, oscSpeed: 0.02, oscAmp: 25 },
+            { level: 6, goal: 25, speed: 2.6, gap: 146, title: 'Turbulence Zone', osc: true, oscSpeed: 0.025, oscAmp: 30 },
+            { level: 7, goal: 30, speed: 2.8, gap: 140, title: 'Supersonic Flight', osc: true, oscSpeed: 0.03, oscAmp: 35 },
+            { level: 8, goal: 35, speed: 3.0, gap: 136, title: 'Heroic Crucible', osc: true, oscSpeed: 0.035, oscAmp: 40 },
+            { level: 9, goal: 40, speed: 3.2, gap: 132, title: "Titan's Gauntlet", osc: true, oscSpeed: 0.04, oscAmp: 45 },
+            { level: 10, goal: 50, speed: 3.5, gap: 128, title: 'Grandmaster Ascent 👑', osc: true, oscSpeed: 0.045, oscAmp: 50 }
         ];
 
         // 2. Main Flappy Heroes Arcade Engine
@@ -1691,14 +1705,15 @@
                 this.height = 760;
                 this.groundHeight = 110;
 
-                // State: 'READY' | 'PLAYING' | 'LEVELCLEAR' | 'GAMEOVER'
                 this.state = 'READY';
                 this.score = 0;
                 this.bestScore = parseInt(localStorage.getItem('flappyman_best') || '0', 10);
 
-                // Theme and Level State
+                // Theme and Level Progression State (Locked until cleared)
                 this.selectedThemeKey = localStorage.getItem('flappyman_theme') || 'superman';
-                this.currentLevel = parseInt(localStorage.getItem('flappyman_level') || '1', 10);
+                this.unlockedLevel = parseInt(localStorage.getItem('flappyman_unlocked_level') || '1', 10);
+                const savedLevel = parseInt(localStorage.getItem('flappyman_level') || '1', 10);
+                this.currentLevel = Math.min(this.unlockedLevel, Math.max(1, isNaN(savedLevel) ? 1 : savedLevel));
 
                 // Flappy Man Physics
                 this.man = {
@@ -1713,9 +1728,9 @@
                 };
 
                 // Constants (Smooth Buoyant Superhero Flight)
-                this.gravity = 0.22;
-                this.flapForce = -5.4;
-                this.maxFallSpeed = 5.8;
+                this.gravity = 0.20;
+                this.flapForce = -5.0;
+                this.maxFallSpeed = 5.2;
                 this.pipeWidth = 64;
 
                 this.applyLevelAndTheme();
@@ -1733,7 +1748,10 @@
 
                 this.resizeCanvas();
                 this.setupEvents();
+                this.updateLevelSelectUI();
                 this.reset();
+                this.lastTime = performance.now();
+                this.accumulator = 0;
                 this.loop();
             }
 
@@ -1743,6 +1761,28 @@
 
             getLevelConfig() {
                 return LEVELS_CONFIG[this.currentLevel - 1] || LEVELS_CONFIG[0];
+            }
+
+            updateLevelSelectUI() {
+                const lvlBtns = document.querySelectorAll('.level-select-btn');
+                lvlBtns.forEach(btn => {
+                    const lvl = parseInt(btn.getAttribute('data-level'), 10);
+                    if (lvl > this.unlockedLevel) {
+                        btn.classList.add('locked');
+                        btn.classList.remove('active');
+                        btn.innerHTML = `🔒 LVL ${lvl}`;
+                        btn.title = `Clear Level ${lvl - 1} first to unlock!`;
+                    } else {
+                        btn.classList.remove('locked');
+                        btn.innerHTML = `⭐ LVL ${lvl}`;
+                        btn.title = `Play Level ${lvl}`;
+                        if (lvl === this.currentLevel) {
+                            btn.classList.add('active');
+                        } else {
+                            btn.classList.remove('active');
+                        }
+                    }
+                });
             }
 
             applyLevelAndTheme() {
@@ -1807,19 +1847,20 @@
                     });
                 });
 
-                // 2. Level Select Buttons (1 to 10)
+                // 2. Level Select Buttons (1 to 10 with Locking)
                 const lvlBtns = document.querySelectorAll('.level-select-btn');
                 lvlBtns.forEach(btn => {
-                    const lvl = parseInt(btn.getAttribute('data-level'), 10);
-                    if (lvl === this.currentLevel) btn.classList.add('active');
-                    else btn.classList.remove('active');
-
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        lvlBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
+                        const lvl = parseInt(btn.getAttribute('data-level'), 10);
+                        if (lvl > this.unlockedLevel) {
+                            audio.playHit();
+                            alert(`🔒 Level ${lvl} is locked! Clear Level ${lvl - 1} first.`);
+                            return;
+                        }
                         this.currentLevel = lvl;
                         localStorage.setItem('flappyman_level', lvl.toString());
+                        this.updateLevelSelectUI();
                         this.applyLevelAndTheme();
                     });
                 });
@@ -1862,16 +1903,15 @@
                         ensureFullScreen();
                         if (this.currentLevel < 10) {
                             this.currentLevel++;
+                            if (this.currentLevel > this.unlockedLevel) {
+                                this.unlockedLevel = this.currentLevel;
+                                localStorage.setItem('flappyman_unlocked_level', this.unlockedLevel.toString());
+                            }
                         } else {
                             this.currentLevel = 1;
                         }
                         localStorage.setItem('flappyman_level', this.currentLevel.toString());
-                        // Update active level UI pill
-                        lvlBtns.forEach(b => {
-                            const l = parseInt(b.getAttribute('data-level'), 10);
-                            if (l === this.currentLevel) b.classList.add('active');
-                            else b.classList.remove('active');
-                        });
+                        this.updateLevelSelectUI();
                         this.reset();
                         this.startGame();
                     });
@@ -1922,10 +1962,10 @@
             reset() {
                 this.state = 'READY';
                 this.score = 0;
-                this.pipesSpawned = 0;
-                this.finishLine = null;
                 this.pipes = [];
                 this.particles = [];
+                this.pipesSpawned = 0;
+                this.finishLine = null;
                 this.applyLevelAndTheme();
 
                 this.man.y = this.height * 0.42;
@@ -1953,16 +1993,23 @@
                 this.state = 'LEVELCLEAR';
                 audio.playLevelUp();
 
+                // Unlock next level in persistent storage
+                if (this.currentLevel >= this.unlockedLevel && this.currentLevel < 10) {
+                    this.unlockedLevel = this.currentLevel + 1;
+                    localStorage.setItem('flappyman_unlocked_level', this.unlockedLevel.toString());
+                }
+                this.updateLevelSelectUI();
+
                 // Generate celebration confetti
-                for (let i = 0; i < 40; i++) {
+                for (let i = 0; i < 50; i++) {
                     this.particles.push({
-                        x: this.width / 2 + (Math.random() - 0.5) * 200,
-                        y: this.height * 0.3 + (Math.random() - 0.5) * 100,
+                        x: this.width / 2 + (Math.random() - 0.5) * 220,
+                        y: this.height * 0.3 + (Math.random() - 0.5) * 120,
                         vx: (Math.random() - 0.5) * 10,
                         vy: -2 - Math.random() * 6,
                         size: 4 + Math.random() * 6,
-                        color: ['#fbc531', '#00d2d3', '#e84118', '#4cd137', '#9c88ff'][Math.floor(Math.random() * 5)],
-                        life: 60
+                        color: ['#fbc531', '#00d2d3', '#e84118', '#4cd137', '#9c88ff', '#ffffff'][Math.floor(Math.random() * 6)],
+                        life: 65
                     });
                 }
 
@@ -1975,21 +2022,21 @@
 
                 if (this.currentLevel < 10) {
                     clearTitle.textContent = `🎉 LEVEL ${this.currentLevel} CLEARED!`;
-                    clearSubtitle.textContent = `TARGET REACHED! ⭐⭐⭐`;
-                    clearPipesVal.textContent = this.score;
-                    clearNextLvlVal.textContent = `LVL ${this.currentLevel + 1}`;
-                    btnNext.innerHTML = `<span>▶ NEXT LEVEL (LVL ${this.currentLevel + 1})</span>`;
+                    clearSubtitle.textContent = `TARGET REACHED! 🏆 LEVEL ${this.currentLevel + 1} UNLOCKED`;
+                    clearPipesVal.textContent = `${this.targetGoal} / ${this.targetGoal}`;
+                    clearNextLvlVal.textContent = `LVL ${this.currentLevel + 1} 🔓`;
+                    btnNext.innerHTML = `<span>▶ NEXT LEVEL (LVL ${this.currentLevel + 1}) ➔</span>`;
                 } else {
                     clearTitle.textContent = `👑 ALL 10 LEVELS CLEARED!`;
                     clearSubtitle.textContent = `GRANDMASTER CHAMPION! 🏆`;
-                    clearPipesVal.textContent = this.score;
+                    clearPipesVal.textContent = `${this.targetGoal} / ${this.targetGoal}`;
                     clearNextLvlVal.textContent = `MASTER 👑`;
                     btnNext.innerHTML = `<span>🎉 REPLAY FROM LEVEL 1</span>`;
                 }
 
                 setTimeout(() => {
                     document.getElementById('levelClearModal').classList.add('show');
-                }, 400);
+                }, 500);
             }
 
             flap() {
@@ -3218,14 +3265,102 @@
                 this.drawFlappyMan();
             }
 
-            loop() {
-                this.update();
+            loop(timestamp) {
+                if (!this.lastTime) this.lastTime = timestamp || performance.now();
+                const now = timestamp || performance.now();
+                const delta = Math.min(now - this.lastTime, 100);
+                this.lastTime = now;
+
+                this.accumulator = (this.accumulator || 0) + delta;
+                const targetStep = 1000 / 60; // Locked 60 FPS update rate
+
+                while (this.accumulator >= targetStep) {
+                    if (this.state !== 'PAUSED') {
+                        this.update();
+                    }
+                    this.accumulator -= targetStep;
+                }
+
                 this.render();
-                requestAnimationFrame(() => this.loop());
+                requestAnimationFrame((t) => this.loop(t));
             }
         }
 
+        function playCountdownAudioFlappy(freq = 440, type = 'sine', duration = 0.15) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                if (!window.__cdAudioCtxFlappy) window.__cdAudioCtxFlappy = new AudioCtx();
+                const ctx = window.__cdAudioCtxFlappy;
+                if (ctx.state === 'suspended') ctx.resume();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.18, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        window.__countdownTimerFlappy = null;
+        function runResumeCountdownFlappy(onComplete) {
+            if (window.__countdownTimerFlappy) {
+                clearInterval(window.__countdownTimerFlappy);
+                window.__countdownTimerFlappy = null;
+            }
+            let overlay = document.getElementById('resumeCountdownOverlayFlappy');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'resumeCountdownOverlayFlappy';
+                overlay.className = 'resume-countdown-overlay';
+                document.body.appendChild(overlay);
+            }
+            overlay.classList.add('active');
+
+            let count = 3;
+            const updateDisplay = () => {
+                if (count > 0) {
+                    overlay.innerHTML = `
+                        <div class="resume-countdown-number" key="${count}">${count}</div>
+                        <div class="resume-countdown-sub">⚡ GET READY • RESUMING</div>
+                    `;
+                    playCountdownAudioFlappy(count === 3 ? 440 : count === 2 ? 554 : 659, 'sine', 0.18);
+                    count--;
+                } else if (count === 0) {
+                    overlay.innerHTML = `
+                        <div class="resume-countdown-number" style="color: #4ade80; text-shadow: 0 0 45px rgba(74, 222, 128, 0.9);">GO!</div>
+                        <div class="resume-countdown-sub" style="color: #4ade80;">🚀 FLY NOW!</div>
+                    `;
+                    playCountdownAudioFlappy(880, 'triangle', 0.3);
+                    count--;
+                } else {
+                    if (window.__countdownTimerFlappy) {
+                        clearInterval(window.__countdownTimerFlappy);
+                        window.__countdownTimerFlappy = null;
+                    }
+                    overlay.classList.remove('active');
+                    setTimeout(() => {
+                        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                    }, 200);
+                    if (typeof onComplete === 'function') onComplete();
+                }
+            };
+
+            updateDisplay();
+            window.__countdownTimerFlappy = setInterval(updateDisplay, 1000);
+        }
+
         window.pauseFlappyGame = function() {
+            if (window.__countdownTimerFlappy) {
+                clearInterval(window.__countdownTimerFlappy);
+                window.__countdownTimerFlappy = null;
+                const overlay = document.getElementById('resumeCountdownOverlayFlappy');
+                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            }
             if (window.flappyGame) {
                 if (window.flappyGame.state === 'PLAYING' || window.flappyGame.state === 'READY') {
                     window.flappyGame.previousState = window.flappyGame.state;
@@ -3233,17 +3368,43 @@
                 }
                 document.body.classList.add('portal-paused');
                 const bankBadge = document.getElementById('portal-top-bank');
-                if (bankBadge) bankBadge.textContent = `🪙 ${localStorage.getItem('coins') || 70} P`;
+                if (bankBadge) {
+                    const pts = localStorage.getItem('krazio_user_points') || localStorage.getItem('coins') || localStorage.getItem('office_escape_coins') || '76';
+                    bankBadge.textContent = `🪙 ${pts} P`;
+                }
             }
         };
 
-        window.resumeFlappyGame = function() {
-            if (window.flappyGame) {
-                if (window.flappyGame.state === 'PAUSED') {
-                    window.flappyGame.state = window.flappyGame.previousState || 'PLAYING';
-                }
-                document.body.classList.remove('portal-paused');
+        let isResumingFlappy = false;
+
+        window.resumeFlappyGame = function(requestFullscreen = true) {
+            if (!window.flappyGame) return;
+
+            isResumingFlappy = true;
+
+            // 1. Immediately expand back to fullscreen and dismiss paused portal UI
+            document.body.classList.remove('portal-paused');
+
+            if (requestFullscreen && !document.fullscreenElement && !document.webkitFullscreenElement) {
+                const docEl = document.documentElement;
+                const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
+                if (req) req.call(docEl).catch(() => {});
             }
+
+            if (window.flappyGame) {
+                window.flappyGame.resizeCanvas();
+            }
+
+            // 2. Start 3-second countdown before unpausing flight mechanics
+            runResumeCountdownFlappy(() => {
+                isResumingFlappy = false;
+                if (window.flappyGame) {
+                    if (window.flappyGame.state === 'PAUSED') {
+                        window.flappyGame.state = window.flappyGame.previousState || 'PLAYING';
+                    }
+                    window.flappyGame.resizeCanvas();
+                }
+            });
         };
 
         window.addEventListener('keydown', (e) => {
@@ -3257,6 +3418,21 @@
             }
         });
 
+        // Instant trigger on first Escape when exiting native browser fullscreen
+        const handleFullscreenExitFlappy = () => {
+            if (isResumingFlappy) return;
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+            if (!isFs && !document.body.classList.contains('portal-paused')) {
+                if (window.flappyGame && (window.flappyGame.state === 'PLAYING' || window.flappyGame.state === 'READY')) {
+                    window.pauseFlappyGame();
+                }
+            }
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenExitFlappy);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenExitFlappy);
+        document.addEventListener('mozfullscreenchange', handleFullscreenExitFlappy);
+        document.addEventListener('MSFullscreenChange', handleFullscreenExitFlappy);
+
         window.addEventListener('DOMContentLoaded', () => {
             window.flappyGame = new FlappyManGame();
         });
@@ -3264,5 +3440,6 @@
             if (!window.flappyGame) window.flappyGame = new FlappyManGame();
         }
     </script>
+    <script src="../assets/krazy-screenshot.js"></script>
 </body>
 </html>

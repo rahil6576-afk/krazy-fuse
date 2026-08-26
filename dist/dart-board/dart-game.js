@@ -40,9 +40,9 @@
 
             // Logical Canvas Dimensions
             this.width = 600;
-            this.height = 640;
-            this.boardCenter = { x: 300, y: 290 };
-            this.boardRadius = 250;
+            this.height = 700;
+            this.boardCenter = { x: 300, y: 360 };
+            this.boardRadius = 220;
 
             // Dart Radii Relative to boardRadius
             this.rInnerBull = this.boardRadius * 0.045; // 50
@@ -83,11 +83,81 @@
             this.isHost = true;
             this.peerChannel = null;
 
+            this.load3DAssets();
             this.initCanvas();
             this.setupEvents();
             this.initMultiplayerChannel();
             this.resetMatch();
             this.startLoop();
+        }
+
+        load3DAssets() {
+            this.assets = {
+                boardReady: false,
+                boardCanvas: null,
+                dartRedReady: false,
+                dartRedCanvas: null,
+                dartBlueReady: false,
+                dartBlueCanvas: null
+            };
+
+            const imgBoard = new Image();
+            imgBoard.onload = () => {
+                try {
+                    const c = document.createElement('canvas');
+                    c.width = imgBoard.width || 1024;
+                    c.height = imgBoard.height || 1024;
+                    const octx = c.getContext('2d');
+                    octx.beginPath();
+                    octx.arc(c.width / 2, c.height / 2, c.width * 0.485, 0, Math.PI * 2);
+                    octx.clip();
+                    octx.drawImage(imgBoard, 0, 0);
+                    this.assets.boardCanvas = c;
+                    this.assets.boardReady = true;
+                } catch (e) {
+                    console.warn('Board asset error:', e);
+                }
+            };
+            imgBoard.src = 'dartboard_3d.jpg';
+
+            const processDart = (src, isRed) => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const c = document.createElement('canvas');
+                        c.width = img.width || 576;
+                        c.height = img.height || 1024;
+                        const octx = c.getContext('2d');
+                        octx.drawImage(img, 0, 0);
+
+                        const imgData = octx.getImageData(0, 0, c.width, c.height);
+                        const d = imgData.data;
+                        for (let i = 0; i < d.length; i += 4) {
+                            const maxLum = Math.max(d[i], d[i+1], d[i+2]);
+                            if (maxLum < 16) {
+                                d[i+3] = 0;
+                            } else if (maxLum < 48) {
+                                d[i+3] = Math.round(((maxLum - 16) / 32) * 255);
+                            }
+                        }
+                        octx.putImageData(imgData, 0, 0);
+
+                        if (isRed) {
+                            this.assets.dartRedCanvas = c;
+                            this.assets.dartRedReady = true;
+                        } else {
+                            this.assets.dartBlueCanvas = c;
+                            this.assets.dartBlueReady = true;
+                        }
+                    } catch (e) {
+                        console.warn('Dart asset error:', e);
+                    }
+                };
+                img.src = src;
+            };
+
+            processDart('dart_red_3d.jpg', true);
+            processDart('dart_blue_3d.jpg', false);
         }
 
         initCanvas() {
@@ -540,100 +610,154 @@
 
             ctx.save();
 
-            // Outer Cabinet Ring
+            // 1. Deep 3D Ambient Drop Shadow on Board
             ctx.beginPath();
-            ctx.arc(center.x, center.y, rBoard + 36, 0, Math.PI * 2);
-            ctx.fillStyle = '#0f172a';
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
-            ctx.shadowBlur = 40;
+            ctx.arc(center.x + 14, center.y + 20, rBoard + 36, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+            ctx.shadowBlur = 35;
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Outer Number Wire Plate
-            ctx.beginPath();
-            ctx.arc(center.x, center.y, rBoard + 28, 0, Math.PI * 2);
-            ctx.fillStyle = '#1e293b';
-            ctx.fill();
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#334155';
-            ctx.stroke();
-
-            // 20 Sectors (Alternating Black & Cream)
-            for (let i = 0; i < 20; i++) {
-                const startAngle = -Math.PI / 2 + (i - 0.5) * ANGLE_PER_SECTOR;
-                const endAngle = startAngle + ANGLE_PER_SECTOR;
-                const isEven = i % 2 === 0;
+            if (this.assets && this.assets.boardReady && this.assets.boardCanvas) {
+                // 3D Photorealistic Tournament Dartboard Asset
+                const totalR = rBoard * 1.25;
+                ctx.drawImage(
+                    this.assets.boardCanvas,
+                    center.x - totalR,
+                    center.y - totalR,
+                    totalR * 2,
+                    totalR * 2
+                );
+            } else {
+                // 2. Heavy Dark-Steel Outer Rim with Metallic Bevel Glint & 12 Perimeter Rivets
+                const outerRimR = rBoard + 32;
+                const rimGrad = ctx.createLinearGradient(center.x - outerRimR, center.y - outerRimR, center.x + outerRimR, center.y + outerRimR);
+                rimGrad.addColorStop(0, '#334155');
+                rimGrad.addColorStop(0.25, '#1e293b');
+                rimGrad.addColorStop(0.5, '#475569');
+                rimGrad.addColorStop(0.75, '#0f172a');
+                rimGrad.addColorStop(1, '#1e293b');
 
                 ctx.beginPath();
-                ctx.moveTo(center.x, center.y);
-                ctx.arc(center.x, center.y, this.rDoubleOuter, startAngle, endAngle);
-                ctx.closePath();
-                ctx.fillStyle = isEven ? '#18181b' : '#fef3c7';
+                ctx.arc(center.x, center.y, outerRimR, 0, Math.PI * 2);
+                ctx.fillStyle = rimGrad;
                 ctx.fill();
-
-                // Double Ring
-                ctx.beginPath();
-                ctx.arc(center.x, center.y, this.rDoubleOuter, startAngle, endAngle);
-                ctx.arc(center.x, center.y, this.rDoubleInner, endAngle, startAngle, true);
-                ctx.closePath();
-                ctx.fillStyle = isEven ? '#dc2626' : '#16a34a';
-                ctx.fill();
-
-                // Treble Ring
-                ctx.beginPath();
-                ctx.arc(center.x, center.y, this.rTrebleOuter, startAngle, endAngle);
-                ctx.arc(center.x, center.y, this.rTrebleInner, endAngle, startAngle, true);
-                ctx.closePath();
-                ctx.fillStyle = isEven ? '#dc2626' : '#16a34a';
-                ctx.fill();
-            }
-
-            // Outer Bull (25)
-            ctx.beginPath();
-            ctx.arc(center.x, center.y, this.rOuterBull, 0, Math.PI * 2);
-            ctx.fillStyle = '#16a34a';
-            ctx.fill();
-
-            // Inner Bull (50)
-            ctx.beginPath();
-            ctx.arc(center.x, center.y, this.rInnerBull, 0, Math.PI * 2);
-            ctx.fillStyle = '#dc2626';
-            ctx.fill();
-
-            // Silver Spider Wires
-            ctx.lineWidth = 1.5;
-            ctx.strokeStyle = 'rgba(241, 245, 249, 0.65)';
-
-            [this.rInnerBull, this.rOuterBull, this.rTrebleInner, this.rTrebleOuter, this.rDoubleInner, this.rDoubleOuter].forEach(r => {
-                ctx.beginPath();
-                ctx.arc(center.x, center.y, r, 0, Math.PI * 2);
+                ctx.lineWidth = 3.5;
+                ctx.strokeStyle = '#64748b';
                 ctx.stroke();
-            });
 
-            for (let i = 0; i < 20; i++) {
-                const angle = -Math.PI / 2 + (i - 0.5) * ANGLE_PER_SECTOR;
+                // 12 Perimeter Rivet Fasteners with Metallic Highlights
+                for (let r = 0; r < 12; r++) {
+                    const rAngle = (r * Math.PI * 2) / 12;
+                    const rx = center.x + Math.cos(rAngle) * (outerRimR - 6);
+                    const ry = center.y + Math.sin(rAngle) * (outerRimR - 6);
+                    ctx.beginPath();
+                    ctx.arc(rx, ry, 3, 0, Math.PI * 2);
+                    ctx.fillStyle = '#cbd5e1';
+                    ctx.fill();
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+
+                // 3. Matte Charcoal Number Ring Band
                 ctx.beginPath();
-                ctx.moveTo(center.x + Math.cos(angle) * this.rOuterBull, center.y + Math.sin(angle) * this.rOuterBull);
-                ctx.lineTo(center.x + Math.cos(angle) * this.rDoubleOuter, center.y + Math.sin(angle) * this.rDoubleOuter);
+                ctx.arc(center.x, center.y, rBoard + 20, 0, Math.PI * 2);
+                ctx.fillStyle = '#0f172a';
+                ctx.fill();
+
+                // Inner Metallic Separator Ring
+                ctx.beginPath();
+                ctx.arc(center.x, center.y, this.rDoubleOuter, 0, Math.PI * 2);
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = '#cbd5e1';
                 ctx.stroke();
-            }
 
-            // Numbers
-            ctx.font = '900 20px Outfit, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#f8fafc';
+                // 4. 20 Alternating Authentic Sisal Segments (Ivory Cream #f5f0e6 vs Jet Black #141416)
+                for (let i = 0; i < 20; i++) {
+                    const startAngle = -Math.PI / 2 + (i - 0.5) * ANGLE_PER_SECTOR;
+                    const endAngle = startAngle + ANGLE_PER_SECTOR;
+                    const isEven = i % 2 === 0;
 
-            for (let i = 0; i < 20; i++) {
-                const angle = -Math.PI / 2 + i * ANGLE_PER_SECTOR;
-                const numR = rBoard + 14;
-                const nx = center.x + Math.cos(angle) * numR;
-                const ny = center.y + Math.sin(angle) * numR;
+                    // Single Bed Base
+                    ctx.beginPath();
+                    ctx.moveTo(center.x, center.y);
+                    ctx.arc(center.x, center.y, this.rDoubleOuter, startAngle, endAngle);
+                    ctx.closePath();
+                    ctx.fillStyle = isEven ? '#141416' : '#f5f0e6';
+                    ctx.fill();
 
+                    // Double Ring (Tournament Crimson Red #d92525 vs Emerald Green #0d9448)
+                    ctx.beginPath();
+                    ctx.arc(center.x, center.y, this.rDoubleOuter, startAngle, endAngle);
+                    ctx.arc(center.x, center.y, this.rDoubleInner, endAngle, startAngle, true);
+                    ctx.closePath();
+                    ctx.fillStyle = isEven ? '#d92525' : '#0d9448';
+                    ctx.fill();
+
+                    // Treble Ring (Tournament Crimson Red #d92525 vs Emerald Green #0d9448)
+                    ctx.beginPath();
+                    ctx.arc(center.x, center.y, this.rTrebleOuter, startAngle, endAngle);
+                    ctx.arc(center.x, center.y, this.rTrebleInner, endAngle, startAngle, true);
+                    ctx.closePath();
+                    ctx.fillStyle = isEven ? '#d92525' : '#0d9448';
+                    ctx.fill();
+                }
+
+                // 5. Dual-Ring Bullseye: Emerald Green Outer Bull (25 pts) & Crimson Red Inner Bull (50 pts)
+                ctx.beginPath();
+                ctx.arc(center.x, center.y, this.rOuterBull, 0, Math.PI * 2);
+                ctx.fillStyle = '#0d9448';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(center.x, center.y, this.rInnerBull, 0, Math.PI * 2);
+                ctx.fillStyle = '#d92525';
+                ctx.fill();
+
+                // 6. High-Tensile Silver Spider Blade Wires (Metallic Dividers with Glint)
                 ctx.save();
-                ctx.translate(nx, ny);
-                ctx.rotate(angle + Math.PI / 2);
-                ctx.fillText(SECTORS[i], 0, 0);
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1.6;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+                ctx.shadowBlur = 1.5;
+
+                // Radial Sector Dividers
+                for (let i = 0; i < 20; i++) {
+                    const angle = -Math.PI / 2 + (i - 0.5) * ANGLE_PER_SECTOR;
+                    ctx.beginPath();
+                    ctx.moveTo(center.x + Math.cos(angle) * this.rOuterBull, center.y + Math.sin(angle) * this.rOuterBull);
+                    ctx.lineTo(center.x + Math.cos(angle) * this.rDoubleOuter, center.y + Math.sin(angle) * this.rDoubleOuter);
+                    ctx.stroke();
+                }
+
+                // Concentric Ring Wires
+                [this.rInnerBull, this.rOuterBull, this.rTrebleInner, this.rTrebleOuter, this.rDoubleInner, this.rDoubleOuter].forEach(r => {
+                    ctx.beginPath();
+                    ctx.arc(center.x, center.y, r, 0, Math.PI * 2);
+                    ctx.stroke();
+                });
+                ctx.restore();
+
+                // 7. Crisp, Bold White Tournament Numbers (20, 1, 18, 4, 13...)
+                ctx.save();
+                ctx.font = '900 22px Outfit, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetY = 1.5;
+
+                for (let i = 0; i < 20; i++) {
+                    const angle = -Math.PI / 2 + i * ANGLE_PER_SECTOR;
+                    const numR = rBoard + 11;
+                    const nx = center.x + Math.cos(angle) * numR;
+                    const ny = center.y + Math.sin(angle) * numR;
+
+                    ctx.fillText(SECTORS[i], nx, ny);
+                }
                 ctx.restore();
             }
 
@@ -645,32 +769,98 @@
             this.boardDarts.forEach(dart => {
                 ctx.save();
                 ctx.translate(dart.x, dart.y);
+                ctx.rotate(dart.angle || 0);
 
-                ctx.beginPath();
-                ctx.ellipse(8, 12, 10, 4, Math.PI / 6, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-                ctx.fill();
+                const isP2 = dart.playerIdx === 1;
+                const isReady = isP2 ? (this.assets && this.assets.dartBlueReady) : (this.assets && this.assets.dartRedReady);
+                const dartCanvas = isP2 ? (this.assets && this.assets.dartBlueCanvas) : (this.assets && this.assets.dartRedCanvas);
 
-                ctx.beginPath();
-                ctx.arc(0, 0, 3, 0, Math.PI * 2);
-                ctx.fillStyle = '#f59e0b';
-                ctx.fill();
+                if (isReady && dartCanvas) {
+                    // Soft Impact Drop Shadow
+                    ctx.beginPath();
+                    ctx.ellipse(10, 24, 18, 8, Math.PI / 4, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                    ctx.fill();
 
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(12, -28);
-                ctx.lineWidth = 3.5;
-                ctx.strokeStyle = '#e2e8f0';
-                ctx.stroke();
+                    // 3D Rendered Dart
+                    const dw = 48;
+                    const dh = dw * (dartCanvas.height / dartCanvas.width);
+                    ctx.drawImage(dartCanvas, -dw * 0.503, -dh * 0.042, dw, dh);
+                } else {
+                    const themeColor = isP2 ? '#2563eb' : '#dc2626';
 
-                ctx.beginPath();
-                ctx.moveTo(12, -28);
-                ctx.lineTo(24, -42);
-                ctx.lineTo(16, -46);
-                ctx.lineTo(6, -34);
-                ctx.closePath();
-                ctx.fillStyle = '#ef4444';
-                ctx.fill();
+                    // Soft Impact Drop Shadow
+                    ctx.beginPath();
+                    ctx.ellipse(8, 14, 14, 6, Math.PI / 5, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                    ctx.fill();
+
+                    // Stainless Steel Needle Point
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-2.5, 14);
+                    ctx.lineTo(2.5, 14);
+                    ctx.closePath();
+                    ctx.fillStyle = '#cbd5e1';
+                    ctx.fill();
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    // Tungsten Barrel with Anodized Rings
+                    const barrelGrad = ctx.createLinearGradient(-5, 0, 5, 0);
+                    barrelGrad.addColorStop(0, '#64748b');
+                    barrelGrad.addColorStop(0.3, '#f8fafc');
+                    barrelGrad.addColorStop(1, '#1e293b');
+
+                    ctx.beginPath();
+                    ctx.moveTo(-3, 14);
+                    ctx.lineTo(3, 14);
+                    ctx.lineTo(5, 18);
+                    ctx.lineTo(4.5, 34);
+                    ctx.lineTo(-4.5, 34);
+                    ctx.lineTo(-5, 18);
+                    ctx.closePath();
+                    ctx.fillStyle = barrelGrad;
+                    ctx.fill();
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+
+                    // Anodized Ribbed Grip Rings
+                    [18, 22, 26, 30].forEach(gy => {
+                        ctx.fillStyle = themeColor;
+                        ctx.fillRect(-4.5, gy, 9, 2);
+                    });
+
+                    // Aluminum Stem
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillRect(-2, 34, 4, 16);
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(-2, 34, 4, 16);
+
+                    // 3D Aerodynamic Quad-Fin Flights
+                    ctx.beginPath();
+                    ctx.moveTo(-2, 50);
+                    ctx.lineTo(-18, 45);
+                    ctx.lineTo(-22, 76);
+                    ctx.lineTo(0, 68);
+                    ctx.lineTo(22, 76);
+                    ctx.lineTo(18, 45);
+                    ctx.lineTo(2, 50);
+                    ctx.closePath();
+
+                    const flightGrad = ctx.createLinearGradient(-22, 0, 22, 0);
+                    flightGrad.addColorStop(0, themeColor);
+                    flightGrad.addColorStop(0.5, '#0f172a');
+                    flightGrad.addColorStop(1, themeColor);
+                    ctx.fillStyle = flightGrad;
+                    ctx.fill();
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
 
                 ctx.restore();
             });
@@ -692,37 +882,98 @@
             const t = fd.progress;
             fd.x = fd.startX + (fd.targetX - fd.startX) * t;
             const linearY = fd.startY + (fd.targetY - fd.startY) * t;
-            const arcOffset = -Math.sin(t * Math.PI) * 70;
+            const arcOffset = -Math.sin(t * Math.PI) * 75;
             fd.y = linearY + arcOffset;
-            fd.scale = 1.6 - t * 0.75;
+            fd.scale = 1.0 - t * 0.55;
 
             const ctx = this.ctx;
             ctx.save();
             ctx.translate(fd.x, fd.y);
             ctx.scale(fd.scale, fd.scale);
 
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(0, 35);
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
-            ctx.stroke();
+            const isP2 = fd.playerIdx === 1;
+            const isReady = isP2 ? (this.assets && this.assets.dartBlueReady) : (this.assets && this.assets.dartRedReady);
+            const dartCanvas = isP2 ? (this.assets && this.assets.dartBlueCanvas) : (this.assets && this.assets.dartRedCanvas);
 
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(0, -32);
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = '#e2e8f0';
-            ctx.stroke();
+            if (isReady && dartCanvas) {
+                // Drop shadow
+                ctx.beginPath();
+                ctx.ellipse(12, 32, 22, 10, Math.PI / 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fill();
 
-            ctx.beginPath();
-            ctx.moveTo(0, -32);
-            ctx.lineTo(-12, -48);
-            ctx.lineTo(0, -44);
-            ctx.lineTo(12, -48);
-            ctx.closePath();
-            ctx.fillStyle = '#ef4444';
-            ctx.fill();
+                const dw = 95;
+                const dh = dw * (dartCanvas.height / dartCanvas.width);
+                ctx.drawImage(dartCanvas, -dw * 0.503, -dh * 0.042, dw, dh);
+            } else {
+                const themeColor = isP2 ? '#2563eb' : '#dc2626';
+
+                // Stainless Steel Needle Point
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-3, 20);
+                ctx.lineTo(3, 20);
+                ctx.closePath();
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fill();
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+
+                // Knurled Tungsten Barrel
+                const barrelGrad = ctx.createLinearGradient(-6, 0, 6, 0);
+                barrelGrad.addColorStop(0, '#64748b');
+                barrelGrad.addColorStop(0.3, '#f8fafc');
+                barrelGrad.addColorStop(1, '#1e293b');
+
+                ctx.beginPath();
+                ctx.moveTo(-3.5, 20);
+                ctx.lineTo(3.5, 20);
+                ctx.lineTo(6, 26);
+                ctx.lineTo(5.5, 46);
+                ctx.lineTo(-5.5, 46);
+                ctx.lineTo(-6, 26);
+                ctx.closePath();
+                ctx.fillStyle = barrelGrad;
+                ctx.fill();
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 1.4;
+                ctx.stroke();
+
+                // Anodized Grip Rings
+                [26, 31, 36, 41].forEach(gy => {
+                    ctx.fillStyle = themeColor;
+                    ctx.fillRect(-5.5, gy, 11, 2.5);
+                });
+
+                // Aluminum Stem
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillRect(-2.5, 46, 5, 20);
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 1.2;
+                ctx.strokeRect(-2.5, 46, 5, 20);
+
+                // Aerodynamic Flight
+                ctx.beginPath();
+                ctx.moveTo(-2.5, 66);
+                ctx.lineTo(-24, 60);
+                ctx.lineTo(-28, 100);
+                ctx.lineTo(0, 90);
+                ctx.lineTo(28, 100);
+                ctx.lineTo(24, 60);
+                ctx.lineTo(2.5, 66);
+                ctx.closePath();
+
+                const flightGrad = ctx.createLinearGradient(-28, 0, 28, 0);
+                flightGrad.addColorStop(0, themeColor);
+                flightGrad.addColorStop(0.5, '#0f172a');
+                flightGrad.addColorStop(1, themeColor);
+                ctx.fillStyle = flightGrad;
+                ctx.fill();
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
 
             ctx.restore();
         }
