@@ -37,6 +37,38 @@
         })();
     </script>
     <style>
+      html.is-embedded .portal-topbar,
+      html.is-embedded .portal-sidebar,
+      html.is-embedded .portal-rec-col,
+      html.is-embedded .game-meta-bar,
+      html.is-embedded #krazio-floating-back,
+      body.is-embedded .portal-topbar,
+      body.is-embedded .portal-sidebar,
+      body.is-embedded .portal-rec-col,
+      body.is-embedded .game-meta-bar,
+      body.is-embedded #krazio-floating-back {
+          display: none !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+      }
+      html.is-embedded .portal-center-col,
+      body.is-embedded .portal-center-col,
+      body.is-embedded.portal-paused .portal-center-col {
+          padding: 0 !important;
+          justify-content: center !important;
+          align-items: center !important;
+      }
+      html.is-embedded #gameWrapper,
+      body.is-embedded #gameWrapper,
+      body.is-embedded.portal-paused #gameWrapper {
+          width: 100vw !important;
+          max-width: 100vw !important;
+          height: 100vh !important;
+          max-height: 100vh !important;
+          border-radius: 0 !important;
+          border: none !important;
+          box-shadow: none !important;
+      }
       #krazio-floating-back {
         position: fixed;
         top: 14px;
@@ -1849,14 +1881,6 @@
             setupEvents() {
                 window.addEventListener('resize', () => this.resizeCanvas());
 
-                function ensureFullScreen() {
-                    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-                        const el = document.documentElement;
-                        const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-                        if (req) req.call(el).catch(() => {});
-                    }
-                }
-
                 // 1. Theme Pill Buttons
                 const themeBtns = document.querySelectorAll('.theme-pill-btn');
                 themeBtns.forEach(btn => {
@@ -1866,6 +1890,7 @@
 
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        window.ensureFullScreenFlappy();
                         themeBtns.forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                         this.selectedThemeKey = themeKey;
@@ -1879,6 +1904,7 @@
                 lvlBtns.forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        window.ensureFullScreenFlappy();
                         const lvl = parseInt(btn.getAttribute('data-level'), 10);
                         if (lvl > this.unlockedLevel) {
                             audio.playHit();
@@ -1896,7 +1922,6 @@
                 if (btnStartGame) {
                     btnStartGame.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        ensureFullScreen();
                         this.startGame();
                     });
                 }
@@ -1905,7 +1930,6 @@
                     if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'Enter') {
                         if (this.state === 'PAUSED') return;
                         e.preventDefault();
-                        ensureFullScreen();
                         if (this.state === 'READY') {
                             this.startGame();
                         } else if (this.state === 'PLAYING') {
@@ -1917,8 +1941,9 @@
                 this.canvas.addEventListener('pointerdown', (e) => {
                     if (this.state === 'PAUSED') return;
                     e.preventDefault();
-                    ensureFullScreen();
-                    if (this.state === 'PLAYING') {
+                    if (this.state === 'READY') {
+                        this.startGame();
+                    } else if (this.state === 'PLAYING') {
                         this.flap();
                     }
                 });
@@ -1927,7 +1952,7 @@
                 const btnNextLevel = document.getElementById('btnNextLevel');
                 if (btnNextLevel) {
                     btnNextLevel.addEventListener('click', () => {
-                        ensureFullScreen();
+                        window.ensureFullScreenFlappy();
                         if (this.currentLevel < 10) {
                             this.currentLevel++;
                             if (this.currentLevel > this.unlockedLevel) {
@@ -1948,7 +1973,7 @@
                 const btnRetryClear = document.getElementById('btnRetryLevelClear');
                 if (btnRetryClear) {
                     btnRetryClear.addEventListener('click', () => {
-                        ensureFullScreen();
+                        window.ensureFullScreenFlappy();
                         this.reset();
                         this.startGame();
                     });
@@ -1958,7 +1983,7 @@
                 const btnPlayAgain = document.getElementById('btnPlayAgain');
                 if (btnPlayAgain) {
                     btnPlayAgain.addEventListener('click', () => {
-                        ensureFullScreen();
+                        window.ensureFullScreenFlappy();
                         this.reset();
                         this.startGame();
                     });
@@ -1974,6 +1999,8 @@
             }
 
             startGame() {
+                window.ensureFullScreenFlappy();
+                document.body.classList.remove('portal-paused');
                 audio.init();
                 this.state = 'PLAYING';
                 const panel = document.getElementById('getReadyPanel');
@@ -1983,10 +2010,13 @@
                 }
                 document.getElementById('levelClearModal').classList.remove('show');
                 document.getElementById('gameoverModal').classList.remove('show');
+                this.resizeCanvas();
+                setTimeout(() => this.resizeCanvas(), 50);
                 this.flap();
             }
 
             reset() {
+                document.body.classList.remove('portal-paused');
                 this.state = 'READY';
                 this.score = 0;
                 this.pipes = [];
@@ -1994,6 +2024,8 @@
                 this.pipesSpawned = 0;
                 this.finishLine = null;
                 this.applyLevelAndTheme();
+                this.resizeCanvas();
+                setTimeout(() => this.resizeCanvas(), 50);
 
                 this.man.y = this.height * 0.42;
                 this.man.vy = 0;
@@ -3398,6 +3430,14 @@
             window.__countdownTimerFlappy = setInterval(updateDisplay, 1000);
         }
 
+        window.ensureFullScreenFlappy = function() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                const el = document.documentElement;
+                const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+                if (req) req.call(el).catch(() => {});
+            }
+        };
+
         window.pauseFlappyGame = function() {
             if (window.__countdownTimerFlappy) {
                 clearInterval(window.__countdownTimerFlappy);
@@ -3406,11 +3446,11 @@
                 if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
             }
             if (window.flappyGame) {
-                if (window.flappyGame.state === 'PLAYING' || window.flappyGame.state === 'READY') {
+                if (window.flappyGame.state === 'PLAYING') {
                     window.flappyGame.previousState = window.flappyGame.state;
                     window.flappyGame.state = 'PAUSED';
+                    document.body.classList.add('portal-paused');
                 }
-                document.body.classList.add('portal-paused');
                 const bankBadge = document.getElementById('portal-top-bank');
                 if (bankBadge) {
                     const pts = localStorage.getItem('krazio_user_points') || localStorage.getItem('coins') || localStorage.getItem('office_escape_coins') || '76';
@@ -3429,14 +3469,13 @@
             // 1. Immediately expand back to fullscreen and dismiss paused portal UI
             document.body.classList.remove('portal-paused');
 
-            if (requestFullscreen && !document.fullscreenElement && !document.webkitFullscreenElement) {
-                const docEl = document.documentElement;
-                const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
-                if (req) req.call(docEl).catch(() => {});
+            if (requestFullscreen) {
+                window.ensureFullScreenFlappy();
             }
 
             if (window.flappyGame) {
                 window.flappyGame.resizeCanvas();
+                setTimeout(() => window.flappyGame.resizeCanvas(), 50);
             }
 
             // 2. Start 3-second countdown before unpausing flight mechanics
@@ -3447,6 +3486,7 @@
                         window.flappyGame.state = window.flappyGame.previousState || 'PLAYING';
                     }
                     window.flappyGame.resizeCanvas();
+                    setTimeout(() => window.flappyGame.resizeCanvas(), 50);
                 }
             });
         };
@@ -3456,10 +3496,13 @@
                 e.preventDefault();
                 if (window.flappyGame) {
                     if (window.flappyGame.state === 'PAUSED') {
-                        window.flappyGame.state = window.flappyGame.previousState || 'PLAYING';
+                        window.resumeFlappyGame();
                     } else if (window.flappyGame.state === 'PLAYING') {
-                        window.flappyGame.previousState = window.flappyGame.state;
-                        window.flappyGame.state = 'PAUSED';
+                        window.pauseFlappyGame();
+                    } else if (window.flappyGame.state === 'READY') {
+                        // Home screen stays clean in full screen
+                        document.body.classList.remove('portal-paused');
+                        window.flappyGame.resizeCanvas();
                     }
                     if (window.parent !== window) {
                         window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'flappy-man', isPaused: window.flappyGame?.state === 'PAUSED' }, '*');
@@ -3472,10 +3515,9 @@
             if (e.data && (e.data.type === 'KRAZY_ESC_PAUSE' || e.data.type === 'KRAZY_PAUSE_TOGGLE')) {
                 if (window.flappyGame) {
                     if (window.flappyGame.state === 'PAUSED') {
-                        window.flappyGame.state = window.flappyGame.previousState || 'PLAYING';
+                        window.resumeFlappyGame();
                     } else if (window.flappyGame.state === 'PLAYING') {
-                        window.flappyGame.previousState = window.flappyGame.state;
-                        window.flappyGame.state = 'PAUSED';
+                        window.pauseFlappyGame();
                     }
                 }
             }
