@@ -741,13 +741,10 @@ class BalloonGameEngine {
       themeBg: document.getElementById('game-theme-bg'),
       balloonLayer: document.getElementById('balloon-stream-layer'),
       effectsLayer: document.getElementById('effects-layer'),
+      projectilesLayer: document.getElementById('projectiles-layer'),
       cannonTrajectorySvg: document.getElementById('cannon-trajectory-svg'),
       aimReticleGroup: document.getElementById('aim-reticle-group'),
-      aimLaserLine: document.getElementById('aim-laser-line'),
-      cannonShooter: document.getElementById('cannon-shooter'),
-      cannonContainer: document.getElementById('cannon-container'),
-      avatarContainer: document.getElementById('character-avatar-container'),
-      avatarImg: document.getElementById('character-avatar-img'),
+      shooterWrapper: document.getElementById('shooter-wrapper'),
 
       // HUD elements
       hud: document.getElementById('game-hud'),
@@ -759,16 +756,16 @@ class BalloonGameEngine {
       progressBarFill: document.getElementById('hud-progress-bar-fill'),
       targetSpotlightCard: document.getElementById('hud-target-spotlight-card'),
       targetGiantBadge: document.getElementById('hud-target-giant-badge'),
-      targetBadgeInner: document.getElementById('hud-target-badge-inner'),
-      feverModeBanner: document.getElementById('hud-fever-banner'),
-      comboPill: document.getElementById('hud-combo-pill'),
+      targetGiantText: document.getElementById('hud-target-giant-text'),
+      targetHintSub: document.getElementById('hud-target-hint-sub'),
+      comboFloatPill: document.getElementById('hud-combo-float-pill'),
+      comboInnerContent: document.getElementById('hud-combo-inner-content'),
       scoreDisplay: document.getElementById('hud-score-display'),
       highScoreDisplay: document.getElementById('hud-high-score-display'),
+      livesBarWrapper: document.getElementById('hud-lives-bar'),
       heartsContainer: document.getElementById('hud-hearts-container'),
       btnMute: document.getElementById('hud-btn-mute'),
       btnPause: document.getElementById('hud-btn-pause'),
-      btnThemeOpen: document.getElementById('hud-btn-theme-open'),
-      btnScoreboardOpen: document.getElementById('hud-btn-scoreboard-open'),
 
       // Modals
       modalContainer: document.getElementById('modal-container'),
@@ -832,15 +829,9 @@ class BalloonGameEngine {
     if (this.dom.btnPause) {
       this.dom.btnPause.addEventListener('click', () => this.pauseGame());
     }
-    if (this.dom.btnThemeOpen) {
-      this.dom.btnThemeOpen.addEventListener('click', () => this.openThemeSelector());
-    }
-    if (this.dom.btnScoreboardOpen) {
-      this.dom.btnScoreboardOpen.addEventListener('click', () => this.openScoreboard());
-    }
 
-    // Modal Action Delegations
-    this.dom.modalContainer.addEventListener('click', (e) => {
+    // Modal & Quick Actions Delegations
+    document.addEventListener('click', (e) => {
       const target = e.target.closest('[data-action]');
       if (!target) return;
       const action = target.getAttribute('data-action');
@@ -917,6 +908,9 @@ class BalloonGameEngine {
     this.theme = theme;
     localStorage.setItem(this.THEME_KEY, theme);
 
+    const startTag = document.getElementById('start-theme-tag');
+    if (startTag) startTag.textContent = theme.toUpperCase();
+
     if (this.dom.themeBg) {
       this.dom.themeBg.className = `game-theme-background theme-${theme} ${this.isFeverMode ? 'fever-active' : ''}`;
       
@@ -983,8 +977,8 @@ class BalloonGameEngine {
       this.dom.themeBg.innerHTML = html;
     }
 
-    // Update Avatar image if applicable
-    this.updateAvatar();
+    this.renderShooter();
+    this.updateHUD();
   }
 
   setTheme(newTheme) {
@@ -994,27 +988,117 @@ class BalloonGameEngine {
     }
   }
 
-  updateAvatar() {
-    if (!this.dom.avatarContainer || !this.dom.avatarImg) return;
+  renderShooter() {
+    if (!this.dom.shooterWrapper) return;
 
-    if (this.theme === 'salman') {
-      this.dom.avatarContainer.style.display = 'block';
-      this.dom.avatarImg.src = this.hunterMood === 'happy' ? 'salman_happy.jpg' : this.hunterMood === 'angry' ? 'salman_angry.jpg' : 'salman_idle.jpg';
+    let html = '';
+    const angle = this.aimPos?.angle || 0;
+    const mood = this.hunterMood || 'idle';
+
+    if (this.theme === 'space') {
+      html = `
+        <div id="aim-shooter-element" class="spaceship-shooter" style="transform: rotate(${angle}deg);">
+          <div class="spaceship-wing wing-left">
+            <div class="wing-blaster"></div>
+          </div>
+          <div class="spaceship-hull">
+            <div class="spaceship-cockpit"></div>
+            <div class="spaceship-nose-cannon"></div>
+          </div>
+          <div class="spaceship-wing wing-right">
+            <div class="wing-blaster"></div>
+          </div>
+          <div class="spaceship-engine-glow"></div>
+        </div>
+      `;
     } else if (this.theme === 'slimy') {
-      this.dom.avatarContainer.style.display = 'block';
-      this.dom.avatarImg.src = this.hunterMood === 'happy' ? 'hunter_happy.jpg' : this.hunterMood === 'angry' ? 'hunter_angry.jpg' : 'hunter_idle.jpg';
-    } else {
-      this.dom.avatarContainer.style.display = 'none';
+      const portraitSrc = (mood === 'happy' || this.isFeverMode) ? 'hunter_happy.jpg' : mood === 'angry' ? 'hunter_angry.jpg' : 'hunter_idle.jpg';
+      html = `
+        <div class="veteran-hunter-wrapper mood-${mood} ${this.isFeverMode ? 'fever-active' : ''}">
+          ${mood === 'happy' ? '<div class="hunter-reaction-bubble happy-reaction"><span class="reaction-icon">🎯</span><span class="reaction-text">BULLSEYE!</span></div>' : ''}
+          ${mood === 'angry' ? '<div class="hunter-reaction-bubble angry-reaction"><span class="reaction-icon">💢</span><span class="reaction-text">MISSED!</span></div>' : ''}
+          <div class="hunter-bust-container">
+            <img src="${portraitSrc}" alt="Veteran Hunter" class="hunter-portrait-img" onerror="this.src='hunter_idle.jpg'" />
+            <div class="hunter-bust-vignette"></div>
+            <div class="hunter-cigar-smoke-node"></div>
+          </div>
+          <div id="aim-shooter-element" class="veteran-shotgun-assembly" style="transform: rotate(${angle}deg);">
+            <div class="shotgun-barrels">
+              <div class="barrel b-top"></div>
+              <div class="barrel b-bottom"></div>
+              <div class="barrel-muzzle"></div>
+            </div>
+            <div class="shotgun-receiver"></div>
+            <div class="shotgun-stock"></div>
+            <div class="shotgun-pump"></div>
+          </div>
+        </div>
+      `;
+    } else if (this.theme === 'dystopian') {
+      html = `
+        <div class="dystopian-railgun-shooter">
+          <div id="aim-shooter-element" class="railgun-turret-barrel" style="transform: rotate(${angle}deg);">
+            <div class="laser-emitter-lens"></div>
+            <div class="railgun-rails">
+              <span class="rail r-left"></span>
+              <span class="rail r-right"></span>
+            </div>
+            <div class="railgun-core-chamber"></div>
+          </div>
+          <div class="railgun-turret-base">
+            <div class="turret-neon-ring"></div>
+          </div>
+        </div>
+      `;
+    } else if (this.theme === 'beach') {
+      html = `
+        <div class="beach-umbrella-shooter">
+          <div class="umbrella-stand-base">
+            <span class="tiki-badge">⛱️</span>
+          </div>
+          <div id="aim-shooter-element" class="umbrella-canopy-assembly" style="transform: rotate(${angle}deg);">
+            <div class="umbrella-launcher-barrel"></div>
+            <div class="umbrella-canopy-striped">
+              <div class="umbrella-rib s1"></div>
+              <div class="umbrella-rib s2"></div>
+              <div class="umbrella-rib s3"></div>
+            </div>
+            <div class="umbrella-tip-melon-loader">🍉</div>
+          </div>
+        </div>
+      `;
+    } else if (this.theme === 'salman') {
+      const portraitSrc = (mood === 'happy' || this.isFeverMode) ? 'salman_happy.jpg' : mood === 'angry' ? 'salman_angry.jpg' : 'salman_idle.jpg';
+      html = `
+        <div class="salman-shooter-wrapper mood-${mood} ${this.isFeverMode ? 'fever-active' : ''}">
+          ${mood === 'happy' ? '<div class="salman-reaction-bubble happy-reaction"><span class="reaction-icon">🚗</span><span class="reaction-text">SWAAGAT HAI!</span></div>' : ''}
+          ${mood === 'angry' ? '<div class="salman-reaction-bubble angry-reaction"><span class="reaction-icon">💢</span><span class="reaction-text">COMMITMENT!</span></div>' : ''}
+          <div class="salman-bust-container">
+            <img src="${portraitSrc}" alt="Bhaijaan Salman Khan" class="salman-portrait-img" onerror="this.src='salman_idle.jpg'" />
+            <div class="salman-bust-vignette"></div>
+            <div class="salman-bracelet-glow"></div>
+          </div>
+          <div id="aim-shooter-element" class="salman-car-aim-assembly" style="transform: rotate(${angle}deg);">
+            <div class="aiming-suv-car">
+              <span class="aiming-car-emoji">🚙</span>
+              <div class="car-headlight-beam"></div>
+            </div>
+          </div>
+        </div>
+      `;
     }
+
+    this.dom.shooterWrapper.innerHTML = html;
+    this.dom.aimShooterElement = document.getElementById('aim-shooter-element');
   }
 
   triggerHunterMood(mood, duration = 1300) {
     this.hunterMood = mood;
-    this.updateAvatar();
+    this.renderShooter();
     if (this.hunterMoodTimer) clearTimeout(this.hunterMoodTimer);
     this.hunterMoodTimer = setTimeout(() => {
       this.hunterMood = 'idle';
-      this.updateAvatar();
+      this.renderShooter();
     }, duration);
   }
 
@@ -1038,14 +1122,8 @@ class BalloonGameEngine {
     if (this.dom.aimReticleGroup) {
       this.dom.aimReticleGroup.setAttribute('transform', `translate(${targetX}, ${targetY})`);
     }
-    if (this.dom.aimLaserLine) {
-      this.dom.aimLaserLine.setAttribute('x1', originX);
-      this.dom.aimLaserLine.setAttribute('y1', originY);
-      this.dom.aimLaserLine.setAttribute('x2', targetX);
-      this.dom.aimLaserLine.setAttribute('y2', targetY);
-    }
-    if (this.dom.cannonShooter) {
-      this.dom.cannonShooter.style.transform = `rotate(${angleDeg}deg)`;
+    if (this.dom.aimShooterElement) {
+      this.dom.aimShooterElement.style.transform = `rotate(${angleDeg}deg)`;
     }
     if (this.dom.cannonTrajectorySvg) {
       this.dom.cannonTrajectorySvg.classList.remove('is-idle');
@@ -1120,12 +1198,24 @@ class BalloonGameEngine {
         <div class="beach-ball ${color} ${isTarget ? 'target-glow' : ''}" style="--sway-duration: ${b.swayDuration}; --sway-delay: ${b.swayDelay};">
           <div class="beach-ball-inner">
             <svg viewBox="0 0 100 100" class="entity-svg beach-ball-svg" aria-hidden="true">
+              <defs>
+                <radialGradient id="beachBallShade-${b.id}" cx="32%" cy="28%" r="68%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4" />
+                  <stop offset="55%" stop-color="#000000" stop-opacity="0" />
+                  <stop offset="100%" stop-color="#000000" stop-opacity="0.45" />
+                </radialGradient>
+                <linearGradient id="beachWhite-${b.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ffffff" />
+                  <stop offset="100%" stop-color="#e9ecef" />
+                </linearGradient>
+              </defs>
               <circle cx="50" cy="50" r="48" fill="var(--color-primary, ${colorHex})" />
-              <path d="M 50 2 C 28 2 12 22 12 50 C 12 78 28 98 50 98 C 36 82 26 62 26 50 C 26 38 36 18 50 2 Z" fill="#ffffff" />
+              <path d="M 50 2 C 28 2 12 22 12 50 C 12 78 28 98 50 98 C 36 82 26 62 26 50 C 26 38 36 18 50 2 Z" fill="url(#beachWhite-${b.id})" />
               <path d="M 50 2 C 36 18 26 38 26 50 C 26 62 36 82 50 98 C 64 82 74 62 74 50 C 74 38 64 18 50 2 Z" fill="var(--color-primary, ${colorHex})" />
-              <path d="M 50 2 C 64 18 74 38 74 50 C 74 62 64 82 50 98 C 72 98 88 78 88 50 C 88 22 72 2 50 2 Z" fill="#ffffff" />
+              <path d="M 50 2 C 64 18 74 38 74 50 C 74 62 64 82 50 98 C 72 98 88 78 88 50 C 88 22 72 2 50 2 Z" fill="url(#beachWhite-${b.id})" />
               <circle cx="50" cy="4" r="5" fill="#ffffff" stroke="rgba(0,0,0,0.2)" stroke-width="1" />
               <circle cx="50" cy="96" r="5" fill="#ffffff" stroke="rgba(0,0,0,0.2)" stroke-width="1" />
+              <circle cx="50" cy="50" r="48" fill="url(#beachBallShade-${b.id})" />
               <ellipse cx="36" cy="24" rx="14" ry="6.5" transform="rotate(-32 36 24)" fill="#ffffff" fill-opacity="0.55" />
             </svg>
           </div>
@@ -1136,10 +1226,28 @@ class BalloonGameEngine {
         <div class="space-asteroid ${color} ${isTarget ? 'target-glow' : ''}" style="--sway-duration: ${b.swayDuration}; --sway-delay: ${b.swayDelay};">
           <div class="asteroid-inner">
             <svg viewBox="0 0 100 100" class="entity-svg asteroid-svg" aria-hidden="true">
-              <path d="M 50,5 C 72,7 90,20 95,44 C 98,62 90,82 76,93 C 58,100 34,97 16,84 C 4,70 2,48 8,28 C 15,12 32,3 50,5 Z" fill="#252033" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" />
-              <path d="M 46,18 Q 58,32 50,48 T 68,76 M 28,42 Q 44,52 38,72" stroke="var(--color-primary, ${colorHex})" stroke-width="3.5" fill="none" stroke-linecap="round" />
+              <defs>
+                <radialGradient id="asteroidRock-${b.id}" cx="35%" cy="30%" r="65%">
+                  <stop offset="0%" stop-color="#4a445d" />
+                  <stop offset="50%" stop-color="#252033" />
+                  <stop offset="100%" stop-color="#110d1c" />
+                </radialGradient>
+                <radialGradient id="crystalCore-${b.id}" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#ffffff" />
+                  <stop offset="45%" stop-color="var(--color-primary, ${colorHex})" />
+                  <stop offset="100%" stop-color="var(--color-primary, ${colorHex})" stop-opacity="0.1" />
+                </radialGradient>
+              </defs>
+              <path d="M 50,5 C 72,7 90,20 95,44 C 98,62 90,82 76,93 C 58,100 34,97 16,84 C 4,70 2,48 8,28 C 15,12 32,3 50,5 Z" fill="url(#asteroidRock-${b.id})" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" />
+              <path d="M 46,18 Q 58,32 50,48 T 68,76 M 28,42 Q 44,52 38,72" stroke="var(--color-primary, ${colorHex})" stroke-width="3.5" fill="none" stroke-linecap="round" filter="drop-shadow(0 0 6px var(--color-primary, ${colorHex}))" />
               <ellipse cx="64" cy="38" rx="12" ry="9" fill="#181424" stroke="#4a445d" stroke-width="1.5" />
-              <circle cx="63" cy="38" r="5.5" fill="var(--color-primary, ${colorHex})" />
+              <circle cx="63" cy="38" r="5.5" fill="url(#crystalCore-${b.id})" filter="drop-shadow(0 0 5px var(--color-primary, ${colorHex}))" />
+              <ellipse cx="32" cy="62" rx="9" ry="7" fill="#141120" stroke="#3b354c" stroke-width="1.2" />
+              <circle cx="32" cy="62" r="3" fill="var(--color-primary, ${colorHex})" fill-opacity="0.8" />
+              <ellipse cx="38" cy="26" rx="6" ry="4.5" fill="#141120" stroke="#3b354c" stroke-width="1" />
+              <ellipse cx="74" cy="68" rx="7" ry="5" fill="#141120" stroke="#3b354c" stroke-width="1" />
+              <path d="M 44,8 Q 62,12 78,24" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.6" />
+              <circle cx="20" cy="32" r="2" fill="#ffffff" opacity="0.7" />
             </svg>
           </div>
         </div>
@@ -1149,10 +1257,27 @@ class BalloonGameEngine {
         <div class="slime-monster ${color} ${isTarget ? 'target-glow' : ''}" style="--sway-duration: ${b.swayDuration}; --sway-delay: ${b.swayDelay};">
           <div class="slime-inner">
             <svg viewBox="0 0 110 110" class="entity-svg slime-svg" aria-hidden="true">
-              <path d="M 58,18 C 66,24 74,38 82,46 C 88,48 98,46 94,54 C 90,62 82,60 76,64 C 82,72 90,82 86,88 C 80,94 64,88 52,90 C 40,88 24,94 18,88 C 14,84 22,74 24,66 C 18,60 10,48 20,24 C 24,14 30,12 32,20 C 34,28 32,38 38,44 C 44,30 48,12 58,18 Z" fill="var(--color-primary, ${colorHex})" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" />
+              <defs>
+                <radialGradient id="slimeGooMountain-${b.id}" cx="48%" cy="30%" r="70%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45" />
+                  <stop offset="35%" stop-color="var(--color-primary, ${colorHex})" />
+                  <stop offset="85%" stop-color="var(--color-primary-dark, #007200)" />
+                  <stop offset="100%" stop-color="#051f05" />
+                </radialGradient>
+              </defs>
+              <path d="M 6,92 C 16,84 28,94 44,90 C 62,94 80,86 96,90 C 106,94 104,98 88,100 C 60,102 32,102 10,98 C 4,96 2,94 6,92 Z" fill="var(--color-primary-dark, #007200)" opacity="0.8" />
+              <path d="M 58,18 C 66,24 74,38 82,46 C 88,48 98,46 94,54 C 90,62 82,60 76,64 C 82,72 90,82 86,88 C 80,94 64,88 52,90 C 40,88 24,94 18,88 C 14,84 22,74 24,66 C 18,60 10,48 20,24 C 24,14 30,12 32,20 C 34,28 32,38 38,44 C 44,30 48,12 58,18 Z" fill="url(#slimeGooMountain-${b.id})" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linejoin="round" />
+              <circle cx="16" cy="38" r="2.5" fill="var(--color-primary, ${colorHex})" />
+              <circle cx="94" cy="62" r="2.5" fill="var(--color-primary, ${colorHex})" />
+              <ellipse cx="12" cy="94" rx="4" ry="2" fill="var(--color-primary, ${colorHex})" />
               <ellipse cx="53" cy="36" rx="10.5" ry="13.5" fill="#fefae0" stroke="#0f290f" stroke-width="2" />
               <ellipse cx="54" cy="37" rx="5.5" ry="7" fill="#1b263b" />
               <circle cx="51" cy="33" r="2.8" fill="#ffffff" />
+              <path d="M 42,52 Q 54,48 64,52 Q 68,66 62,76 Q 52,82 42,74 Q 38,64 42,52 Z" fill="#0a180a" stroke="#0f290f" stroke-width="2" />
+              <rect x="47" y="52" width="4.5" height="5.5" rx="1.5" fill="#ffffff" stroke="#0a180a" stroke-width="0.8" />
+              <rect x="54" y="52" width="4" height="6.5" rx="1.5" fill="#ffffff" stroke="#0a180a" stroke-width="0.8" />
+              <rect x="51" y="70" width="4.5" height="5" rx="1.5" fill="#ffffff" stroke="#0a180a" stroke-width="0.8" />
+              <path d="M 54,20 Q 62,26 68,34" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.65" />
             </svg>
           </div>
         </div>
@@ -1162,9 +1287,19 @@ class BalloonGameEngine {
         <div class="cyber-zombie ${color} ${isTarget ? 'target-glow' : ''}" style="--sway-duration: ${b.swayDuration}; --sway-delay: ${b.swayDelay};">
           <div class="zombie-inner">
             <svg viewBox="0 0 100 100" class="entity-svg zombie-svg" aria-hidden="true">
-              <path d="M 50,8 C 74,8 86,24 86,50 C 86,66 78,80 72,90 C 62,94 38,94 28,90 C 22,80 14,66 14,50 C 14,24 26,8 50,8 Z" fill="#1f2937" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" />
+              <defs>
+                <linearGradient id="zombieHead-${b.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#374151" />
+                  <stop offset="60%" stop-color="#1f2937" />
+                  <stop offset="100%" stop-color="#111827" />
+                </linearGradient>
+              </defs>
+              <path d="M 50,8 C 74,8 86,24 86,50 C 86,66 78,80 72,90 C 62,94 38,94 28,90 C 22,80 14,66 14,50 C 14,24 26,8 50,8 Z" fill="url(#zombieHead-${b.id})" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" />
               <circle cx="35" cy="42" r="10" fill="#0f172a" stroke="var(--color-primary, ${colorHex})" stroke-width="2" />
-              <circle cx="35" cy="42" r="5.5" fill="var(--color-primary, ${colorHex})" />
+              <circle cx="35" cy="42" r="5.5" fill="var(--color-primary, ${colorHex})" filter="drop-shadow(0 0 6px var(--color-primary, ${colorHex}))" />
+              <circle cx="65" cy="42" r="6" fill="#111827" stroke="#4b5563" stroke-width="1.5" />
+              <line x1="22" y1="42" x2="48" y2="42" stroke="var(--color-primary, ${colorHex})" stroke-width="1" stroke-dasharray="1 2" />
+              <path d="M 38,72 L 62,72" stroke="var(--color-primary, ${colorHex})" stroke-width="3" stroke-linecap="round" />
             </svg>
           </div>
         </div>
@@ -1175,8 +1310,17 @@ class BalloonGameEngine {
           <div class="blackbuck-inner">
             <svg viewBox="0 0 110 100" class="entity-svg blackbuck-svg" aria-hidden="true">
               <path d="M 22,62 C 26,44 42,42 58,46 C 72,50 82,42 90,32 C 94,36 96,44 92,52 C 86,60 76,64 68,68 C 54,74 38,76 28,78 C 22,76 18,70 22,62 Z" fill="#271c19" />
+              <path d="M 30,72 C 42,70 56,66 66,62 C 60,68 48,74 34,76 Z" fill="#f8fafc" />
               <path d="M 82,44 C 88,38 96,30 102,32 C 105,34 104,40 98,46 C 92,50 86,48 82,44 Z" fill="#1c1311" />
-              <path d="M 85,34 Q 78,16 68,4 M 83,34 Q 74,18 64,6" stroke="var(--color-primary, ${colorHex})" stroke-width="3.5" stroke-linecap="round" fill="none" />
+              <circle cx="94" cy="36" r="4.5" fill="#f8fafc" />
+              <circle cx="94.5" cy="36" r="2.5" fill="#000000" />
+              <circle cx="93.5" cy="35" r="0.8" fill="#ffffff" />
+              <path d="M 85,34 Q 78,16 68,4 M 83,34 Q 74,18 64,6" stroke="var(--color-primary, ${colorHex})" stroke-width="4" stroke-linecap="round" fill="none" filter="drop-shadow(0 0 5px var(--color-primary, ${colorHex}))" />
+              <circle cx="79" cy="24" r="2" fill="#ffffff" />
+              <circle cx="73" cy="14" r="1.8" fill="#ffffff" />
+              <circle cx="68" cy="6" r="1.5" fill="#ffffff" />
+              <path d="M 88,52 L 102,74 L 108,76" stroke="#271c19" stroke-width="3" stroke-linecap="round" fill="none" />
+              <path d="M 28,70 L 14,88 L 6,86" stroke="#271c19" stroke-width="3" stroke-linecap="round" fill="none" />
             </svg>
           </div>
         </div>
@@ -1282,6 +1426,7 @@ class BalloonGameEngine {
   startCountdown() {
     this.setGameState('countdown');
     this.renderBalloons();
+    this.renderShooter();
     this.updateHUD();
 
     if (this.dom.countdownOverlay && this.dom.countdownNumber) {
@@ -1592,7 +1737,7 @@ class BalloonGameEngine {
   toggleSound() {
     const muted = sound.toggleMute();
     if (this.dom.btnMute) {
-      this.dom.btnMute.textContent = muted ? '🔇' : '🔊';
+      this.dom.btnMute.innerHTML = `${muted ? '🔇' : '🔊'} <span id="hud-mute-label-text" class="btn-label-text">${muted ? 'UNMUTE' : 'MUTE'}</span>`;
     }
   }
 
@@ -1603,6 +1748,16 @@ class BalloonGameEngine {
   updateHUD() {
     const config = LEVELS[this.level - 1] || LEVELS[0];
     const needed = config.targetPopsNeeded;
+    const remaining = Math.max(0, needed - this.levelProgress);
+
+    const entityNames = {
+      space: { single: 'asteroid', plural: 'asteroids' },
+      beach: { single: 'beach ball', plural: 'beach balls' },
+      dystopian: { single: 'cyber implant', plural: 'cyber implants' },
+      slimy: { single: 'slime monster', plural: 'slime monsters' },
+      salman: { single: 'blackbuck', plural: 'blackbucks' },
+    };
+    const entity = entityNames[this.theme] || entityNames.space;
 
     if (this.dom.levelNumberText) this.dom.levelNumberText.innerHTML = `LEVEL ${this.level} <span class="level-max">/ 20</span>`;
     if (this.dom.levelMechanicTag) this.dom.levelMechanicTag.textContent = getLevelMechanic(this.level, this.theme);
@@ -1614,33 +1769,83 @@ class BalloonGameEngine {
     // Target color badge
     if (this.dom.targetGiantBadge) {
       this.dom.targetGiantBadge.className = `target-giant-badge ${this.targetColor} glow-${this.targetColor}`;
+      const colorHex = targetColorHex[this.targetColor] || '#ffffff';
+      
+      if (this.theme === 'salman') {
+        this.dom.targetGiantBadge.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <svg viewBox="0 0 110 100" style="width: 40px; height: 36px; --color-primary: ${colorHex};" aria-hidden="true">
+              <path d="M 22,62 C 26,44 42,42 58,46 C 72,50 82,42 90,32 C 94,36 96,44 92,52 C 86,60 76,64 68,68 C 54,74 38,76 28,78 C 22,76 18,70 22,62 Z" fill="#271c19" />
+              <path d="M 30,72 C 42,70 56,66 66,62 C 60,68 48,74 34,76 Z" fill="#f8fafc" />
+              <path d="M 82,44 C 88,38 96,30 102,32 C 105,34 104,40 98,46 C 92,50 86,48 82,44 Z" fill="#1c1311" />
+              <circle cx="94" cy="36" r="4.5" fill="#f8fafc" />
+              <circle cx="94.5" cy="36" r="2.5" fill="#000000" />
+              <path d="M 85,34 Q 78,16 68,4 M 83,34 Q 74,18 64,6" stroke="var(--color-primary, ${colorHex})" stroke-width="4" stroke-linecap="round" fill="none" />
+            </svg>
+            <span class="target-giant-text">${this.targetColor.toUpperCase()}</span>
+          </div>
+        `;
+      } else {
+        this.dom.targetGiantBadge.innerHTML = `<span class="target-giant-text">${this.targetColor.toUpperCase()}</span>`;
+      }
     }
 
-    if (this.dom.feverModeBanner) {
-      this.dom.feverModeBanner.style.display = this.isFeverMode ? 'flex' : 'none';
+    if (this.dom.targetHintSub) {
+      this.dom.targetHintSub.textContent = remaining === 1
+        ? `Pop 1 more ${this.targetColor.toUpperCase()} ${entity.single}!`
+        : `Pop ${remaining} more ${this.targetColor.toUpperCase()} ${entity.plural}`;
     }
 
-    if (this.dom.comboPill) {
-      this.dom.comboPill.style.display = this.combo >= 2 ? 'flex' : 'none';
-      const countEl = document.getElementById('hud-combo-count');
-      if (countEl) countEl.textContent = `${this.combo}×`;
+    // Combo / Fever Mode
+    if (this.dom.comboFloatPill) {
+      if (this.combo >= 2 || this.isFeverMode) {
+        this.dom.comboFloatPill.style.display = 'block';
+        this.dom.comboFloatPill.className = `combo-float-pill ${this.isFeverMode ? 'fever-mode-active' : ''}`;
+        if (this.isFeverMode) {
+          this.dom.comboFloatPill.innerHTML = `
+            <div class="fever-content">
+              <span class="fever-fire">🔥</span>
+              <span class="fever-title">FEVER MODE 3×</span>
+              <span class="fever-fire">🔥</span>
+            </div>
+          `;
+        } else {
+          this.dom.comboFloatPill.innerHTML = `
+            <div class="combo-content">
+              <span class="combo-x">COMBO</span>
+              <span class="combo-multiplier">×${this.combo}</span>
+              <span class="combo-bonus-tag">+${this.combo * 50} pts</span>
+            </div>
+          `;
+        }
+      } else {
+        this.dom.comboFloatPill.style.display = 'none';
+      }
     }
 
-    if (this.dom.scoreDisplay) this.dom.scoreDisplay.textContent = this.score;
-    if (this.dom.highScoreDisplay) this.dom.highScoreDisplay.textContent = this.highScore;
+    if (this.dom.scoreDisplay) this.dom.scoreDisplay.textContent = this.score.toLocaleString();
+    if (this.dom.highScoreDisplay) this.dom.highScoreDisplay.textContent = this.highScore.toLocaleString();
 
-    // Render Hearts
+    // Render Hearts with SVG
     if (this.dom.heartsContainer) {
       const lives = Math.max(0, 3 - this.strikes);
+      if (this.dom.livesBarWrapper) {
+        if (lives === 1) this.dom.livesBarWrapper.classList.add('critical-danger-pulse');
+        else this.dom.livesBarWrapper.classList.remove('critical-danger-pulse');
+      }
+
       this.dom.heartsContainer.innerHTML = [0, 1, 2].map(idx => `
-        <span class="heart-icon ${idx < lives ? 'heart-active' : 'heart-lost'}">
-          ${idx < lives ? '❤️' : '🖤'}
-        </span>
+        <div class="heart-unit ${idx < lives ? 'heart-alive' : 'heart-lost'}" title="${idx < lives ? 'Life active' : 'Life lost'}">
+          <svg viewBox="0 0 24 24" class="heart-svg" aria-hidden="true">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </div>
       `).join('');
     }
 
     if (this.dom.btnMute) {
-      this.dom.btnMute.textContent = sound.isMuted() ? '🔇' : '🔊';
+      const muted = sound.isMuted();
+      this.dom.btnMute.innerHTML = `${muted ? '🔇' : '🔊'} <span id="hud-mute-label-text" class="btn-label-text">${muted ? 'UNMUTE' : 'MUTE'}</span>`;
     }
   }
 
@@ -1648,59 +1853,72 @@ class BalloonGameEngine {
     this.closeModals();
     this.dom.modalContainer.classList.remove('hidden');
 
-    const config = LEVELS[this.level - 1] || LEVELS[0];
-    const acc = Math.round((this.shotsHit / Math.max(1, this.shotsFired)) * 100);
-
     if (modalId === 'start') {
       this.dom.startModal.classList.remove('hidden');
-      const input = document.getElementById('input-player-name');
-      if (input) input.value = this.playerName;
-      const themeTag = document.getElementById('start-theme-tag');
-      if (themeTag) themeTag.textContent = this.theme.toUpperCase();
+    } else if (modalId === 'theme') {
+      this.dom.themeModal.classList.remove('hidden');
     } else if (modalId === 'level_complete') {
       this.dom.levelCompleteModal.classList.remove('hidden');
-      document.getElementById('lc-level-title').textContent = `Level ${this.level} Cleared!`;
-      document.getElementById('lc-score-val').textContent = this.score;
-      document.getElementById('lc-accuracy-val').textContent = `${acc}%`;
-      document.getElementById('lc-max-combo').textContent = `${this.maxCombo}×`;
+      const titleEl = document.getElementById('lc-level-title');
+      const scoreEl = document.getElementById('lc-score-val');
+      const accEl = document.getElementById('lc-accuracy-val');
+      const comboEl = document.getElementById('lc-max-combo');
+
+      if (titleEl) titleEl.textContent = `Level ${this.level} Cleared!`;
+      if (scoreEl) scoreEl.textContent = this.score.toLocaleString();
+      if (accEl) {
+        const acc = this.shotsFired > 0 ? Math.round((this.shotsHit / this.shotsFired) * 100) : 100;
+        accEl.textContent = `${acc}%`;
+      }
+      if (comboEl) comboEl.textContent = `${this.maxCombo}×`;
     } else if (modalId === 'game_over') {
       this.dom.gameOverModal.classList.remove('hidden');
-      document.getElementById('go-level-val').textContent = this.level;
-      document.getElementById('go-score-val').textContent = this.score;
-      document.getElementById('go-best-score').textContent = this.highScore;
+      const lvlEl = document.getElementById('go-level-val');
+      const scoreEl = document.getElementById('go-score-val');
+      const bestEl = document.getElementById('go-best-score');
+
+      if (lvlEl) lvlEl.textContent = this.level;
+      if (scoreEl) scoreEl.textContent = this.score.toLocaleString();
+      if (bestEl) bestEl.textContent = this.highScore.toLocaleString();
     } else if (modalId === 'victory') {
       this.dom.victoryModal.classList.remove('hidden');
-      document.getElementById('vic-score-val').textContent = this.score;
-      document.getElementById('vic-accuracy-val').textContent = `${acc}%`;
+      const scoreEl = document.getElementById('vic-score-val');
+      const accEl = document.getElementById('vic-accuracy-val');
+
+      if (scoreEl) scoreEl.textContent = this.score.toLocaleString();
+      if (accEl) {
+        const acc = this.shotsFired > 0 ? Math.round((this.shotsHit / this.shotsFired) * 100) : 100;
+        accEl.textContent = `${acc}%`;
+      }
+    } else if (modalId === 'scoreboard') {
+      this.dom.scoreboardModal.classList.remove('hidden');
+      this.renderScoreboardList();
     }
   }
 
   openThemeSelector() {
-    this.dom.modalContainer.classList.remove('hidden');
-    this.dom.themeModal.classList.remove('hidden');
+    this.openModal('theme');
   }
 
   openScoreboard() {
-    this.dom.modalContainer.classList.remove('hidden');
-    this.dom.scoreboardModal.classList.remove('hidden');
-    this.renderScoreboardList();
+    this.openModal('scoreboard');
   }
 
   renderScoreboardList() {
-    const listEl = document.getElementById('scoreboard-list-container');
-    if (!listEl) return;
+    const list = document.getElementById('scoreboard-list-container');
+    if (!list) return;
 
     if (this.scoreboard.length === 0) {
-      listEl.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px;">No scores yet! Play a match to set a record.</div>';
+      list.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 20px;">No high score records yet!</div>`;
       return;
     }
 
-    listEl.innerHTML = this.scoreboard.map((entry, idx) => `
-      <div class="scoreboard-row">
+    list.innerHTML = this.scoreboard.map((entry, idx) => `
+      <div class="scoreboard-entry-row ${idx === 0 ? 'gold-rank' : idx === 1 ? 'silver-rank' : idx === 2 ? 'bronze-rank' : ''}">
         <span class="sb-rank">#${idx + 1}</span>
         <span class="sb-name">${entry.name || 'Player'}</span>
         <span class="sb-level">Lvl ${entry.level}</span>
-        <span class="sb-score">${entry.score} pts</span>
+        <span class="sb-score">${entry.score.toLocaleString()} pts</span>
       </div>
     `).join('');
   }
@@ -1794,23 +2012,37 @@ class BalloonGameEngine {
     const container = document.getElementById('projectiles-layer');
     if (!container) return;
 
-    container.innerHTML = this.cannonballs.map(ball => `
-      <div
-        class="cannonball-projectile theme-${ball.theme}"
-        style="
-          position: absolute;
-          top: ${ball.y}px;
-          left: ${ball.x}px;
-          width: ${ball.size}px;
-          height: ${ball.size}px;
-          transform: translate(-50%, -50%) rotate(${ball.angle}deg);
-          pointer-events: none;
-          z-index: 50;
-        "
-      >
-        <div class="blade-spinner-glow"></div>
-      </div>
-    `).join('');
+    container.innerHTML = this.cannonballs.map(ball => {
+      const ballTheme = ball.theme || this.theme || 'space';
+
+      let inner = '';
+      if (ballTheme === 'space') {
+        inner = '<div class="plasma-bullet-node"><div class="plasma-trail"></div></div>';
+      } else if (ballTheme === 'slimy') {
+        inner = '<div class="shotgun-bullet-node"><div class="shotgun-shell-casing"></div><div class="shotgun-smoke-trail"></div></div>';
+      } else if (ballTheme === 'dystopian') {
+        inner = '<div class="laser-beam-node"><div class="laser-core-beam"></div><div class="laser-spark-corona"></div></div>';
+      } else if (ballTheme === 'beach') {
+        inner = '<div class="watermelon-node"><div class="watermelon-skin">🍉</div><div class="watermelon-splash-trail"></div></div>';
+      } else if (ballTheme === 'salman') {
+        inner = '<div class="flying-car-node"><div class="flying-car-body">🚗</div><div class="car-exhaust-fire"></div><div class="car-drift-sparks"></div></div>';
+      }
+
+      return `
+        <div
+          class="projectile-entity proj-${ballTheme}"
+          style="
+            left: ${ball.x}px;
+            top: ${ball.y}px;
+            width: ${ball.size}px;
+            height: ${ball.size}px;
+            transform: translate(-50%, -50%) rotate(${ball.angle || 0}deg);
+          "
+        >
+          ${inner}
+        </div>
+      `;
+    }).join('');
   }
 }
 

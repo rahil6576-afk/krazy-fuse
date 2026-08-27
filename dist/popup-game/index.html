@@ -6,10 +6,10 @@
   <title>Pop Up: Balloon Blitz 🎈💥 — krazio games</title>
   <!-- Favicon -->
   <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
-  <!-- Google Fonts: Lilita One (Headings/Play) + Outfit (UI/HUD/Modals) -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Outfit:wght@400;600;700;800;900&family=Rubik:wght@500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   
   <script>
     (function() {
@@ -89,14 +89,14 @@
     <!-- HUD (Score, Level, Target Color, Lives, Combo) -->
     <div id="game-hud" class="game-hud" style="display: none;">
       <div class="hud-container">
-        <!-- Top-Left: Level & Objective -->
+        <!-- Top-Left: Level Info & Objectives -->
         <div class="hud-column hud-left">
           <div class="level-header">
             <span id="hud-level-number" class="level-number-text">LEVEL 1 <span class="level-max">/ 20</span></span>
             <span id="hud-level-mechanic" class="level-mechanic-tag theme-space">COSMIC INTRO</span>
           </div>
 
-          <div class="level-track-bar" title="Level Progress">
+          <div class="level-track-bar" title="Level Track">
             <div id="hud-level-track-progress" class="level-track-progress" style="width: 5%;"></div>
             <div id="hud-level-track-pin" class="level-track-pin" style="left: 0%;"></div>
           </div>
@@ -112,52 +112,63 @@
           </div>
         </div>
 
-        <!-- Top-Center: Target Color Spotlight -->
+        <!-- Top-Center: Target Spotlight -->
         <div class="hud-column hud-center">
           <div id="hud-target-spotlight-card" class="target-spotlight-card">
             <span class="target-title-label">🎯 TARGET COLOR</span>
             <div id="hud-target-giant-badge" class="target-giant-badge red glow-red">
-              <div id="hud-target-badge-inner" class="target-badge-inner"></div>
+              <span id="hud-target-giant-text" class="target-giant-text">RED</span>
             </div>
-          </div>
-
-          <div id="hud-fever-banner" class="fever-mode-pill" style="display: none;">
-            🔥 FEVER MODE 3× ACTIVE! 🔥
-          </div>
-
-          <div id="hud-combo-pill" class="combo-indicator-pill" style="display: none;">
-            ⚡ COMBO <span id="hud-combo-count">2×</span>
+            <span id="hud-target-hint-sub" class="target-hint-sub">Pop 3 more RED asteroids</span>
           </div>
         </div>
 
-        <!-- Top-Right: Score, Lives & Actions -->
+        <!-- Top-Right: Score, Best, Menu & Audio Controls -->
         <div class="hud-column hud-right">
-          <div class="score-card-box">
-            <div class="score-row">
-              <span class="score-label">SCORE</span>
-              <span id="hud-score-display" class="score-value">0</span>
+          <div class="score-high-card">
+            <div class="score-block">
+              <span class="hud-mini-label">SCORE</span>
+              <span id="hud-score-display" class="score-digits">0</span>
             </div>
-            <div class="high-score-row">
-              <span class="high-score-label">BEST:</span>
-              <span id="hud-high-score-display" class="high-score-value">0</span>
-            </div>
-          </div>
-
-          <div class="lives-hearts-row">
-            <span class="lives-label">LIVES:</span>
-            <div id="hud-hearts-container" class="hearts-list">
-              <span class="heart-icon heart-active">❤️</span>
-              <span class="heart-icon heart-active">❤️</span>
-              <span class="heart-icon heart-active">❤️</span>
+            <div class="score-sep"></div>
+            <div class="score-block">
+              <span class="hud-mini-label">BEST</span>
+              <span id="hud-high-score-display" class="best-digits">0</span>
             </div>
           </div>
 
-          <div class="hud-action-buttons">
-            <button id="hud-btn-mute" class="hud-icon-btn" title="Toggle Sound">🔊</button>
-            <button id="hud-btn-pause" class="hud-icon-btn" title="Pause Game (Esc/P)">⏸️</button>
-            <button id="hud-btn-theme-open" class="hud-icon-btn" title="Change Theme">🎨</button>
-            <button id="hud-btn-scoreboard-open" class="hud-icon-btn" title="Scoreboard">🏆</button>
+          <div class="hud-quick-actions">
+            <button class="hud-action-btn theme-action-btn" data-action="open-themes" title="Change Theme">
+              🎨 <span class="btn-label-text">THEME</span>
+            </button>
+            <button id="hud-btn-mute" class="hud-action-btn" title="Toggle Sound">
+              🔊 <span id="hud-mute-label-text" class="btn-label-text">MUTE</span>
+            </button>
+            <button id="hud-btn-pause" class="hud-action-btn" title="Pause Game">
+              ⏸️ <span class="btn-label-text">PAUSE</span>
+            </button>
+            <button class="hud-action-btn leaderboard-btn" data-action="open-scoreboard" title="Scoreboard">
+              🏆 <span class="btn-label-text">RANKS</span>
+            </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Floating Combo / Fever Banner -->
+      <div id="hud-combo-float-pill" class="combo-float-pill" style="display: none;">
+        <div id="hud-combo-inner-content" class="combo-content">
+          <span class="combo-x">COMBO</span>
+          <span id="hud-combo-count" class="combo-multiplier">×2</span>
+        </div>
+      </div>
+
+      <!-- Integrated Bottom Lives System -->
+      <div id="hud-lives-bar" class="lives-bar-wrapper">
+        <span class="lives-tag">LIVES</span>
+        <div id="hud-hearts-container" class="hearts-cluster">
+          <div class="heart-unit heart-alive"><svg viewBox="0 0 24 24" class="heart-svg" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+          <div class="heart-unit heart-alive"><svg viewBox="0 0 24 24" class="heart-svg" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+          <div class="heart-unit heart-alive"><svg viewBox="0 0 24 24" class="heart-svg" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
         </div>
       </div>
     </div>
@@ -171,27 +182,21 @@
     <!-- Particle & Floating Text Effects Layer -->
     <div id="effects-layer" class="effects-container"></div>
 
-    <!-- Cannon & Aiming Reticle -->
+    <!-- Aiming Trajectory SVG & Reticle -->
     <svg id="cannon-trajectory-svg" class="cannon-trajectory-svg is-idle" aria-hidden="true">
-      <line id="aim-laser-line" class="aim-laser-line" x1="500" y1="700" x2="500" y2="500" />
-      <g id="aim-reticle-group" transform="translate(500, 500)">
-        <circle cx="0" cy="0" r="18" class="reticle-outer-ring" />
-        <circle cx="0" cy="0" r="4" class="reticle-inner-dot" />
+      <g id="aim-reticle-group" class="aim-reticle-group" transform="translate(500, 500)">
+        <circle r="14" class="aim-reticle-outer" />
+        <circle r="4" class="aim-reticle-dot" />
+        <line x1="-18" y1="0" x2="-8" y2="0" class="aim-reticle-cross" />
+        <line x1="8" y1="0" x2="18" y2="0" class="aim-reticle-cross" />
+        <line x1="0" y1="-18" x2="0" y2="-8" class="aim-reticle-cross" />
+        <line x1="0" y1="8" x2="0" y2="18" class="aim-reticle-cross" />
       </g>
     </svg>
 
-    <div id="cannon-container" class="cannon-stage-container">
-      <div id="cannon-shooter" class="cannon-shooter-rig">
-        <div class="cannon-barrel-outer">
-          <div class="cannon-barrel-inner"></div>
-        </div>
-        <div class="cannon-core-glow"></div>
-      </div>
-    </div>
-
-    <!-- Mascot Character Avatar Container -->
-    <div id="character-avatar-container" class="character-avatar-wrap" style="display: none;">
-      <img id="character-avatar-img" class="character-avatar-img" src="hunter_idle.jpg" alt="Hunter Avatar" />
+    <!-- Theme-Specific Cannon / Shooter Assembly -->
+    <div id="shooter-wrapper" class="shooter-wrapper">
+      <!-- Injected dynamically based on theme -->
     </div>
 
     <!-- Modal Backdrop Container -->
