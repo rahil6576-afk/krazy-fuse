@@ -1424,12 +1424,50 @@ class BalloonGameEngine {
     `;
   }
 
+  updateTargetIndicators() {
+    const balloonElements = document.querySelectorAll('.balloon-wrapper');
+    balloonElements.forEach(el => {
+      const bColor = el.getAttribute('data-color');
+      const isTarget = bColor === this.targetColor;
+      
+      el.setAttribute('data-is-target', isTarget ? 'true' : 'false');
+      if (isTarget) {
+        el.classList.add('is-target-balloon');
+      } else {
+        el.classList.remove('is-target-balloon');
+      }
+
+      // Inner entity glow toggle
+      const innerEntity = el.querySelector('.beach-ball, .space-asteroid, .slime-monster, .cyber-zombie, .blackbuck-deer');
+      if (innerEntity) {
+        if (isTarget) {
+          innerEntity.classList.add('target-glow');
+        } else {
+          innerEntity.classList.remove('target-glow');
+        }
+      }
+
+      // Star indicator ⭐
+      let starEl = el.querySelector('.child-target-indicator');
+      if (isTarget && !starEl) {
+        starEl = document.createElement('div');
+        starEl.className = 'child-target-indicator';
+        starEl.setAttribute('aria-hidden', 'true');
+        starEl.textContent = '⭐';
+        el.insertBefore(starEl, el.firstChild);
+      } else if (!isTarget && starEl) {
+        starEl.remove();
+      }
+    });
+  }
+
   renderBalloons() {
     if (!this.dom.balloonLayer) return;
     this.dom.balloonLayer.innerHTML = this.balloons
       .filter(b => !b.isPopping)
       .map(b => this.buildBalloonHTML(b))
       .join('');
+    this.updateTargetIndicators();
   }
 
   // ==========================================
@@ -1922,6 +1960,8 @@ class BalloonGameEngine {
       const muted = sound.isMuted();
       this.dom.btnMute.innerHTML = `${muted ? '🔇' : '🔊'} <span id="hud-mute-label-text" class="btn-label-text">${muted ? 'UNMUTE' : 'MUTE'}</span>`;
     }
+
+    this.updateTargetIndicators();
   }
 
   openModal(modalId) {
