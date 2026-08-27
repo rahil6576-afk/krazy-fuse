@@ -1975,26 +1975,37 @@ class BalloonGameEngine {
     } else if (modalId === 'level_complete') {
       this.dom.levelCompleteModal.classList.remove('hidden');
       const titleEl = document.getElementById('lc-level-title');
+      const subtitleEl = document.getElementById('lc-level-subtitle');
+      const bonusEl = document.getElementById('lc-bonus-val');
       const scoreEl = document.getElementById('lc-score-val');
       const accEl = document.getElementById('lc-accuracy-val');
       const comboEl = document.getElementById('lc-max-combo');
+      const btnNext = document.getElementById('lc-btn-next');
 
-      if (titleEl) titleEl.textContent = `Level ${this.level} Cleared!`;
+      const config = LEVELS[this.level - 1] || {};
+      const bonus = config.bonusPoints || 100;
+
+      if (titleEl) titleEl.textContent = `LEVEL ${this.level} CLEARED!`;
+      if (subtitleEl) subtitleEl.textContent = getLevelMechanic(this.level, this.theme);
+      if (bonusEl) bonusEl.textContent = `+${bonus}`;
       if (scoreEl) scoreEl.textContent = this.score.toLocaleString();
       if (accEl) {
         const acc = this.shotsFired > 0 ? Math.round((this.shotsHit / this.shotsFired) * 100) : 100;
         accEl.textContent = `${acc}%`;
       }
-      if (comboEl) comboEl.textContent = `${this.maxCombo}×`;
+      if (comboEl) comboEl.textContent = `${Math.max(1, this.maxCombo)}×`;
+      if (btnNext) btnNext.textContent = `NEXT LEVEL (LEVEL ${Math.min(20, this.level + 1)}/20) ➔`;
     } else if (modalId === 'game_over') {
       this.dom.gameOverModal.classList.remove('hidden');
       const lvlEl = document.getElementById('go-level-val');
       const scoreEl = document.getElementById('go-score-val');
       const bestEl = document.getElementById('go-best-score');
+      const comboEl = document.getElementById('go-max-combo');
 
       if (lvlEl) lvlEl.textContent = this.level;
       if (scoreEl) scoreEl.textContent = this.score.toLocaleString();
       if (bestEl) bestEl.textContent = this.highScore.toLocaleString();
+      if (comboEl) comboEl.textContent = `${Math.max(1, this.maxCombo)}×`;
     } else if (modalId === 'victory') {
       this.dom.victoryModal.classList.remove('hidden');
       const scoreEl = document.getElementById('vic-score-val');

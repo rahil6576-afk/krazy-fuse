@@ -310,52 +310,98 @@
       </div>
 
       <!-- 3. Level Complete Modal -->
-      <div id="modal-level-complete" class="modal-card level-complete-card hidden">
-        <div class="modal-badge-icon">🎉</div>
-        <h2 id="lc-level-title" class="modal-title">Level Cleared!</h2>
-        <div class="stats-summary-grid">
-          <div class="stat-pill"><span class="stat-label">SCORE</span><span id="lc-score-val" class="stat-val">0</span></div>
-          <div class="stat-pill"><span class="stat-label">ACCURACY</span><span id="lc-accuracy-val" class="stat-val">100%</span></div>
-          <div class="stat-pill"><span class="stat-label">MAX COMBO</span><span id="lc-max-combo" class="stat-val">0×</span></div>
+      <div id="modal-level-complete" class="modal-card victory-card hidden">
+        <div class="modal-icon-badge glow-gold">🎉</div>
+        <h2 id="lc-level-title" class="modal-title">LEVEL 1 CLEARED!</h2>
+        <p id="lc-level-subtitle" class="modal-subtitle">Great shooting, Champion!</p>
+
+        <div class="modal-stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">LEVEL BONUS</span>
+            <span id="lc-bonus-val" class="stat-val text-gold">+100</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">TOTAL SCORE</span>
+            <span id="lc-score-val" class="stat-val text-cyan">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">ACCURACY</span>
+            <span id="lc-accuracy-val" class="stat-val text-green">100%</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">BEST COMBO</span>
+            <span id="lc-max-combo" class="stat-val text-gold">1×</span>
+          </div>
         </div>
-        <button class="modal-primary-btn" data-action="next-level">
-          CONTINUE TO NEXT LEVEL ➔
+
+        <button id="lc-btn-next" class="modal-primary-btn" data-action="next-level">
+          NEXT LEVEL (LEVEL 2/20) ➔
         </button>
       </div>
 
       <!-- 4. Game Over Modal -->
-      <div id="modal-game-over" class="modal-card game-over-card hidden">
-        <div class="modal-badge-icon">💔</div>
-        <h2 class="modal-title">LEVEL FAILED</h2>
-        <p style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 14px;">3 strikes! Wrong balloons cost all your lives.</p>
-        <div class="stats-summary-grid">
-          <div class="stat-pill"><span class="stat-label">REACHED</span><span class="stat-val">Level <span id="go-level-val">1</span></span></div>
-          <div class="stat-pill"><span class="stat-label">SCORE</span><span id="go-score-val" class="stat-val">0</span></div>
-          <div class="stat-pill"><span class="stat-label">BEST</span><span id="go-best-score" class="stat-val">0</span></div>
+      <div id="modal-game-over" class="modal-card failure-card hidden">
+        <div class="modal-icon-badge glow-red">💔</div>
+        <h2 class="modal-title text-red">LEVEL FAILED</h2>
+        <p class="modal-subtitle">You lost all 3 lives by popping wrong targets!</p>
+
+        <div class="modal-stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">FINAL SCORE</span>
+            <span id="go-score-val" class="stat-val text-gold">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">LEVEL REACHED</span>
+            <span class="stat-val text-cyan">Lvl <span id="go-level-val">1</span> / 20</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">ALL-TIME BEST</span>
+            <span id="go-best-score" class="stat-val text-gold">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">MAX COMBO</span>
+            <span id="go-max-combo" class="stat-val text-green">1×</span>
+          </div>
         </div>
-        <button class="modal-primary-btn" data-action="retry-level">
-          🔄 RETRY LEVEL
-        </button>
-        <button class="modal-secondary-btn" data-action="back-to-menu">
-          🏠 MAIN MENU
-        </button>
+
+        <div class="modal-button-group">
+          <button class="modal-primary-btn retry-btn" data-action="retry-level">
+            🔄 RETRY LEVEL
+          </button>
+          <button class="modal-secondary-btn" data-action="back-to-menu">
+            🏠 Main Menu
+          </button>
+        </div>
       </div>
 
       <!-- 5. Victory Modal -->
       <div id="modal-victory" class="modal-card victory-card hidden">
-        <div class="modal-badge-icon">🏆</div>
-        <h2 class="modal-title">GRAND CHAMPION!</h2>
-        <p style="color: #ffd700; font-size: 1.05rem; font-weight: 800; margin-bottom: 14px;">You have conquered all 20 levels!</p>
-        <div class="stats-summary-grid">
-          <div class="stat-pill"><span class="stat-label">FINAL SCORE</span><span id="vic-score-val" class="stat-val">0</span></div>
-          <div class="stat-pill"><span class="stat-label">ACCURACY</span><span id="vic-accuracy-val" class="stat-val">100%</span></div>
+        <div class="modal-icon-badge glow-gold">🏆</div>
+        <h2 class="modal-title text-gold">GRAND CHAMPION!</h2>
+        <p class="modal-subtitle">Incredible! You conquered all 20 levels of Pop Rush!</p>
+
+        <div class="modal-stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">FINAL SCORE</span>
+            <span id="vic-score-val" class="stat-val text-gold">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">OVERALL ACCURACY</span>
+            <span id="vic-accuracy-val" class="stat-val text-green">100%</span>
+          </div>
         </div>
-        <button class="modal-primary-btn" data-action="restart-game">
-          PLAY AGAIN
-        </button>
-        <button class="modal-secondary-btn" data-action="back-to-menu">
-          MAIN MENU
-        </button>
+
+        <div class="modal-button-group">
+          <button class="modal-primary-btn" data-action="restart-game">
+            ▶ PLAY AGAIN
+          </button>
+          <button class="modal-secondary-btn" data-action="open-scoreboard">
+            🏆 View Scoreboard
+          </button>
+          <button class="modal-secondary-btn" data-action="back-to-menu">
+            🏠 Main Menu
+          </button>
+        </div>
       </div>
 
       <!-- 6. Hall of Fame Scoreboard Modal -->
