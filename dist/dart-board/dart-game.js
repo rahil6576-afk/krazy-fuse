@@ -610,14 +610,16 @@
 
             ctx.save();
 
-            // 1. Deep 3D Ambient Drop Shadow on Board
+            // 1. Deep 3D Ambient Drop Shadow on Board (High-performance radial gradient)
+            const shadowR = rBoard + 44;
+            const shadowGrad = ctx.createRadialGradient(center.x + 10, center.y + 14, rBoard * 0.8, center.x + 10, center.y + 14, shadowR);
+            shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0.65)');
+            shadowGrad.addColorStop(0.75, 'rgba(0, 0, 0, 0.35)');
+            shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = shadowGrad;
             ctx.beginPath();
-            ctx.arc(center.x + 14, center.y + 20, rBoard + 36, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-            ctx.shadowBlur = 35;
+            ctx.arc(center.x + 10, center.y + 14, shadowR, 0, Math.PI * 2);
             ctx.fill();
-            ctx.shadowBlur = 0;
 
             if (this.assets && this.assets.boardReady && this.assets.boardCanvas) {
                 // 3D Photorealistic Tournament Dartboard Asset
@@ -1058,7 +1060,9 @@
 
         startLoop() {
             const loop = () => {
-                this.render();
+                if (!document.hidden) {
+                    this.render();
+                }
                 requestAnimationFrame(loop);
             };
             requestAnimationFrame(loop);

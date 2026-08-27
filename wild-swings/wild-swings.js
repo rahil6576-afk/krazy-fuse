@@ -856,12 +856,15 @@ class WildSwingsGame {
       const now = performance.now() / 1000;
 
       // 1. Deep NYC Twilight Night Sky Gradient
-      const grad = this.ctx.createLinearGradient(0, 0, 0, H);
-      grad.addColorStop(0,   '#02041a');
-      grad.addColorStop(0.45, '#0a0d36');
-      grad.addColorStop(0.8,  '#1d0d33');
-      grad.addColorStop(1,    '#2b0e2d');
-      this.ctx.fillStyle = grad;
+      if (!this._cachedSkyGrad || this._cachedSkyH !== H) {
+        this._cachedSkyGrad = this.ctx.createLinearGradient(0, 0, 0, H);
+        this._cachedSkyGrad.addColorStop(0,   '#02041a');
+        this._cachedSkyGrad.addColorStop(0.45, '#0a0d36');
+        this._cachedSkyGrad.addColorStop(0.8,  '#1d0d33');
+        this._cachedSkyGrad.addColorStop(1,    '#2b0e2d');
+        this._cachedSkyH = H;
+      }
+      this.ctx.fillStyle = this._cachedSkyGrad;
       this.ctx.fillRect(0, 0, W, H);
 
       // 2. 3D Sweeping Searchlight Beams in Sky
@@ -872,11 +875,13 @@ class WildSwingsGame {
       this.ctx.save();
       this.ctx.translate(W * 0.25, H);
       this.ctx.rotate(beamAngle1);
-      const beamGrad1 = this.ctx.createLinearGradient(0, 0, 0, -H * 1.2);
-      beamGrad1.addColorStop(0, 'rgba(0, 240, 255, 0.12)');
-      beamGrad1.addColorStop(0.6, 'rgba(0, 240, 255, 0.04)');
-      beamGrad1.addColorStop(1, 'rgba(0, 240, 255, 0)');
-      this.ctx.fillStyle = beamGrad1;
+      if (!this._cachedBeamGrad1 || this._cachedBeamH !== H) {
+        this._cachedBeamGrad1 = this.ctx.createLinearGradient(0, 0, 0, -H * 1.2);
+        this._cachedBeamGrad1.addColorStop(0, 'rgba(0, 240, 255, 0.12)');
+        this._cachedBeamGrad1.addColorStop(0.6, 'rgba(0, 240, 255, 0.04)');
+        this._cachedBeamGrad1.addColorStop(1, 'rgba(0, 240, 255, 0)');
+      }
+      this.ctx.fillStyle = this._cachedBeamGrad1;
       this.ctx.beginPath();
       this.ctx.moveTo(-15, 0);
       this.ctx.lineTo(-90, -H * 1.2);
@@ -890,11 +895,14 @@ class WildSwingsGame {
       this.ctx.save();
       this.ctx.translate(W * 0.75, H);
       this.ctx.rotate(beamAngle2);
-      const beamGrad2 = this.ctx.createLinearGradient(0, 0, 0, -H * 1.2);
-      beamGrad2.addColorStop(0, 'rgba(255, 42, 85, 0.10)');
-      beamGrad2.addColorStop(0.6, 'rgba(255, 42, 85, 0.03)');
-      beamGrad2.addColorStop(1, 'rgba(255, 42, 85, 0)');
-      this.ctx.fillStyle = beamGrad2;
+      if (!this._cachedBeamGrad2 || this._cachedBeamH !== H) {
+        this._cachedBeamGrad2 = this.ctx.createLinearGradient(0, 0, 0, -H * 1.2);
+        this._cachedBeamGrad2.addColorStop(0, 'rgba(255, 42, 85, 0.10)');
+        this._cachedBeamGrad2.addColorStop(0.6, 'rgba(255, 42, 85, 0.03)');
+        this._cachedBeamGrad2.addColorStop(1, 'rgba(255, 42, 85, 0)');
+        this._cachedBeamH = H;
+      }
+      this.ctx.fillStyle = this._cachedBeamGrad2;
       this.ctx.beginPath();
       this.ctx.moveTo(-15, 0);
       this.ctx.lineTo(-80, -H * 1.2);
@@ -960,26 +968,25 @@ class WildSwingsGame {
             this.ctx.closePath();
             this.ctx.fill();
 
-            // Blinking 3D Aviation Light
+            // Blinking 3D Aviation Light (smooth alpha without costly shadowBlur)
             if (Math.sin(now * 2.2 + b.x * 0.01) > 0.1) {
+              this.ctx.fillStyle = 'rgba(255, 42, 85, 0.4)';
+              this.ctx.beginPath();
+              this.ctx.arc(spireX, by - 10 - spireH, 6, 0, Math.PI * 2);
+              this.ctx.fill();
               this.ctx.fillStyle = '#ff2a55';
-              this.ctx.shadowColor = '#ff2a55';
-              this.ctx.shadowBlur = 8;
               this.ctx.beginPath();
               this.ctx.arc(spireX, by - 10 - spireH, 3, 0, Math.PI * 2);
               this.ctx.fill();
-              this.ctx.shadowBlur = 0;
             }
           }
 
           // Lit Windows Grid
           if (b.windowsLit) {
             this.ctx.fillStyle = 'rgba(255, 230, 150, 0.45)';
-            for (let wy = by + 20; wy < by + b.height - 30; wy += 28) {
-              for (let wx = bx + 12; wx < bx + b.width - 15; wx += 22) {
-                if ((wx + wy) % 7 === 0) {
-                  this.ctx.fillRect(wx, wy, 8, 12);
-                }
+            for (let wy = by + 20; wy < by + b.height - 30; wy += 36) {
+              for (let wx = bx + 12; wx < bx + b.width - 15; wx += 26) {
+                this.ctx.fillRect(wx, wy, 8, 12);
               }
             }
           }
@@ -987,11 +994,14 @@ class WildSwingsGame {
       }
 
       // 5. 3D NYC Ground Street Grid Traffic Light Glow
-      const streetGrad = this.ctx.createLinearGradient(0, H - 45, 0, H);
-      streetGrad.addColorStop(0, 'rgba(255, 42, 85, 0)');
-      streetGrad.addColorStop(0.5, 'rgba(255, 165, 2, 0.12)');
-      streetGrad.addColorStop(1, 'rgba(0, 240, 255, 0.18)');
-      this.ctx.fillStyle = streetGrad;
+      if (!this._cachedStreetGrad || this._cachedStreetH !== H) {
+        this._cachedStreetGrad = this.ctx.createLinearGradient(0, H - 45, 0, H);
+        this._cachedStreetGrad.addColorStop(0, 'rgba(255, 42, 85, 0)');
+        this._cachedStreetGrad.addColorStop(0.5, 'rgba(255, 165, 2, 0.12)');
+        this._cachedStreetGrad.addColorStop(1, 'rgba(0, 240, 255, 0.18)');
+        this._cachedStreetH = H;
+      }
+      this.ctx.fillStyle = this._cachedStreetGrad;
       this.ctx.fillRect(0, H - 45, W, 45);
 
       // Pulsing traffic particles in depth
