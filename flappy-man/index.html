@@ -225,15 +225,17 @@
         /* Get Ready Overlay */
         .get-ready-panel {
             position: absolute;
-            top: 25%;
+            top: 18%;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             flex-direction: column;
             align-items: center;
             z-index: 25;
-            pointer-events: none;
+            pointer-events: auto;
             text-align: center;
+            width: 90%;
+            max-width: 440px;
             transition: opacity 0.25s ease;
         }
 
@@ -1799,11 +1801,8 @@
                 this.particles = [];
                 this.cityOffset = 0;
                 this.groundOffset = 0;
-                this.clouds = [
-                    { x: 40, y: 120, scale: 1.2 },
-                    { x: 220, y: 80, scale: 0.9 },
-                    { x: 380, y: 160, scale: 1.1 }
-                ];
+                this.clouds = [];
+                this.initClouds();
 
                 this.resizeCanvas();
                 this.setupEvents();
@@ -1812,6 +1811,20 @@
                 this.lastTime = performance.now();
                 this.accumulator = 0;
                 this.loop();
+            }
+
+            initClouds() {
+                this.clouds = [];
+                const w = this.width || window.innerWidth || 1200;
+                const count = Math.max(5, Math.ceil(w / 240));
+                for (let i = 0; i < count; i++) {
+                    this.clouds.push({
+                        x: (w / count) * i + (Math.random() * 80 - 40),
+                        y: 40 + Math.random() * 150,
+                        scale: 0.8 + Math.random() * 0.6,
+                        speed: 0.25 + Math.random() * 0.35
+                    });
+                }
             }
 
             getTheme() {
@@ -1866,16 +1879,19 @@
             }
 
             resizeCanvas() {
-                const rect = this.canvas.parentElement.getBoundingClientRect();
-                this.width = rect.width || 440;
-                this.height = rect.height || 760;
+                const rect = this.canvas.parentElement ? this.canvas.parentElement.getBoundingClientRect() : null;
+                this.width = (rect && rect.width > 0) ? rect.width : (window.innerWidth || 1200);
+                this.height = (rect && rect.height > 0) ? rect.height : (window.innerHeight || 800);
                 const dpr = window.devicePixelRatio || 1;
-                this.canvas.width = this.width * dpr;
-                this.canvas.height = this.height * dpr;
+                this.canvas.width = Math.round(this.width * dpr);
+                this.canvas.height = Math.round(this.height * dpr);
                 this.canvas.style.width = `${this.width}px`;
                 this.canvas.style.height = `${this.height}px`;
 
                 this.man.x = Math.max(120, Math.min(this.width * 0.22, 260));
+                if (!this.clouds || this.clouds.length < Math.ceil(this.width / 260)) {
+                    this.initClouds();
+                }
             }
 
             setupEvents() {
@@ -2198,7 +2214,18 @@
                 // Parallax ground & city
                 if (this.state !== 'GAMEOVER' && this.state !== 'LEVELCLEAR') {
                     this.groundOffset = (this.groundOffset + this.pipeSpeed) % 24;
-                    this.cityOffset = (this.cityOffset + this.pipeSpeed * 0.3) % 400;
+                    this.cityOffset = (this.cityOffset + this.pipeSpeed * 0.3) % 100000;
+                }
+
+                // Update Clouds
+                if (this.clouds) {
+                    this.clouds.forEach(c => {
+                        c.x -= (c.speed || 0.3);
+                        if (c.x < -120) {
+                            c.x = this.width + 60;
+                            c.y = 40 + Math.random() * 150;
+                        }
+                    });
                 }
 
                 // Update Particles
@@ -2375,8 +2402,10 @@
 
                     // Metropolis Skyline with Daily Planet Globe Spire
                     ctx.fillStyle = theme.cityBack;
-                    for (let i = -1; i < 10; i++) {
-                        const bx = i * 90 - this.cityOffset;
+                    const numBack = Math.ceil(this.width / 90) + 4;
+                    const offsetBack = this.cityOffset % 90;
+                    for (let i = -1; i < numBack; i++) {
+                        const bx = i * 90 - offsetBack;
                         ctx.fillRect(bx, floorY - 140, 70, 140);
                         ctx.fillRect(bx + 20, floorY - 180, 30, 40);
                         // Golden Globe atop tower
@@ -2391,8 +2420,10 @@
                     }
 
                     ctx.fillStyle = theme.cityFront;
-                    for (let i = -1; i < 12; i++) {
-                        const bx = i * 70 - (this.cityOffset * 1.4);
+                    const numFront = Math.ceil(this.width / 70) + 4;
+                    const offsetFront = (this.cityOffset * 1.4) % 70;
+                    for (let i = -1; i < numFront; i++) {
+                        const bx = i * 70 - offsetFront;
                         ctx.fillRect(bx, floorY - 95, 55, 95);
                     }
                 } else if (this.selectedThemeKey === 'ironman') {
@@ -2409,8 +2440,10 @@
 
                     // Manhattan Skyline with Stark Tower
                     ctx.fillStyle = theme.cityBack;
-                    for (let i = -1; i < 10; i++) {
-                        const bx = i * 95 - this.cityOffset;
+                    const numBack = Math.ceil(this.width / 95) + 4;
+                    const offsetBack = this.cityOffset % 95;
+                    for (let i = -1; i < numBack; i++) {
+                        const bx = i * 95 - offsetBack;
                         ctx.fillRect(bx, floorY - 150, 75, 150);
                         // Stark Tower / Avengers 'A' Spire
                         if (i % 3 === 1) {
@@ -2424,8 +2457,10 @@
                     }
 
                     ctx.fillStyle = theme.cityFront;
-                    for (let i = -1; i < 12; i++) {
-                        const bx = i * 75 - (this.cityOffset * 1.4);
+                    const numFront = Math.ceil(this.width / 75) + 4;
+                    const offsetFront = (this.cityOffset * 1.4) % 75;
+                    for (let i = -1; i < numFront; i++) {
+                        const bx = i * 75 - offsetFront;
                         ctx.fillRect(bx, floorY - 100, 60, 100);
                     }
                 } else if (this.selectedThemeKey === 'batman') {
@@ -2448,8 +2483,10 @@
 
                     // Gothic Gargoyle Spired Skyline
                     ctx.fillStyle = theme.cityBack;
-                    for (let i = -1; i < 10; i++) {
-                        const bx = i * 85 - this.cityOffset;
+                    const numBack = Math.ceil(this.width / 85) + 4;
+                    const offsetBack = this.cityOffset % 85;
+                    for (let i = -1; i < numBack; i++) {
+                        const bx = i * 85 - offsetBack;
                         ctx.fillRect(bx, floorY - 160, 65, 160);
                         // Gothic Cathedral Pointed Spire
                         ctx.beginPath();
@@ -2461,8 +2498,10 @@
                     }
 
                     ctx.fillStyle = theme.cityFront;
-                    for (let i = -1; i < 12; i++) {
-                        const bx = i * 70 - (this.cityOffset * 1.4);
+                    const numFront = Math.ceil(this.width / 70) + 4;
+                    const offsetFront = (this.cityOffset * 1.4) % 70;
+                    for (let i = -1; i < numFront; i++) {
+                        const bx = i * 70 - offsetFront;
                         ctx.fillRect(bx, floorY - 105, 55, 105);
                     }
                 } else {
@@ -2479,8 +2518,10 @@
 
                     // Golden Palace Minarets & Saffron Banners of Lanka
                     ctx.fillStyle = theme.cityBack;
-                    for (let i = -1; i < 10; i++) {
-                        const bx = i * 90 - this.cityOffset;
+                    const numBack = Math.ceil(this.width / 90) + 4;
+                    const offsetBack = this.cityOffset % 90;
+                    for (let i = -1; i < numBack; i++) {
+                        const bx = i * 90 - offsetBack;
                         ctx.fillRect(bx, floorY - 165, 70, 165);
                         // Ornate Golden Palace Domes of Ravana
                         ctx.beginPath();
@@ -2493,8 +2534,10 @@
                     }
 
                     ctx.fillStyle = theme.cityFront;
-                    for (let i = -1; i < 12; i++) {
-                        const bx = i * 70 - (this.cityOffset * 1.4);
+                    const numFront = Math.ceil(this.width / 70) + 4;
+                    const offsetFront = (this.cityOffset * 1.4) % 70;
+                    for (let i = -1; i < numFront; i++) {
+                        const bx = i * 70 - offsetFront;
                         ctx.fillRect(bx, floorY - 100, 55, 100);
                     }
                 }
