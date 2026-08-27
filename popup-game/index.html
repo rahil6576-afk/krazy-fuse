@@ -1,55 +1,368 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Pop Up: Balloon Blitz 🎈💥 — krazio games</title>
-    <!-- Favicon -->
-    <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-      #krazio-floating-back {
-        position: fixed;
-        top: 14px;
-        left: 16px;
-        z-index: 99999;
-        width: 40px;
-        height: 40px;
-        background: rgba(15, 23, 42, 0.85);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #f8fafc;
-        border-radius: 50%;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        transition: all 0.2s ease;
-        cursor: pointer;
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pop Up: Balloon Blitz 🎈💥 — krazio games</title>
+  <!-- Favicon -->
+  <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
+  <!-- Google Fonts: Lilita One (Headings/Play) + Outfit (UI/HUD/Modals) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Outfit:wght@400;600;700;800;900&family=Rubik:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    (function() {
+      if (window.parent !== window || window.location.search.includes('embedded=true')) {
+        document.documentElement.classList.add('is-embedded');
+        document.addEventListener('DOMContentLoaded', () => document.body && document.body.classList.add('is-embedded'));
       }
-      #krazio-floating-back:hover {
-        background: rgba(249, 115, 22, 0.9);
-        border-color: #f97316;
-        color: #ffffff;
-        transform: translateX(-3px) scale(1.08);
-        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
+      function exitToPortal() {
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
+        } else {
+          window.location.href = '../index.html';
+        }
       }
-    </style>
-    <script type="module" crossorigin src="./assets/index-C8WJADtp.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Cb2R3n_i.css">
-  </head>
-  <body>
-    <!-- Simple Backward Arrow Button -->
-    <a href="../index.html" id="krazio-floating-back" title="Back to Portal" aria-label="Back">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5M12 19l-7-7 7-7"/>
-      </svg>
-    </a>
-    <div id="root"></div>
-  </body>
+      window.exitToPortal = exitToPortal;
+    })();
+  </script>
+
+  <link rel="stylesheet" href="popup-style.css">
+  <style>
+    /* Floating Portal Back Button */
+    #krazio-floating-back {
+      position: fixed;
+      top: 14px;
+      left: 16px;
+      z-index: 99999;
+      width: 40px;
+      height: 40px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f8fafc;
+      border-radius: 50%;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    #krazio-floating-back:hover {
+      background: rgba(249, 115, 22, 0.9);
+      border-color: #f97316;
+      color: #ffffff;
+      transform: translateX(-3px) scale(1.08);
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
+    }
+    html.is-embedded #krazio-floating-back,
+    body.is-embedded #krazio-floating-back {
+      display: none !important;
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Portal Return Button -->
+  <a href="../index.html" id="krazio-floating-back" title="Back to Portal" aria-label="Back" onclick="exitToPortal(); return false;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+  </a>
+
+  <!-- Root Game Container -->
+  <div id="game-app-root" class="game-app-container">
+    <!-- Animated Theme & Atmospheric Starfield Layer -->
+    <div id="game-theme-bg" class="game-theme-background theme-space" aria-hidden="true">
+      <div class="nebula-layer"></div>
+      <div class="stars-layer-1"></div>
+      <div class="stars-layer-2"></div>
+      <div class="shooting-star"></div>
+    </div>
+
+    <!-- HUD (Score, Level, Target Color, Lives, Combo) -->
+    <div id="game-hud" class="game-hud" style="display: none;">
+      <div class="hud-container">
+        <!-- Top-Left: Level & Objective -->
+        <div class="hud-column hud-left">
+          <div class="level-header">
+            <span id="hud-level-number" class="level-number-text">LEVEL 1 <span class="level-max">/ 20</span></span>
+            <span id="hud-level-mechanic" class="level-mechanic-tag theme-space">COSMIC INTRO</span>
+          </div>
+
+          <div class="level-track-bar" title="Level Progress">
+            <div id="hud-level-track-progress" class="level-track-progress" style="width: 5%;"></div>
+            <div id="hud-level-track-pin" class="level-track-pin" style="left: 0%;"></div>
+          </div>
+
+          <div class="objective-box">
+            <div class="objective-label-row">
+              <span class="objective-label">OBJECTIVE</span>
+              <span id="hud-objective-count" class="objective-count">0 / 3</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="hud-progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top-Center: Target Color Spotlight -->
+        <div class="hud-column hud-center">
+          <div id="hud-target-spotlight-card" class="target-spotlight-card">
+            <span class="target-title-label">🎯 TARGET COLOR</span>
+            <div id="hud-target-giant-badge" class="target-giant-badge red glow-red">
+              <div id="hud-target-badge-inner" class="target-badge-inner"></div>
+            </div>
+          </div>
+
+          <div id="hud-fever-banner" class="fever-mode-pill" style="display: none;">
+            🔥 FEVER MODE 3× ACTIVE! 🔥
+          </div>
+
+          <div id="hud-combo-pill" class="combo-indicator-pill" style="display: none;">
+            ⚡ COMBO <span id="hud-combo-count">2×</span>
+          </div>
+        </div>
+
+        <!-- Top-Right: Score, Lives & Actions -->
+        <div class="hud-column hud-right">
+          <div class="score-card-box">
+            <div class="score-row">
+              <span class="score-label">SCORE</span>
+              <span id="hud-score-display" class="score-value">0</span>
+            </div>
+            <div class="high-score-row">
+              <span class="high-score-label">BEST:</span>
+              <span id="hud-high-score-display" class="high-score-value">0</span>
+            </div>
+          </div>
+
+          <div class="lives-hearts-row">
+            <span class="lives-label">LIVES:</span>
+            <div id="hud-hearts-container" class="hearts-list">
+              <span class="heart-icon heart-active">❤️</span>
+              <span class="heart-icon heart-active">❤️</span>
+              <span class="heart-icon heart-active">❤️</span>
+            </div>
+          </div>
+
+          <div class="hud-action-buttons">
+            <button id="hud-btn-mute" class="hud-icon-btn" title="Toggle Sound">🔊</button>
+            <button id="hud-btn-pause" class="hud-icon-btn" title="Pause Game (Esc/P)">⏸️</button>
+            <button id="hud-btn-theme-open" class="hud-icon-btn" title="Change Theme">🎨</button>
+            <button id="hud-btn-scoreboard-open" class="hud-icon-btn" title="Scoreboard">🏆</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Balloon Stream Layer -->
+    <div id="balloon-stream-layer" class="balloon-stream-container"></div>
+
+    <!-- Projectiles Layer -->
+    <div id="projectiles-layer" class="projectiles-container"></div>
+
+    <!-- Particle & Floating Text Effects Layer -->
+    <div id="effects-layer" class="effects-container"></div>
+
+    <!-- Cannon & Aiming Reticle -->
+    <svg id="cannon-trajectory-svg" class="cannon-trajectory-svg is-idle" aria-hidden="true">
+      <line id="aim-laser-line" class="aim-laser-line" x1="500" y1="700" x2="500" y2="500" />
+      <g id="aim-reticle-group" transform="translate(500, 500)">
+        <circle cx="0" cy="0" r="18" class="reticle-outer-ring" />
+        <circle cx="0" cy="0" r="4" class="reticle-inner-dot" />
+      </g>
+    </svg>
+
+    <div id="cannon-container" class="cannon-stage-container">
+      <div id="cannon-shooter" class="cannon-shooter-rig">
+        <div class="cannon-barrel-outer">
+          <div class="cannon-barrel-inner"></div>
+        </div>
+        <div class="cannon-core-glow"></div>
+      </div>
+    </div>
+
+    <!-- Mascot Character Avatar Container -->
+    <div id="character-avatar-container" class="character-avatar-wrap" style="display: none;">
+      <img id="character-avatar-img" class="character-avatar-img" src="hunter_idle.jpg" alt="Hunter Avatar" />
+    </div>
+
+    <!-- Modal Backdrop Container -->
+    <div id="modal-container" class="modal-backdrop">
+      <!-- 1. Start Screen Modal -->
+      <div id="modal-start" class="modal-card start-card">
+        <div class="start-logo-wrap">
+          <div class="start-balloon-badge">🎈</div>
+          <h1 class="game-main-title">POP RUSH</h1>
+          <p class="game-main-tagline">Match the target. Pop fast. Don't miss.</p>
+        </div>
+
+        <div id="start-main-group" class="modal-button-group">
+          <div class="name-button-wrapper">
+            <span class="name-button-icon">👤</span>
+            <input type="text" id="input-player-name" class="name-input-button" placeholder="Add name here" maxlength="15" value="Player" />
+          </div>
+
+          <button class="modal-primary-btn play-btn" data-action="start-game">
+            ▶ PLAY GAME
+          </button>
+
+          <button class="modal-secondary-btn theme-toggle-btn" data-action="open-themes">
+            🎨 Themes: <span id="start-theme-tag" class="theme-name-tag">SPACE</span>
+          </button>
+
+          <button class="modal-secondary-btn" data-action="show-how-to-play">
+            📖 How to Play
+          </button>
+          <button class="modal-secondary-btn" data-action="open-scoreboard">
+            🏆 Hall of Fame
+          </button>
+        </div>
+
+        <div id="start-how-to-card" class="how-to-play-card hidden">
+          <h3 class="how-to-title">🎯 HOW TO PLAY</h3>
+          <ul class="rules-list">
+            <li>Aim your cannon with <strong>Mouse or Touch</strong> & click/tap to shoot.</li>
+            <li>Pop only the <strong>TARGET COLOR</strong> shown in the top HUD.</li>
+            <li>Popping wrong balloons costs <strong>1 Life</strong> (3 strikes = Level Failed!).</li>
+            <li>Consecutive correct hits build <strong>COMBO MULTIPLIERS</strong>.</li>
+            <li>Hit a 5× combo to unleash <strong>🔥 FEVER MODE 3×</strong>!</li>
+            <li>Conquer all <strong>20 Levels</strong> to become the Grand Champion!</li>
+          </ul>
+          <button class="modal-secondary-btn" data-action="hide-how-to-play">
+            Back to Menu
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Theme Selector Modal -->
+      <div id="modal-theme" class="modal-card theme-card hidden">
+        <h2 class="modal-title">🎨 SELECT BATTLE THEME</h2>
+        <div class="themes-grid">
+          <button class="theme-option-btn" data-action="select-theme" data-theme="space">
+            <span class="theme-icon">🌌</span>
+            <div class="theme-info">
+              <span class="theme-title">Space Cosmos</span>
+              <span class="theme-desc">Deep stars & crystalline asteroids</span>
+            </div>
+          </button>
+          <button class="theme-option-btn" data-action="select-theme" data-theme="beach">
+            <span class="theme-icon">🏝️</span>
+            <div class="theme-info">
+              <span class="theme-title">Tropical Beach</span>
+              <span class="theme-desc">Azure ocean & striped beach balls</span>
+            </div>
+          </button>
+          <button class="theme-option-btn" data-action="select-theme" data-theme="dystopian">
+            <span class="theme-icon">🏙️</span>
+            <div class="theme-info">
+              <span class="theme-title">Cyber Dystopia</span>
+              <span class="theme-desc">Neon skyline & cyber zombie implants</span>
+            </div>
+          </button>
+          <button class="theme-option-btn" data-action="select-theme" data-theme="slimy">
+            <span class="theme-icon">🧪</span>
+            <div class="theme-info">
+              <span class="theme-title">Slimy Cavern</span>
+              <span class="theme-desc">Acid goo & cyclops slime monsters</span>
+            </div>
+          </button>
+          <button class="theme-option-btn" data-action="select-theme" data-theme="salman">
+            <span class="theme-icon">🚗</span>
+            <div class="theme-info">
+              <span class="theme-title">Bhaijaan Safari</span>
+              <span class="theme-desc">Salman throwing cars at blackbucks</span>
+            </div>
+          </button>
+        </div>
+        <button class="modal-secondary-btn" data-action="close-theme-modal" style="margin-top: 16px;">
+          Close
+        </button>
+      </div>
+
+      <!-- 3. Level Complete Modal -->
+      <div id="modal-level-complete" class="modal-card level-complete-card hidden">
+        <div class="modal-badge-icon">🎉</div>
+        <h2 id="lc-level-title" class="modal-title">Level Cleared!</h2>
+        <div class="stats-summary-grid">
+          <div class="stat-pill"><span class="stat-label">SCORE</span><span id="lc-score-val" class="stat-val">0</span></div>
+          <div class="stat-pill"><span class="stat-label">ACCURACY</span><span id="lc-accuracy-val" class="stat-val">100%</span></div>
+          <div class="stat-pill"><span class="stat-label">MAX COMBO</span><span id="lc-max-combo" class="stat-val">0×</span></div>
+        </div>
+        <button class="modal-primary-btn" data-action="next-level">
+          CONTINUE TO NEXT LEVEL ➔
+        </button>
+      </div>
+
+      <!-- 4. Game Over Modal -->
+      <div id="modal-game-over" class="modal-card game-over-card hidden">
+        <div class="modal-badge-icon">💔</div>
+        <h2 class="modal-title">LEVEL FAILED</h2>
+        <p style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 14px;">3 strikes! Wrong balloons cost all your lives.</p>
+        <div class="stats-summary-grid">
+          <div class="stat-pill"><span class="stat-label">REACHED</span><span class="stat-val">Level <span id="go-level-val">1</span></span></div>
+          <div class="stat-pill"><span class="stat-label">SCORE</span><span id="go-score-val" class="stat-val">0</span></div>
+          <div class="stat-pill"><span class="stat-label">BEST</span><span id="go-best-score" class="stat-val">0</span></div>
+        </div>
+        <button class="modal-primary-btn" data-action="retry-level">
+          🔄 RETRY LEVEL
+        </button>
+        <button class="modal-secondary-btn" data-action="back-to-menu">
+          🏠 MAIN MENU
+        </button>
+      </div>
+
+      <!-- 5. Victory Modal -->
+      <div id="modal-victory" class="modal-card victory-card hidden">
+        <div class="modal-badge-icon">🏆</div>
+        <h2 class="modal-title">GRAND CHAMPION!</h2>
+        <p style="color: #ffd700; font-size: 1.05rem; font-weight: 800; margin-bottom: 14px;">You have conquered all 20 levels!</p>
+        <div class="stats-summary-grid">
+          <div class="stat-pill"><span class="stat-label">FINAL SCORE</span><span id="vic-score-val" class="stat-val">0</span></div>
+          <div class="stat-pill"><span class="stat-label">ACCURACY</span><span id="vic-accuracy-val" class="stat-val">100%</span></div>
+        </div>
+        <button class="modal-primary-btn" data-action="restart-game">
+          PLAY AGAIN
+        </button>
+        <button class="modal-secondary-btn" data-action="back-to-menu">
+          MAIN MENU
+        </button>
+      </div>
+
+      <!-- 6. Hall of Fame Scoreboard Modal -->
+      <div id="modal-scoreboard" class="modal-card scoreboard-card hidden">
+        <h2 class="modal-title">🏆 HALL OF FAME</h2>
+        <div id="scoreboard-list-container" class="scoreboard-list-wrap"></div>
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button class="modal-secondary-btn" data-action="clear-scoreboard" style="flex: 1;">
+            Clear Records
+          </button>
+          <button class="modal-primary-btn" data-action="close-scoreboard" style="flex: 1;">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Countdown Overlays -->
+    <div id="countdown-overlay" class="countdown-fullscreen-overlay hidden">
+      <div id="countdown-number" class="countdown-big-number">3</div>
+    </div>
+
+    <div id="resume-countdown-overlay" class="resume-countdown-overlay hidden">
+      <div id="resume-countdown-number" class="resume-countdown-number">3</div>
+      <div class="resume-countdown-sub">⚡ GET READY • RESUMING</div>
+    </div>
+  </div>
+
+  <script src="popup-game.js"></script>
+  <script src="../assets/krazy-screenshot.js"></script>
+</body>
 </html>
