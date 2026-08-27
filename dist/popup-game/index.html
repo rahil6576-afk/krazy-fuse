@@ -248,47 +248,64 @@
       </div>
 
       <!-- 2. Theme Selector Modal -->
-      <div id="modal-theme" class="modal-card theme-card hidden">
-        <h2 class="modal-title">🎨 SELECT BATTLE THEME</h2>
+      <div id="modal-theme" class="modal-card themes-modal-card hidden">
+        <div class="scoreboard-header">
+          <div class="header-left">
+            <span class="trophy-icon">🎨</span>
+            <h2 class="modal-title">CHOOSE THEME</h2>
+          </div>
+          <button class="close-btn" data-action="close-theme-modal">✕</button>
+        </div>
+        <p class="modal-subtitle">Pick an immersive visual aesthetic</p>
         <div class="themes-grid">
-          <button class="theme-option-btn" data-action="select-theme" data-theme="space">
-            <span class="theme-icon">🌌</span>
-            <div class="theme-info">
-              <span class="theme-title">Space Cosmos</span>
-              <span class="theme-desc">Deep stars & crystalline asteroids</span>
+          <button class="theme-card-option" data-action="select-theme" data-theme="space" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%); border-color: #00f0ff;">
+            <div class="theme-card-icon">🌌</div>
+            <div class="theme-card-info">
+              <div class="theme-card-title-row">
+                <span class="theme-card-name" style="color: #00f0ff;">Space Cosmos</span>
+              </div>
+              <span class="theme-card-desc">Deep stars & crystalline asteroids</span>
             </div>
           </button>
-          <button class="theme-option-btn" data-action="select-theme" data-theme="beach">
-            <span class="theme-icon">🏝️</span>
-            <div class="theme-info">
-              <span class="theme-title">Tropical Beach</span>
-              <span class="theme-desc">Azure ocean & striped beach balls</span>
+          <button class="theme-card-option" data-action="select-theme" data-theme="beach" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%); border-color: #38bdf8;">
+            <div class="theme-card-icon">🏝️</div>
+            <div class="theme-card-info">
+              <div class="theme-card-title-row">
+                <span class="theme-card-name" style="color: #38bdf8;">Tropical Beach</span>
+              </div>
+              <span class="theme-card-desc">Azure ocean & striped beach balls</span>
             </div>
           </button>
-          <button class="theme-option-btn" data-action="select-theme" data-theme="dystopian">
-            <span class="theme-icon">🏙️</span>
-            <div class="theme-info">
-              <span class="theme-title">Cyber Dystopia</span>
-              <span class="theme-desc">Neon skyline & cyber zombie implants</span>
+          <button class="theme-card-option" data-action="select-theme" data-theme="dystopian" style="background: linear-gradient(135deg, #18181b 0%, #3b0764 50%, #581c87 100%); border-color: #d946ef;">
+            <div class="theme-card-icon">🏙️</div>
+            <div class="theme-card-info">
+              <div class="theme-card-title-row">
+                <span class="theme-card-name" style="color: #d946ef;">Cyber Dystopia</span>
+              </div>
+              <span class="theme-card-desc">Neon skyline & cyber zombie implants</span>
             </div>
           </button>
-          <button class="theme-option-btn" data-action="select-theme" data-theme="slimy">
-            <span class="theme-icon">🧪</span>
-            <div class="theme-info">
-              <span class="theme-title">Slimy Cavern</span>
-              <span class="theme-desc">Acid goo & cyclops slime monsters</span>
+          <button class="theme-card-option" data-action="select-theme" data-theme="slimy" style="background: linear-gradient(135deg, #052e16 0%, #14532d 50%, #166534 100%); border-color: #22c55e;">
+            <div class="theme-card-icon">🧪</div>
+            <div class="theme-card-info">
+              <div class="theme-card-title-row">
+                <span class="theme-card-name" style="color: #22c55e;">Slimy Cavern</span>
+              </div>
+              <span class="theme-card-desc">Acid goo & cyclops slime monsters</span>
             </div>
           </button>
-          <button class="theme-option-btn" data-action="select-theme" data-theme="salman">
-            <span class="theme-icon">🚗</span>
-            <div class="theme-info">
-              <span class="theme-title">Bhaijaan Safari</span>
-              <span class="theme-desc">Salman throwing cars at blackbucks</span>
+          <button class="theme-card-option" data-action="select-theme" data-theme="salman" style="background: linear-gradient(135deg, #18181b 0%, #78350f 50%, #d97706 100%); border-color: #f59e0b;">
+            <div class="theme-card-icon">🚗</div>
+            <div class="theme-card-info">
+              <div class="theme-card-title-row">
+                <span class="theme-card-name" style="color: #f59e0b;">Bhaijaan Safari</span>
+              </div>
+              <span class="theme-card-desc">Salman throwing cars at blackbucks</span>
             </div>
           </button>
         </div>
-        <button class="modal-secondary-btn" data-action="close-theme-modal" style="margin-top: 16px;">
-          Close
+        <button class="modal-primary-btn" data-action="close-theme-modal" style="margin-top: 16px;">
+          Done
         </button>
       </div>
 

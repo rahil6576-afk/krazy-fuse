@@ -527,15 +527,46 @@ class SoundManager {
       const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.type = theme === 'dystopian' ? 'sawtooth' : theme === 'slimy' ? 'triangle' : 'sine';
-      osc.frequency.setValueAtTime(theme === 'dystopian' ? 1200 : theme === 'slimy' ? 160 : 700, now);
-      osc.frequency.exponentialRampToValueAtTime(120, now + 0.15);
-      gain.gain.setValueAtTime(0.35, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+      if (theme === 'salman') {
+        // Bhaijaan SUV Launch / Vroom
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.22);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+      } else if (theme === 'dystopian') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(1400, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.16);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+      } else if (theme === 'slimy') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.18);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+      } else if (theme === 'beach') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.14);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+      } else {
+        // Space plasma blaster
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(950, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.15);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+      }
+
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start(now);
-      osc.stop(now + 0.16);
+      osc.stop(now + 0.25);
     }
   }
 
@@ -547,18 +578,18 @@ class SoundManager {
 
     if (this.ctx) {
       const now = this.ctx.currentTime;
-      const baseFreq = 420 + Math.min(600, combo * 45);
+      const baseFreq = 440 + Math.min(650, combo * 50);
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(baseFreq, now);
-      osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, now + 0.08);
-      gain.gain.setValueAtTime(0.35, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.6, now + 0.08);
+      gain.gain.setValueAtTime(0.38, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start(now);
-      osc.stop(now + 0.12);
+      osc.stop(now + 0.14);
     }
   }
 
@@ -572,9 +603,9 @@ class SoundManager {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(160, now);
-      osc.frequency.linearRampToValueAtTime(90, now + 0.25);
-      gain.gain.setValueAtTime(0.3, now);
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.linearRampToValueAtTime(80, now + 0.25);
+      gain.gain.setValueAtTime(0.35, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
@@ -587,11 +618,28 @@ class SoundManager {
     if (this.muted) return;
     this.init();
     if (this.playBuffer(this.failBuffer, 0.65)) return;
+    if (this.ctx) {
+      const now = this.ctx.currentTime;
+      [240, 200, 160, 120].forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const t = now + idx * 0.12;
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.2);
+      });
+    }
   }
 
   playWinFanfare() {
-    if (this.muted || !this.ctx) return;
+    if (this.muted) return;
     this.init();
+    if (!this.ctx) return;
     const notes = [523.25, 659.25, 783.99, 1046.5];
     notes.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();
@@ -609,8 +657,9 @@ class SoundManager {
   }
 
   playFever() {
-    if (this.muted || !this.ctx) return;
+    if (this.muted) return;
     this.init();
+    if (!this.ctx) return;
     const chords = [440, 554, 659, 880, 1108];
     chords.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();
@@ -628,7 +677,9 @@ class SoundManager {
   }
 
   playComboChord(combo) {
-    if (this.muted || !this.ctx) return;
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
     const base = 350 + (combo % 8) * 50;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -644,7 +695,9 @@ class SoundManager {
   }
 
   playCountdown(isGo = false) {
-    if (this.muted || !this.ctx) return;
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
     const freq = isGo ? 880 : 440;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -662,7 +715,23 @@ class SoundManager {
   playSwagat() {
     if (this.muted) return;
     this.init();
-    this.playBuffer(this.swagatBuffer, 0.7);
+    if (this.playBuffer(this.swagatBuffer, 0.7)) return;
+    if (this.ctx) {
+      // Fanfare celebratory chime
+      [587.33, 739.99, 880, 1174.66].forEach((f, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const t = this.ctx.currentTime + idx * 0.08;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(f, t);
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.3);
+      });
+    }
   }
 }
 
@@ -794,15 +863,20 @@ class BalloonGameEngine {
     window.addEventListener('touchmove', onPointerMove, { passive: true });
 
     // Firing Cannon on Click/Tap on Playfield
-    this.dom.appRoot.addEventListener('pointerdown', (e) => {
+    const handleFire = (e) => {
       // Ignore clicks on HUD buttons or modals
       if (e.target.closest('.game-hud') || e.target.closest('.modal-card') || e.target.closest('#krazio-floating-back')) {
         return;
       }
+      sound.init();
       if (this.gameState === 'playing') {
-        this.fireCannonball(e.clientX, e.clientY);
+        const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : window.innerWidth / 2);
+        const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : window.innerHeight / 2);
+        this.fireCannonball(clientX, clientY);
       }
-    });
+    };
+
+    window.addEventListener('pointerdown', handleFire);
 
     // Keyboard Hotkeys
     window.addEventListener('keydown', (e) => {
@@ -967,10 +1041,10 @@ class BalloonGameEngine {
       } else if (theme === 'salman') {
         html = `
           <div class="salman-environment">
-            <div class="salman-highway-backdrop"></div>
-            <div class="salman-desert-sun-gleam"></div>
-            <div class="salman-dust-storm-overlay"></div>
-            <div class="salman-ambient-vignette"></div>
+            <div class="salman-desert-backdrop"></div>
+            <div class="salman-twilight-glow"></div>
+            <div class="salman-dust-haze"></div>
+            <div class="salman-vignette-overlay"></div>
           </div>
         `;
       }
@@ -978,6 +1052,7 @@ class BalloonGameEngine {
     }
 
     this.renderShooter();
+    this.renderBalloons();
     this.updateHUD();
   }
 
