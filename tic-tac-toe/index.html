@@ -1149,13 +1149,13 @@
 
             <!-- Action Buttons -->
             <div class="actions-row">
-                <button class="action-btn btn-restart" id="btn-restart">
+                <button class="action-btn btn-restart" id="btn-restart" onclick="restartRoundTTT()">
                     <span>🔄 New Round</span>
                 </button>
                 <button class="action-btn" id="btn-pause" title="Pause Game (Esc/P)" onclick="pauseTicTacToe()">
                     <span>⏸️ Pause</span>
                 </button>
-                <button class="action-btn" id="btn-reset-scores">
+                <button class="action-btn" id="btn-reset-scores" onclick="resetScoresTTT()">
                     <span>🧹 Reset Score</span>
                 </button>
             </div>
@@ -1774,6 +1774,29 @@
                 initBoard();
             });
         });
+
+        // Action Buttons Setup (New Round & Reset Score)
+        window.restartRoundTTT = function() {
+            if (isTicTacToePaused) {
+                resumeTicTacToe(false);
+            }
+            initBoard();
+        };
+
+        window.resetScoresTTT = function() {
+            scores = { X: 0, O: 0, ties: 0 };
+            initBoard();
+        };
+
+        const btnRestart = document.getElementById('btn-restart');
+        if (btnRestart) {
+            btnRestart.addEventListener('click', window.restartRoundTTT);
+        }
+
+        const btnResetScores = document.getElementById('btn-reset-scores');
+        if (btnResetScores) {
+            btnResetScores.addEventListener('click', window.resetScoresTTT);
+        }
 
         // Pause & Resume Portal Functions
         let isTicTacToePaused = false;
