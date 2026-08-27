@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic Tac Toe: Neon Arena ❌⭕ — krazio games</title>
+    <title>Sumi-e Tac Toe: Zen Brush & AI 墨絵 ❌⭕ — krazio games</title>
     <!-- Favicon -->
     <link rel="icon" href="../krazio-icon.svg" type="image/svg+xml">
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Traditional Japanese Calligraphy & Brush Serifs -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;900&family=Yuji+Boku&family=Outfit:wght@400;600;700;800&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
     <script>
         (function() {
             if (window.parent !== window || window.location.search.includes('embedded=true')) {
@@ -57,17 +58,23 @@
             padding: 0 !important;
             justify-content: center !important;
         }
+
         :root {
-            --bg-color: #080b16;
-            --card-bg: rgba(18, 24, 43, 0.85);
-            --border-glow: rgba(99, 102, 241, 0.35);
-            --cyan-glow: #00f0ff;
-            --cyan-glow-dim: rgba(0, 240, 255, 0.25);
-            --pink-glow: #ff007f;
-            --pink-glow-dim: rgba(255, 0, 127, 0.25);
-            --gold-glow: #ffd700;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
+            /* Traditional Sumi-e & Washi Palette */
+            --washi-bg: #f4edd9;
+            --washi-bg-card: rgba(248, 243, 231, 0.94);
+            --washi-border: #d4c8ab;
+            --sumi-black: #1a1715;
+            --sumi-dark: #2d2825;
+            --sumi-gray: #6b635b;
+            --sumi-light: #9e9488;
+            --hanko-red: #c92a2a;
+            --hanko-red-glow: rgba(201, 42, 42, 0.28);
+            --enso-gold: #c59b27;
+            --enso-gold-glow: rgba(197, 155, 39, 0.25);
+            --bamboo-green: #3b5a45;
+            --card-shadow: 0 10px 30px rgba(45, 40, 37, 0.12), 0 2px 8px rgba(45, 40, 37, 0.08);
+            --transition-smooth: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
         }
 
         * {
@@ -79,9 +86,9 @@
         }
 
         body {
-            background: var(--bg-color);
-            color: var(--text-primary);
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--washi-bg);
+            color: var(--sumi-black);
+            font-family: 'Shippori Mincho', 'Outfit', serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -89,216 +96,345 @@
             justify-content: space-between;
             overflow-x: hidden;
             position: relative;
-            background-image: 
-                radial-gradient(circle at 50% 10%, rgba(99, 102, 241, 0.15), transparent 60%),
-                radial-gradient(circle at 10% 85%, rgba(0, 240, 255, 0.08), transparent 45%),
-                radial-gradient(circle at 90% 85%, rgba(255, 0, 127, 0.08), transparent 45%);
         }
 
-        /* Floating Back Navigation */
+        /* Washi Paper Grain & Ink Wash Misty Mountains Backdrop */
+        .sumi-background-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            background: 
+                radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.85) 0%, transparent 65%),
+                radial-gradient(circle at 10% 90%, rgba(201, 42, 42, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(59, 90, 69, 0.05) 0%, transparent 40%),
+                linear-gradient(180deg, #f7f2e4 0%, #f0e6ce 100%);
+        }
+
+        .sumi-mountains-svg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 38vh;
+            opacity: 0.18;
+            pointer-events: none;
+        }
+
+        .sumi-bamboo-svg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 60vh;
+            width: auto;
+            opacity: 0.12;
+            pointer-events: none;
+            transform: scaleX(-1);
+        }
+
+        .sumi-bamboo-left-svg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 50vh;
+            width: auto;
+            opacity: 0.14;
+            pointer-events: none;
+        }
+
+        /* Floating Portal Back Button */
         #krazio-floating-back {
             position: fixed;
             top: 14px;
             left: 16px;
             z-index: 99999;
-            width: 40px;
-            height: 40px;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #f8fafc;
+            width: 42px;
+            height: 42px;
+            background: rgba(244, 237, 217, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1.5px solid var(--sumi-dark);
+            color: var(--sumi-dark);
             border-radius: 50%;
             text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(45, 40, 37, 0.15);
+            transition: var(--transition-smooth);
             cursor: pointer;
         }
-
         #krazio-floating-back:hover {
-            background: rgba(249, 115, 22, 0.9);
-            border-color: #f97316;
+            background: var(--hanko-red);
+            border-color: var(--hanko-red);
             color: #ffffff;
-            transform: translateX(-3px) scale(1.08);
-            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
+            transform: translateX(-3px) scale(1.06);
+            box-shadow: 0 6px 18px var(--hanko-red-glow);
         }
 
-        /* Header Bar */
-        .game-header {
+        /* Main Container */
+        .zen-main-container {
             width: 100%;
-            max-width: 680px;
-            padding: 65px 20px 10px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 16px 20px 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center;
-        }
-
-        .game-title {
-            font-size: 2.5rem;
-            font-weight: 900;
-            letter-spacing: -1px;
-            background: linear-gradient(135deg, #00f0ff 0%, #a855f7 50%, #ff007f 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 35px rgba(168, 85, 247, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .game-subtitle {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-
-        /* Mode & Difficulty Selector Pills */
-        .controls-panel {
-            width: 100%;
-            max-width: 580px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding: 0 16px;
-            margin: 12px 0 16px 0;
-        }
-
-        .pill-group {
-            display: flex;
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 9999px;
-            padding: 4px;
-            gap: 4px;
-            backdrop-filter: blur(8px);
-        }
-
-        .mode-btn, .diff-btn, .grid-btn {
+            position: relative;
+            z-index: 1;
             flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 0.88rem;
-            padding: 8px 12px;
-            border-radius: 9999px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        }
+
+        /* Title Header */
+        .zen-header {
+            text-align: center;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .zen-kanji-badge {
+            font-family: 'Yuji Boku', serif;
+            font-size: 1.5rem;
+            color: var(--hanko-red);
+            display: inline-block;
+            border: 1.5px solid var(--hanko-red);
+            padding: 1px 7px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            background: rgba(201, 42, 42, 0.05);
+            letter-spacing: 2px;
+        }
+
+        .zen-title {
+            font-family: 'Shippori Mincho', 'Cinzel Decorative', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--sumi-black);
+            letter-spacing: 2px;
+            text-transform: uppercase;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 12px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .zen-title-symbol {
+            font-family: 'Yuji Boku', serif;
+            font-size: 2rem;
+            font-weight: normal;
+        }
+        .zen-title-symbol.x-symbol { color: var(--sumi-black); }
+        .zen-title-symbol.o-symbol { color: var(--hanko-red); }
+
+        .zen-subtitle {
+            font-size: 0.95rem;
+            color: var(--sumi-gray);
+            margin-top: 2px;
+            letter-spacing: 1px;
+            font-style: italic;
+        }
+
+        /* Controls / Option Bars */
+        .zen-controls-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 16px;
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .zen-pill-group {
+            background: var(--washi-bg-card);
+            border: 1.5px solid var(--washi-border);
+            padding: 4px;
+            border-radius: 28px;
+            display: flex;
+            gap: 4px;
+            box-shadow: 0 3px 10px rgba(45, 40, 37, 0.06);
+        }
+
+        .zen-pill-btn {
+            background: transparent;
+            border: none;
+            color: var(--sumi-gray);
+            font-family: 'Shippori Mincho', 'Outfit', serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 7px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
             gap: 6px;
         }
 
-        .mode-btn.active, .diff-btn.active, .grid-btn.active {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: #ffffff;
-            box-shadow: 0 2px 14px rgba(99, 102, 241, 0.5);
+        .zen-pill-btn:hover {
+            color: var(--sumi-black);
+            background: rgba(45, 40, 37, 0.05);
         }
 
-        /* Player Turn & Scoreboard Banner */
-        .match-status-bar {
+        .zen-pill-btn.active {
+            background: var(--sumi-dark);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(45, 40, 37, 0.2);
+        }
+
+        /* Players Scoreboard & Hanko Seals */
+        .zen-score-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
-            max-width: 520px;
+            max-width: 580px;
+            margin-bottom: 16px;
+            gap: 14px;
+        }
+
+        .player-scroll-card {
+            flex: 1;
+            background: var(--washi-bg-card);
+            border: 1.5px solid var(--washi-border);
+            border-radius: 12px;
+            padding: 12px 16px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 20px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-glow);
-            border-radius: 20px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-            margin-bottom: 18px;
+            gap: 12px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            transition: var(--transition-smooth);
         }
 
-        .player-card {
+        .player-scroll-card.active-turn {
+            border-color: var(--sumi-dark);
+            box-shadow: 0 0 0 2px var(--sumi-dark), 0 8px 24px rgba(45, 40, 37, 0.15);
+            transform: translateY(-2px);
+            background: #ffffff;
+        }
+
+        .player-scroll-card.player-x.active-turn {
+            border-color: var(--sumi-black);
+            box-shadow: 0 0 0 2px var(--sumi-black), 0 8px 24px rgba(26, 23, 21, 0.18);
+        }
+
+        .player-scroll-card.player-o.active-turn {
+            border-color: var(--hanko-red);
+            box-shadow: 0 0 0 2px var(--hanko-red), 0 8px 24px var(--hanko-red-glow);
+        }
+
+        /* Traditional Hanko Seal Stamp */
+        .hanko-seal {
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Yuji Boku', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .hanko-seal.seal-x {
+            background: #f0ede6;
+            border: 2px solid var(--sumi-black);
+            color: var(--sumi-black);
+        }
+
+        .hanko-seal.seal-o {
+            background: rgba(201, 42, 42, 0.08);
+            border: 2px solid var(--hanko-red);
+            color: var(--hanko-red);
+        }
+
+        .player-info-meta {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            padding: 6px 16px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            position: relative;
+            flex: 1;
+            min-width: 0;
         }
 
-        .player-card.active-turn {
-            background: rgba(255, 255, 255, 0.08);
-            transform: scale(1.05);
+        .player-name-label {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--sumi-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .player-card.p-x.active-turn {
-            border: 1px solid var(--cyan-glow);
-            box-shadow: 0 0 20px var(--cyan-glow-dim);
-        }
-
-        .player-card.p-o.active-turn {
-            border: 1px solid var(--pink-glow);
-            box-shadow: 0 0 20px var(--pink-glow-dim);
-        }
-
-        .player-label {
-            font-size: 0.8rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-        }
-
-        .player-score {
+        .player-score-count {
             font-size: 1.6rem;
             font-weight: 900;
+            font-family: 'Shippori Mincho', serif;
+            color: var(--sumi-black);
+            line-height: 1.1;
         }
 
-        .p-x .player-score { color: var(--cyan-glow); text-shadow: 0 0 10px var(--cyan-glow-dim); }
-        .p-o .player-score { color: var(--pink-glow); text-shadow: 0 0 10px var(--pink-glow-dim); }
-
-        .vs-divider {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .versus-divider {
+            font-family: 'Yuji Boku', serif;
+            font-size: 1.1rem;
+            color: var(--sumi-light);
+            font-weight: bold;
+            padding: 0 4px;
         }
 
-        .turn-announcer {
-            font-size: 0.95rem;
-            font-weight: 900;
-            color: #fff;
-            padding: 4px 12px;
-            border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.1);
-            letter-spacing: 0.5px;
-            animation: pulseGlow 1.8s infinite alternate;
-        }
-
-        @keyframes pulseGlow {
-            0% { opacity: 0.8; transform: scale(0.98); }
-            100% { opacity: 1; transform: scale(1.02); }
-        }
-
-        .ties-count {
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
+        /* Turn Indicator Status Bar */
+        .zen-status-banner {
+            width: 100%;
+            max-width: 580px;
+            background: var(--washi-bg-card);
+            border: 1.5px solid var(--washi-border);
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.05rem;
             font-weight: 700;
+            color: var(--sumi-dark);
+            margin-bottom: 16px;
+            box-shadow: 0 3px 12px rgba(45, 40, 37, 0.05);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 48px;
         }
 
-        /* 3D Glass Board Arena */
-        .board-container {
+        .turn-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--sumi-dark);
+            display: inline-block;
+            animation: pulseDot 1.4s infinite ease-in-out;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.35); opacity: 1; }
+        }
+
+        /* Sumi-e Game Board Container */
+        .zen-board-stage {
             position: relative;
-            width: 90vw;
+            width: 100%;
             max-width: 440px;
             aspect-ratio: 1 / 1;
-            background: var(--card-bg);
-            border: 2px solid var(--border-glow);
-            border-radius: 28px;
-            padding: 14px;
-            box-shadow: 
-                0 20px 50px rgba(0, 0, 0, 0.6),
-                0 0 40px rgba(99, 102, 241, 0.15);
+            margin: 0 auto 20px;
+            background: var(--washi-bg-card);
+            border: 2.5px solid var(--sumi-dark);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow), inset 0 0 30px rgba(212, 200, 171, 0.4);
+            padding: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -308,8 +444,9 @@
             width: 100%;
             height: 100%;
             display: grid;
-            gap: 12px;
+            gap: 10px;
             position: relative;
+            z-index: 2;
         }
 
         .tic-board.grid-3 {
@@ -320,1133 +457,483 @@
         .tic-board.grid-4 {
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(4, 1fr);
-            gap: 8px;
+            gap: 7px;
         }
 
         .tic-board.grid-5 {
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(5, 1fr);
-            gap: 6px;
+            gap: 5px;
         }
 
+        /* Board Cells */
         .cell {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1.5px solid var(--washi-border);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: var(--transition-smooth);
             position: relative;
             overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
         }
 
         .cell:hover:not(.taken) {
-            background: rgba(99, 102, 241, 0.2);
-            border-color: rgba(99, 102, 241, 0.5);
-            transform: scale(1.04);
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: var(--sumi-gray);
+            box-shadow: inset 0 0 10px rgba(45, 40, 37, 0.05);
+            transform: scale(0.98);
         }
 
-        .cell:active:not(.taken) {
-            transform: scale(0.96);
+        .cell.taken {
+            cursor: default;
+            background: rgba(255, 255, 255, 0.85);
         }
 
         .cell.winning-cell {
-            background: rgba(255, 215, 0, 0.2) !important;
-            border-color: var(--gold-glow) !important;
-            animation: winCellPulse 1s infinite alternate;
+            background: rgba(201, 42, 42, 0.1) !important;
+            border-color: var(--hanko-red) !important;
+            animation: winCellGlow 1.5s infinite alternate ease-in-out;
         }
 
-        @keyframes winCellPulse {
-            0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); transform: scale(1); }
-            100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); transform: scale(1.05); }
+        @keyframes winCellGlow {
+            0% { box-shadow: inset 0 0 10px rgba(201, 42, 42, 0.15); }
+            100% { box-shadow: inset 0 0 24px rgba(201, 42, 42, 0.35); }
         }
 
-        /* SVG Mark Glyphs */
+        /* SVG Mark Animations (Sumi-e Brush X & Ensō Circle O) */
         .mark-svg {
-            width: 70%;
-            height: 70%;
+            width: 80%;
+            height: 80%;
+            max-width: 90px;
+            max-height: 90px;
+            pointer-events: none;
         }
 
-        /* X Drawing Animation */
-        .path-x {
-            stroke: var(--cyan-glow);
-            stroke-width: 14;
+        .brush-x-stroke {
+            stroke: var(--sumi-black);
+            stroke-width: 9;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            stroke-dasharray: 120;
+            stroke-dashoffset: 120;
+            animation: drawBrushStroke 0.32s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+        }
+
+        .brush-enso-circle {
+            stroke: var(--hanko-red);
+            stroke-width: 9;
             stroke-linecap: round;
             fill: none;
-            filter: drop-shadow(0 0 12px var(--cyan-glow));
-            stroke-dasharray: 200;
-            stroke-dashoffset: 200;
-            animation: drawLine 0.28s ease-out forwards;
+            stroke-dasharray: 260;
+            stroke-dashoffset: 260;
+            animation: drawBrushStroke 0.42s cubic-bezier(0.3, 0.85, 0.3, 1) forwards;
+            filter: drop-shadow(0 2px 4px var(--hanko-red-glow));
         }
 
-        /* O Drawing Animation */
-        .path-o {
-            stroke: var(--pink-glow);
-            stroke-width: 14;
-            stroke-linecap: round;
-            fill: none;
-            filter: drop-shadow(0 0 12px var(--pink-glow));
-            stroke-dasharray: 300;
-            stroke-dashoffset: 300;
-            animation: drawLine 0.32s ease-out forwards;
-        }
-
-        @keyframes drawLine {
+        @keyframes drawBrushStroke {
             to { stroke-dashoffset: 0; }
         }
 
-        /* Winning Laser Line Canvas Overlay */
-        #strike-canvas {
+        /* Strike Line Canvas */
+        .strike-canvas {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            border-radius: 28px;
-            z-index: 20;
-        }
-
-        /* Bottom Control Buttons */
-        .actions-row {
-            display: flex;
-            gap: 12px;
-            margin: 20px 0 30px 0;
-        }
-
-        .action-btn {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #f8fafc;
-            font-family: inherit;
-            font-weight: 800;
-            font-size: 0.95rem;
-            padding: 12px 24px;
-            border-radius: 9999px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .action-btn:hover {
-            background: rgba(79, 70, 229, 0.9);
-            border-color: #6366f1;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
-        }
-
-        .btn-restart {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            border: none;
-            box-shadow: 0 4px 18px rgba(79, 70, 229, 0.5);
-        }
-
-        /* Confetti Container */
-        #confetti-canvas {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        @media (max-width: 480px) {
-            .game-title { font-size: 1.8rem; }
-            .board-container { max-width: 360px; }
-            .mode-btn, .diff-btn, .grid-btn { font-size: 0.78rem; padding: 6px 8px; }
-        }
-
-        /* ==========================================
-           KRAZY FUSE ARCADE PORTAL DOCKED PAUSE THEME
-           ========================================== */
-        #game-view-wrapper {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #080c14;
-            overflow-x: hidden;
-            overflow-y: auto;
             z-index: 10;
         }
 
-        #main-game-stage {
-            width: 100%;
+        /* Bottom Action Buttons (Wooden Tablet / Ema Style) */
+        .zen-actions-row {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        body.portal-paused #main-game-stage {
-            width: 480px !important;
-            max-width: 480px !important;
-            height: 480px !important;
-            max-height: 480px !important;
-            aspect-ratio: 1 / 1 !important;
-            border-radius: 18px !important;
-            border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.25) !important;
-            background: rgba(14, 20, 36, 0.95);
-            padding: 16px;
-            position: relative !important;
-            overflow: hidden !important;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        body.portal-paused .game-header {
-            padding: 10px 10px 4px 10px;
-        }
-        body.portal-paused .game-title {
-            font-size: 1.8rem;
-        }
-
-        .portal-topbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: rgba(11, 18, 32, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            gap: 20px;
-            z-index: 1000;
-            font-family: 'Outfit', sans-serif;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(-100%);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
-        }
-
-        body.portal-paused .portal-topbar {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0);
-        }
-
-        .portal-nav-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex: 1;
-            max-width: 520px;
-        }
-
-        .portal-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #fff;
-            text-decoration: none;
-            font-weight: 900;
-        }
-
-        .portal-brand-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 9px;
-            background: linear-gradient(135deg, #0284c7, #6366f1);
-            display: grid;
-            place-items: center;
-            font-size: 1.2rem;
-            box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
-        }
-
-        .portal-brand span {
-            display: flex;
-            flex-direction: column;
-            line-height: 1;
-        }
-
-        .portal-brand b {
-            font-size: 1.05rem;
-            letter-spacing: 0.5px;
-        }
-
-        .portal-brand small {
-            font-size: 0.62rem;
-            color: #38bdf8;
-            letter-spacing: 1.5px;
-            font-weight: 800;
-        }
-
-        .portal-search-box {
-            flex: 1;
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .portal-search-box input {
-            width: 100%;
-            height: 38px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 999px;
-            padding: 0 16px 0 38px;
-            color: #fff;
-            font-size: 0.85rem;
-            font-family: inherit;
-            outline: none;
-        }
-
-        .portal-search-box .search-icon {
-            position: absolute;
-            left: 12px;
-            font-size: 0.85rem;
-            color: #94a3b8;
-        }
-
-        .portal-nav-pills {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nav-pill {
-            padding: 6px 14px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #cbd5e1;
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-decoration: none;
-            transition: 0.2s;
-        }
-
-        .nav-pill:hover, .nav-pill.active {
-            background: rgba(56, 189, 248, 0.15);
-            border-color: #38bdf8;
-            color: #38bdf8;
-        }
-
-        .portal-nav-right {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .portal-bank-badge {
-            background: rgba(245, 158, 11, 0.15);
-            border: 1px solid rgba(245, 158, 11, 0.4);
-            color: #fbbf24;
-            padding: 6px 14px;
-            border-radius: 999px;
-            font-weight: 800;
-            font-size: 0.85rem;
-        }
-
-        .portal-resume-btn {
-            background: linear-gradient(135deg, #0284c7, #2563eb);
-            border: 1px solid rgba(56, 189, 248, 0.5);
-            color: #fff;
-            font-weight: 800;
-            font-size: 0.85rem;
-            padding: 8px 18px;
-            border-radius: 999px;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(2, 132, 199, 0.4);
-            transition: 0.2s;
-        }
-
-        .portal-resume-btn:hover {
-            transform: scale(1.04);
-            box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
-        }
-
-        .portal-layout-body {
-            display: flex;
-            min-height: 100vh;
-            position: relative;
-            width: 100%;
-        }
-
-        .portal-sidebar {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            bottom: 0;
-            width: 72px;
-            background: rgba(11, 18, 32, 0.95);
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 16px 0;
             gap: 12px;
-            z-index: 900;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+            width: 100%;
+            max-width: 440px;
+            justify-content: center;
         }
 
-        body.portal-paused .portal-sidebar {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(0);
-        }
-
-        .side-btn {
-            width: 52px;
-            height: 52px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .zen-btn-primary {
+            flex: 2;
+            background: var(--sumi-dark);
+            color: #ffffff;
+            border: 1.5px solid var(--sumi-black);
+            padding: 12px 20px;
+            font-family: 'Shippori Mincho', serif;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(45, 40, 37, 0.2);
+            transition: var(--transition-smooth);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-decoration: none;
-            color: #94a3b8;
-            transition: 0.2s;
-        }
-
-        .side-btn span { font-size: 1.2rem; }
-        .side-btn small { font-size: 0.6rem; font-weight: 700; margin-top: 2px; }
-
-        .side-btn:hover, .side-btn.active {
-            background: rgba(56, 189, 248, 0.15);
-            border-color: #38bdf8;
-            color: #38bdf8;
-        }
-
-        .portal-center-col {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            min-height: 100vh;
-            transition: padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        body.portal-paused .portal-center-col {
-            padding: 76px 300px 24px 90px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-        }
-
-        .game-meta-bar {
-            width: 100%;
-            max-width: 480px;
-            background: rgba(14, 23, 38, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 10px 14px;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
             gap: 8px;
-            margin-top: 12px;
-            font-family: 'Outfit', sans-serif;
-            box-sizing: border-box;
-        }
-
-        body.portal-paused .game-meta-bar {
-            display: flex;
-        }
-
-        .game-meta-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 0;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .game-avatar-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 9px;
-            background: linear-gradient(135deg, #06b6d4, #a855f7);
-            display: grid;
-            place-items: center;
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-
-        .game-meta-info h3 {
-            font-size: 0.92rem;
-            font-weight: 800;
-            color: #fff;
-            margin: 0 0 2px 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .game-meta-tags {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
-
-        .tag-badge {
-            font-size: 0.62rem;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.08);
-            color: #94a3b8;
-        }
-
-        .meta-rating {
-            font-size: 0.68rem;
-            font-weight: 800;
-            color: #fbbf24;
-        }
-
-        .game-meta-actions {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .meta-btn {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #cbd5e1;
-            font-size: 0.75rem;
-            font-weight: 700;
-            padding: 6px 10px;
-            border-radius: 7px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: 0.2s;
-            white-space: nowrap;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .meta-btn:hover, .meta-btn.active {
-            background: rgba(56, 189, 248, 0.15);
-            border-color: #38bdf8;
-            color: #38bdf8;
-        }
-
-        .portal-rec-col {
-            position: fixed;
-            top: 60px;
-            right: 0;
-            bottom: 0;
-            width: 270px;
-            background: rgba(11, 18, 32, 0.95);
-            border-left: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 16px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 900;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
-            overflow-y: auto;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        body.portal-paused .portal-rec-col {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(0);
-        }
-
-        .rec-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.72rem;
-            font-weight: 800;
             letter-spacing: 1px;
-            color: #94a3b8;
         }
 
-        .rec-header a {
-            color: #38bdf8;
-            text-decoration: none;
-            font-size: 0.72rem;
+        .zen-btn-primary:hover {
+            background: var(--sumi-black);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(45, 40, 37, 0.3);
         }
 
-        .rec-grid {
+        .zen-btn-secondary {
+            flex: 1;
+            background: var(--washi-bg-card);
+            color: var(--sumi-dark);
+            border: 1.5px solid var(--washi-border);
+            padding: 12px 14px;
+            font-family: 'Shippori Mincho', serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(45, 40, 37, 0.06);
+            transition: var(--transition-smooth);
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .rec-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            background: rgba(15, 23, 42, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            text-decoration: none;
-            color: inherit;
-            transition: 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .rec-card:hover {
-            transform: translateX(4px);
-            border-color: rgba(56, 189, 248, 0.5);
-            background: rgba(30, 41, 59, 0.9);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .rec-preview {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            background: rgba(30, 41, 59, 0.8);
-            display: grid;
-            place-items: center;
-            font-size: 1.4rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .rec-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .rec-info b {
-            font-size: 0.85rem;
-            color: #f8fafc;
-        }
-
-        .rec-info small {
-            font-size: 0.68rem;
-            color: #94a3b8;
-        }
-
-        .rec-badge {
-            position: absolute;
-            right: 8px;
-            top: 8px;
-            font-size: 0.52rem;
-            font-weight: 900;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: rgba(56, 189, 248, 0.15);
-            color: #38bdf8;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-        }
-
-        /* Frosted Pause Screen Inside Game Container */
-        .pause-modal-card {
-            position: absolute;
-            inset: 0;
-            background: rgba(7, 13, 24, 0.88);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            display: none;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 500;
-            padding: 20px;
-            font-family: 'Outfit', sans-serif;
+            gap: 6px;
         }
 
-        body.portal-paused .pause-modal-card {
-            display: flex;
+        .zen-btn-secondary:hover {
+            border-color: var(--sumi-dark);
+            color: var(--sumi-black);
+            background: #ffffff;
+            transform: translateY(-2px);
         }
 
-        /* 3-Second Resume Countdown Overlay */
-        .resume-countdown-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 999999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(10, 15, 29, 0.72);
-            backdrop-filter: blur(12px);
-            pointer-events: all;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-        .resume-countdown-overlay.active {
-            opacity: 1;
-        }
-        .resume-countdown-number {
-            font-family: 'Outfit', sans-serif;
-            font-size: 8rem;
-            font-weight: 900;
-            color: #38bdf8;
-            text-shadow: 0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(56, 189, 248, 0.5);
-            line-height: 1;
-            transform: scale(1.5);
-            opacity: 0;
-            animation: countdownPop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        .resume-countdown-sub {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 800;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.95);
-            margin-top: 14px;
-            text-shadow: 0 2px 12px rgba(0,0,0,0.6);
-        }
-        @keyframes countdownPop {
-            0% { transform: scale(1.6); opacity: 0; }
-            20% { transform: scale(1); opacity: 1; }
-            80% { transform: scale(0.95); opacity: 1; }
-            100% { transform: scale(0.8); opacity: 0; }
+        /* Sound Button */
+        .zen-btn-icon {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            padding: 0;
         }
 
-        body.portal-paused #krazio-floating-back {
-            opacity: 0;
-            pointer-events: none;
+        /* Responsive Adjustments */
+        @media (max-width: 480px) {
+            .zen-title { font-size: 1.7rem; }
+            .zen-board-stage { max-width: 340px; padding: 8px; }
+            .player-scroll-card { padding: 8px 12px; }
+            .hanko-seal { width: 36px; height: 36px; font-size: 1.2rem; }
+            .player-score-count { font-size: 1.3rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Simple Backward Arrow Button -->
-    <a href="../index.html" id="krazio-floating-back" title="Back to Portal" aria-label="Back">
+    <!-- Washi & Sumi-e Backdrop Atmosphere -->
+    <div class="sumi-background-layer">
+        <!-- Mountain silhouettes -->
+        <svg class="sumi-mountains-svg" viewBox="0 0 1200 400" preserveAspectRatio="none">
+            <path d="M0,400 L0,220 Q180,120 380,240 T780,180 Q980,260 1200,160 L1200,400 Z" fill="#2d2825" opacity="0.3" />
+            <path d="M0,400 L0,280 Q250,180 520,300 T950,220 Q1080,280 1200,240 L1200,400 Z" fill="#1a1715" opacity="0.5" />
+        </svg>
+        <!-- Bamboo silhouettes -->
+        <svg class="sumi-bamboo-svg" viewBox="0 0 200 600" preserveAspectRatio="xMidYMid meet">
+            <path d="M160,0 L160,600 M160,120 Q190,100 200,70 M160,240 Q120,210 100,190 M160,380 Q195,350 210,320 M160,490 Q120,460 90,430" stroke="#1a1715" stroke-width="4" fill="none" stroke-linecap="round" />
+            <path d="M120,60 L120,600 M120,180 Q150,150 170,120 M120,310 Q80,280 60,250 M120,440 Q150,400 170,360" stroke="#2d2825" stroke-width="3.5" fill="none" stroke-linecap="round" />
+        </svg>
+        <svg class="sumi-bamboo-left-svg" viewBox="0 0 200 600" preserveAspectRatio="xMidYMid meet">
+            <path d="M40,0 L40,600 M40,140 Q10,110 0,90 M40,280 Q80,250 100,220 M40,420 Q10,380 0,350" stroke="#1a1715" stroke-width="3.5" fill="none" stroke-linecap="round" />
+        </svg>
+    </div>
+
+    <!-- Floating Portal Back Navigation -->
+    <a href="../index.html" id="krazio-floating-back" title="Back to Portal" aria-label="Back" onclick="exitToPortal(); return false;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
         </svg>
     </a>
 
-    <!-- Confetti & Win Canvas -->
-    <canvas id="confetti-canvas"></canvas>
+    <!-- Main Game Container -->
+    <div class="zen-main-container">
+        <!-- Header -->
+        <header class="zen-header">
+            <div class="zen-kanji-badge">水墨画 • 禅</div>
+            <h1 class="zen-title">
+                <span class="zen-title-symbol x-symbol">✕</span>
+                <span>SUMI-E TAC TOE</span>
+                <span class="zen-title-symbol o-symbol">◯</span>
+            </h1>
+            <p class="zen-subtitle">Traditional Japanese Calligraphy Brush Battle</p>
+        </header>
 
-    <!-- Master Game View Wrapper -->
-    <div id="game-view-wrapper">
-      <!-- Topbar for Paused Portal Mode -->
-      <header id="portal-paused-topbar" class="portal-topbar">
-        <div class="portal-nav-left">
-          <a class="portal-brand" href="../index.html" title="Krazy Fuse Arcade Portal">
-            <span class="portal-brand-icon">⚡</span>
-            <span><b>KRAZY FUSE</b><small>ARCADE PORTAL</small></span>
-          </a>
-          <div class="portal-search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" placeholder="Search 250+ free arcade games..." readonly onclick="window.location.href='../index.html'">
-          </div>
-        </div>
-
-        <div class="portal-nav-pills">
-          <a href="../index.html" class="nav-pill active">🔥 HOT</a>
-          <a href="../dart-board/index.html" class="nav-pill">🎯 2-PLAYER</a>
-          <a href="../office-escape/index.html" class="nav-pill">🏃 RUNNER</a>
-          <a href="../flappy-man/index.html" class="nav-pill">🦸 SUPERHERO</a>
-          <a href="../wild-swings/index.html" class="nav-pill">🕸️ ACTION</a>
-          <a href="../bomb-panic/index.html" class="nav-pill">💣 PARTY</a>
-        </div>
-
-        <div class="portal-nav-right">
-          <div class="portal-bank-badge" id="portal-top-bank">🪙 76 P</div>
-          <button id="btn-portal-maximize" class="portal-resume-btn" onclick="resumeTicTacToe()">
-            <span>▶️ RESUME (ESC)</span>
-          </button>
-        </div>
-      </header>
-
-      <div id="portal-paused-body" class="portal-layout-body">
-        <!-- Left Sidebar Navigation -->
-        <aside class="portal-sidebar">
-          <a href="../index.html" class="side-btn active" title="Home"><span>🏠</span><small>Home</small></a>
-          <a href="../index.html" class="side-btn" title="Trending"><span>🔥</span><small>Hot</small></a>
-          <a href="../dart-board/index.html" class="side-btn" title="2 Player"><span>👥</span><small>2-Player</small></a>
-          <a href="../flappy-man/index.html" class="side-btn" title="Arcade"><span>🕹️</span><small>Arcade</small></a>
-          <a href="../wild-swings/index.html" class="side-btn" title="Action"><span>⚡</span><small>Action</small></a>
-          <a href="../bomb-panic/index.html" class="side-btn" title="Party"><span>💣</span><small>Party</small></a>
-          <a href="../gravity-flip/index.html" class="side-btn" title="Reflex"><span>🔄</span><small>Reflex</small></a>
-        </aside>
-
-        <!-- Center Column -->
-        <main class="portal-center-col">
-          <div id="main-game-stage">
-            <!-- Header Section -->
-            <header class="game-header">
-                <h1 class="game-title">
-                    <span>❌</span>
-                    <span>NEON TAC TOE</span>
-                    <span>⭕</span>
-                </h1>
-                <p class="game-subtitle">Classic & Expanded Strategy • Play with Bot or Pass on 1 Device</p>
-            </header>
-
-            <!-- Mode & Options Panel -->
-            <div class="controls-panel">
-                <!-- Opponent Mode -->
-                <div class="pill-group" id="mode-group">
-                    <button class="mode-btn active" data-mode="bot">🤖 Play vs Bot</button>
-                    <button class="mode-btn" data-mode="pass">👥 Pass & Play</button>
-                </div>
-
-                <!-- Bot Difficulty (Shown when in Bot mode) -->
-                <div class="pill-group" id="diff-group">
-                    <button class="diff-btn" data-diff="easy">Casual 🟢</button>
-                    <button class="diff-btn active" data-diff="medium">Smart 🟡</button>
-                    <button class="diff-btn" data-diff="impossible">Unbeatable 🔴</button>
-                </div>
-
-                <!-- Grid Size -->
-                <div class="pill-group" id="grid-group">
-                    <button class="grid-btn active" data-grid="3">3×3 Classic (Match 3)</button>
-                    <button class="grid-btn" data-grid="4">4×4 Arena (Match 4)</button>
-                    <button class="grid-btn" data-grid="5">5×5 Master (Match 4)</button>
-                </div>
-            </div>
-
-            <!-- Match Scoreboard & Turn Status -->
-            <div class="match-status-bar">
-                <div class="player-card p-x active-turn" id="card-p-x">
-                    <span class="player-label" id="label-p-x">PLAYER (X)</span>
-                    <span class="player-score" id="score-p-x">0</span>
-                </div>
-
-                <div class="vs-divider">
-                    <div class="turn-announcer" id="turn-announcer">X's Turn ⚡</div>
-                    <span class="ties-count" id="ties-count">0 Ties</span>
-                </div>
-
-                <div class="player-card p-o" id="card-p-o">
-                    <span class="player-label" id="label-p-o">BOT (O)</span>
-                    <span class="player-score" id="score-p-o">0</span>
-                </div>
-            </div>
-
-            <!-- 3D Board Container -->
-            <div class="board-container">
-                <div class="tic-board grid-3" id="tic-board"></div>
-                <canvas id="strike-canvas"></canvas>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="actions-row">
-                <button class="action-btn btn-restart" id="btn-restart" onclick="restartRoundTTT()">
-                    <span>🔄 New Round</span>
+        <!-- Controls: Game Mode & Grid Size -->
+        <div class="zen-controls-panel">
+            <!-- Mode Selector -->
+            <div class="zen-pill-group" role="tablist">
+                <button class="zen-pill-btn active" id="mode-bot" onclick="setMode('bot')">
+                    🤖 vs Zen Bot
                 </button>
-                <button class="action-btn" id="btn-pause" title="Pause Game (Esc/P)" onclick="pauseTicTacToe()">
-                    <span>⏸️ Pause</span>
-                </button>
-                <button class="action-btn" id="btn-reset-scores" onclick="resetScoresTTT()">
-                    <span>🧹 Reset Score</span>
+                <button class="zen-pill-btn" id="mode-pvp" onclick="setMode('pvp')">
+                    👥 Pass & Play
                 </button>
             </div>
 
-            <!-- Universal Paused Screen Overlay -->
-            <div class="pause-modal-card">
-              <div style="background: rgba(14, 23, 38, 0.96); border: 2.5px solid rgba(56, 189, 248, 0.4); border-radius: 20px; padding: 22px 24px; text-align: center; max-width: 380px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(56,189,248,0.3); backdrop-filter: blur(16px); font-family: 'Outfit', sans-serif;">
-                <div style="display: inline-block; border: 2.5px solid #38bdf8; color: #38bdf8; font-weight: 900; font-size: 1.05rem; padding: 3px 14px; border-radius: 8px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">⏸️ PAUSED</div>
-                <h2 style="font-size: 1.65rem; font-weight: 900; color: #fff; margin-bottom: 4px;">Game Paused</h2>
-                <p style="color: #94a3b8; font-size: 0.88rem; margin-bottom: 16px;">Taking a quick tactical breather...</p>
-                <div style="display: flex; flex-direction: column; gap: 9px; max-width: 260px; margin: 0 auto; width: 100%;">
-                  <button class="portal-resume-btn" onclick="resumeTicTacToe()" style="justify-content: center; width: 100%; font-size: 1rem; padding: 11px 18px; background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56,189,248,0.4); border-radius: 999px; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.4);">
-                    <span>▶️ RESUME (ESC)</span>
-                  </button>
-                  <button onclick="resumeTicTacToe(); initBoard();" style="justify-content: center; width: 100%; font-size: 0.88rem; padding: 9px 16px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
-                    <span>🔄 RESTART ROUND</span>
-                  </button>
-                  <a href="../index.html" style="justify-content: center; width: 100%; font-size: 0.88rem; padding: 9px 16px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; text-decoration: none; text-align: center; display: inline-block;">
-                    <span>🏠 HOME</span>
-                  </a>
-                </div>
-              </div>
+            <!-- Difficulty Selector (Bot Mode) -->
+            <div class="zen-pill-group" id="difficulty-group">
+                <button class="zen-pill-btn" id="diff-easy" onclick="setDifficulty('easy')">
+                    🍃 Novice
+                </button>
+                <button class="zen-pill-btn active" id="diff-medium" onclick="setDifficulty('medium')">
+                    🥋 Ronin
+                </button>
+                <button class="zen-pill-btn" id="diff-hard" onclick="setDifficulty('hard')">
+                    ⚔️ Shogun
+                </button>
             </div>
-          </div>
 
-          <!-- Under-Game Meta Action Bar -->
-          <div id="game-meta-bar" class="game-meta-bar">
-            <div class="game-meta-info">
-              <div class="game-avatar-icon">❌⭕</div>
-              <div style="min-width: 0; flex: 1;">
-                <h3>Tic Tac Toe</h3>
-                <div class="game-meta-tags">
-                  <span class="tag-badge">Puzzle</span>
-                  <span class="tag-badge">PvP / Bot</span>
-                  <span class="meta-rating">⭐ 4.9</span>
-                </div>
-              </div>
+            <!-- Grid Size Selector -->
+            <div class="zen-pill-group">
+                <button class="zen-pill-btn active" id="grid-3" onclick="setGridSize(3)">
+                    3×3
+                </button>
+                <button class="zen-pill-btn" id="grid-4" onclick="setGridSize(4)">
+                    4×4
+                </button>
+                <button class="zen-pill-btn" id="grid-5" onclick="setGridSize(5)">
+                    5×5
+                </button>
             </div>
-            <div class="game-meta-actions">
-              <button class="meta-btn" id="btn-meta-like" onclick="this.classList.toggle('active'); const s = this.querySelector('span'); if(s) s.textContent = this.classList.contains('active') ? '48.2k' : '48.1k';">
-                👍 <span>48.1k</span>
-              </button>
-              <button class="meta-btn" id="btn-meta-fav" onclick="this.classList.toggle('active')">
-                ⭐ Fav
-              </button>
-              <button class="meta-btn" id="btn-meta-expand" onclick="resumeTicTacToe()">
-                ⛶ Expand
-              </button>
-              <button class="meta-btn" id="btn-meta-share" onclick="if(navigator.clipboard){navigator.clipboard.writeText(window.location.href); alert('Game link copied!');}">
-                🔗
-              </button>
-            </div>
-          </div>
-        </main>
+        </div>
 
-        <!-- Right Column: Recommended Games Grid -->
-        <aside id="portal-rec-col" class="portal-rec-col">
-          <div class="rec-header">
-            <span>🔥 RECOMMENDED GAMES</span>
-            <a href="../index.html">ALL <span>→</span></a>
-          </div>
-          <div class="rec-grid">
-            <a href="../office-escape/index.html" class="rec-card">
-              <div class="rec-badge">⚡ SPRINT</div>
-              <div class="rec-preview">🏃💼</div>
-              <div class="rec-info">
-                <b>Office Escape</b>
-                <small>Runner • Satire</small>
-              </div>
-            </a>
-            <a href="../dart-board/index.html" class="rec-card">
-              <div class="rec-badge">🎯 BULLSEYE</div>
-              <div class="rec-preview">🎯🍺</div>
-              <div class="rec-info">
-                <b>Dart Master</b>
-                <small>PvP • 2-Player</small>
-              </div>
-            </a>
-            <a href="../flappy-man/index.html" class="rec-card">
-              <div class="rec-badge">🦸 HERO</div>
-              <div class="rec-preview">🦸‍♂️🚀</div>
-              <div class="rec-info">
-                <b>Flappy Man</b>
-                <small>Arcade • 10 Levels</small>
-              </div>
-            </a>
-            <a href="../wild-swings/index.html" class="rec-card">
-              <div class="rec-badge">🕸️ PHYSICS</div>
-              <div class="rec-preview">🕸️🐒</div>
-              <div class="rec-info">
-                <b>Wild Swings</b>
-                <small>Action • 20 Levels</small>
-              </div>
-            </a>
-            <a href="../bomb-panic/index.html" class="rec-card">
-              <div class="rec-badge">💣 MULTI</div>
-              <div class="rec-preview">💣💥</div>
-              <div class="rec-info">
-                <b>Bomb Panic</b>
-                <small>Party • Hot Potato</small>
-              </div>
-            </a>
-            <a href="../gravity-flip/index.html" class="rec-card">
-              <div class="rec-badge">⛏️ CAVERN</div>
-              <div class="rec-preview">⛏️🔄</div>
-              <div class="rec-info">
-                <b>Gravity Flip</b>
-                <small>Runner • Reflex</small>
-              </div>
-            </a>
-          </div>
-        </aside>
-      </div>
+        <!-- Scoreboard & Hanko Seals -->
+        <div class="zen-score-row">
+            <!-- Player X -->
+            <div class="player-scroll-card player-x active-turn" id="card-player-x">
+                <div class="hanko-seal seal-x">墨</div>
+                <div class="player-info-meta">
+                    <span class="player-name-label" id="label-player-x">Player (X)</span>
+                    <span class="player-score-count" id="score-player-x">0</span>
+                </div>
+            </div>
+
+            <div class="versus-divider">対</div>
+
+            <!-- Player O / Bot -->
+            <div class="player-scroll-card player-o" id="card-player-o">
+                <div class="hanko-seal seal-o">禅</div>
+                <div class="player-info-meta">
+                    <span class="player-name-label" id="label-player-o">Zen Master (O)</span>
+                    <span class="player-score-count" id="score-player-o">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Banner -->
+        <div class="zen-status-banner" id="status-banner">
+            <span class="turn-dot"></span>
+            <span id="status-text">Your Turn (Sumi Black X) — Place your brush stroke</span>
+        </div>
+
+        <!-- Board Stage -->
+        <div class="zen-board-stage">
+            <canvas id="strike-canvas" class="strike-canvas"></canvas>
+            <div id="board" class="tic-board grid-3"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="zen-actions-row">
+            <button class="zen-btn-primary" id="btn-restart" onclick="restartRound()">
+                🔄 New Round (新局)
+            </button>
+            <button class="zen-btn-secondary" id="btn-reset-scores" onclick="resetScores()">
+                ⚖️ Reset
+            </button>
+            <button class="zen-btn-secondary zen-btn-icon" id="btn-toggle-sound" onclick="toggleSound()" title="Toggle Sound">
+                🔊
+            </button>
+        </div>
     </div>
 
+    <!-- ==========================================
+         SUMI-E ZEN AUDIO & GAME LOGIC
+         ========================================== -->
     <script>
-        // Web Audio Synthesizer for Retro Neon Sound FX
-        class NeonAudio {
+        /**
+         * Authentic Web Audio API Synthesizer for Sumi-e Zen Soundscapes
+         */
+        class SumiAudioEngine {
             constructor() {
                 this.ctx = null;
-                this.initOnInteraction();
+                this.muted = localStorage.getItem('sumi_sound_muted') === 'true';
             }
 
-            initOnInteraction() {
-                const startAudio = () => {
-                    if (!this.ctx) {
-                        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    }
-                    if (this.ctx && this.ctx.state === 'suspended') {
-                        this.ctx.resume();
-                    }
-                };
-                window.addEventListener('click', startAudio, { once: true });
-                window.addEventListener('touchstart', startAudio, { once: true });
-            }
-
-            ensureContext() {
+            init() {
                 if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
                 }
             }
 
-            playMark(isX) {
-                this.ensureContext();
-                if (!this.ctx) return;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = isX ? 'triangle' : 'sine';
-                osc.frequency.setValueAtTime(isX ? 520 : 380, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(isX ? 780 : 260, this.ctx.currentTime + 0.12);
-                gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.12);
+            toggleMute() {
+                this.muted = !this.muted;
+                localStorage.setItem('sumi_sound_muted', this.muted.toString());
+                return this.muted;
             }
 
-            playBotThinking() {
-                this.ensureContext();
+            // 1. Calligraphy Brush Stroke (Soft paper friction & ink whoosh)
+            playBrushStroke() {
+                if (this.muted) return;
+                this.init();
                 if (!this.ctx) return;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(220, this.ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(330, this.ctx.currentTime + 0.08);
-                gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.08);
+                try {
+                    const now = this.ctx.currentTime;
+                    // Pink noise buffer for paper friction
+                    const bufferSize = this.ctx.sampleRate * 0.15;
+                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const output = buffer.getChannelData(0);
+                    let b0 = 0, b1 = 0, b2 = 0;
+                    for (let i = 0; i < bufferSize; i++) {
+                        const white = Math.random() * 2 - 1;
+                        b0 = 0.99886 * b0 + white * 0.0555179;
+                        b1 = 0.99332 * b1 + white * 0.0750759;
+                        b2 = 0.96900 * b2 + white * 0.1538520;
+                        output[i] = (b0 + b1 + b2) * 0.25;
+                    }
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(800, now);
+                    filter.frequency.exponentialRampToValueAtTime(300, now + 0.15);
+
+                    const gain = this.ctx.createGain();
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+                    noise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    noise.start(now);
+                } catch(e) {}
             }
 
-            playWin() {
-                this.ensureContext();
+            // 2. Koto Pentatonic String Pluck (Turn mark feedback)
+            playKotoPluck(isPlayerX = true) {
+                if (this.muted) return;
+                this.init();
                 if (!this.ctx) return;
-                const notes = [440, 554, 659, 880];
-                notes.forEach((freq, i) => {
+                try {
+                    const now = this.ctx.currentTime;
+                    const freq = isPlayerX ? 293.66 : 440; // D4 or A4 in Hirajoshi scale
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + i * 0.09);
-                    gain.gain.setValueAtTime(0.22, this.ctx.currentTime + i * 0.09);
-                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + i * 0.09 + 0.28);
+                    osc.frequency.setValueAtTime(freq, now);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 0.98, now + 0.35);
+
+                    gain.gain.setValueAtTime(0.28, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
                     osc.connect(gain);
                     gain.connect(this.ctx.destination);
-                    osc.start(this.ctx.currentTime + i * 0.09);
-                    osc.stop(this.ctx.currentTime + i * 0.09 + 0.28);
-                });
+                    osc.start(now);
+                    osc.stop(now + 0.36);
+                } catch(e) {}
             }
 
-            playDraw() {
-                this.ensureContext();
+            // 3. Resonant Zen Bell / Singing Bowl (Victory Fanfare)
+            playZenBell() {
+                if (this.muted) return;
+                this.init();
                 if (!this.ctx) return;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(320, this.ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(160, this.ctx.currentTime + 0.25);
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.25);
+                try {
+                    const now = this.ctx.currentTime;
+                    const frequencies = [587.33, 880, 1174.66, 1760];
+                    frequencies.forEach((f, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(f, now);
+                        const initialVol = 0.22 / (idx + 1);
+                        gain.gain.setValueAtTime(initialVol, now);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 1.85);
+                    });
+                } catch(e) {}
+            }
+
+            // 4. Wooden Hyoshigi Clapper (Button click & round resets)
+            playClapper() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1400, now);
+                    osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.06);
+                } catch(e) {}
             }
         }
 
-        const audio = new NeonAudio();
+        const audio = new SumiAudioEngine();
 
-        // Game State Engine
-        let gameMode = 'bot'; // 'bot' | 'pass'
-        let botDifficulty = 'medium'; // 'easy' | 'medium' | 'impossible'
-        let gridSize = 3;
-        let winStreakReq = 3; // 3 on 3x3, 4 on 4x4 and 5x5
+        // Game State Variables
         let board = [];
+        let gridSize = 3;
+        let winStreakReq = 3;
         let currentPlayer = 'X';
         let isGameActive = true;
+        let gameMode = 'bot'; // 'bot' | 'pvp'
+        let botDifficulty = 'medium'; // 'easy' | 'medium' | 'hard'
         let isBotThinking = false;
-        let scores = { X: 0, O: 0, ties: 0 };
 
-        const boardEl = document.getElementById('tic-board');
-        const turnAnnouncer = document.getElementById('turn-announcer');
-        const cardPX = document.getElementById('card-p-x');
-        const cardPO = document.getElementById('card-p-o');
-        const labelPX = document.getElementById('label-p-x');
-        const labelPO = document.getElementById('label-p-o');
-        const scorePX = document.getElementById('score-p-x');
-        const scorePO = document.getElementById('score-p-o');
-        const tiesCount = document.getElementById('ties-count');
-        const diffGroup = document.getElementById('diff-group');
+        const scores = { X: 0, O: 0, draws: 0 };
+
+        // DOM Element Cache
+        const boardEl = document.getElementById('board');
         const strikeCanvas = document.getElementById('strike-canvas');
-        const confettiCanvas = document.getElementById('confetti-canvas');
+        const statusTextEl = document.getElementById('status-text');
+        const cardPlayerX = document.getElementById('card-player-x');
+        const cardPlayerO = document.getElementById('card-player-o');
+        const labelPlayerO = document.getElementById('label-player-o');
+        const scorePlayerX = document.getElementById('score-player-x');
+        const scorePlayerO = document.getElementById('score-player-o');
+        const btnToggleSound = document.getElementById('btn-toggle-sound');
+        const diffGroup = document.getElementById('difficulty-group');
 
-        // Confetti System
-        let confettiParticles = [];
-        function triggerConfetti() {
-            const ctx = confettiCanvas.getContext('2d');
-            confettiCanvas.width = window.innerWidth;
-            confettiCanvas.height = window.innerHeight;
-            confettiParticles = [];
-
-            const colors = ['#00f0ff', '#ff007f', '#ffd700', '#a855f7', '#38b000'];
-            for (let i = 0; i < 80; i++) {
-                confettiParticles.push({
-                    x: window.innerWidth / 2,
-                    y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 16,
-                    vy: (Math.random() - 0.7) * 18,
-                    size: Math.random() * 8 + 4,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    rot: Math.random() * 360,
-                    vRot: (Math.random() - 0.5) * 12,
-                    opacity: 1
-                });
+        function initGame() {
+            createBoard();
+            updateUI();
+            if (btnToggleSound) {
+                btnToggleSound.textContent = audio.muted ? '🔇' : '🔊';
             }
-
-            function updateConfetti() {
-                ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-                let alive = false;
-                confettiParticles.forEach(p => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += 0.45; // gravity
-                    p.rot += p.vRot;
-                    p.opacity -= 0.014;
-                    if (p.opacity > 0) {
-                        alive = true;
-                        ctx.save();
-                        ctx.translate(p.x, p.y);
-                        ctx.rotate((p.rot * Math.PI) / 180);
-                        ctx.fillStyle = p.color;
-                        ctx.globalAlpha = Math.max(0, p.opacity);
-                        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-                        ctx.restore();
-                    }
-                });
-                if (alive) requestAnimationFrame(updateConfetti);
-                else ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-            }
-            requestAnimationFrame(updateConfetti);
         }
 
-        // Initialize Board
-        function initBoard() {
-            winStreakReq = gridSize === 3 ? 3 : 4;
+        function createBoard() {
             board = Array(gridSize * gridSize).fill(null);
-            currentPlayer = 'X';
             isGameActive = true;
             isBotThinking = false;
+            currentPlayer = 'X';
 
             boardEl.className = `tic-board grid-${gridSize}`;
             boardEl.innerHTML = '';
@@ -1467,17 +954,7 @@
             updateUI();
         }
 
-        function ensureFullScreen() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-                const el = document.documentElement;
-                const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-                if (req) req.call(el).catch(() => {});
-            }
-        }
-
         function handleCellClick(index) {
-            if (isTicTacToePaused || document.body.classList.contains('portal-paused')) return;
-            ensureFullScreen();
             if (!isGameActive || board[index] !== null || isBotThinking) return;
 
             makeMove(index, currentPlayer);
@@ -1500,7 +977,6 @@
             if (gameMode === 'bot' && currentPlayer === 'O' && isGameActive) {
                 isBotThinking = true;
                 updateUI();
-                audio.playBotThinking();
                 setTimeout(() => {
                     const botMove = getBotMove();
                     if (botMove !== null) {
@@ -1525,21 +1001,24 @@
             const cell = boardEl.children[index];
             cell.classList.add('taken');
 
+            audio.playBrushStroke();
+            audio.playKotoPluck(player === 'X');
+
             if (player === 'X') {
+                // Sumi-e Calligraphic Brush Cross (✕)
                 cell.innerHTML = `
                     <svg viewBox="0 0 100 100" class="mark-svg">
-                        <line x1="18" y1="18" x2="82" y2="82" class="path-x" />
-                        <line x1="82" y1="18" x2="18" y2="82" class="path-x" style="animation-delay: 0.12s;" />
+                        <path d="M 20,20 Q 50,48 80,80" class="brush-x-stroke" />
+                        <path d="M 80,20 Q 52,50 20,80" class="brush-x-stroke" style="animation-delay: 0.12s;" />
                     </svg>
                 `;
-                audio.playMark(true);
             } else {
+                // Authentic Ensō (円相) Zen Brush Circle (◯)
                 cell.innerHTML = `
                     <svg viewBox="0 0 100 100" class="mark-svg">
-                        <circle cx="50" cy="50" r="34" class="path-o" />
+                        <path d="M 50,15 A 35,35 0 1,1 48,15" class="brush-enso-circle" />
                     </svg>
                 `;
-                audio.playMark(false);
             }
         }
 
@@ -1599,324 +1078,287 @@
         function handleWin(winResult) {
             isGameActive = false;
             scores[winResult.winner]++;
+            audio.playZenBell();
 
+            // Highlight Winning Cells
             winResult.line.forEach(idx => {
                 if (boardEl.children[idx]) {
                     boardEl.children[idx].classList.add('winning-cell');
                 }
             });
 
-            triggerConfetti();
-            audio.playWin();
-            updateUI(winResult.winner + ' Wins! 🎉');
+            // Draw Sumi-e Red Vermilion Brush Slash
+            drawStrikeLine(winResult.line);
+
+            const winnerName = winResult.winner === 'X' 
+                ? (gameMode === 'bot' ? 'You (Sumi X)' : 'Player X') 
+                : (gameMode === 'bot' ? 'Zen Master (O)' : 'Player O');
+
+            statusTextEl.innerHTML = `🏆 <strong style="color: var(--hanko-red);">${winnerName}</strong> Achieves Victory! (勝利)`;
+            updateScoreUI();
         }
 
         function handleDraw() {
             isGameActive = false;
-            scores.ties++;
-            audio.playDraw();
-            updateUI("It's a Tie! 🤝");
+            scores.draws++;
+            audio.playClapper();
+            statusTextEl.innerHTML = `⚖️ <strong>Zen Harmony!</strong> It is a peaceful Draw (引き分け)`;
+            updateScoreUI();
         }
 
-        function updateUI(customMessage = null) {
-            scorePX.textContent = scores.X;
-            scorePO.textContent = scores.O;
-            tiesCount.textContent = `${scores.ties} Ties`;
+        function drawStrikeLine(lineIndices) {
+            const firstCell = boardEl.children[lineIndices[0]];
+            const lastCell = boardEl.children[lineIndices[lineIndices.length - 1]];
+            if (!firstCell || !lastCell) return;
 
-            labelPX.textContent = gameMode === 'bot' ? 'PLAYER (X)' : 'PLAYER 1 (X)';
-            labelPO.textContent = gameMode === 'bot' ? `BOT [${botDifficulty.toUpperCase()}] (O)` : 'PLAYER 2 (O)';
+            const boardRect = boardEl.getBoundingClientRect();
+            const firstRect = firstCell.getBoundingClientRect();
+            const lastRect = lastCell.getBoundingClientRect();
 
-            if (customMessage) {
-                turnAnnouncer.textContent = customMessage;
-                cardPX.classList.remove('active-turn');
-                cardPO.classList.remove('active-turn');
-            } else if (isBotThinking) {
-                turnAnnouncer.textContent = 'Bot Thinking... 🤖';
-                cardPX.classList.remove('active-turn');
-                cardPO.classList.add('active-turn');
-            } else {
-                turnAnnouncer.textContent = currentPlayer === 'X' ? (gameMode === 'bot' ? "Your Turn (X) ⚡" : "P1 Turn (X) ⚡") : (gameMode === 'bot' ? "Bot Turn (O)" : "P2 Turn (O) ⚡");
-                cardPX.classList.toggle('active-turn', currentPlayer === 'X');
-                cardPO.classList.toggle('active-turn', currentPlayer === 'O');
-            }
+            const x1 = firstRect.left + firstRect.width / 2 - boardRect.left;
+            const y1 = firstRect.top + firstRect.height / 2 - boardRect.top;
+            const x2 = lastRect.left + lastRect.width / 2 - boardRect.left;
+            const y2 = lastRect.top + lastRect.height / 2 - boardRect.top;
+
+            const ctx = strikeCanvas.getContext('2d');
+            strikeCanvas.width = strikeCanvas.offsetWidth;
+            strikeCanvas.height = strikeCanvas.offsetHeight;
+
+            ctx.save();
+            ctx.strokeStyle = '#c92a2a';
+            ctx.lineWidth = 7;
+            ctx.lineCap = 'round';
+            ctx.shadowColor = 'rgba(201, 42, 42, 0.4)';
+            ctx.shadowBlur = 12;
+
+            let progress = 0;
+            const animateStrike = () => {
+                progress += 0.08;
+                ctx.clearRect(0, 0, strikeCanvas.width, strikeCanvas.height);
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x1 + (x2 - x1) * Math.min(1, progress), y1 + (y2 - y1) * Math.min(1, progress));
+                ctx.stroke();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateStrike);
+                }
+            };
+            requestAnimationFrame(animateStrike);
+            ctx.restore();
         }
 
-        // Smart Bot Logic (Easy, Medium, Minimax Impossible)
+        // ==========================================
+        // AI BOT LOGIC (Novice / Ronin / Shogun Minimax)
+        // ==========================================
         function getBotMove() {
-            const availableMoves = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
-            if (availableMoves.length === 0) return null;
+            const emptyIndices = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+            if (emptyIndices.length === 0) return null;
 
-            // 1. Easy: Mostly Random Moves
+            // 1. Novice Monk (Casual)
             if (botDifficulty === 'easy') {
-                return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+                return emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
             }
 
-            // 2. Check for Immediate Bot Win Move
-            for (const move of availableMoves) {
-                const clone = [...board];
-                clone[move] = 'O';
-                if (checkWin(clone, gridSize, winStreakReq)) return move;
+            // Check Immediate Winning Move for O
+            for (const idx of emptyIndices) {
+                const temp = [...board];
+                temp[idx] = 'O';
+                if (checkWin(temp, gridSize, winStreakReq)) return idx;
             }
 
-            // 3. Check for Immediate Human Block Move
-            for (const move of availableMoves) {
-                const clone = [...board];
-                clone[move] = 'X';
-                if (checkWin(clone, gridSize, winStreakReq)) return move;
+            // Check Immediate Block Move for X
+            for (const idx of emptyIndices) {
+                const temp = [...board];
+                temp[idx] = 'X';
+                if (checkWin(temp, gridSize, winStreakReq)) return idx;
             }
 
-            // Medium Mode: 40% Chance to pick center or smart corner, else random
+            // 2. Wandering Ronin (Medium)
             if (botDifficulty === 'medium') {
-                const center = Math.floor(board.length / 2);
-                if (board[center] === null && Math.random() < 0.7) return center;
-                return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+                const center = Math.floor((gridSize * gridSize) / 2);
+                if (emptyIndices.includes(center) && Math.random() > 0.3) return center;
+                return emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
             }
 
-            // 4. Impossible (Unbeatable Minimax for 3x3)
+            // 3. Shogun Grandmaster (Minimax for 3x3, Heuristic for 4x4/5x5)
             if (gridSize === 3) {
-                return getBestMinimaxMove();
-            } else {
-                // Heuristic Evaluation for 4x4 / 5x5
-                return getHeuristicMove(availableMoves);
-            }
-        }
-
-        function getBestMinimaxMove() {
-            let bestScore = -Infinity;
-            let bestMove = null;
-
-            for (let i = 0; i < board.length; i++) {
-                if (board[i] === null) {
-                    board[i] = 'O';
+                let bestScore = -Infinity;
+                let bestMove = emptyIndices[0];
+                for (const idx of emptyIndices) {
+                    board[idx] = 'O';
                     const score = minimax(board, 0, false, -Infinity, Infinity);
-                    board[i] = null;
+                    board[idx] = null;
                     if (score > bestScore) {
                         bestScore = score;
-                        bestMove = i;
+                        bestMove = idx;
                     }
                 }
+                return bestMove;
+            } else {
+                // Strategic heuristic scoring for 4x4 and 5x5
+                let bestScore = -Infinity;
+                let bestMove = emptyIndices[0];
+                const center = Math.floor((gridSize * gridSize) / 2);
+
+                for (const idx of emptyIndices) {
+                    let score = 0;
+                    if (idx === center) score += 4;
+                    const r = Math.floor(idx / gridSize);
+                    const c = idx % gridSize;
+                    if ((r === 1 || r === gridSize - 2) && (c === 1 || c === gridSize - 2)) score += 2;
+
+                    board[idx] = 'O';
+                    score += evaluateBoard(board, 'O');
+                    board[idx] = null;
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = idx;
+                    }
+                }
+                return bestMove;
             }
-            return bestMove;
         }
 
         function minimax(b, depth, isMaximizing, alpha, beta) {
-            const result = checkWin(b, 3, 3);
-            if (result) return result.winner === 'O' ? (10 - depth) : (depth - 10);
+            const winResult = checkWin(b, 3, 3);
+            if (winResult) return winResult.winner === 'O' ? (10 - depth) : (depth - 10);
             if (checkDraw(b) || depth >= 6) return 0;
+
+            const emptyIndices = b.map((v, i) => v === null ? i : null).filter(v => v !== null);
 
             if (isMaximizing) {
                 let maxEval = -Infinity;
-                for (let i = 0; i < b.length; i++) {
-                    if (b[i] === null) {
-                        b[i] = 'O';
-                        const evaluation = minimax(b, depth + 1, false, alpha, beta);
-                        b[i] = null;
-                        maxEval = Math.max(maxEval, evaluation);
-                        alpha = Math.max(alpha, evaluation);
-                        if (beta <= alpha) break;
-                    }
+                for (const idx of emptyIndices) {
+                    b[idx] = 'O';
+                    const ev = minimax(b, depth + 1, false, alpha, beta);
+                    b[idx] = null;
+                    maxEval = Math.max(maxEval, ev);
+                    alpha = Math.max(alpha, ev);
+                    if (beta <= alpha) break;
                 }
                 return maxEval;
             } else {
                 let minEval = Infinity;
-                for (let i = 0; i < b.length; i++) {
-                    if (b[i] === null) {
-                        b[i] = 'X';
-                        const evaluation = minimax(b, depth + 1, true, alpha, beta);
-                        b[i] = null;
-                        minEval = Math.min(minEval, evaluation);
-                        beta = Math.min(beta, evaluation);
-                        if (beta <= alpha) break;
-                    }
+                for (const idx of emptyIndices) {
+                    b[idx] = 'X';
+                    const ev = minimax(b, depth + 1, true, alpha, beta);
+                    b[idx] = null;
+                    minEval = Math.min(minEval, ev);
+                    beta = Math.min(beta, ev);
+                    if (beta <= alpha) break;
                 }
                 return minEval;
             }
         }
 
-        function getHeuristicMove(availableMoves) {
-            const center = Math.floor(board.length / 2);
-            if (availableMoves.includes(center)) return center;
-
-            const corners = [0, gridSize - 1, gridSize * (gridSize - 1), gridSize * gridSize - 1];
-            const freeCorners = corners.filter(c => availableMoves.includes(c));
-            if (freeCorners.length > 0 && Math.random() < 0.65) {
-                return freeCorners[Math.floor(Math.random() * freeCorners.length)];
-            }
-
-            return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        function evaluateBoard(b, player) {
+            let score = 0;
+            const opp = player === 'O' ? 'X' : 'O';
+            const winRes = checkWin(b, gridSize, winStreakReq);
+            if (winRes) return winRes.winner === player ? 100 : -100;
+            return score;
         }
 
-        // Mode and Pill Selectors Setup
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                gameMode = btn.dataset.mode;
-                diffGroup.style.display = gameMode === 'bot' ? 'flex' : 'none';
-                initBoard();
-            });
-        });
-
-        document.querySelectorAll('.diff-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                botDifficulty = btn.dataset.diff;
-                initBoard();
-            });
-        });
-
-        document.querySelectorAll('.grid-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.grid-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                gridSize = parseInt(btn.dataset.grid, 10);
-                initBoard();
-            });
-        });
-
-        // Action Buttons Setup (New Round & Reset Score)
-        window.restartRoundTTT = function() {
-            if (isTicTacToePaused) {
-                resumeTicTacToe(false);
-            }
-            initBoard();
-        };
-
-        window.resetScoresTTT = function() {
-            scores = { X: 0, O: 0, ties: 0 };
-            initBoard();
-        };
-
-        const btnRestart = document.getElementById('btn-restart');
-        if (btnRestart) {
-            btnRestart.addEventListener('click', window.restartRoundTTT);
-        }
-
-        const btnResetScores = document.getElementById('btn-reset-scores');
-        if (btnResetScores) {
-            btnResetScores.addEventListener('click', window.resetScoresTTT);
-        }
-
-        // Pause & Resume Portal Functions
-        let isTicTacToePaused = false;
-        let __countdownTimerTTT = null;
-
-        function playCountdownAudioTTT(freq = 440, type = 'sine', duration = 0.15) {
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                if (!window.__cdCtxTTT) window.__cdCtxTTT = new AudioCtx();
-                const ctx = window.__cdCtxTTT;
-                if (ctx.state === 'suspended') ctx.resume();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, ctx.currentTime);
-                gain.gain.setValueAtTime(0.18, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + duration);
-            } catch (e) {}
-        }
-
-        function runResumeCountdownTTT(onComplete) {
-            if (__countdownTimerTTT) {
-                clearInterval(__countdownTimerTTT);
-                __countdownTimerTTT = null;
-            }
-            let overlay = document.getElementById('resumeCountdownOverlayTTT');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'resumeCountdownOverlayTTT';
-                overlay.className = 'resume-countdown-overlay';
-                document.body.appendChild(overlay);
-            }
-            overlay.classList.add('active');
-
-            let count = 3;
-            const updateDisplay = () => {
-                if (count > 0) {
-                    overlay.innerHTML = `
-                        <div class="resume-countdown-number" key="${count}">${count}</div>
-                        <div class="resume-countdown-sub">⚡ GET READY • RESUMING</div>
-                    `;
-                    playCountdownAudioTTT(count === 3 ? 440 : count === 2 ? 554 : 659, 'sine', 0.18);
-                    count--;
-                } else if (count === 0) {
-                    overlay.innerHTML = `
-                        <div class="resume-countdown-number" style="color: #4ade80; text-shadow: 0 0 45px rgba(74, 222, 128, 0.9);">PLAY!</div>
-                        <div class="resume-countdown-sub" style="color: #4ade80;">❌⭕ NEON MATCH!</div>
-                    `;
-                    playCountdownAudioTTT(880, 'triangle', 0.3);
-                    count--;
+        // ==========================================
+        // UI UPDATES & EVENT HANDLERS
+        // ==========================================
+        function updateUI() {
+            if (isGameActive) {
+                if (isBotThinking) {
+                    statusTextEl.innerHTML = `🧘 <span style="color: var(--hanko-red);">Zen Master is contemplating the brush stroke...</span>`;
                 } else {
-                    if (__countdownTimerTTT) {
-                        clearInterval(__countdownTimerTTT);
-                        __countdownTimerTTT = null;
-                    }
-                    overlay.classList.remove('active');
-                    setTimeout(() => {
-                        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-                    }, 200);
-                    if (typeof onComplete === 'function') onComplete();
+                    const currentName = currentPlayer === 'X' 
+                        ? (gameMode === 'bot' ? 'Your Turn (Sumi X)' : 'Player X’s Turn') 
+                        : (gameMode === 'bot' ? 'Zen Master (O)' : 'Player O’s Turn');
+                    statusTextEl.innerHTML = `<span class="turn-dot"></span> <span>${currentName} — Place your mark</span>`;
                 }
-            };
+            }
 
-            updateDisplay();
-            __countdownTimerTTT = setInterval(updateDisplay, 1000);
+            if (currentPlayer === 'X') {
+                cardPlayerX.classList.add('active-turn');
+                cardPlayerO.classList.remove('active-turn');
+            } else {
+                cardPlayerO.classList.add('active-turn');
+                cardPlayerX.classList.remove('active-turn');
+            }
+
+            labelPlayerO.textContent = gameMode === 'bot' ? 'Zen Master (O)' : 'Player (O)';
+            updateScoreUI();
         }
 
-        window.pauseTicTacToe = function() {
-            if (__countdownTimerTTT) {
-                clearInterval(__countdownTimerTTT);
-                __countdownTimerTTT = null;
-                const overlay = document.getElementById('resumeCountdownOverlayTTT');
-                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-            }
-            isTicTacToePaused = true;
-            document.body.classList.add('portal-paused');
-            const bankBadge = document.getElementById('portal-top-bank');
-            if (bankBadge) {
-                const pts = localStorage.getItem('krazio_user_points') || localStorage.getItem('coins') || localStorage.getItem('office_escape_coins') || '76';
-                bankBadge.textContent = `🪙 ${pts} P`;
-            }
-        };
+        function updateScoreUI() {
+            scorePlayerX.textContent = scores.X;
+            scorePlayerO.textContent = scores.O;
+        }
 
-        window.resumeTicTacToe = function(requestFullscreen = true) {
-            // 1. Immediately expand back to fullscreen and dismiss paused portal UI
-            document.body.classList.remove('portal-paused');
-            if (requestFullscreen && !document.fullscreenElement && !document.webkitFullscreenElement) {
-                const docEl = document.documentElement;
-                const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
-                if (req) req.call(docEl).catch(() => {});
-            }
+        function setMode(mode) {
+            gameMode = mode;
+            audio.playClapper();
+            document.getElementById('mode-bot').classList.toggle('active', mode === 'bot');
+            document.getElementById('mode-pvp').classList.toggle('active', mode === 'pvp');
+            diffGroup.style.display = mode === 'bot' ? 'flex' : 'none';
+            resetScores();
+            createBoard();
+        }
 
-            // 2. Start 3-second countdown before unfreezing player interactions
-            runResumeCountdownTTT(() => {
-                isTicTacToePaused = false;
+        function setDifficulty(diff) {
+            botDifficulty = diff;
+            audio.playClapper();
+            ['easy', 'medium', 'hard'].forEach(d => {
+                document.getElementById(`diff-${d}`).classList.toggle('active', d === diff);
             });
-        };
+            createBoard();
+        }
 
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                isTicTacToePaused = !isTicTacToePaused;
-                if (window.parent !== window) {
-                    window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'tic-tac-toe', isPaused: isTicTacToePaused }, '*');
-                } else {
-                    window.location.href = '../index.html?game=tic-tac-toe';
-                }
-            } else if (e.key === 'p' || e.key === 'P') {
-                e.preventDefault();
-                isTicTacToePaused = !isTicTacToePaused;
+        function setGridSize(size) {
+            gridSize = size;
+            winStreakReq = size === 3 ? 3 : 4;
+            audio.playClapper();
+            [3, 4, 5].forEach(s => {
+                document.getElementById(`grid-${s}`).classList.toggle('active', s === size);
+            });
+            resetScores();
+            createBoard();
+        }
+
+        function restartRound() {
+            audio.playClapper();
+            createBoard();
+        }
+
+        function resetScores() {
+            audio.playClapper();
+            scores.X = 0;
+            scores.O = 0;
+            scores.draws = 0;
+            createBoard();
+        }
+
+        function toggleSound() {
+            const isMuted = audio.toggleMute();
+            if (btnToggleSound) {
+                btnToggleSound.textContent = isMuted ? '🔇' : '🔊';
+            }
+        }
+
+        // Global functions for inline onclick attributes
+        window.restartRound = restartRound;
+        window.resetScores = resetScores;
+        window.toggleSound = toggleSound;
+        window.setMode = setMode;
+        window.setDifficulty = setDifficulty;
+        window.setGridSize = setGridSize;
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initGame);
+        window.addEventListener('resize', () => {
+            if (strikeCanvas) {
+                strikeCanvas.width = strikeCanvas.offsetWidth;
+                strikeCanvas.height = strikeCanvas.offsetHeight;
             }
         });
-
-        // Start initial game
-        initBoard();
     </script>
     <script src="../assets/krazy-screenshot.js"></script>
 </body>

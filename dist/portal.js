@@ -224,25 +224,25 @@ const GAMES_CATALOG = [
     },
     {
         id: 'tic-tac-toe',
-        title: 'Neon Tac Toe: Arena & Bots',
+        title: 'Sumi-e Tac Toe: Zen Brush & AI',
         category: 'pvp',
-        tags: ['PvP', 'Multiplayer', 'AI Bot', 'Strategy'],
-        desc: 'Cyberpunk Tic Tac Toe with Unbeatable Minimax AI Bots, 2-Player Pass & Play, and 3x3 / 4x4 / 5x5 boards!',
-        fullDesc: 'The classic game reimagined in neon cyberpunk aesthetic. Test your wits against the legendary Unbeatable Minimax algorithm or battle local friends across expanded 4x4 and 5x5 board variations.',
-        emoji: '❌⭕',
-        heroEmoji: '⚡❌⭕',
+        tags: ['PvP', 'Multiplayer', 'AI Bot', 'Strategy', 'Zen'],
+        desc: 'Traditional Japanese ink-wash Sumi-e Tic Tac Toe with calligraphy brush strokes, Ensō circle marks, Hanko seals, and Zen Master AI!',
+        fullDesc: 'Experience the timeless beauty of Japanese ink wash painting (水墨画). Wield calligraphic brush marks (Sumi X & Ensō O) against the contemplative Zen Master AI across classic 3x3, 4x4, and 5x5 boards with authentic acoustic soundscapes.',
+        emoji: '墨⭕',
+        heroEmoji: '🖌️墨⭕',
         status: 'live',
         rating: '5.0',
-        plays: '29.7K',
-        likesCount: 2420,
+        plays: '31.2K',
+        likesCount: 2580,
         link: '/tic-tac-toe/index.html',
         trending: false,
         isNew: true,
         multiplayer: true,
         themeClass: 'theme-tictactoe',
-        actionBadge: '🤖 MINIMAX BOT',
+        actionBadge: '🧘 ZEN MASTER AI',
         controls: [
-            { key: 'Mouse Click', label: 'Place Symbol on Grid' }
+            { key: 'Mouse Click / Touch', label: 'Draw Ink Mark on Board' }
         ]
     }
 ];
