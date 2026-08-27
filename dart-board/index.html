@@ -814,78 +814,28 @@
         /* 3D UI Overlay Container Positioned Over Left Wooden Signboard Planks */
         .home-board-ui-container {
             position: absolute;
-            left: 6%;
-            top: 8%;
-            width: 32%;
-            height: 86%;
-            display: flex;
-            flex-direction: column;
-            gap: 2.5%;
+            left: 25.1%;
+            top: 32.2%;
+            width: 21.6%;
+            height: 52.0%;
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            row-gap: 2.2%;
             box-sizing: border-box;
             z-index: 20;
             transform-style: preserve-3d;
-            padding: 14px 14px;
+            padding: 0;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-            transform: translateY(8px);
-            border-radius: 18px;
-            background: linear-gradient(160deg, rgba(101, 67, 33, 0.88) 0%, rgba(58, 35, 12, 0.92) 100%);
-            border: 2.5px solid rgba(210, 160, 80, 0.5);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,220,120,0.3);
+            transform: translate(-50%, 8px);
+            overflow: hidden;
         }
 
         .home-board-ui-container.ready {
             opacity: 1;
             pointer-events: auto;
-            transform: translateY(0);
-        }
-
-        /* DART MASTER Title Header on Signboard */
-        .dart-master-title {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            margin-bottom: 4px;
-            flex-shrink: 0;
-        }
-
-        .dart-master-logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-family: 'Lilita One', cursive, sans-serif;
-            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-            line-height: 1.1;
-        }
-
-        .dart-master-logo .logo-dart {
-            color: #ef4444;
-            font-size: 1.2em;
-        }
-
-        .dart-master-logo .logo-name-dart { color: #ef4444; }
-        .dart-master-logo .logo-name-master { color: #ffffff; margin-left: 6px; }
-
-        .dart-master-sub {
-            font-size: clamp(0.55rem, 0.85vw, 0.72rem);
-            color: rgba(255,220,140,0.85);
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            margin-top: 2px;
-            padding-left: 2px;
-        }
-
-        .dart-master-divider {
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, rgba(210,160,60,0.8) 0%, rgba(210,160,60,0.2) 100%);
-            border-radius: 2px;
-            margin: 2px 0 4px 0;
-            flex-shrink: 0;
+            transform: translate(-50%, 0);
         }
 
         /* Settings Gear Button at Top-Left of Screen */
@@ -1848,18 +1798,9 @@
                 <!-- Settings Gear Button at Top-Left of Screen -->
                 <button class="menu-gear-btn" id="btnHomeSettings" title="Game Settings & Help">⚙️</button>
 
-                <!-- Interactive 3D UI Overlay Container - Wooden Sign Panel -->
+                <!-- Interactive 3D UI Overlay Container Over Wooden Signboard (Exactly 6 Planks) -->
                 <div class="home-board-ui-container" id="homeBoardUI">
-                    <!-- DART MASTER Title -->
-                    <div class="dart-master-title">
-                        <div class="dart-master-logo">
-                            <span class="logo-dart">🎯</span>
-                            <span class="logo-name-dart">DART</span>
-                            <span class="logo-name-master">MASTER</span>
-                        </div>
-                        <div class="dart-master-sub">Sharpen your aim. Become the master.</div>
-                    </div>
-                    <div class="dart-master-divider"></div>
+                    <!-- Plank 1: Play vs Bot -->
                     <button class="game-btn game-btn-red btn-home-mode active" data-mode="bot">
                         <span class="game-btn-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
