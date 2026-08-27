@@ -3,12 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <base href="/bomb-panic/">
     <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Fredoka:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            if (window.parent !== window || window.location.search.includes('embedded=true')) {
+                document.documentElement.classList.add('is-embedded');
+                document.addEventListener('DOMContentLoaded', () => document.body && document.body.classList.add('is-embedded'));
+            }
+            function exitToPortal() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
+                } else {
+                    window.location.href = '../index.html';
+                }
+            }
+            window.exitToPortal = exitToPortal;
+            document.addEventListener('click', function(e) {
+                const a = e.target.closest('a');
+                if (a) {
+                    const href = a.getAttribute('href');
+                    if (href && (href.includes('index.html') || href === '/' || href === '../' || href === '../index.html')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        exitToPortal();
+                        return false;
+                    }
+                }
+            }, true);
+        })();
+    </script>
     <style>
       #krazio-floating-back {
         position: fixed;
@@ -1306,7 +1333,30 @@
                     <button class="avatar-btn" data-emoji="💀">💀</button>
                 </div>
 
-                <button class="btn-start" id="btnStartGame">ENTER ARENA</button>
+                <div style="display: flex; gap: 10px; margin-top: 14px; width: 100%; flex-wrap: wrap;">
+                    <button class="btn-start" id="btnStartGame" style="flex: 1; min-width: 140px;">ENTER ARENA</button>
+                    <a href="../index.html" class="btn-start" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #7c3aed, #4c1d95); border-color: #a78bfa; color: #fff; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center;">🎮 PLAY ANOTHER GAME</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Elimination Quick-Exit Overlay (Triggers when Player Dies in Hot Potato) -->
+        <div class="modal-overlay" id="eliminationOverlay" style="display: none; z-index: 120;">
+            <div class="modal-box" style="max-width: 440px; text-align: center; background: rgba(15, 23, 42, 0.96); border: 2.5px solid #ef4444; box-shadow: 0 20px 60px rgba(239, 68, 68, 0.4), 0 0 30px rgba(239, 68, 68, 0.2); backdrop-filter: blur(16px);">
+                <div style="font-size: 3rem; margin-bottom: 6px;">💥💀</div>
+                <h2 style="font-size: 1.8rem; font-weight: 900; color: #ff4757; margin-bottom: 6px;">YOU EXPLODED!</h2>
+                <p style="color: #cbd5e1; font-size: 0.95rem; margin-bottom: 20px;">You were eliminated from Hot Potato!</p>
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                    <a href="../index.html" class="btn-start" style="background: linear-gradient(135deg, #7c3aed, #4c1d95); border-color: #a78bfa; color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; width: 100%; font-size: 1rem; font-weight: 800; padding: 12px 18px; border-radius: 14px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);">
+                        <span>🎮 EXIT & PLAY ANOTHER GAME</span>
+                    </a>
+                    <button class="btn-start" onclick="document.getElementById('eliminationOverlay').style.display='none'; if(window.bombPanic) window.bombPanic.startMatch();" style="background: linear-gradient(135deg, #0284c7, #2563eb); border-color: #38bdf8; width: 100%; font-size: 0.95rem; font-weight: 800; padding: 10px 18px; border-radius: 14px; color: #fff; cursor: pointer;">
+                        <span>🔄 RESTART MATCH</span>
+                    </button>
+                    <button onclick="document.getElementById('eliminationOverlay').style.display='none';" style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); color: #cbd5e1; padding: 10px 18px; border-radius: 14px; font-weight: 800; cursor: pointer; width: 100%; font-family: inherit;">
+                        <span>👀 SPECTATE BOTS</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1835,21 +1885,21 @@
             }
 
             resize() {
-                this.width = window.innerWidth;
-                this.height = window.innerHeight;
+                this.width = window.innerWidth || document.documentElement.clientWidth || 800;
+                this.height = window.innerHeight || document.documentElement.clientHeight || 600;
                 const dpr = window.devicePixelRatio || 1;
                 this.canvas.width = this.width * dpr;
                 this.canvas.height = this.height * dpr;
                 this.canvas.style.width = `${this.width}px`;
                 this.canvas.style.height = `${this.height}px`;
 
-                const marginX = Math.max(40, this.width * 0.12);
-                const marginY = Math.max(70, this.height * 0.12);
+                const marginX = Math.max(30, this.width * 0.1);
+                const marginY = Math.max(50, this.height * 0.1);
 
-                this.arena.w = this.width - marginX * 2;
-                this.arena.h = this.height - marginY * 2;
-                this.arena.x = marginX;
-                this.arena.y = marginY;
+                this.arena.w = Math.max(320, this.width - marginX * 2);
+                this.arena.h = Math.max(220, this.height - marginY * 2);
+                this.arena.x = (this.width - this.arena.w) / 2;
+                this.arena.y = (this.height - this.arena.h) / 2;
                 this.arena.targetW = this.arena.w;
                 this.arena.targetH = this.arena.h;
             }
@@ -1860,7 +1910,18 @@
                 window.addEventListener('keydown', (e) => {
                     this.keys[e.code] = true;
 
-                    if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        this.togglePause();
+                        if (window.parent !== window) {
+                            window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'bomb-panic', isPaused: this.state === 'PAUSED' }, '*');
+                        } else {
+                            window.location.href = '../index.html?game=bomb-panic';
+                        }
+                        return;
+                    }
+
+                    if (e.key === 'p' || e.key === 'P') {
                         e.preventDefault();
                         this.togglePause();
                         return;
@@ -1870,13 +1931,15 @@
                         e.preventDefault();
                         if (this.state === 'PAUSED') {
                             this.togglePause();
-                        } else {
+                        } else if (this.state === 'PLAYING') {
                             this.tryPlayerThrow('p1');
                         }
                     }
                     if (e.code === 'Enter' || e.code === 'Numpad0') {
                         e.preventDefault();
-                        this.tryPlayerThrow('bot1'); // Player 2 in local mode
+                        if (this.state === 'PLAYING') {
+                            this.tryPlayerThrow('bot1'); // Player 2 in local mode
+                        }
                     }
                 });
 
@@ -1892,7 +1955,10 @@
                 this.canvas.addEventListener('pointerdown', (e) => {
                     audio.init();
                     if (this.state === 'PLAYING') {
-                        this.tryPlayerThrow('p1', e.clientX, e.clientY);
+                        const rect = this.canvas.getBoundingClientRect();
+                        const clickX = e.clientX - rect.left;
+                        const clickY = e.clientY - rect.top;
+                        this.tryPlayerThrow('p1', clickX, clickY);
                     }
                 });
 
@@ -2057,6 +2123,9 @@
             }
 
             startMatch() {
+                const elimModal = document.getElementById('eliminationOverlay');
+                if (elimModal) elimModal.style.display = 'none';
+
                 this.state = 'PLAYING';
                 this.resize();
                 this.particles = [];
@@ -2186,6 +2255,14 @@
 
                 const aliveSurvivors = this.players.filter(p => p.alive);
                 this.updateHUD();
+
+                // If local player exploded mid-game, show quick elimination exit modal
+                if (victim.isPlayer && aliveSurvivors.length > 1) {
+                    setTimeout(() => {
+                        const elimModal = document.getElementById('eliminationOverlay');
+                        if (elimModal && this.state === 'PLAYING') elimModal.style.display = 'flex';
+                    }, 500);
+                }
 
                 // Check Victory Condition
                 if (aliveSurvivors.length <= 1) {
@@ -2930,33 +3007,8 @@
             }
         };
 
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
-                e.preventDefault();
-                if (window.bombPanic) {
-                    if (window.bombPanic.state === 'PAUSED' || document.body.classList.contains('portal-paused')) {
-                        window.resumeBombGame();
-                    } else if (window.bombPanic.state === 'PLAYING') {
-                        window.pauseBombGame();
-                    }
-                }
-            }
-        });
-
-        // Instant trigger on first Escape when exiting native browser fullscreen
-        const handleFullscreenExitBomb = () => {
-            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-            if (!isFs && window.bombPanic && window.bombPanic.state === 'PLAYING') {
-                window.pauseBombGame();
-            }
-        };
-        document.addEventListener('fullscreenchange', handleFullscreenExitBomb);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenExitBomb);
-        document.addEventListener('mozfullscreenchange', handleFullscreenExitBomb);
-        document.addEventListener('MSFullscreenChange', handleFullscreenExitBomb);
-
         window.addEventListener('DOMContentLoaded', () => {
-            window.bombPanic = new BombPanicGame();
+            if (!window.bombPanic) window.bombPanic = new BombPanicGame();
         });
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             if (!window.bombPanic) window.bombPanic = new BombPanicGame();

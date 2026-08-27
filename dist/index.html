@@ -12,12 +12,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="portal.css">
 </head>
-<body>
+<body data-view="catalog">
 
     <!-- Top Navigation Bar -->
     <header class="navbar">
         <div class="nav-left">
-            <a href="index.html" class="logo-container" title="Krazy Fuse — Live to Play">
+            <button id="btn-sidebar-toggle" class="nav-icon-btn" title="Toggle Navigation Menu">
+                <span class="hamburger-icon">☰</span>
+            </button>
+
+            <a href="index.html" class="logo-container" id="brand-logo-link" title="Krazy Fuse — Live to Play">
                 <img src="krazio-icon.svg" alt="Krazy Fuse Emblem" class="brand-icon-img">
                 <div class="brand-title-wrap">
                     <span class="brand-main-krazy">Krazy</span>
@@ -38,138 +42,401 @@
             </nav>
         </div>
 
-        <div class="nav-actions">
+        <div class="nav-center">
             <div class="nav-search-wrap">
                 <span class="nav-search-icon">🔍</span>
-                <input type="text" id="nav-search-input" class="nav-search-input" placeholder="Search games...">
+                <input type="text" id="nav-search-input" class="nav-search-input" placeholder="Search games and categories...">
+                <button id="nav-search-clear" class="nav-search-clear hidden" title="Clear search">✕</button>
             </div>
+        </div>
+
+        <div class="nav-actions">
+            <button id="btn-nav-random" class="nav-icon-btn" title="Play Random Game">
+                <span>🎲</span>
+            </button>
+            <button id="btn-nav-bookmarks" class="nav-icon-btn" title="Saved Bookmarks">
+                <span>🔖</span>
+                <span id="nav-bookmarks-count" class="badge-count hidden">0</span>
+            </button>
             <button id="btn-theme-toggle" class="btn-theme" title="Toggle Day/Night Theme">
                 <span>☀️ Day</span>
             </button>
             <button id="btn-open-suggest" class="nav-btn">
                 <span>💡 Pitch Idea</span>
             </button>
+            <div class="user-avatar-badge" title="Gamer Profile">
+                <span>👾</span>
+            </div>
         </div>
     </header>
 
-    <!-- Arcade Hero Section -->
-    <section class="arcade-hero">
-        <!-- Subtle Background Game Glyphs -->
-        <div class="hero-bg-glyphs" aria-hidden="true">
-            <span class="glyph glyph-1">✦</span>
-            <span class="glyph glyph-2">●</span>
-            <span class="glyph glyph-3">🎮</span>
-            <span class="glyph glyph-4">⚡</span>
-            <span class="glyph glyph-5">✦</span>
-            <span class="glyph glyph-6">●</span>
-        </div>
+    <!-- Master App Shell (Sidebar + Main Viewport Area) -->
+    <div class="app-layout">
 
-        <div class="hero-content-wrap">
-            <div class="hero-brand-badge">
-                <span class="hero-badge-fire">🔥</span>
-                <span>PLAY SOMETHING AWESOME</span>
-            </div>
-            <h1 class="hero-big-title">KRAZY FUSE</h1>
-            <p class="hero-subtitle">Fast, chaotic, instant-play browser games with zero downloads.</p>
-
-            <!-- Big Center Search Bar -->
-            <div class="hero-search-box">
-                <span class="hero-search-icon">🔍</span>
-                <input type="text" id="search-games-input" class="hero-search-input" placeholder="Search 10+ krazy arcade games...">
-                <button class="hero-search-btn" id="btn-search-go"><span>FIND GAME</span></button>
-            </div>
-
-            <!-- Filter Category Tabs -->
-            <div class="category-tabs-row" id="category-tabs">
-                <button class="category-pill active" data-category="all">🎮 All Games</button>
-                <button class="category-pill" data-category="trending">🔥 Trending</button>
-                <button class="category-pill" data-category="new">🆕 New & Hot</button>
-                <button class="category-pill" data-category="multiplayer">👥 Multiplayer</button>
-                <button class="category-pill" data-category="runner">🏃 Runners</button>
-                <button class="category-pill" data-category="arcade">🎈 Arcade</button>
-                <button class="category-pill" data-category="pvp">⚔️ PvP Combat</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main Game Portal Content Container -->
-    <main class="main-content">
-        <!-- Dynamic Section Container: Populated by portal.js -->
-        <div id="portal-sections-container">
-            <!-- Filter / Search Results Grid (when searching/filtering) -->
-            <section id="filtered-section" class="game-section hidden">
-                <div class="section-header-row">
-                    <h2 class="section-title" id="filtered-title">⚡ FILTERED GAMES</h2>
-                    <span class="section-count-badge" id="filtered-count">0 games</span>
-                </div>
-                <div id="filtered-grid" class="games-grid"></div>
-            </section>
-
-            <!-- Standard Section 1: Trending Now -->
-            <section id="section-trending" class="game-section">
-                <div class="section-header-row">
-                    <div class="section-title-wrap">
-                        <span class="section-emoji">🔥</span>
-                        <h2 class="section-title">TRENDING NOW</h2>
-                    </div>
-                    <span class="section-tag-sub">Most played this week</span>
-                </div>
-                <div id="trending-grid" class="games-grid"></div>
-            </section>
-
-            <!-- Standard Section 2: New & Hot Games -->
-            <section id="section-new" class="game-section">
-                <div class="section-header-row">
-                    <div class="section-title-wrap">
-                        <span class="section-emoji">🆕</span>
-                        <h2 class="section-title">NEW RELEASES</h2>
-                    </div>
-                    <span class="section-tag-sub">Fresh drops & updates</span>
-                </div>
-                <div id="new-grid" class="games-grid"></div>
-            </section>
-
-            <!-- Standard Section 3: Multiplayer & 1v1 -->
-            <section id="section-multiplayer" class="game-section">
-                <div class="section-header-row">
-                    <div class="section-title-wrap">
-                        <span class="section-emoji">👥</span>
-                        <h2 class="section-title">MULTIPLAYER & PVP</h2>
-                    </div>
-                    <span class="section-tag-sub">Play with friends & smart bots</span>
-                </div>
-                <div id="multiplayer-grid" class="games-grid"></div>
-            </section>
-
-            <!-- Standard Section 4: All Games Catalog -->
-            <section id="section-all" class="game-section">
-                <div class="section-header-row">
-                    <div class="section-title-wrap">
-                        <span class="section-emoji">🎮</span>
-                        <h2 class="section-title">ALL KRAZY GAMES</h2>
-                    </div>
-                    <span class="section-tag-sub">Complete instant-play arcade</span>
-                </div>
-                <div id="all-games-grid" class="games-grid"></div>
-            </section>
-        </div>
-
-        <!-- Suggest a Game Banner -->
-        <section class="suggest-banner">
-            <div class="suggest-info">
-                <h3>💡 Have a Krazy Game Idea?</h3>
-                <p>We are constantly building and adding new indie web games. Pitch your kraziest game concept!</p>
-            </div>
-            <div class="suggest-actions">
-                <button id="btn-view-stored" class="nav-btn" title="View previously submitted ideas">
-                    <span>📋 View Pitches</span>
+        <!-- Left Vertical Icon Sidebar Rail -->
+        <aside class="sidebar-rail" id="sidebar-rail">
+            <div class="sidebar-icons-list">
+                <button class="sidebar-icon-btn active" data-category="all" title="Home Arcade">
+                    <span class="rail-icon">🏠</span>
+                    <span class="rail-label">Home</span>
                 </button>
-                <button id="btn-open-suggest-2" class="btn-arcade-cta" onclick="document.getElementById('suggest-modal').classList.add('active')">
-                    <span>🚀 PITCH YOUR IDEA</span>
+                <button class="sidebar-icon-btn" data-category="trending" title="Popular & Trending">
+                    <span class="rail-icon">🔥</span>
+                    <span class="rail-label">Popular</span>
+                </button>
+                <button class="sidebar-icon-btn" data-category="new" title="New Releases">
+                    <span class="rail-icon">🆕</span>
+                    <span class="rail-label">New</span>
+                </button>
+                <button class="sidebar-icon-btn" data-category="multiplayer" title="Multiplayer & PvP">
+                    <span class="rail-icon">👥</span>
+                    <span class="rail-label">Multiplayer</span>
+                </button>
+                <div class="rail-divider"></div>
+                <button class="sidebar-icon-btn" data-category="action" title="Action & Combat">
+                    <span class="rail-icon">⚡</span>
+                    <span class="rail-label">Action</span>
+                </button>
+                <button class="sidebar-icon-btn" data-category="runner" title="Runners & Escape">
+                    <span class="rail-icon">🏃</span>
+                    <span class="rail-label">Runners</span>
+                </button>
+                <button class="sidebar-icon-btn" data-category="pvp" title="Darts & Targets">
+                    <span class="rail-icon">🎯</span>
+                    <span class="rail-label">Darts</span>
+                </button>
+                <button class="sidebar-icon-btn" data-category="arcade" title="Arcade & Physics">
+                    <span class="rail-icon">🕹️</span>
+                    <span class="rail-label">Arcade</span>
+                </button>
+                <button class="sidebar-icon-btn" data-category="reflex" title="Gravity & Reflex">
+                    <span class="rail-icon">🔄</span>
+                    <span class="rail-label">Reflex</span>
+                </button>
+                <div class="rail-divider"></div>
+                <button class="sidebar-icon-btn" id="btn-sidebar-random" title="Surprise Me!">
+                    <span class="rail-icon">🎲</span>
+                    <span class="rail-label">Random</span>
                 </button>
             </div>
-        </section>
-    </main>
+        </aside>
+
+        <!-- Dynamic Main Content Arena -->
+        <div class="content-viewport" id="content-viewport">
+
+            <!-- ==========================================================
+                 VIEW 1: DEDICATED GAME PLAYER ARENA (CrazyGames-Style)
+                 ========================================================== -->
+            <section id="game-player-view" class="game-player-view hidden">
+                <div class="player-layout-grid">
+
+                    <!-- Left/Center Main Game Stage -->
+                    <div class="player-main-col">
+                        
+                        <!-- Breadcrumbs & Quick Back Link -->
+                        <div class="player-top-bar">
+                            <button id="btn-back-to-catalog" class="btn-player-back">
+                                <span>← Back to Arcade</span>
+                            </button>
+                            <div class="player-breadcrumbs">
+                                <span class="bc-home" id="bc-home-btn">Games</span>
+                                <span class="bc-sep">/</span>
+                                <span class="bc-category" id="player-bc-category">Action</span>
+                                <span class="bc-sep">/</span>
+                                <span class="bc-current" id="player-bc-title">Office Escape</span>
+                            </div>
+                        </div>
+
+                        <!-- Central Embedded Game Screen (Glowing Neon Frame) -->
+                        <div class="game-screen-wrapper" id="game-screen-wrapper">
+                            <div class="game-screen-inner" id="game-screen-inner">
+                                <!-- Loading Spinner -->
+                                <div class="game-loader-overlay" id="game-loader-overlay">
+                                    <div class="game-loader-spinner"></div>
+                                    <div class="game-loader-title" id="game-loader-title">Loading Game...</div>
+                                    <div class="game-loader-sub">Preparing Krazy Fuse Engine ⚡</div>
+                                </div>
+
+                                <!-- The Game iframe -->
+                                <iframe id="active-game-iframe" src="about:blank" allow="fullscreen; autoplay; gamepad; clipboard-write; microphone; camera" tabindex="0"></iframe>
+                            </div>
+                        </div>
+
+                        <!-- Game Meta & Action Bar (Matching CrazyGames UI directly) -->
+                        <div class="game-action-bar" id="game-action-bar">
+                            <!-- Left: Game Info & Icon -->
+                            <div class="action-bar-left">
+                                <div class="game-player-badge" id="player-game-icon">🏃</div>
+                                <div class="game-player-title-box">
+                                    <h2 class="game-player-title" id="player-game-title">Tunnel Runner</h2>
+                                    <div class="game-player-sub-meta">
+                                        <span class="player-rating-star">⭐ <strong id="player-game-rating">4.9</strong></span>
+                                        <span class="meta-dot">·</span>
+                                        <span id="player-game-plays">👥 28.4K Plays</span>
+                                        <span class="meta-dot">·</span>
+                                        <span class="player-tag-badge" id="player-game-tag">Runner</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: CrazyGames Interactive Action Buttons -->
+                            <div class="action-bar-right">
+                                <!-- Like Button with Live Counter -->
+                                <button id="btn-game-like" class="game-ctrl-btn btn-like" title="I Like this game">
+                                    <span class="ctrl-icon">👍</span>
+                                    <span id="game-likes-count" class="ctrl-label">2.4K</span>
+                                </button>
+                                
+                                <!-- Dislike Button -->
+                                <button id="btn-game-dislike" class="game-ctrl-btn btn-dislike" title="Dislike">
+                                    <span class="ctrl-icon">👎</span>
+                                </button>
+
+                                <!-- Bookmark / Favorite -->
+                                <button id="btn-game-bookmark" class="game-ctrl-btn" title="Add to Bookmarks">
+                                    <span class="ctrl-icon" id="bookmark-icon">🔖</span>
+                                </button>
+
+                                <!-- Comments Drawer Toggle -->
+                                <button id="btn-game-comments" class="game-ctrl-btn" title="View Comments & Tips">
+                                    <span class="ctrl-icon">💬</span>
+                                    <span class="ctrl-label" id="game-comments-count">18</span>
+                                </button>
+
+                                <!-- Share Link -->
+                                <button id="btn-game-share" class="game-ctrl-btn" title="Share Game Link">
+                                    <span class="ctrl-icon">🔗</span>
+                                </button>
+
+                                <!-- Viewport Aspect Toggle -->
+                                <button id="btn-game-aspect" class="game-ctrl-btn" title="Toggle Aspect Ratio">
+                                    <span class="ctrl-icon">📱</span>
+                                </button>
+
+                                <!-- Sound Mute Toggle -->
+                                <button id="btn-game-sound" class="game-ctrl-btn" title="Sound On/Off">
+                                    <span class="ctrl-icon" id="game-sound-icon">🔊</span>
+                                </button>
+
+                                <!-- Native Fullscreen Toggle -->
+                                <button id="btn-game-fullscreen" class="game-ctrl-btn btn-fullscreen-highlight" title="Enter Fullscreen (F)">
+                                    <svg class="fullscreen-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Banner & Game Guides Section -->
+                        <div class="player-bottom-details">
+                            
+                            <!-- Stylized Promotional Feature Banner (Styled like Adobe Firefly banner in screenshot) -->
+                            <div class="player-promo-banner">
+                                <div class="promo-banner-art">⚡</div>
+                                <div class="promo-banner-text">
+                                    <h4>Krazy Fuse Instant Arcade</h4>
+                                    <p>Fast, chaotic games made for instant fun. No downloads, zero paywalls, pure gameplay.</p>
+                                </div>
+                                <button class="btn-promo-action" id="btn-promo-random">
+                                    <span>🎲 Surprise Game</span>
+                                </button>
+                            </div>
+
+                            <!-- Controls & Instructions Card -->
+                            <div class="player-info-card">
+                                <div class="card-section-title">
+                                    <span class="cs-icon">🎮</span>
+                                    <h3>HOW TO PLAY & CONTROLS</h3>
+                                </div>
+                                <div class="controls-cheatsheet-grid" id="player-controls-grid">
+                                    <!-- Dynamic controls key badges -->
+                                </div>
+                                <div class="game-full-description" id="player-game-description">
+                                    <!-- Game description -->
+                                </div>
+                                <div class="game-features-row" id="player-game-tags">
+                                    <!-- Tags -->
+                                </div>
+                            </div>
+
+                            <!-- Comments & Reviews Drawer/Card -->
+                            <div class="player-comments-card" id="player-comments-card">
+                                <div class="card-section-title">
+                                    <span class="cs-icon">💬</span>
+                                    <h3>PLAYER REVIEWS & STRATEGY</h3>
+                                </div>
+                                
+                                <div class="comment-input-row">
+                                    <input type="text" id="user-comment-input" class="comment-input-field" placeholder="Leave a review or tip for fellow players...">
+                                    <button id="btn-post-comment" class="btn-arcade-cta" style="padding: 8px 16px; font-size: 0.95rem;">
+                                        <span>Post 🚀</span>
+                                    </button>
+                                </div>
+
+                                <div class="comments-list-box" id="comments-list-box">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Sidebar: "Play next" Recommendations & Spotlight -->
+                    <aside class="player-right-sidebar">
+                        
+                        <!-- Top Spotlight Ad / Feature Box -->
+                        <div class="sidebar-spotlight-card">
+                            <div class="spotlight-badge">🔥 ARCADE SPOTLIGHT</div>
+                            <div class="spotlight-title" id="spotlight-title">Ready for more chaos?</div>
+                            <p class="spotlight-desc" id="spotlight-desc">Discover high-octane 1v1 arenas, survival elevators & physics flyers.</p>
+                            <button class="btn-spotlight-cta" id="btn-spotlight-play">
+                                <span>Play Featured ⚡</span>
+                            </button>
+                        </div>
+
+                        <!-- "Play next" Header -->
+                        <div class="play-next-header">
+                            <span class="pn-icon">🕹️</span>
+                            <h3>Play next</h3>
+                        </div>
+
+                        <!-- Recommended Game Cards (CrazyGames Layout) -->
+                        <div class="play-next-list" id="play-next-list">
+                            <!-- Populated with 3-4 recommended games dynamically -->
+                        </div>
+
+                        <!-- View More Purple Button -->
+                        <button class="btn-view-more-purple" id="btn-view-more-purple">
+                            <span>View more games ➔</span>
+                        </button>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- ==========================================================
+                 VIEW 2: HOME CATALOG & HERO VIEW
+                 ========================================================== -->
+            <section id="catalog-view" class="catalog-view">
+                
+                <!-- Arcade Hero Section -->
+                <section class="arcade-hero">
+                    <!-- Subtle Background Game Glyphs -->
+                    <div class="hero-bg-glyphs" aria-hidden="true">
+                        <span class="glyph glyph-1">✦</span>
+                        <span class="glyph glyph-2">●</span>
+                        <span class="glyph glyph-3">🎮</span>
+                        <span class="glyph glyph-4">⚡</span>
+                        <span class="glyph glyph-5">✦</span>
+                        <span class="glyph glyph-6">●</span>
+                    </div>
+
+                    <div class="hero-content-wrap">
+                        <div class="hero-brand-badge">
+                            <span class="hero-badge-fire">🔥</span>
+                            <span>PLAY SOMETHING AWESOME</span>
+                        </div>
+                        <h1 class="hero-big-title">KRAZY FUSE</h1>
+                        <p class="hero-subtitle">Fast, chaotic, instant-play browser games with zero downloads.</p>
+
+                        <!-- Big Center Search Bar -->
+                        <div class="hero-search-box">
+                            <span class="hero-search-icon">🔍</span>
+                            <input type="text" id="search-games-input" class="hero-search-input" placeholder="Search 12+ krazy arcade games...">
+                            <button class="hero-search-btn" id="btn-search-go"><span>FIND GAME</span></button>
+                        </div>
+
+                        <!-- Filter Category Tabs -->
+                        <div class="category-tabs-row" id="category-tabs">
+                            <button class="category-pill active" data-category="all">🎮 All Games</button>
+                            <button class="category-pill" data-category="trending">🔥 Trending</button>
+                            <button class="category-pill" data-category="new">🆕 New & Hot</button>
+                            <button class="category-pill" data-category="multiplayer">👥 Multiplayer</button>
+                            <button class="category-pill" data-category="runner">🏃 Runners</button>
+                            <button class="category-pill" data-category="arcade">🎈 Arcade</button>
+                            <button class="category-pill" data-category="pvp">⚔️ PvP Combat</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Main Game Portal Content Container -->
+                <main class="main-content">
+                    <div id="portal-sections-container">
+                        <!-- Filter / Search Results Grid (when searching/filtering) -->
+                        <section id="filtered-section" class="game-section hidden">
+                            <div class="section-header-row">
+                                <h2 class="section-title" id="filtered-title">⚡ FILTERED GAMES</h2>
+                                <span class="section-count-badge" id="filtered-count">0 games</span>
+                            </div>
+                            <div id="filtered-grid" class="games-grid"></div>
+                        </section>
+
+                        <!-- Standard Section 1: Trending Now -->
+                        <section id="section-trending" class="game-section">
+                            <div class="section-header-row">
+                                <div class="section-title-wrap">
+                                    <span class="section-emoji">🔥</span>
+                                    <h2 class="section-title">TRENDING NOW</h2>
+                                </div>
+                                <span class="section-tag-sub">Most played this week</span>
+                            </div>
+                            <div id="trending-grid" class="games-grid"></div>
+                        </section>
+
+                        <!-- Standard Section 2: New & Hot Games -->
+                        <section id="section-new" class="game-section">
+                            <div class="section-header-row">
+                                <div class="section-title-wrap">
+                                    <span class="section-emoji">🆕</span>
+                                    <h2 class="section-title">NEW RELEASES</h2>
+                                </div>
+                                <span class="section-tag-sub">Fresh drops & updates</span>
+                            </div>
+                            <div id="new-grid" class="games-grid"></div>
+                        </section>
+
+                        <!-- Standard Section 3: Multiplayer & 1v1 -->
+                        <section id="section-multiplayer" class="game-section">
+                            <div class="section-header-row">
+                                <div class="section-title-wrap">
+                                    <span class="section-emoji">👥</span>
+                                    <h2 class="section-title">MULTIPLAYER & PVP</h2>
+                                </div>
+                                <span class="section-tag-sub">Play with friends & smart bots</span>
+                            </div>
+                            <div id="multiplayer-grid" class="games-grid"></div>
+                        </section>
+
+                        <!-- Standard Section 4: All Games Catalog -->
+                        <section id="section-all" class="game-section">
+                            <div class="section-header-row">
+                                <div class="section-title-wrap">
+                                    <span class="section-emoji">🎮</span>
+                                    <h2 class="section-title">ALL KRAZY GAMES</h2>
+                                </div>
+                                <span class="section-tag-sub">Complete instant-play arcade</span>
+                            </div>
+                            <div id="all-games-grid" class="games-grid"></div>
+                        </section>
+                    </div>
+
+                    <!-- Suggest a Game Banner -->
+                    <section class="suggest-banner">
+                        <div class="suggest-info">
+                            <h3>💡 Have a Krazy Game Idea?</h3>
+                            <p>We are constantly building and adding new indie web games. Pitch your kraziest game concept!</p>
+                        </div>
+                        <div class="suggest-actions">
+                            <button id="btn-view-stored" class="nav-btn" title="View previously submitted ideas">
+                                <span>📋 View Pitches</span>
+                            </button>
+                            <button id="btn-open-suggest-2" class="btn-arcade-cta">
+                                <span>🚀 PITCH YOUR IDEA</span>
+                            </button>
+                        </div>
+                    </section>
+                </main>
+            </section>
+        </div>
+    </div>
 
     <!-- Interactive Game Suggestion Modal -->
     <div id="suggest-modal" class="modal-backdrop">
@@ -187,6 +454,12 @@
                 <button id="btn-submit-idea" class="btn-arcade-cta" style="padding: 8px 20px; font-size: 1rem;">SUBMIT CONCEPT</button>
             </div>
         </div>
+    </div>
+
+    <!-- Toast Notification Popup -->
+    <div id="portal-toast" class="portal-toast hidden">
+        <span id="toast-icon">✨</span>
+        <span id="toast-message">Game link copied to clipboard!</span>
     </div>
 
     <!-- Footer -->

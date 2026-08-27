@@ -56,24 +56,19 @@ export class GameEngine {
         this.__wasInFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
 
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'Escape' || e.code === 'KeyP') {
+            if (e.code === 'Escape') {
+                e.preventDefault();
+                this.togglePause();
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'fallen-one', isPaused: this.isPaused }, '*');
+                } else {
+                    window.location.href = '../index.html?game=fallen-one';
+                }
+            } else if (e.code === 'KeyP') {
                 e.preventDefault();
                 this.togglePause();
             }
         });
-
-        // Instant trigger on first Escape when exiting native browser fullscreen
-        const handleFullscreenExitFO = () => {
-            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-            if (!isFs && this.__wasInFullscreen && (this.gameState === GAME_STATES.IN_GAME || this.gameState === GAME_STATES.TRAINING) && !this.isPaused && !document.body.classList.contains('portal-paused')) {
-                this.pause();
-            }
-            this.__wasInFullscreen = isFs;
-        };
-        document.addEventListener('fullscreenchange', handleFullscreenExitFO);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenExitFO);
-        document.addEventListener('mozfullscreenchange', handleFullscreenExitFO);
-        document.addEventListener('MSFullscreenChange', handleFullscreenExitFO);
     }
 
     togglePause() {

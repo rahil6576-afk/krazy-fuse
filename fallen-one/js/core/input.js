@@ -6,6 +6,11 @@ export class InputManager {
     constructor() {
         const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('pvp_key_bindings') : null;
         this.keyBindings = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_KEY_BINDINGS));
+        if (this.keyBindings && this.keyBindings.P1 && this.keyBindings.P1.ultimate === 'KeyO') {
+            this.keyBindings.P1.ultimate = 'KeyU';
+            this.keyBindings.P1.lightKick = 'KeyI';
+            this.keyBindings.P1.heavyKick = 'KeyO';
+        }
         this.rawKeys = {};
         
         this.playerInputs = {

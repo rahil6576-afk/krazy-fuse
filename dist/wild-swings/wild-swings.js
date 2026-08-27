@@ -41,10 +41,10 @@ class WildSwingsGame {
       trail: [],
     };
 
-    // Physics Constants (Relaxed, accessible swing pacing)
-    this.gravity = 0.16;
+    // Physics Constants (Smooth, Realistic Pendulum Pacing)
+    this.gravity = 0.17;
     this.airResistance = 0.998;
-    this.maxSpeed = 10.5;
+    this.maxSpeed = 8.0;
     this.hookMaxRange = 360;
     this.isHoldingInput = false;
 
@@ -232,22 +232,23 @@ class WildSwingsGame {
 
     const dx = this.player.x - target.x;
     const dy = this.player.y - target.y;
-    const length = Math.sqrt(dx * dx + dy * dy);
+    const length = Math.max(55, Math.hypot(dx, dy));
 
     this.player.isHooked = true;
     this.player.hookTarget = target;
-    this.player.hookLength = Math.max(40, length);
-    this.player.hookAngle = Math.atan2(dy, dx);
+    this.player.hookLength = length;
+    // phi: Angle offset from vertical-down (negative when left, 0 at bottom, positive when right)
+    this.player.hookAngle = Math.atan2(dx, dy);
 
-    // Tangential speed calculation
-    const currentSpeed = Math.sqrt(this.player.vx * this.player.vx + this.player.vy * this.player.vy);
-    const tangentialVel = (-Math.sin(this.player.hookAngle) * this.player.vx + Math.cos(this.player.hookAngle) * this.player.vy);
-    this.player.hookAngularVel = tangentialVel / this.player.hookLength;
+    // Natural tangential pendulum momentum: vx * cos(phi) - vy * sin(phi)
+    const tangentialVel = this.player.vx * Math.cos(this.player.hookAngle) - this.player.vy * Math.sin(this.player.hookAngle);
+    let initialAngVel = tangentialVel / length;
 
-    // Minimum swing angular kick so player always gains dynamic momentum
-    if (Math.abs(this.player.hookAngularVel) < 0.03) {
-      this.player.hookAngularVel = this.player.vx >= 0 ? 0.05 : -0.05;
+    // Smooth forward clockwise swing speed
+    if (initialAngVel < 0.018) {
+      initialAngVel = 0.036;
     }
+    this.player.hookAngularVel = Math.max(-0.045, Math.min(0.050, initialAngVel));
 
     wildAudio.playHookAttach(this.theme);
     this.spawnWebSparks(target.x, target.y);
@@ -256,29 +257,30 @@ class WildSwingsGame {
   releaseHook() {
     if (!this.player.isHooked) return;
 
-    const angSpeed = this.player.hookAngularVel;
-    const r = this.player.hookLength;
-    const theta = this.player.hookAngle;
+    const angSpeed = Number.isFinite(this.player.hookAngularVel) ? this.player.hookAngularVel : 0.038;
+    const r = this.player.hookLength || 100;
+    const phi = this.player.hookAngle || 0;
 
-    // Convert angular velocity back to linear velocity with launch boost
-    let vx = -r * Math.sin(theta) * angSpeed;
-    let vy = r * Math.cos(theta) * angSpeed;
+    // Pure tangential release velocity:
+    // vx = r * cos(phi) * omega (directed rightwards)
+    // vy = -r * sin(phi) * omega (directed upward when swinging on the right side)
+    let vx = r * Math.cos(phi) * angSpeed * 1.15;
+    let vy = -r * Math.sin(phi) * angSpeed * 1.15;
 
-    // Aerodynamic forward launch bonus
-    const launchBonus = 1.14;
-    vx *= launchBonus;
-    vy *= launchBonus;
+    // Smooth aerodynamic launch dynamics:
+    // When coming from left down towards right and releasing, launch character smoothly upward & forward
+    if (vx < 3.2) vx = 3.2;
+    if (vy > -2.2) vy = -3.2; // Launch smoothly into the sky!
 
-    // Cap velocity
-    const speed = Math.sqrt(vx * vx + vy * vy);
+    const speed = Math.hypot(vx, vy);
     if (speed > this.maxSpeed) {
       const scale = this.maxSpeed / speed;
       vx *= scale;
       vy *= scale;
     }
 
-    this.player.vx = vx;
-    this.player.vy = vy;
+    this.player.vx = Number.isFinite(vx) ? vx : 3.8;
+    this.player.vy = Number.isFinite(vy) ? vy : -3.2;
     this.player.isHooked = false;
     this.player.hookTarget = null;
 
@@ -293,8 +295,8 @@ class WildSwingsGame {
 
     this.player.x = 120;
     this.player.y = 350;
-    this.player.vx = 7;
-    this.player.vy = -3;
+    this.player.vx = 2.4;
+    this.player.vy = -1.0;
     this.player.angle = 0;
     this.player.rotSpeed = 0;
     this.player.isHooked = false;
@@ -348,18 +350,6 @@ class WildSwingsGame {
         angleOffset: anchorIdx * 1.5,
       });
 
-      // Trampolines below anchors for recovery & bounce combos
-      if (anchorIdx % 2 === 1 || lvl <= 4) {
-        this.trampolines.push({
-          x: curX - 60,
-          y: Math.min(550, anchorY + 280),
-          width: 90,
-          height: 22,
-          bouncePower: 18 + Math.min(lvl * 0.4, 6),
-          pressed: 0,
-        });
-      }
-
       // Add Lasers and Hazard Obstacles as level increases
       if (lvl >= 7 && anchorIdx > 1 && anchorIdx % 2 === 0) {
         this.hazards.push({
@@ -395,15 +385,7 @@ class WildSwingsGame {
       anchorIdx++;
     }
 
-    // Safety bouncers at start
-    this.trampolines.unshift({
-      x: 100,
-      y: 520,
-      width: 120,
-      height: 22,
-      bouncePower: 20,
-      pressed: 0,
-    });
+    // Safety bouncers at start (Removed as requested)
   }
 
   generateProceduralEndlessChunk(startX, endX) {
@@ -423,17 +405,6 @@ class WildSwingsGame {
         moveRange: 70,
         angleOffset: idx,
       });
-
-      if (idx % 2 === 0) {
-        this.trampolines.push({
-          x: curX - 50,
-          y: 540,
-          width: 90,
-          height: 22,
-          bouncePower: 21,
-          pressed: 0,
-        });
-      }
 
       if (idx > 3 && idx % 3 === 1) {
         this.hazards.push({
@@ -469,36 +440,54 @@ class WildSwingsGame {
     if (this.player.isHooked && this.player.hookTarget) {
       const a = this.player.hookTarget;
       const r = this.player.hookLength;
+      const phi = this.player.hookAngle;
 
-      // Angular acceleration: d2Theta = (-g / r) * cos(theta)
-      const angularAcc = (-this.gravity / r) * Math.cos(this.player.hookAngle);
+      // True pendulum gravity torque: pulls towards the bottom (phi = 0)
+      // Left (phi < 0): accelerates forward/clockwise (+angularAcc)
+      // Right (phi > 0): decelerates forward motion as climbing (-angularAcc)
+      const angularAcc = (-this.gravity / r) * Math.sin(phi);
       this.player.hookAngularVel += angularAcc;
-      this.player.hookAngularVel *= 0.998; // gentle rope damping
 
+      // Gentle swing pump while holding to maintain momentum
+      if (this.player.hookAngularVel > 0 && this.player.hookAngularVel < 0.032) {
+        this.player.hookAngularVel += 0.0006;
+      }
+
+      this.player.hookAngularVel *= 0.999; // gentle rope damping
+
+      // Smooth speed cap for controlled, enjoyable pacing
+      this.player.hookAngularVel = Math.max(-0.050, Math.min(0.050, this.player.hookAngularVel));
       this.player.hookAngle += this.player.hookAngularVel;
 
-      // Update player position on the circular swing arc
-      this.player.x = a.x + r * Math.cos(this.player.hookAngle);
-      this.player.y = a.y + r * Math.sin(this.player.hookAngle);
+      // Update player position along the pendulum arc
+      this.player.x = a.x + r * Math.sin(this.player.hookAngle);
+      this.player.y = a.y + r * Math.cos(this.player.hookAngle);
 
       // Tangential velocity representation
-      this.player.vx = -r * Math.sin(this.player.hookAngle) * this.player.hookAngularVel;
-      this.player.vy = r * Math.cos(this.player.hookAngle) * this.player.hookAngularVel;
+      this.player.vx = r * Math.cos(this.player.hookAngle) * this.player.hookAngularVel;
+      this.player.vy = -r * Math.sin(this.player.hookAngle) * this.player.hookAngularVel;
 
       // Rotation matches swing tension
-      this.player.angle = this.player.hookAngle + Math.PI / 2;
+      this.player.angle = this.player.hookAngle;
     } else {
       // Free flight: gravity & air resistance
       this.player.vy += this.gravity;
       this.player.vx *= this.airResistance;
       this.player.vy *= this.airResistance;
 
+      // Gentle clamp on max flight speed
+      const curSpeed = Math.hypot(this.player.vx, this.player.vy);
+      if (curSpeed > this.maxSpeed) {
+        const s = this.maxSpeed / curSpeed;
+        this.player.vx *= s;
+        this.player.vy *= s;
+      }
+
       this.player.x += this.player.vx;
       this.player.y += this.player.vy;
 
       // Dynamic mid-air flips
-      const flightSpeed = Math.sqrt(this.player.vx * this.player.vx + this.player.vy * this.player.vy);
-      this.player.rotSpeed = (this.player.vx * 0.04);
+      this.player.rotSpeed = (this.player.vx * 0.035);
       this.player.angle += this.player.rotSpeed;
 
       // Detect 360-degree stunt flips
@@ -521,32 +510,6 @@ class WildSwingsGame {
     }
 
     for (const t of this.player.trail) t.alpha *= 0.9;
-
-    // 3. Trampoline Bouncer Collisions
-    for (const pad of this.trampolines) {
-      if (pad.pressed > 0) pad.pressed *= 0.85;
-
-      const px = this.player.x;
-      const py = this.player.y + this.player.radius;
-
-      if (
-        px >= pad.x &&
-        px <= pad.x + pad.width &&
-        py >= pad.y - 12 &&
-        py <= pad.y + pad.height &&
-        this.player.vy > 0
-      ) {
-        // High bounce upward & forward
-        this.player.y = pad.y - this.player.radius - 2;
-        this.player.vy = -pad.bouncePower;
-        this.player.vx = Math.max(this.player.vx * 1.15, 8);
-        pad.pressed = 12;
-
-        wildAudio.playBounce(pad.bouncePower / 20);
-        this.spawnBounceShockwave(pad.x + pad.width / 2, pad.y);
-        break;
-      }
-    }
 
     // 4. Boost Ring Portals
     for (const b of this.boosters) {
@@ -837,11 +800,6 @@ class WildSwingsGame {
     // 4. Draw Anchor Points
     for (const a of this.anchors) {
       this.renderAnchor(a);
-    }
-
-    // 5. Draw Trampoline Bouncers
-    for (const pad of this.trampolines) {
-      this.renderTrampoline(pad);
     }
 
     // 6. Draw Hazards & Boosters

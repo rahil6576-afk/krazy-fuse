@@ -41,10 +41,10 @@ class WildSwingsGame {
       trail: [],
     };
 
-    // Physics Constants (Relaxed, accessible swing pacing)
-    this.gravity = 0.16;
+    // Physics Constants (Smooth, Realistic Pendulum Pacing)
+    this.gravity = 0.17;
     this.airResistance = 0.998;
-    this.maxSpeed = 10.5;
+    this.maxSpeed = 8.0;
     this.hookMaxRange = 360;
     this.isHoldingInput = false;
 
@@ -232,22 +232,23 @@ class WildSwingsGame {
 
     const dx = this.player.x - target.x;
     const dy = this.player.y - target.y;
-    const length = Math.sqrt(dx * dx + dy * dy);
+    const length = Math.max(55, Math.hypot(dx, dy));
 
     this.player.isHooked = true;
     this.player.hookTarget = target;
-    this.player.hookLength = Math.max(40, length);
-    this.player.hookAngle = Math.atan2(dy, dx);
+    this.player.hookLength = length;
+    // phi: Angle offset from vertical-down (negative when left, 0 at bottom, positive when right)
+    this.player.hookAngle = Math.atan2(dx, dy);
 
-    // Tangential speed calculation
-    const currentSpeed = Math.sqrt(this.player.vx * this.player.vx + this.player.vy * this.player.vy);
-    const tangentialVel = (-Math.sin(this.player.hookAngle) * this.player.vx + Math.cos(this.player.hookAngle) * this.player.vy);
-    this.player.hookAngularVel = tangentialVel / this.player.hookLength;
+    // Natural tangential pendulum momentum: vx * cos(phi) - vy * sin(phi)
+    const tangentialVel = this.player.vx * Math.cos(this.player.hookAngle) - this.player.vy * Math.sin(this.player.hookAngle);
+    let initialAngVel = tangentialVel / length;
 
-    // Minimum swing angular kick so player always gains dynamic momentum
-    if (Math.abs(this.player.hookAngularVel) < 0.03) {
-      this.player.hookAngularVel = this.player.vx >= 0 ? 0.05 : -0.05;
+    // Smooth forward clockwise swing speed
+    if (initialAngVel < 0.018) {
+      initialAngVel = 0.036;
     }
+    this.player.hookAngularVel = Math.max(-0.045, Math.min(0.050, initialAngVel));
 
     wildAudio.playHookAttach(this.theme);
     this.spawnWebSparks(target.x, target.y);
@@ -256,29 +257,30 @@ class WildSwingsGame {
   releaseHook() {
     if (!this.player.isHooked) return;
 
-    const angSpeed = this.player.hookAngularVel;
-    const r = this.player.hookLength;
-    const theta = this.player.hookAngle;
+    const angSpeed = Number.isFinite(this.player.hookAngularVel) ? this.player.hookAngularVel : 0.038;
+    const r = this.player.hookLength || 100;
+    const phi = this.player.hookAngle || 0;
 
-    // Convert angular velocity back to linear velocity with launch boost
-    let vx = -r * Math.sin(theta) * angSpeed;
-    let vy = r * Math.cos(theta) * angSpeed;
+    // Pure tangential release velocity:
+    // vx = r * cos(phi) * omega (directed rightwards)
+    // vy = -r * sin(phi) * omega (directed upward when swinging on the right side)
+    let vx = r * Math.cos(phi) * angSpeed * 1.15;
+    let vy = -r * Math.sin(phi) * angSpeed * 1.15;
 
-    // Aerodynamic forward launch bonus
-    const launchBonus = 1.14;
-    vx *= launchBonus;
-    vy *= launchBonus;
+    // Smooth aerodynamic launch dynamics:
+    // When coming from left down towards right and releasing, launch character smoothly upward & forward
+    if (vx < 3.2) vx = 3.2;
+    if (vy > -2.2) vy = -3.2; // Launch smoothly into the sky!
 
-    // Cap velocity
-    const speed = Math.sqrt(vx * vx + vy * vy);
+    const speed = Math.hypot(vx, vy);
     if (speed > this.maxSpeed) {
       const scale = this.maxSpeed / speed;
       vx *= scale;
       vy *= scale;
     }
 
-    this.player.vx = vx;
-    this.player.vy = vy;
+    this.player.vx = Number.isFinite(vx) ? vx : 3.8;
+    this.player.vy = Number.isFinite(vy) ? vy : -3.2;
     this.player.isHooked = false;
     this.player.hookTarget = null;
 
@@ -293,8 +295,8 @@ class WildSwingsGame {
 
     this.player.x = 120;
     this.player.y = 350;
-    this.player.vx = 7;
-    this.player.vy = -3;
+    this.player.vx = 2.4;
+    this.player.vy = -1.0;
     this.player.angle = 0;
     this.player.rotSpeed = 0;
     this.player.isHooked = false;
@@ -348,18 +350,6 @@ class WildSwingsGame {
         angleOffset: anchorIdx * 1.5,
       });
 
-      // Trampolines below anchors for recovery & bounce combos
-      if (anchorIdx % 2 === 1 || lvl <= 4) {
-        this.trampolines.push({
-          x: curX - 60,
-          y: Math.min(550, anchorY + 280),
-          width: 90,
-          height: 22,
-          bouncePower: 18 + Math.min(lvl * 0.4, 6),
-          pressed: 0,
-        });
-      }
-
       // Add Lasers and Hazard Obstacles as level increases
       if (lvl >= 7 && anchorIdx > 1 && anchorIdx % 2 === 0) {
         this.hazards.push({
@@ -395,15 +385,7 @@ class WildSwingsGame {
       anchorIdx++;
     }
 
-    // Safety bouncers at start
-    this.trampolines.unshift({
-      x: 100,
-      y: 520,
-      width: 120,
-      height: 22,
-      bouncePower: 20,
-      pressed: 0,
-    });
+    // Safety bouncers at start (Removed as requested)
   }
 
   generateProceduralEndlessChunk(startX, endX) {
@@ -423,17 +405,6 @@ class WildSwingsGame {
         moveRange: 70,
         angleOffset: idx,
       });
-
-      if (idx % 2 === 0) {
-        this.trampolines.push({
-          x: curX - 50,
-          y: 540,
-          width: 90,
-          height: 22,
-          bouncePower: 21,
-          pressed: 0,
-        });
-      }
 
       if (idx > 3 && idx % 3 === 1) {
         this.hazards.push({
@@ -469,36 +440,54 @@ class WildSwingsGame {
     if (this.player.isHooked && this.player.hookTarget) {
       const a = this.player.hookTarget;
       const r = this.player.hookLength;
+      const phi = this.player.hookAngle;
 
-      // Angular acceleration: d2Theta = (-g / r) * cos(theta)
-      const angularAcc = (-this.gravity / r) * Math.cos(this.player.hookAngle);
+      // True pendulum gravity torque: pulls towards the bottom (phi = 0)
+      // Left (phi < 0): accelerates forward/clockwise (+angularAcc)
+      // Right (phi > 0): decelerates forward motion as climbing (-angularAcc)
+      const angularAcc = (-this.gravity / r) * Math.sin(phi);
       this.player.hookAngularVel += angularAcc;
-      this.player.hookAngularVel *= 0.998; // gentle rope damping
 
+      // Gentle swing pump while holding to maintain momentum
+      if (this.player.hookAngularVel > 0 && this.player.hookAngularVel < 0.032) {
+        this.player.hookAngularVel += 0.0006;
+      }
+
+      this.player.hookAngularVel *= 0.999; // gentle rope damping
+
+      // Smooth speed cap for controlled, enjoyable pacing
+      this.player.hookAngularVel = Math.max(-0.050, Math.min(0.050, this.player.hookAngularVel));
       this.player.hookAngle += this.player.hookAngularVel;
 
-      // Update player position on the circular swing arc
-      this.player.x = a.x + r * Math.cos(this.player.hookAngle);
-      this.player.y = a.y + r * Math.sin(this.player.hookAngle);
+      // Update player position along the pendulum arc
+      this.player.x = a.x + r * Math.sin(this.player.hookAngle);
+      this.player.y = a.y + r * Math.cos(this.player.hookAngle);
 
       // Tangential velocity representation
-      this.player.vx = -r * Math.sin(this.player.hookAngle) * this.player.hookAngularVel;
-      this.player.vy = r * Math.cos(this.player.hookAngle) * this.player.hookAngularVel;
+      this.player.vx = r * Math.cos(this.player.hookAngle) * this.player.hookAngularVel;
+      this.player.vy = -r * Math.sin(this.player.hookAngle) * this.player.hookAngularVel;
 
       // Rotation matches swing tension
-      this.player.angle = this.player.hookAngle + Math.PI / 2;
+      this.player.angle = this.player.hookAngle;
     } else {
       // Free flight: gravity & air resistance
       this.player.vy += this.gravity;
       this.player.vx *= this.airResistance;
       this.player.vy *= this.airResistance;
 
+      // Gentle clamp on max flight speed
+      const curSpeed = Math.hypot(this.player.vx, this.player.vy);
+      if (curSpeed > this.maxSpeed) {
+        const s = this.maxSpeed / curSpeed;
+        this.player.vx *= s;
+        this.player.vy *= s;
+      }
+
       this.player.x += this.player.vx;
       this.player.y += this.player.vy;
 
       // Dynamic mid-air flips
-      const flightSpeed = Math.sqrt(this.player.vx * this.player.vx + this.player.vy * this.player.vy);
-      this.player.rotSpeed = (this.player.vx * 0.04);
+      this.player.rotSpeed = (this.player.vx * 0.035);
       this.player.angle += this.player.rotSpeed;
 
       // Detect 360-degree stunt flips
@@ -521,32 +510,6 @@ class WildSwingsGame {
     }
 
     for (const t of this.player.trail) t.alpha *= 0.9;
-
-    // 3. Trampoline Bouncer Collisions
-    for (const pad of this.trampolines) {
-      if (pad.pressed > 0) pad.pressed *= 0.85;
-
-      const px = this.player.x;
-      const py = this.player.y + this.player.radius;
-
-      if (
-        px >= pad.x &&
-        px <= pad.x + pad.width &&
-        py >= pad.y - 12 &&
-        py <= pad.y + pad.height &&
-        this.player.vy > 0
-      ) {
-        // High bounce upward & forward
-        this.player.y = pad.y - this.player.radius - 2;
-        this.player.vy = -pad.bouncePower;
-        this.player.vx = Math.max(this.player.vx * 1.15, 8);
-        pad.pressed = 12;
-
-        wildAudio.playBounce(pad.bouncePower / 20);
-        this.spawnBounceShockwave(pad.x + pad.width / 2, pad.y);
-        break;
-      }
-    }
 
     // 4. Boost Ring Portals
     for (const b of this.boosters) {
@@ -839,11 +802,6 @@ class WildSwingsGame {
       this.renderAnchor(a);
     }
 
-    // 5. Draw Trampoline Bouncers
-    for (const pad of this.trampolines) {
-      this.renderTrampoline(pad);
-    }
-
     // 6. Draw Hazards & Boosters
     for (const h of this.hazards) {
       this.renderHazard(h);
@@ -893,18 +851,63 @@ class WildSwingsGame {
     const camY = this.camera.y;
 
     if (this.theme === 'spiderman') {
-      // Midnight NYC Skyline with Searchlights
-      const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
-      grad.addColorStop(0, '#0c0e29');
-      grad.addColorStop(0.6, '#181a44');
-      grad.addColorStop(1, '#2d143c');
-      this.ctx.fillStyle = grad;
-      this.ctx.fillRect(0, 0, this.width, this.height);
+      const W = this.width;
+      const H = this.height;
+      const now = performance.now() / 1000;
 
-      // Twinkling stars
+      // 1. Deep NYC Twilight Night Sky Gradient
+      const grad = this.ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0,   '#02041a');
+      grad.addColorStop(0.45, '#0a0d36');
+      grad.addColorStop(0.8,  '#1d0d33');
+      grad.addColorStop(1,    '#2b0e2d');
+      this.ctx.fillStyle = grad;
+      this.ctx.fillRect(0, 0, W, H);
+
+      // 2. 3D Sweeping Searchlight Beams in Sky
+      const beamAngle1 = Math.sin(now * 0.4) * 0.35;
+      const beamAngle2 = Math.cos(now * 0.3) * 0.40;
+      
+      // Searchlight 1 (Cyan/Blue Beam)
+      this.ctx.save();
+      this.ctx.translate(W * 0.25, H);
+      this.ctx.rotate(beamAngle1);
+      const beamGrad1 = this.ctx.createLinearGradient(0, 0, 0, -H * 1.2);
+      beamGrad1.addColorStop(0, 'rgba(0, 240, 255, 0.12)');
+      beamGrad1.addColorStop(0.6, 'rgba(0, 240, 255, 0.04)');
+      beamGrad1.addColorStop(1, 'rgba(0, 240, 255, 0)');
+      this.ctx.fillStyle = beamGrad1;
+      this.ctx.beginPath();
+      this.ctx.moveTo(-15, 0);
+      this.ctx.lineTo(-90, -H * 1.2);
+      this.ctx.lineTo(90, -H * 1.2);
+      this.ctx.lineTo(15, 0);
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.restore();
+
+      // Searchlight 2 (Magenta/Spider Red Beam)
+      this.ctx.save();
+      this.ctx.translate(W * 0.75, H);
+      this.ctx.rotate(beamAngle2);
+      const beamGrad2 = this.ctx.createLinearGradient(0, 0, 0, -H * 1.2);
+      beamGrad2.addColorStop(0, 'rgba(255, 42, 85, 0.10)');
+      beamGrad2.addColorStop(0.6, 'rgba(255, 42, 85, 0.03)');
+      beamGrad2.addColorStop(1, 'rgba(255, 42, 85, 0)');
+      this.ctx.fillStyle = beamGrad2;
+      this.ctx.beginPath();
+      this.ctx.moveTo(-15, 0);
+      this.ctx.lineTo(-80, -H * 1.2);
+      this.ctx.lineTo(80, -H * 1.2);
+      this.ctx.lineTo(15, 0);
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.restore();
+
+      // 3. Stars with Per-Star Twinkle
       this.ctx.fillStyle = '#ffffff';
       for (const s of this.bgStars) {
-        const sx = ((s.x - camX * 0.05) % (this.width + 400) + this.width + 400) % (this.width + 400) - 200;
+        const sx = ((s.x - camX * 0.05) % (W + 400) + W + 400) % (W + 400) - 200;
         this.ctx.globalAlpha = s.opacity;
         this.ctx.beginPath();
         this.ctx.arc(sx, s.y, s.radius, 0, Math.PI * 2);
@@ -912,15 +915,62 @@ class WildSwingsGame {
       }
       this.ctx.globalAlpha = 1;
 
-      // Parallax Skyscraper Silhouettes
+      // 4. Parallax 3D Skyscraper Projections with Front & Side Depth Faces
       for (const b of this.cityBuildings) {
         const factor = b.layer === 1 ? 0.12 : b.layer === 2 ? 0.25 : 0.42;
         const bx = b.x - camX * factor;
-        const by = this.height - b.height + camY * 0.1;
+        const by = H - b.height + camY * 0.1;
+        const pOffset = (bx - W / 2) * (b.layer === 1 ? 0.03 : b.layer === 2 ? 0.05 : 0.07);
 
-        if (bx > -200 && bx < this.width + 200) {
+        if (bx > -200 && bx < W + 200) {
+          // Front Face
           this.ctx.fillStyle = b.layer === 1 ? '#0a0d24' : b.layer === 2 ? '#121738' : '#1c224f';
           this.ctx.fillRect(bx, by, b.width, b.height + 400);
+
+          // 3D Depth Side Face
+          this.ctx.fillStyle = pOffset > 0 ? '#050717' : '#232b60';
+          this.ctx.beginPath();
+          const sideX = pOffset > 0 ? bx + b.width : bx;
+          this.ctx.moveTo(sideX, by);
+          this.ctx.lineTo(sideX + pOffset, by - 10);
+          this.ctx.lineTo(sideX + pOffset, by + b.height + 400);
+          this.ctx.lineTo(sideX, by + b.height + 400);
+          this.ctx.closePath();
+          this.ctx.fill();
+
+          // 3D Roof Top Cap
+          this.ctx.fillStyle = '#28326d';
+          this.ctx.beginPath();
+          this.ctx.moveTo(bx, by);
+          this.ctx.lineTo(bx + pOffset, by - 10);
+          this.ctx.lineTo(bx + b.width + pOffset, by - 10);
+          this.ctx.lineTo(bx + b.width, by);
+          this.ctx.closePath();
+          this.ctx.fill();
+
+          // 3D Metallic Rooftop Spire
+          if (b.hasAntenna) {
+            const spireX = bx + b.width * 0.5 + pOffset * 0.5;
+            const spireH = 30 + (b.width % 25);
+            this.ctx.fillStyle = '#3a498c';
+            this.ctx.beginPath();
+            this.ctx.moveTo(spireX - 3, by - 10);
+            this.ctx.lineTo(spireX, by - 10 - spireH);
+            this.ctx.lineTo(spireX + 3, by - 10);
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            // Blinking 3D Aviation Light
+            if (Math.sin(now * 2.2 + b.x * 0.01) > 0.1) {
+              this.ctx.fillStyle = '#ff2a55';
+              this.ctx.shadowColor = '#ff2a55';
+              this.ctx.shadowBlur = 8;
+              this.ctx.beginPath();
+              this.ctx.arc(spireX, by - 10 - spireH, 3, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.shadowBlur = 0;
+            }
+          }
 
           // Lit Windows Grid
           if (b.windowsLit) {
@@ -934,6 +984,24 @@ class WildSwingsGame {
             }
           }
         }
+      }
+
+      // 5. 3D NYC Ground Street Grid Traffic Light Glow
+      const streetGrad = this.ctx.createLinearGradient(0, H - 45, 0, H);
+      streetGrad.addColorStop(0, 'rgba(255, 42, 85, 0)');
+      streetGrad.addColorStop(0.5, 'rgba(255, 165, 2, 0.12)');
+      streetGrad.addColorStop(1, 'rgba(0, 240, 255, 0.18)');
+      this.ctx.fillStyle = streetGrad;
+      this.ctx.fillRect(0, H - 45, W, 45);
+
+      // Pulsing traffic particles in depth
+      for (let i = 0; i < 16; i++) {
+        const tx = ((i * 140 + now * 90) % (W + 200)) - 100;
+        const ty = H - 8 - Math.sin(i * 1.5) * 6;
+        this.ctx.fillStyle = i % 2 === 0 ? 'rgba(255, 42, 85, 0.65)' : 'rgba(255, 200, 80, 0.65)';
+        this.ctx.beginPath();
+        this.ctx.arc(tx, ty, 3 + (i % 3), 0, Math.PI * 2);
+        this.ctx.fill();
       }
     } else if (this.theme === 'monkey') {
       // Lush Tropical Jungle with Canopy Light Beams

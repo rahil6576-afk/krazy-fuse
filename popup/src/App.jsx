@@ -144,6 +144,9 @@ export default function App() {
         } else if (gameState === 'paused') {
           handleResumeGame();
         }
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'popup-game', isPaused: gameState === 'playing' }, '*');
+        }
       }
     };
 

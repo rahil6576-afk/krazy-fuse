@@ -1,232 +1,217 @@
-// gravity-audio.js — Procedural Web Audio FX & Synthwave Music for Gravity Flip
-class GravityAudioManager {
+// gravity-audio.js — Web Audio API Sound Engine for Gravity Flip (2D Cavern Runner Edition)
+// Synthesizes Gravity Flip Swoop, Coin Pickup, Shield Break, Powerups, Level Up, and BGM
+
+class GravityAudioEngine {
     constructor() {
         this.ctx = null;
-        this.muted = localStorage.getItem('gravity_muted') === 'true';
-        this.bgmPlaying = false;
-        this.bgmTimer = null;
-        this.step = 0;
+        this.isMuted = false;
+        this.bgmOsc = null;
+        this.bgmGain = null;
+        this.isBGMPlaying = false;
     }
 
     init() {
         if (!this.ctx) {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (AudioCtx) this.ctx = new AudioCtx();
+            this.ctx = new AudioCtx();
         }
         if (this.ctx && this.ctx.state === 'suspended') {
             this.ctx.resume();
         }
     }
 
+    // Gravity Invert Swoop
     playFlip() {
-        if (this.muted || !this.ctx) return;
+        if (this.isMuted) return;
+        this.init();
+
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(320, now);
-        osc.frequency.exponentialRampToValueAtTime(750, now + 0.08);
 
-        gain.gain.setValueAtTime(0.22, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(540, now + 0.18);
+
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
+
         osc.start(now);
-        osc.stop(now + 0.12);
+        osc.stop(now + 0.18);
     }
 
+    // Gem / Coin Pickup Chime
     playCoin() {
-        if (this.muted || !this.ctx) return;
+        if (this.isMuted) return;
+        this.init();
+
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
+
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(987.77, now); // B5
-        osc.frequency.setValueAtTime(1318.51, now + 0.06); // E6
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.setValueAtTime(1320, now + 0.08);
 
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.2);
-    }
 
-    playPowerup() {
-        if (this.muted || !this.ctx) return;
-        const now = this.ctx.currentTime;
-        const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
-        notes.forEach((freq, idx) => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(freq, now + idx * 0.04);
-
-            gain.gain.setValueAtTime(0.18, now + idx * 0.04);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.15);
-
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(now + idx * 0.04);
-            osc.stop(now + idx * 0.04 + 0.15);
-        });
-    }
-
-    playShield() {
-        if (this.muted || !this.ctx) return;
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.18);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
         osc.start(now);
         osc.stop(now + 0.22);
     }
 
-    playMagnet() {
-        if (this.muted || !this.ctx) return;
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.linearRampToValueAtTime(600, now + 0.15);
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.2);
-    }
+    // Shield Pickup
+    playShield() {
+        if (this.isMuted) return;
+        this.init();
 
-    playSlowMo() {
-        if (this.muted || !this.ctx) return;
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
+
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(150, now + 0.3);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.3);
-    }
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(1040, now + 0.25);
 
-    playShieldBreak() {
-        if (this.muted || !this.ctx) return;
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.exponentialRampToValueAtTime(120, now + 0.25);
-
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
+
         osc.start(now);
         osc.stop(now + 0.25);
     }
 
-    playLevelUp() {
-        if (this.muted || !this.ctx) return;
+    // Shield Break Impact
+    playShieldBreak() {
+        if (this.isMuted) return;
+        this.init();
+
         const now = this.ctx.currentTime;
-        const notes = [440, 554.37, 659.25, 880];
-        notes.forEach((freq, i) => {
+        const bufferSize = this.ctx.sampleRate * 0.18;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(1200, now);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.6, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        noise.start(now);
+    }
+
+    playMagnet() {
+        this.playCoin();
+    }
+
+    playSlowMo() {
+        this.playShield();
+    }
+
+    // Death Impact
+    playDeath() {
+        if (this.isMuted) return;
+        this.init();
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.45);
+
+        gain.gain.setValueAtTime(0.7, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.45);
+    }
+
+    // Level Up Chime
+    playLevelUp() {
+        if (this.isMuted) return;
+        this.init();
+
+        const now = this.ctx.currentTime;
+        [440, 554.37, 659.25, 880].forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
+
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + i * 0.07);
-            gain.gain.setValueAtTime(0.28, now + i * 0.07);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.25);
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+            gain.gain.setValueAtTime(0.3, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.2);
+
             osc.connect(gain);
             gain.connect(this.ctx.destination);
-            osc.start(now + i * 0.07);
-            osc.stop(now + i * 0.07 + 0.25);
+
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.2);
         });
     }
 
-    playDeath() {
-        if (this.muted || !this.ctx) return;
-        const now = this.ctx.currentTime;
-        // White noise explosion crunch
-        const bufferSize = this.ctx.sampleRate * 0.4;
-        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const output = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            output[i] = Math.random() * 2 - 1;
-        }
-
-        const whiteNoise = this.ctx.createBufferSource();
-        whiteNoise.buffer = buffer;
-
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(800, now);
-        filter.frequency.exponentialRampToValueAtTime(40, now + 0.4);
-
-        const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.5, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-
-        whiteNoise.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.ctx.destination);
-        whiteNoise.start(now);
-    }
-
     startBGM() {
-        if (this.bgmPlaying || this.muted) return;
-        this.bgmPlaying = true;
-        this.step = 0;
-        const bassNotes = [110, 110, 146.83, 130.81, 98, 98, 123.47, 110];
+        if (this.isBGMPlaying || this.isMuted) return;
+        this.init();
 
-        this.bgmTimer = setInterval(() => {
-            if (!this.ctx || this.muted) return;
-            const now = this.ctx.currentTime;
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(bassNotes[this.step % bassNotes.length], now);
+        this.isBGMPlaying = true;
+        const now = this.ctx.currentTime;
 
-            gain.gain.setValueAtTime(0.08, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        this.bgmOsc = this.ctx.createOscillator();
+        this.bgmGain = this.ctx.createGain();
 
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(now);
-            osc.stop(now + 0.18);
+        this.bgmOsc.type = 'sine';
+        this.bgmOsc.frequency.setValueAtTime(110, now);
 
-            this.step++;
-        }, 220);
+        this.bgmGain.gain.setValueAtTime(0.06, now);
+
+        this.bgmOsc.connect(this.bgmGain);
+        this.bgmGain.connect(this.ctx.destination);
+
+        this.bgmOsc.start(now);
     }
 
     stopBGM() {
-        if (this.bgmTimer) {
-            clearInterval(this.bgmTimer);
-            this.bgmTimer = null;
+        if (this.bgmOsc) {
+            try {
+                this.bgmOsc.stop();
+                this.bgmOsc.disconnect();
+            } catch (e) {}
+            this.bgmOsc = null;
         }
-        this.bgmPlaying = false;
+        this.isBGMPlaying = false;
     }
 
     toggleMute() {
-        this.muted = !this.muted;
-        localStorage.setItem('gravity_muted', this.muted);
-        if (this.muted) this.stopBGM();
-        return this.muted;
+        this.isMuted = !this.isMuted;
+        if (this.isMuted) this.stopBGM();
+        return this.isMuted;
     }
 }
 
-window.gravityAudio = new GravityAudioManager();
+window.gravityAudio = new GravityAudioEngine();

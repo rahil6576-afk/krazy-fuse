@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Elevator of Doom 99 🛗💀 — krazio games</title>
-    <base href="/elevator-doom/">
     <!-- Favicon -->
     <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
     <!-- Google Fonts -->
@@ -12,11 +11,39 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="elevator-doom.css">
+    <script>
+        (function() {
+            if (window.parent !== window || window.location.search.includes('embedded=true')) {
+                document.documentElement.classList.add('is-embedded');
+                document.addEventListener('DOMContentLoaded', () => document.body && document.body.classList.add('is-embedded'));
+            }
+            function exitToPortal() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
+                } else {
+                    window.location.href = '../index.html';
+                }
+            }
+            window.exitToPortal = exitToPortal;
+            document.addEventListener('click', function(e) {
+                const a = e.target.closest('a');
+                if (a) {
+                    const href = a.getAttribute('href');
+                    if (href && (href.includes('index.html') || href === '/' || href === '../' || href === '../index.html')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        exitToPortal();
+                        return false;
+                    }
+                }
+            }, true);
+        })();
+    </script>
 </head>
 <body>
 
     <!-- Simple Backward Arrow Button -->
-    <a href="../index.html" id="krazio-floating-back" title="Back to Portal" aria-label="Back">
+    <a href="../index.html" target="_parent" id="krazio-floating-back" title="Back to Portal" aria-label="Back">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
         </svg>
@@ -339,7 +366,7 @@
           <button class="portal-resume-btn" onclick="resumeElevatorGame()" style="justify-content: center; width: 100%; font-size: 1.05rem; padding: 12px 20px; background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56,189,248,0.4); border-radius: 999px; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.4);">
             <span>▶️ RESUME (ESC)</span>
           </button>
-          <button onclick="resumeElevatorGame(); initMatch();" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
+          <button onclick="resumeElevatorGame(); startNewRun();" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
             <span>🔄 RESTART RUN</span>
           </button>
           <a href="../index.html" style="justify-content: center; width: 100%; font-size: 0.92rem; padding: 10px 20px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; text-decoration: none; text-align: center; display: inline-block;">

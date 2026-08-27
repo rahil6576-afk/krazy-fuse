@@ -1076,23 +1076,24 @@ function createScorePopup(x, y, text, color = '#fbbf24') {
 }
 
 function updateAndDrawParticles() {
+    // Cap particle array to 80 to prevent memory growth
+    if (particles.length > 80) particles.splice(0, particles.length - 80);
+
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.life--;
 
         if (p.type === 'text') {
             p.y += p.vy;
-            ctx.save();
             ctx.font = '900 16px Outfit, sans-serif';
             ctx.fillStyle = p.color;
             ctx.fillText(p.text, p.x, p.y);
-            ctx.restore();
         } else if (p.type === 'ring') {
             p.radius += (p.maxRadius - p.radius) * 0.25;
             ctx.save();
             ctx.strokeStyle = p.color;
             ctx.lineWidth = 2;
-            ctx.globalAlpha = p.life / 14;
+            ctx.globalAlpha = Math.max(0, p.life / 14);
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.stroke();
@@ -1100,18 +1101,16 @@ function updateAndDrawParticles() {
         } else if (p.type === 'ghost') {
             ctx.save();
             ctx.fillStyle = p.color;
-            ctx.globalAlpha = (p.life / 8) * 0.35;
+            ctx.globalAlpha = Math.max(0, (p.life / 8) * 0.35);
             ctx.fillRect(p.x, p.y, p.width, p.height);
             ctx.restore();
         } else {
             p.x += p.vx;
             p.y += p.vy;
-            ctx.save();
             ctx.fillStyle = p.color;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             ctx.fill();
-            ctx.restore();
         }
 
         if (p.life <= 0) {
@@ -2188,70 +2187,67 @@ function render() {
     requestAnimationFrame(render);
 }
 
-// HUD Updates
+// Cached HUD DOM Elements
+const _hudElements = {
+    time: null,
+    coins: null,
+    zone: null,
+    staminaFill: null,
+    staminaVal: null,
+    powerupBar: null
+};
+
+let _lastHudUpdateFrame = 0;
+let _lastStamPct = -1;
+let _lastPowerupKey = '';
+
 function updateHUD(biome) {
-    document.getElementById('hud-time').textContent = survivalTime.toFixed(1) + 's';
-    document.getElementById('hud-coins').textContent = (totalCoins + runCoins) + ' P';
-    document.getElementById('hud-zone').textContent = biome.name;
+    if (!_hudElements.time) {
+        _hudElements.time = document.getElementById('hud-time');
+        _hudElements.coins = document.getElementById('hud-coins');
+        _hudElements.zone = document.getElementById('hud-zone');
+        _hudElements.staminaFill = document.getElementById('stamina-fill');
+        _hudElements.staminaVal = document.getElementById('hud-stamina-val');
+        _hudElements.powerupBar = document.getElementById('active-powerup-bar');
+    }
 
-    const staminaFill = document.getElementById('stamina-fill');
-    if (staminaFill) {
-        const stamPct = Math.max(0, Math.min(100, Math.round(player.stamina / player.maxStamina * 100)));
-        staminaFill.style.width = stamPct + '%';
-        if (stamPct < 35) {
-            staminaFill.style.background = 'linear-gradient(90deg, #ef4444, #f59e0b)';
-            staminaFill.style.boxShadow = '0 0 8px rgba(239, 68, 68, 0.8)';
-        } else {
-            staminaFill.style.background = 'linear-gradient(90deg, #38bdf8, #10b981)';
-            staminaFill.style.boxShadow = '0 0 8px rgba(56, 189, 248, 0.8)';
+    if (_hudElements.time) _hudElements.time.textContent = survivalTime.toFixed(1) + 's';
+    if (_hudElements.coins) _hudElements.coins.textContent = (totalCoins + runCoins) + ' P';
+    if (_hudElements.zone) _hudElements.zone.textContent = biome.name;
+
+    const stamPct = Math.max(0, Math.min(100, Math.round(player.stamina / player.maxStamina * 100)));
+    if (_hudElements.staminaFill && stamPct !== _lastStamPct) {
+        _lastStamPct = stamPct;
+        _hudElements.staminaFill.style.width = stamPct + '%';
+        _hudElements.staminaFill.style.background = stamPct < 35 ? 'linear-gradient(90deg, #ef4444, #f59e0b)' : 'linear-gradient(90deg, #38bdf8, #10b981)';
+    }
+
+    if (_hudElements.staminaVal) {
+        _hudElements.staminaVal.textContent = stamPct + '%';
+        _hudElements.staminaVal.style.color = stamPct < 35 ? '#f87171' : '#38bdf8';
+    }
+
+    // Active powerups tag - only rebuild when state changes
+    const powerupKey = `${player.coffeeTimer > 0 ? Math.ceil(player.coffeeTimer / 30) : 0}-${player.shield > 0}-${player.ptoTimer > 0 ? Math.ceil(player.ptoTimer / 30) : 0}-${player.hasExtraLife}-${player.doublePointsActive}`;
+    if (_hudElements.powerupBar && powerupKey !== _lastPowerupKey) {
+        _lastPowerupKey = powerupKey;
+        let html = '';
+        if (player.coffeeTimer > 0) {
+            html += `<div class="powerup-tag">🚀 Rocket / Espresso (${(player.coffeeTimer / 60).toFixed(1)}s)</div>`;
         }
-    }
-
-    const staminaVal = document.getElementById('hud-stamina-val');
-    if (staminaVal) {
-        staminaVal.textContent = Math.round(player.stamina) + '%';
-        staminaVal.style.color = player.stamina < 35 ? '#f87171' : '#38bdf8';
-    }
-
-    // Active powerups tag
-    const powerupContainer = document.getElementById('active-powerup-bar');
-    powerupContainer.innerHTML = '';
-
-    if (player.coffeeTimer > 0) {
-        const tag = document.createElement('div');
-        tag.className = 'powerup-tag';
-        tag.innerHTML = `🚀 Rocket / Espresso (${(player.coffeeTimer / 60).toFixed(1)}s)`;
-        powerupContainer.appendChild(tag);
-    }
-    if (player.shield > 0) {
-        const tag = document.createElement('div');
-        tag.className = 'powerup-tag';
-        tag.style.borderColor = '#38bdf8';
-        tag.innerHTML = `🎧 Noise-Cancel Shield Active`;
-        powerupContainer.appendChild(tag);
-    }
-    if (player.ptoTimer > 0) {
-        const tag = document.createElement('div');
-        tag.className = 'powerup-tag';
-        tag.style.borderColor = '#10b981';
-        tag.innerHTML = `🏝️ PTO Coin Magnet (${(player.ptoTimer / 60).toFixed(1)}s)`;
-        powerupContainer.appendChild(tag);
-    }
-    if (player.hasExtraLife) {
-        const tag = document.createElement('div');
-        tag.className = 'powerup-tag';
-        tag.style.borderColor = '#10b981';
-        tag.style.color = '#34d399';
-        tag.innerHTML = `🛡️ HR Revive Ready`;
-        powerupContainer.appendChild(tag);
-    }
-    if (player.doublePointsActive) {
-        const tag = document.createElement('div');
-        tag.className = 'powerup-tag';
-        tag.style.borderColor = '#fbbf24';
-        tag.style.color = '#fbbf24';
-        tag.innerHTML = `💰 2x Points Active`;
-        powerupContainer.appendChild(tag);
+        if (player.shield > 0) {
+            html += `<div class="powerup-tag" style="border-color:#38bdf8;">🎧 Noise-Cancel Shield Active</div>`;
+        }
+        if (player.ptoTimer > 0) {
+            html += `<div class="powerup-tag" style="border-color:#10b981;">🏝️ PTO Coin Magnet (${(player.ptoTimer / 60).toFixed(1)}s)</div>`;
+        }
+        if (player.hasExtraLife) {
+            html += `<div class="powerup-tag" style="border-color:#10b981; color:#34d399;">🛡️ HR Revive Ready</div>`;
+        }
+        if (player.doublePointsActive) {
+            html += `<div class="powerup-tag" style="border-color:#fbbf24; color:#fbbf24;">💰 2x Points Active</div>`;
+        }
+        _hudElements.powerupBar.innerHTML = html;
     }
 }
 
@@ -2412,7 +2408,22 @@ window.addEventListener('keydown', (e) => {
         return;
     }
 
-    if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        if (currentState === GAME_STATE.PLAYING) {
+            pauseGame();
+        } else if (currentState === GAME_STATE.PAUSED) {
+            resumeGame();
+        }
+        if (window.parent !== window) {
+            window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'office-escape', isPaused: currentState === GAME_STATE.PAUSED }, '*');
+        } else {
+            window.location.href = '../index.html?game=office-escape';
+        }
+        return;
+    }
+
+    if (e.key === 'p' || e.key === 'P') {
         e.preventDefault();
         if (currentState === GAME_STATE.PLAYING) {
             pauseGame();
@@ -2421,18 +2432,6 @@ window.addEventListener('keydown', (e) => {
         }
         return;
     }
-
-// Instant trigger on first Escape when exiting native browser fullscreen
-const handleFullscreenExitOffice = () => {
-    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-    if (!isFs && currentState === GAME_STATE.PLAYING) {
-        pauseGame();
-    }
-};
-document.addEventListener('fullscreenchange', handleFullscreenExitOffice);
-document.addEventListener('webkitfullscreenchange', handleFullscreenExitOffice);
-document.addEventListener('mozfullscreenchange', handleFullscreenExitOffice);
-document.addEventListener('MSFullscreenChange', handleFullscreenExitOffice);
 
     // Ignore key auto-repeats for Jump and Dash to avoid consuming double jump / stamina instantly
     if (e.repeat && (e.code === 'Space' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === 'Shift' || e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D')) {
@@ -3126,8 +3125,10 @@ function goHome() {
 }
 
 function handleBackNavigation() {
-    if (currentState === GAME_STATE.PLAYING || currentState === GAME_STATE.PAUSED || currentState === GAME_STATE.GAMEOVER) {
-        goHome();
+    if (window.exitToPortal) {
+        window.exitToPortal();
+    } else if (window.parent !== window) {
+        window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
     } else {
         window.location.href = '../index.html';
     }

@@ -644,6 +644,20 @@ canvas#elevatorCanvas {
     box-shadow: 0 8px 20px rgba(239, 68, 68, 0.5);
 }
 
+.btn-retry-highlight {
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    border: 2px solid #fde68a !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 20px rgba(217, 119, 6, 0.5) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-retry-highlight:hover {
+    transform: translateY(-3px) scale(1.03) !important;
+    box-shadow: 0 10px 28px rgba(217, 119, 6, 0.75) !important;
+    filter: brightness(1.1) !important;
+}
+
 .btn-text {
     text-align: left;
 }
@@ -728,6 +742,30 @@ canvas#elevatorCanvas {
     color: #38bdf8;
 }
 
+/* Master Screen Overlay (Lobby, GameOver, Victory) */
+.screen {
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 10, 20, 0.94);
+    backdrop-filter: blur(14px);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-y: auto;
+    animation: fadeIn 0.25s ease;
+}
+
+.screen.hidden,
+.decision-overlay.hidden,
+.safe-room-overlay.hidden,
+.boss-health-card.hidden,
+.hidden {
+    display: none !important;
+}
+
 /* Lobby Roster */
 .lobby-roster-card {
     background: rgba(15, 23, 42, 0.8);
@@ -749,8 +787,8 @@ canvas#elevatorCanvas {
 
 .passenger-preview-grid {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
 }
 
 .p-slot {
@@ -942,6 +980,39 @@ canvas#elevatorCanvas {
 
 .spectator-banner.hidden {
     display: none;
+}
+
+/* Embedded Mode (inside Krazy Fuse Portal iframe) */
+html.is-embedded .portal-topbar,
+html.is-embedded .portal-sidebar,
+html.is-embedded .portal-rec-col,
+html.is-embedded .game-meta-bar,
+html.is-embedded #krazio-floating-back,
+body.is-embedded .portal-topbar,
+body.is-embedded .portal-sidebar,
+body.is-embedded .portal-rec-col,
+body.is-embedded .game-meta-bar,
+body.is-embedded #krazio-floating-back {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+html.is-embedded .portal-center-col,
+body.is-embedded .portal-center-col {
+    padding: 0 !important;
+    justify-content: center !important;
+}
+
+html.is-embedded #game-wrapper,
+body.is-embedded #game-wrapper {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
 }
 
 /* ==========================================

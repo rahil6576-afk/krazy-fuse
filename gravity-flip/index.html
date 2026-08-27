@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gravity Flip: Cavern Runner ⛏️🪨 — krazio games</title>
-    <base href="/gravity-flip/">
     <!-- Favicon -->
     <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
     <!-- Google Fonts -->
@@ -12,6 +11,36 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="gravity-flip.css">
+    <script>
+        (function() {
+            if (window.parent !== window || new URLSearchParams(window.location.search).get('embedded') === 'true') {
+                document.documentElement.classList.add('is-embedded');
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (document.body) document.body.classList.add('is-embedded');
+                });
+            }
+            function exitToPortal() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
+                } else {
+                    window.location.href = '../index.html';
+                }
+            }
+            window.exitToPortal = exitToPortal;
+            document.addEventListener('click', function(e) {
+                const a = e.target.closest('a');
+                if (a) {
+                    const href = a.getAttribute('href');
+                    if (href && (href.includes('index.html') || href === '/' || href === '../' || href === '../index.html')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        exitToPortal();
+                        return false;
+                    }
+                }
+            }, true);
+        })();
+    </script>
     <style>
         /* Smooth 60fps Paused Portal Transition System */
         #game-view-wrapper {
@@ -672,7 +701,7 @@
         <!-- Center Column -->
         <main class="portal-center-col">
           <div id="game-wrapper">
-        <!-- Game Canvas -->
+        <!-- 3D WebGL Game Canvas -->
         <canvas id="gameCanvas"></canvas>
 
         <!-- In-Game HUD -->
@@ -691,7 +720,7 @@
 
             <div class="hud-group">
                 <div class="hud-pill speed-pill">
-                    <span id="hud-speed">⚡ 65 KM/H</span>
+                    <span id="hud-speed">⚡ 32 KM/H</span>
                 </div>
                 <button id="btn-pause" class="hud-btn" title="Pause Game (P / ESC)">⏸️</button>
                 <button id="btn-mute" class="hud-btn" title="Toggle Sound">🔊</button>
@@ -919,29 +948,23 @@
         };
 
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+            if (e.key === 'Escape') {
                 e.preventDefault();
                 if (window.game) {
-                    if (window.game.gameState === 'PAUSED') {
-                        window.resumeGravityGame();
-                    } else if (window.game.gameState === 'PLAYING') {
-                        window.pauseGravityGame();
-                    }
+                    window.game.togglePause();
+                }
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'gravity-flip', isPaused: window.game?.gameState === 'PAUSED' }, '*');
+                } else {
+                    window.location.href = '../index.html?game=gravity-flip';
+                }
+            } else if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+                if (window.game) {
+                    window.game.togglePause();
                 }
             }
         });
-
-        // Instant trigger on first Escape when exiting native browser fullscreen
-        const handleFullscreenExitGravity = () => {
-            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-            if (!isFs && window.game && window.game.gameState === 'PLAYING') {
-                window.pauseGravityGame();
-            }
-        };
-        document.addEventListener('fullscreenchange', handleFullscreenExitGravity);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenExitGravity);
-        document.addEventListener('mozfullscreenchange', handleFullscreenExitGravity);
-        document.addEventListener('MSFullscreenChange', handleFullscreenExitGravity);
     </script>
     <script src="../assets/krazy-screenshot.js"></script>
 </body>

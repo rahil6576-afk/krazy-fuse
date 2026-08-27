@@ -3,12 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <base href="/flappy-man/">
     <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
     <!-- Favicon & Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Fredoka:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            if (window.parent !== window || window.location.search.includes('embedded=true')) {
+                document.documentElement.classList.add('is-embedded');
+                document.addEventListener('DOMContentLoaded', () => document.body && document.body.classList.add('is-embedded'));
+            }
+            function exitToPortal() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
+                } else {
+                    window.location.href = '../index.html';
+                }
+            }
+            window.exitToPortal = exitToPortal;
+            document.addEventListener('click', function(e) {
+                const a = e.target.closest('a');
+                if (a) {
+                    const href = a.getAttribute('href');
+                    if (href && (href.includes('index.html') || href === '/' || href === '../' || href === '../index.html')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        exitToPortal();
+                        return false;
+                    }
+                }
+            }, true);
+        })();
+    </script>
     <style>
       #krazio-floating-back {
         position: fixed;
@@ -3263,6 +3290,23 @@
                 this.drawGround();
                 this.drawParticles();
                 this.drawFlappyMan();
+
+                if (this.state === 'PAUSED') {
+                    this.ctx.save();
+                    this.ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+                    this.ctx.fillRect(0, 0, this.width, this.height);
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.font = '900 28px Outfit, sans-serif';
+                    this.ctx.shadowColor = '#38bdf8';
+                    this.ctx.shadowBlur = 15;
+                    this.ctx.fillText('⏸️ GAME PAUSED', this.width / 2, this.height / 2 - 10);
+                    this.ctx.font = '700 15px Outfit, sans-serif';
+                    this.ctx.fillStyle = '#94a3b8';
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.fillText('Press ESC or P to Resume', this.width / 2, this.height / 2 + 25);
+                    this.ctx.restore();
+                }
             }
 
             loop(timestamp) {
@@ -3410,28 +3454,32 @@
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
                 e.preventDefault();
-                if (document.body.classList.contains('portal-paused')) {
-                    window.resumeFlappyGame();
-                } else {
-                    window.pauseFlappyGame();
+                if (window.flappyGame) {
+                    if (window.flappyGame.state === 'PAUSED') {
+                        window.flappyGame.state = window.flappyGame.previousState || 'PLAYING';
+                    } else if (window.flappyGame.state === 'PLAYING') {
+                        window.flappyGame.previousState = window.flappyGame.state;
+                        window.flappyGame.state = 'PAUSED';
+                    }
+                    if (window.parent !== window) {
+                        window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'flappy-man', isPaused: window.flappyGame?.state === 'PAUSED' }, '*');
+                    }
                 }
             }
         });
 
-        // Instant trigger on first Escape when exiting native browser fullscreen
-        const handleFullscreenExitFlappy = () => {
-            if (isResumingFlappy) return;
-            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-            if (!isFs && !document.body.classList.contains('portal-paused')) {
-                if (window.flappyGame && (window.flappyGame.state === 'PLAYING' || window.flappyGame.state === 'READY')) {
-                    window.pauseFlappyGame();
+        window.addEventListener('message', (e) => {
+            if (e.data && (e.data.type === 'KRAZY_ESC_PAUSE' || e.data.type === 'KRAZY_PAUSE_TOGGLE')) {
+                if (window.flappyGame) {
+                    if (window.flappyGame.state === 'PAUSED') {
+                        window.flappyGame.state = window.flappyGame.previousState || 'PLAYING';
+                    } else if (window.flappyGame.state === 'PLAYING') {
+                        window.flappyGame.previousState = window.flappyGame.state;
+                        window.flappyGame.state = 'PAUSED';
+                    }
                 }
             }
-        };
-        document.addEventListener('fullscreenchange', handleFullscreenExitFlappy);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenExitFlappy);
-        document.addEventListener('mozfullscreenchange', handleFullscreenExitFlappy);
-        document.addEventListener('MSFullscreenChange', handleFullscreenExitFlappy);
+        });
 
         window.addEventListener('DOMContentLoaded', () => {
             window.flappyGame = new FlappyManGame();

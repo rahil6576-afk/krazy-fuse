@@ -1,4 +1,4 @@
-﻿// Office Escape: Corporate Run - Main Game Engine
+// Office Escape: Corporate Run - Main Game Engine
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -3034,7 +3034,22 @@ window.addEventListener('keydown', (e) => {
     // Audio context resume on first user interaction
     window.soundManager.init();
 
-    if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        if (currentState === GAME_STATE.PLAYING) {
+            pauseGame();
+        } else if (currentState === GAME_STATE.PAUSED) {
+            resumeGame();
+        }
+        if (window.parent !== window) {
+            window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'office-escape', isPaused: currentState === GAME_STATE.PAUSED }, '*');
+        } else {
+            window.location.href = '../index.html?game=office-escape';
+        }
+        return;
+    }
+
+    if (e.key === 'p' || e.key === 'P') {
         e.preventDefault();
         if (currentState === GAME_STATE.PLAYING) {
             pauseGame();

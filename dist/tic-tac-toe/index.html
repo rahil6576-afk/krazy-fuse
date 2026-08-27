@@ -9,9 +9,54 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
-
+    <script>
+        (function() {
+            if (window.parent !== window || window.location.search.includes('embedded=true')) {
+                document.documentElement.classList.add('is-embedded');
+                document.addEventListener('DOMContentLoaded', () => document.body && document.body.classList.add('is-embedded'));
+            }
+            function exitToPortal() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
+                } else {
+                    window.location.href = '../index.html';
+                }
+            }
+            window.exitToPortal = exitToPortal;
+            document.addEventListener('click', function(e) {
+                const a = e.target.closest('a');
+                if (a) {
+                    const href = a.getAttribute('href');
+                    if (href && (href.includes('index.html') || href === '/' || href === '../' || href === '../index.html')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        exitToPortal();
+                        return false;
+                    }
+                }
+            }, true);
+        })();
+    </script>
     <style>
+        html.is-embedded .portal-topbar,
+        html.is-embedded .portal-sidebar,
+        html.is-embedded .portal-rec-col,
+        html.is-embedded .game-meta-bar,
+        html.is-embedded #krazio-floating-back,
+        body.is-embedded .portal-topbar,
+        body.is-embedded .portal-sidebar,
+        body.is-embedded .portal-rec-col,
+        body.is-embedded .game-meta-bar,
+        body.is-embedded #krazio-floating-back {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        html.is-embedded .portal-center-col,
+        body.is-embedded .portal-center-col {
+            padding: 0 !important;
+            justify-content: center !important;
+        }
         :root {
             --bg-color: #080b16;
             --card-bg: rgba(18, 24, 43, 0.85);
@@ -1833,27 +1878,19 @@
         };
 
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+            if (e.key === 'Escape') {
                 e.preventDefault();
-                if (document.body.classList.contains('portal-paused') || isTicTacToePaused) {
-                    window.resumeTicTacToe();
+                isTicTacToePaused = !isTicTacToePaused;
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'tic-tac-toe', isPaused: isTicTacToePaused }, '*');
                 } else {
-                    window.pauseTicTacToe();
+                    window.location.href = '../index.html?game=tic-tac-toe';
                 }
+            } else if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+                isTicTacToePaused = !isTicTacToePaused;
             }
         });
-
-        // Instant trigger on first Escape when exiting native browser fullscreen
-        const handleFullscreenExitTTT = () => {
-            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-            if (!isFs && !isTicTacToePaused) {
-                window.pauseTicTacToe();
-            }
-        };
-        document.addEventListener('fullscreenchange', handleFullscreenExitTTT);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenExitTTT);
-        document.addEventListener('mozfullscreenchange', handleFullscreenExitTTT);
-        document.addEventListener('MSFullscreenChange', handleFullscreenExitTTT);
 
         // Start initial game
         initBoard();

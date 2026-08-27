@@ -92,10 +92,10 @@ export const DEFAULT_KEY_BINDINGS = {
         right: 'KeyD',
         lightPunch: 'KeyJ',
         heavyPunch: 'KeyK',
-        lightKick: 'KeyU',
-        heavyKick: 'KeyI',
+        lightKick: 'KeyI',
+        heavyKick: 'KeyO',
         special: 'KeyL',
-        ultimate: 'KeyO',
+        ultimate: 'KeyU',
         block: 'KeyH',
         dash: 'Space'
     },

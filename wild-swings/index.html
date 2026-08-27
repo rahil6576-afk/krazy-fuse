@@ -3,15 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <base href="/wild-swings/">
     <!-- Favicon -->
     <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <script>
+        (function() {
+            if (window.parent !== window || window.location.search.includes('embedded=true')) {
+                document.documentElement.classList.add('is-embedded');
+                document.addEventListener('DOMContentLoaded', () => document.body && document.body.classList.add('is-embedded'));
+            }
+            function exitToPortal() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
+                } else {
+                    window.location.href = '../index.html';
+                }
+            }
+            window.exitToPortal = exitToPortal;
+            document.addEventListener('click', function(e) {
+                const a = e.target.closest('a');
+                if (a) {
+                    const href = a.getAttribute('href');
+                    if (href && (href.includes('index.html') || href === '/' || href === '../' || href === '../index.html')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        exitToPortal();
+                        return false;
+                    }
+                }
+            }, true);
+        })();
+    </script>
     <style>
+        html.is-embedded .portal-topbar,
+        html.is-embedded .portal-sidebar,
+        html.is-embedded .portal-rec-col,
+        html.is-embedded .game-meta-bar,
+        html.is-embedded #krazio-floating-back,
+        body.is-embedded .portal-topbar,
+        body.is-embedded .portal-sidebar,
+        body.is-embedded .portal-rec-col,
+        body.is-embedded .game-meta-bar,
+        body.is-embedded #krazio-floating-back {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        html.is-embedded .portal-center-col,
+        body.is-embedded .portal-center-col {
+            padding: 0 !important;
+            justify-content: center !important;
+        }
       :root {
         --primary: #4353ff;
         --accent: #00f0ff;
@@ -1214,53 +1258,7 @@
     </style>
 </head>
 <body>
-
-    <!-- Master Game View Wrapper -->
-    <div id="game-view-wrapper">
-      <!-- Topbar for Paused Portal Mode -->
-      <header id="portal-paused-topbar" class="portal-topbar">
-        <div class="portal-nav-left">
-          <a class="portal-brand" href="../index.html" title="Krazy Fuse Arcade Portal">
-            <span class="portal-brand-icon">⚡</span>
-            <span><b>KRAZY FUSE</b><small>ARCADE PORTAL</small></span>
-          </a>
-          <div class="portal-search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" placeholder="Search 250+ free arcade games..." readonly onclick="window.location.href='../index.html'">
-          </div>
-        </div>
-
-        <div class="portal-nav-pills">
-          <a href="../index.html" class="nav-pill active">🔥 HOT</a>
-          <a href="../dart-board/index.html" class="nav-pill">🎯 2-PLAYER</a>
-          <a href="../office-escape/index.html" class="nav-pill">🏃 RUNNER</a>
-          <a href="../flappy-man/index.html" class="nav-pill">🦸 SUPERHERO</a>
-          <a href="../bomb-panic/index.html" class="nav-pill">💣 PARTY</a>
-        </div>
-
-        <div class="portal-nav-right">
-          <div class="portal-bank-badge" id="portal-top-bank">🪙 70 P</div>
-          <button id="btn-portal-maximize" class="portal-resume-btn" onclick="resumeSwingsGame()">
-            <span>▶️ RESUME (ESC)</span>
-          </button>
-        </div>
-      </header>
-
-      <div id="portal-paused-body" class="portal-layout-body">
-        <!-- Left Sidebar Navigation -->
-        <aside class="portal-sidebar">
-          <a href="../index.html" class="side-btn active" title="Home"><span>🏠</span><small>Home</small></a>
-          <a href="../index.html" class="side-btn" title="Trending"><span>🔥</span><small>Hot</small></a>
-          <a href="../dart-board/index.html" class="side-btn" title="2 Player"><span>👥</span><small>2-Player</small></a>
-          <a href="../flappy-man/index.html" class="side-btn" title="Arcade"><span>🕹️</span><small>Arcade</small></a>
-          <a href="../wild-swings/index.html" class="side-btn" title="Action"><span>⚡</span><small>Action</small></a>
-          <a href="../bomb-panic/index.html" class="side-btn" title="Party"><span>💣</span><small>Party</small></a>
-          <a href="../gravity-flip/index.html" class="side-btn" title="Reflex"><span>🔄</span><small>Reflex</small></a>
-        </aside>
-
-        <!-- Center Column -->
-        <main class="portal-center-col">
-          <div id="game-container">
+    <div id="game-container">
         <!-- 60FPS Stickman Hook Physics Canvas -->
         <canvas id="gameCanvas"></canvas>
 
@@ -1315,21 +1313,21 @@
                         <div class="theme-card-emoji">🕷️</div>
                         <div class="theme-card-info">
                             <h4>Spider-Man: NYC Skyline</h4>
-                            <p>Web sling between skyscraper spires</p>
+                            <p>Classic Red & Blue suit with 3D Skyscraper Spires</p>
                         </div>
                     </div>
                     <div class="theme-select-card" data-theme="monkey">
                         <div class="theme-card-emoji">🐒</div>
                         <div class="theme-card-info">
                             <h4>Jungle Monkey: Canopy Rush</h4>
-                            <p>Swing wild jungle vines across ancient ruins</p>
+                            <p>Swing wild jungle vines across ancient bamboo ruins</p>
                         </div>
                     </div>
                     <div class="theme-select-card" data-theme="tarzan">
                         <div class="theme-card-emoji">🌴</div>
                         <div class="theme-card-info">
                             <h4>Tarzan: Wild Jungle Canopy</h4>
-                            <p>Swing thick jungle lianas & leap across sunlit ancient ruins</p>
+                            <p>Swing thick jungle lianas & leap across sunlit ruins</p>
                         </div>
                     </div>
                 </div>
@@ -1371,7 +1369,7 @@
                         <span>🗺️ SELECT LEVEL (1-20)</span>
                     </button>
                     <button class="btn-secondary-link" id="btn-menu-theme" style="font-size: 1.05rem;">
-                        <span>🎨 CHOOSE CHARACTER THEME</span>
+                        <span>🎨 THEMES</span>
                     </button>
                     <a href="../index.html" class="btn-secondary-link" style="text-decoration: none; border-color: rgba(99, 102, 241, 0.4); color: #818cf8; font-size: 1.05rem;" title="Back to Krazio Games Portal">
                         <img src="krazio-icon.svg" alt="krazio" style="width: 20px; height: 20px; border-radius: 50%; display: inline-block;">
@@ -1470,90 +1468,7 @@
                 <div class="rhino-qte-cta">⚡ TAP / CLICK TO KICK! ⚡</div>
             </div>
         </div>
-      </div>
-
-      <!-- Under-Game Meta Action Bar -->
-      <div id="game-meta-bar" class="game-meta-bar">
-        <div class="game-meta-info">
-          <div class="game-avatar-icon">🕸️🐒</div>
-          <div>
-            <h3>Wild Swings: Hook & Flight</h3>
-            <div class="game-meta-tags">
-              <span class="tag-badge">Physics</span>
-              <span class="tag-badge">Swinging</span>
-              <span class="tag-badge">20 Levels</span>
-              <span class="meta-rating">⭐ 5.0 (31.8k votes)</span>
-            </div>
-          </div>
-        </div>
-        <div class="game-meta-actions">
-          <button class="meta-btn" id="btn-meta-like" onclick="this.classList.toggle('active')">
-            👍 <span>31.8k</span>
-          </button>
-          <button class="meta-btn" id="btn-meta-fav" onclick="this.classList.toggle('active')">
-            ⭐ Favorite
-          </button>
-          <button class="meta-btn" id="btn-meta-expand" onclick="resumeSwingsGame()">
-            ⛶ Expand (ESC)
-          </button>
-          <button class="meta-btn" id="btn-meta-share" onclick="if(navigator.clipboard){navigator.clipboard.writeText(window.location.href); alert('Game link copied!');}">
-            🔗 Share
-          </button>
-        </div>
-      </div>
-    </main>
-
-    <!-- Right Column: Recommended Games Grid -->
-    <aside id="portal-rec-col" class="portal-rec-col">
-      <div class="rec-header">
-        <span>🔥 RECOMMENDED GAMES</span>
-        <a href="../index.html">ALL <span>→</span></a>
-      </div>
-      <div class="rec-grid">
-        <a href="../office-escape/index.html" class="rec-card">
-          <div class="rec-badge">⚡ SPRINT</div>
-          <div class="rec-preview">🏃💼</div>
-          <div class="rec-info">
-            <b>Office Escape</b>
-            <small>Runner • Satire</small>
-          </div>
-        </a>
-        <a href="../dart-board/index.html" class="rec-card">
-          <div class="rec-badge">🎯 BULLSEYE</div>
-          <div class="rec-preview">🎯🍺</div>
-          <div class="rec-info">
-            <b>Dart Master</b>
-            <small>PvP • 2-Player</small>
-          </div>
-        </a>
-        <a href="../flappy-man/index.html" class="rec-card">
-          <div class="rec-badge">🦸 SUPERHERO</div>
-          <div class="rec-preview">🦸‍♂️🚀</div>
-          <div class="rec-info">
-            <b>Flappy Man</b>
-            <small>Arcade • 10 Levels</small>
-          </div>
-        </a>
-        <a href="../bomb-panic/index.html" class="rec-card">
-          <div class="rec-badge">💣 MULTI</div>
-          <div class="rec-preview">💣💥</div>
-          <div class="rec-info">
-            <b>Bomb Panic</b>
-            <small>Party • Hot Potato</small>
-          </div>
-        </a>
-        <a href="../gravity-flip/index.html" class="rec-card">
-          <div class="rec-badge">⛏️ CAVERN</div>
-          <div class="rec-preview">⛏️🔄</div>
-          <div class="rec-info">
-            <b>Gravity Flip</b>
-            <small>Runner • Reflex</small>
-          </div>
-        </a>
-      </div>
-    </aside>
-  </div>
-</div>
+    </div>
 
     <!-- Complete Authentic Stickman Hook Engine -->
     <script>
@@ -1860,12 +1775,13 @@
             trail: [],
           };
 
-          // Smooth, Relaxed Accessible Swing Physics
-          this.gravity = 0.16;
+          // Smooth, Realistic Pendulum Arc Swing Physics (Balanced Pacing)
+          this.gravity = 0.17;
           this.airResistance = 0.998;
-          this.maxSpeed = 10.5;
+          this.maxSpeed = 8.0;
           this.hookMaxRange = 360;
           this.isHolding = false;
+          this.isPaused = false;
 
           this.camera = { x: 0, y: 0 };
           this.anchors = [];
@@ -1897,9 +1813,32 @@
           this.bindEvents();
           this.resize();
           this.loadLevel(this.currentLevel);
+          this.updateHUDThemeDisplay();
 
           this.lastTime = performance.now();
           requestAnimationFrame((t) => this.loop(t));
+        }
+
+        setTheme(theme) {
+          this.theme = theme;
+          localStorage.setItem('wild_swings_theme', theme);
+          this.updateHUDThemeDisplay();
+          this.render();
+        }
+
+        updateHUDThemeDisplay() {
+          const hudThemeText = document.getElementById('hud-theme-text');
+          const runnerAvatar = document.getElementById('hud-runner-avatar');
+          let label = '🕷️ SPIDER-MAN';
+          let avatar = '🕷️';
+
+          if (this.theme === 'spiderman') { label = '🕷️ SPIDER-MAN'; avatar = '🕷️'; }
+          else if (this.theme === 'monkey') { label = '🐒 JUNGLE MONKEY'; avatar = '🐒'; }
+          else if (this.theme === 'tarzan') { label = '🌴 TARZAN'; avatar = '🌴'; }
+          else { label = '🕷️ SPIDER-MAN'; avatar = '🕷️'; this.theme = 'spiderman'; }
+
+          if (hudThemeText) hudThemeText.textContent = label;
+          if (runnerAvatar) runnerAvatar.textContent = avatar;
         }
 
         initDecorations() {
@@ -2096,24 +2035,25 @@
 
           const dx = this.player.x - target.x;
           const dy = this.player.y - target.y;
-          const length = Math.max(50, Math.sqrt(dx * dx + dy * dy));
+          const length = Math.max(55, Math.hypot(dx, dy));
 
           this.player.isHooked = true;
           this.player.hookTarget = target;
           this.player.hookLength = length;
-          this.player.hookAngle = Math.atan2(dy, dx);
+          // phi: Angle offset from vertical-down (negative when left of anchor, 0 at bottom, positive when right)
+          this.player.hookAngle = Math.atan2(dx, dy);
           this.player.mode = 'stickman';
           this.player.swingsCount++;
 
-          // Tangential swing momentum with guaranteed forward drive
-          const tangentialVel = (-Math.sin(this.player.hookAngle) * this.player.vx + Math.cos(this.player.hookAngle) * this.player.vy);
+          // Natural tangential pendulum momentum: vx * cos(phi) - vy * sin(phi)
+          const tangentialVel = this.player.vx * Math.cos(this.player.hookAngle) - this.player.vy * Math.sin(this.player.hookAngle);
           let initialAngVel = tangentialVel / length;
 
-          // Never start with zero swing speed
-          if (initialAngVel <= 0.02) {
-            initialAngVel = 0.055;
+          // Ensure smooth, graceful forward clockwise swing (no sudden jerky snap)
+          if (initialAngVel < 0.018) {
+            initialAngVel = 0.036;
           }
-          this.player.hookAngularVel = Math.max(-0.08, Math.min(0.08, initialAngVel));
+          this.player.hookAngularVel = Math.max(-0.045, Math.min(0.050, initialAngVel));
 
           audio.playHook(this.theme);
           this.spawnSparks(target.x, target.y);
@@ -2121,27 +2061,30 @@
 
         releaseHook() {
           if (!this.player.isHooked) return;
-          const angSpeed = Number.isFinite(this.player.hookAngularVel) ? this.player.hookAngularVel : 0.05;
+          const angSpeed = Number.isFinite(this.player.hookAngularVel) ? this.player.hookAngularVel : 0.038;
           const r = this.player.hookLength || 100;
-          const theta = this.player.hookAngle || 0;
+          const phi = this.player.hookAngle || 0;
 
-          // Controlled momentum launch on release
-          let vx = -r * Math.sin(theta) * angSpeed * 1.35;
-          let vy = r * Math.cos(theta) * angSpeed * 1.35;
+          // Pure tangential release velocity:
+          // vx = r * cos(phi) * omega (directed rightwards)
+          // vy = -r * sin(phi) * omega (directed upward when swinging on the right side)
+          let vx = r * Math.cos(phi) * angSpeed * 1.15;
+          let vy = -r * Math.sin(phi) * angSpeed * 1.15;
 
-          // Ensure strong forward launch impulse so player never stalls
-          if (vx < 4.5) vx = 4.5;
-          if (vy > 0 && vy < 1.5) vy = -2.8;
+          // Smooth aerodynamic launch dynamics:
+          // When coming from left down towards right and releasing, launch character smoothly upward & forward
+          if (vx < 3.2) vx = 3.2;
+          if (vy > -2.2) vy = -3.2; // Majestic upward arc into the sky!
 
-          const speed = Math.sqrt(vx * vx + vy * vy);
+          const speed = Math.hypot(vx, vy);
           if (speed > this.maxSpeed) {
             const scale = this.maxSpeed / speed;
             vx *= scale;
             vy *= scale;
           }
 
-          this.player.vx = Number.isFinite(vx) ? vx : 5;
-          this.player.vy = Number.isFinite(vy) ? vy : -2;
+          this.player.vx = Number.isFinite(vx) ? vx : 3.8;
+          this.player.vy = Number.isFinite(vy) ? vy : -3.2;
           this.player.isHooked = false;
           this.player.hookTarget = null;
           this.player.mode = 'ball';
@@ -2158,8 +2101,8 @@
           this.startPlatform = { x: 30, y: 340, width: 130, height: 26 };
           this.player.x = 85;
           this.player.y = 314;
-          this.player.vx = 2.8;
-          this.player.vy = -1.2;
+          this.player.vx = 2.4;
+          this.player.vy = -1.0;
           this.player.rollAngle = 0;
           this.player.mode = 'ball';
           this.player.isHooked = false;
@@ -2223,33 +2166,30 @@
               isDrone: isMoving,
             });
 
-            if (idx % 2 === 1 || lvl <= 4) {
-              this.trampolines.push({
-                x: curX - 45,
-                y: Math.min(520, anchorY + 270),
-                width: 90,
-                height: 22,
-                bouncePower: 11.5 + Math.min(lvl * 0.2, 2.5),
-                squish: 0,
-              });
-            }
-
             curX += gapBase + Math.random() * 26;
             idx++;
           }
+        }
 
-          // Guaranteed final booster trampoline right before finish line
-          this.trampolines.push({
-            x: levelLength - 180,
-            y: 490,
-            width: 110,
-            height: 24,
-            bouncePower: 14.5,
-            squish: 0,
-          });
+        togglePause() {
+          if (this.gameState !== 'playing' && !this.isPaused) return;
+          this.isPaused = !this.isPaused;
+          const pauseModal = document.getElementById('pause-modal');
+          if (pauseModal) {
+            if (this.isPaused) {
+              pauseModal.classList.add('active');
+            } else {
+              pauseModal.classList.remove('active');
+            }
+          }
+          if (window.parent !== window) {
+            window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'wild-swings', isPaused: this.isPaused }, '*');
+          }
+          return this.isPaused;
         }
 
         update(dt) {
+          if (this.isPaused) return;
           this.levelTime = (performance.now() - this.levelStartTime) / 1000;
 
           if (this.gameState === 'playing' || this.gameState === 'level_cleared') {
@@ -2257,31 +2197,46 @@
             if (this.player.isHooked && this.player.hookTarget && this.gameState === 'playing') {
               const a = this.player.hookTarget;
               const r = this.player.hookLength;
+              const phi = this.player.hookAngle;
 
-              // Smooth dynamic pendulum torque
-              const angularAcc = (-this.gravity / r) * Math.cos(this.player.hookAngle);
+              // True pendulum gravity torque: pulls towards the bottom (phi = 0)
+              // Left (phi < 0): accelerates forward/clockwise (+angularAcc)
+              // Right (phi > 0): decelerates forward motion as climbing (-angularAcc)
+              const angularAcc = (-this.gravity / r) * Math.sin(phi);
               this.player.hookAngularVel += angularAcc;
 
-              // Arc pumping: keep forward swing alive, never dampen to zero
-              if (this.player.hookAngularVel > 0 && this.player.hookAngularVel < 0.052) {
-                this.player.hookAngularVel = 0.052;
-              } else if (this.player.hookAngularVel < 0 && this.player.hookAngularVel > -0.04) {
-                this.player.hookAngularVel = -0.04;
+              // Gentle swing pump while holding to maintain momentum
+              if (this.player.hookAngularVel > 0 && this.player.hookAngularVel < 0.032) {
+                this.player.hookAngularVel += 0.0006;
               }
 
-              // Clamp maximum angular speed
-              this.player.hookAngularVel = Math.max(-0.085, Math.min(0.085, this.player.hookAngularVel));
+              // Gentle rope damping
+              this.player.hookAngularVel *= 0.999;
+
+              // Smooth speed cap for controlled, enjoyable pacing
+              this.player.hookAngularVel = Math.max(-0.050, Math.min(0.050, this.player.hookAngularVel));
               this.player.hookAngle += this.player.hookAngularVel;
 
-              this.player.x = a.x + r * Math.cos(this.player.hookAngle);
-              this.player.y = a.y + r * Math.sin(this.player.hookAngle);
-              this.player.vx = -r * Math.sin(this.player.hookAngle) * this.player.hookAngularVel;
-              this.player.vy = r * Math.cos(this.player.hookAngle) * this.player.hookAngularVel;
+              // Character position along the pendulum arc
+              this.player.x = a.x + r * Math.sin(this.player.hookAngle);
+              this.player.y = a.y + r * Math.cos(this.player.hookAngle);
+
+              // Tangential velocity vector
+              this.player.vx = r * Math.cos(this.player.hookAngle) * this.player.hookAngularVel;
+              this.player.vy = -r * Math.sin(this.player.hookAngle) * this.player.hookAngularVel;
             } else {
               // Free flight: Ball Mode with smooth gravity
               this.player.vy += this.gravity;
               this.player.vx *= this.airResistance;
               this.player.vy *= this.airResistance;
+
+              // Gentle clamp on max flight speed
+              const curSpeed = Math.hypot(this.player.vx, this.player.vy);
+              if (curSpeed > this.maxSpeed) {
+                const s = this.maxSpeed / curSpeed;
+                this.player.vx *= s;
+                this.player.vy *= s;
+              }
 
               // Wind drift (Spider-Man theme, levels 5+)
               if (this.windForce > 0 && this.theme === 'spiderman') {
@@ -2291,7 +2246,7 @@
               this.player.x += this.player.vx;
               this.player.y += this.player.vy;
 
-              this.player.rollAngle += this.player.vx * 0.06;
+              this.player.rollAngle += this.player.vx * 0.045;
             }
 
             // Motion speed trail
@@ -2314,31 +2269,6 @@
             ) {
               this.player.y = sp.y - this.player.radius;
               this.player.vy = 0;
-            }
-
-            // 3. Trampoline Bouncers Collision
-            for (const pad of this.trampolines) {
-              if (pad.squish > 0) pad.squish *= 0.82;
-
-              const px = this.player.x;
-              const py = this.player.y + this.player.radius;
-
-              if (
-                px >= pad.x &&
-                px <= pad.x + pad.width &&
-                py >= pad.y - 12 &&
-                py <= pad.y + pad.height &&
-                this.player.vy > 0
-              ) {
-                this.player.y = pad.y - this.player.radius - 2;
-                this.player.vy = -pad.bouncePower;
-                this.player.vx = Math.max(this.player.vx * 1.1, 5.5);
-                pad.squish = 12;
-
-                audio.playBounce();
-                this.spawnShockwave(pad.x + pad.width / 2, pad.y);
-                break;
-              }
             }
 
             // 4. Fall Death Check
@@ -2629,21 +2559,21 @@
               this.ctx.setLineDash([6, 6]);
               this.ctx.moveTo(this.player.x, this.player.y);
               this.ctx.lineTo(nearest.x, nearest.y);
-              this.ctx.strokeStyle = this.theme === 'spiderman' ? 'rgba(255,255,255,0.75)' : this.theme === 'monkey' ? 'rgba(34, 197, 94, 0.8)' : 'rgba(245, 158, 11, 0.8)';
+              this.ctx.strokeStyle = (this.theme === 'spiderman' || this.theme === 'miles') ? 'rgba(255,255,255,0.75)' : this.theme === 'iron' ? 'rgba(251,191,36,0.85)' : this.theme === 'monkey' ? 'rgba(34, 197, 94, 0.8)' : 'rgba(245, 158, 11, 0.8)';
               this.ctx.lineWidth = 2.5;
               this.ctx.stroke();
 
               // Glowing Target Lock Ring
               this.ctx.beginPath();
               this.ctx.arc(nearest.x, nearest.y, nearest.radius + 12, 0, Math.PI * 2);
-              this.ctx.strokeStyle = this.theme === 'spiderman' ? '#38bdf8' : this.theme === 'monkey' ? '#4ade80' : '#f59e0b';
+              this.ctx.strokeStyle = (this.theme === 'spiderman' || this.theme === 'miles') ? '#38bdf8' : this.theme === 'iron' ? '#fbbf24' : this.theme === 'monkey' ? '#4ade80' : '#f59e0b';
               this.ctx.lineWidth = 2.5;
               this.ctx.stroke();
               this.ctx.restore();
             }
           }
 
-          // 3. Active Hook Rope (Web for Spidey, Vine for Monkey, Liana for Tarzan)
+          // 3. Active Hook Rope (Web for Spidey/Miles, Energy for Iron, Vine for Monkey, Liana for Tarzan)
           if (this.player.isHooked && this.player.hookTarget) {
             this.ctx.save();
             const tx = this.player.hookTarget.x;
@@ -2671,6 +2601,42 @@
                 this.ctx.arc(wx, wy, 2.5, 0, Math.PI * 2);
                 this.ctx.fill();
               }
+            } else if (this.theme === 'miles') {
+              // Glowing Crimson Venom Web
+              this.ctx.strokeStyle = '#ff0055';
+              this.ctx.lineWidth = 3.8;
+              this.ctx.shadowColor = '#ff0055';
+              this.ctx.shadowBlur = 14;
+              this.ctx.beginPath();
+              this.ctx.moveTo(px, py);
+              this.ctx.lineTo(tx, ty);
+              this.ctx.stroke();
+
+              for (let f = 0.25; f <= 0.75; f += 0.25) {
+                const wx = px + (tx - px) * f;
+                const wy = py + (ty - py) * f;
+                this.ctx.fillStyle = '#ff0055';
+                this.ctx.beginPath();
+                this.ctx.arc(wx, wy, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+              }
+            } else if (this.theme === 'iron') {
+              // Stark Laser Beam Ropes
+              this.ctx.strokeStyle = '#fbbf24';
+              this.ctx.lineWidth = 4;
+              this.ctx.shadowColor = '#f59e0b';
+              this.ctx.shadowBlur = 16;
+              this.ctx.beginPath();
+              this.ctx.moveTo(px, py);
+              this.ctx.lineTo(tx, ty);
+              this.ctx.stroke();
+
+              this.ctx.strokeStyle = '#ffffff';
+              this.ctx.lineWidth = 1.8;
+              this.ctx.beginPath();
+              this.ctx.moveTo(px, py);
+              this.ctx.lineTo(tx, ty);
+              this.ctx.stroke();
             } else if (this.theme === 'monkey') {
               // Leafy Green Jungle Vine
               this.ctx.strokeStyle = '#16a34a';
@@ -2757,25 +2723,6 @@
               this.ctx.textBaseline = 'middle';
               this.ctx.fillText('🌿', 0, 0);
             }
-            this.ctx.restore();
-          }
-
-          // 5. Trampolines / Bouncers
-          for (const pad of this.trampolines) {
-            this.ctx.save();
-            const sq = pad.squish || 0;
-            this.ctx.fillStyle = '#475569';
-            this.ctx.fillRect(pad.x + 8, pad.y + 6, pad.width - 16, 12);
-
-            this.ctx.fillStyle = '#ff007f';
-            this.ctx.shadowColor = '#ff007f';
-            this.ctx.shadowBlur = 12;
-            this.ctx.beginPath();
-            this.ctx.roundRect(pad.x, pad.y + sq, pad.width, pad.height - sq, 8);
-            this.ctx.fill();
-
-            this.ctx.fillStyle = '#ffd700';
-            this.ctx.fillRect(pad.x + pad.width * 0.35, pad.y + sq + 3, pad.width * 0.3, 4);
             this.ctx.restore();
           }
 
@@ -2879,6 +2826,48 @@
               this.ctx.ellipse(r * 0.35, r * 0.28, r * 0.32, r * 0.2, -0.45, 0, Math.PI * 2);
               this.ctx.fill();
               this.ctx.restore();
+            } else if (this.theme === 'miles') {
+              // Miles Morales Stealth Ball
+              this.ctx.save();
+              this.ctx.fillStyle = '#090d16';
+              this.ctx.shadowColor = 'rgba(255, 0, 85, 0.7)';
+              this.ctx.shadowBlur = 10;
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, r, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#ff0055';
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, r * 0.4, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#ff0055';
+              this.ctx.beginPath();
+              this.ctx.ellipse(r * 0.35, -r * 0.28, r * 0.38, r * 0.22, 0.45, 0, Math.PI * 2);
+              this.ctx.ellipse(r * 0.35, r * 0.28, r * 0.38, r * 0.22, -0.45, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.restore();
+            } else if (this.theme === 'iron') {
+              // Iron Spider Gold Tech Ball
+              this.ctx.save();
+              this.ctx.fillStyle = '#e11d48';
+              this.ctx.shadowColor = 'rgba(251, 191, 36, 0.8)';
+              this.ctx.shadowBlur = 12;
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, r, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#fbbf24';
+              this.ctx.beginPath();
+              this.ctx.arc(0, 0, r * 0.5, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#00f0ff';
+              this.ctx.beginPath();
+              this.ctx.ellipse(r * 0.35, -r * 0.28, r * 0.35, r * 0.2, 0.45, 0, Math.PI * 2);
+              this.ctx.ellipse(r * 0.35, r * 0.28, r * 0.35, r * 0.2, -0.45, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.restore();
             } else if (this.theme === 'monkey') {
               // Monkey Ball
               this.ctx.save();
@@ -2952,8 +2941,11 @@
               this.ctx.restore();
             }
           } else {
-            // Stickman / Acrobat Swing Mode
-            this.ctx.rotate(this.player.hookAngle + Math.PI / 2);
+            // Stickman / Acrobat Swing Mode (Faces directly toward hook anchor)
+            const toAnchorAngle = this.player.hookTarget
+              ? Math.atan2(this.player.hookTarget.y - this.player.y, this.player.hookTarget.x - this.player.x) + Math.PI / 2
+              : this.player.hookAngle;
+            this.ctx.rotate(toAnchorAngle);
 
             if (this.theme === 'spiderman') {
               // Detailed Spider-Man Acrobat
@@ -3013,6 +3005,94 @@
               this.ctx.beginPath();
               this.ctx.moveTo(-9, 18); this.ctx.lineTo(-12, 26);
               this.ctx.moveTo(10, 15); this.ctx.lineTo(14, 22);
+              this.ctx.stroke();
+              this.ctx.restore();
+            } else if (this.theme === 'miles') {
+              // Miles Morales Stealth Acrobat
+              this.ctx.save();
+              this.ctx.fillStyle = '#090d16';
+              this.ctx.beginPath();
+              this.ctx.ellipse(0, -18, 9, 10, 0, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#ff0055';
+              this.ctx.shadowColor = '#ff0055';
+              this.ctx.shadowBlur = 8;
+              this.ctx.beginPath();
+              this.ctx.ellipse(-3, -19, 4, 2.5, -0.3, 0, Math.PI * 2);
+              this.ctx.ellipse(3, -19, 4, 2.5, 0.3, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.shadowBlur = 0;
+
+              this.ctx.fillStyle = '#090d16';
+              this.ctx.beginPath();
+              this.ctx.roundRect(-7, -8, 14, 18, 4);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#ff0055';
+              this.ctx.beginPath();
+              this.ctx.arc(0, -2, 3, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.strokeStyle = '#090d16';
+              this.ctx.lineWidth = 4.5;
+              this.ctx.lineCap = 'round';
+              this.ctx.beginPath();
+              this.ctx.moveTo(-5, -6); this.ctx.lineTo(-12, -22);
+              this.ctx.moveTo(5, -6); this.ctx.lineTo(12, -22);
+              this.ctx.stroke();
+
+              this.ctx.strokeStyle = '#ff0055';
+              this.ctx.lineWidth = 4;
+              this.ctx.beginPath();
+              this.ctx.moveTo(-4, 9); this.ctx.lineTo(-9, 21);
+              this.ctx.moveTo(4, 9); this.ctx.lineTo(10, 18);
+              this.ctx.stroke();
+              this.ctx.restore();
+            } else if (this.theme === 'iron') {
+              // Iron Spider Gold Tech Armor
+              this.ctx.save();
+              this.ctx.fillStyle = '#e11d48';
+              this.ctx.beginPath();
+              this.ctx.ellipse(0, -18, 9, 10, 0, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#fbbf24';
+              this.ctx.fillRect(-5, -23, 10, 6);
+              this.ctx.fillStyle = '#00f0ff';
+              this.ctx.shadowColor = '#00f0ff';
+              this.ctx.shadowBlur = 8;
+              this.ctx.beginPath();
+              this.ctx.ellipse(-3, -19, 3.5, 2, -0.3, 0, Math.PI * 2);
+              this.ctx.ellipse(3, -19, 3.5, 2, 0.3, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.shadowBlur = 0;
+
+              this.ctx.fillStyle = '#e11d48';
+              this.ctx.beginPath();
+              this.ctx.roundRect(-7, -8, 14, 18, 4);
+              this.ctx.fill();
+
+              this.ctx.fillStyle = '#fbbf24';
+              this.ctx.fillRect(-7, -4, 3, 10);
+              this.ctx.fillRect(4, -4, 3, 10);
+              this.ctx.beginPath();
+              this.ctx.arc(0, -2, 3.5, 0, Math.PI * 2);
+              this.ctx.fill();
+
+              this.ctx.strokeStyle = '#fbbf24';
+              this.ctx.lineWidth = 4.5;
+              this.ctx.lineCap = 'round';
+              this.ctx.beginPath();
+              this.ctx.moveTo(-5, -6); this.ctx.lineTo(-12, -22);
+              this.ctx.moveTo(5, -6); this.ctx.lineTo(12, -22);
+              this.ctx.stroke();
+
+              this.ctx.strokeStyle = '#e11d48';
+              this.ctx.lineWidth = 4.5;
+              this.ctx.beginPath();
+              this.ctx.moveTo(-4, 9); this.ctx.lineTo(-9, 21);
+              this.ctx.moveTo(4, 9); this.ctx.lineTo(10, 18);
               this.ctx.stroke();
               this.ctx.restore();
             } else if (this.theme === 'monkey') {
@@ -3317,16 +3397,57 @@
           const H = this.height;
           const now = performance.now() / 1000;
 
-          if (this.theme === 'spiderman') {
-            // === Deep night sky ===
+          if (this.theme === 'spiderman' || this.theme === 'miles' || this.theme === 'iron') {
+            // 1. Deep NYC Twilight Night Sky Gradient
             const grad = this.ctx.createLinearGradient(0, 0, 0, H);
             grad.addColorStop(0,   '#02041a');
-            grad.addColorStop(0.5, '#0b0e3c');
-            grad.addColorStop(1,   '#160828');
+            grad.addColorStop(0.45, '#0a0d36');
+            grad.addColorStop(0.8,  '#1d0d33');
+            grad.addColorStop(1,    '#2b0e2d');
             this.ctx.fillStyle = grad;
             this.ctx.fillRect(0, 0, W, H);
 
-            // Moon + halo
+            // 2. 3D Sweeping Searchlight Beams in Sky
+            const beamAngle1 = Math.sin(now * 0.4) * 0.35;
+            const beamAngle2 = Math.cos(now * 0.3) * 0.40;
+            
+            // Searchlight 1 (Cyan/Blue Beam)
+            this.ctx.save();
+            this.ctx.translate(W * 0.25, H);
+            this.ctx.rotate(beamAngle1);
+            const beamGrad1 = this.ctx.createLinearGradient(0, 0, 0, -H * 1.2);
+            beamGrad1.addColorStop(0, 'rgba(0, 240, 255, 0.12)');
+            beamGrad1.addColorStop(0.6, 'rgba(0, 240, 255, 0.04)');
+            beamGrad1.addColorStop(1, 'rgba(0, 240, 255, 0)');
+            this.ctx.fillStyle = beamGrad1;
+            this.ctx.beginPath();
+            this.ctx.moveTo(-15, 0);
+            this.ctx.lineTo(-90, -H * 1.2);
+            this.ctx.lineTo(90, -H * 1.2);
+            this.ctx.lineTo(15, 0);
+            this.ctx.closePath();
+            this.ctx.fill();
+            this.ctx.restore();
+
+            // Searchlight 2 (Magenta/Spider Red Beam)
+            this.ctx.save();
+            this.ctx.translate(W * 0.75, H);
+            this.ctx.rotate(beamAngle2);
+            const beamGrad2 = this.ctx.createLinearGradient(0, 0, 0, -H * 1.2);
+            beamGrad2.addColorStop(0, 'rgba(255, 42, 85, 0.10)');
+            beamGrad2.addColorStop(0.6, 'rgba(255, 42, 85, 0.03)');
+            beamGrad2.addColorStop(1, 'rgba(255, 42, 85, 0)');
+            this.ctx.fillStyle = beamGrad2;
+            this.ctx.beginPath();
+            this.ctx.moveTo(-15, 0);
+            this.ctx.lineTo(-80, -H * 1.2);
+            this.ctx.lineTo(80, -H * 1.2);
+            this.ctx.lineTo(15, 0);
+            this.ctx.closePath();
+            this.ctx.fill();
+            this.ctx.restore();
+
+            // 3. Moon + Soft Atmospheric Halo
             const moonX = W * 0.73 - camX * 0.007;
             const moonY = H * 0.16;
             const moonGrad = this.ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, 95);
@@ -3339,7 +3460,7 @@
             this.ctx.arc(moonX, moonY, 22, 0, Math.PI * 2);
             this.ctx.fill();
 
-            // Stars (0.018x) with per-star twinkle
+            // 4. Stars (0.018x) with Per-Star Twinkle
             for (const s of this.bgStars) {
               const sx = ((s.x - camX * 0.018) % (W + 600) + W + 600) % (W + 600) - 300;
               if (sx < -4 || sx > W + 4) continue;
@@ -3352,26 +3473,64 @@
             }
             this.ctx.globalAlpha = 1;
 
-            // FAR buildings (0.12x) — hazy dark silhouettes
+            // 5. FAR Buildings 3D Depth Layer (0.12x Parallax)
             const farWrap = 8640;
             for (const b of this.buildingsFar) {
               const bx = ((b.x - camX * 0.12) % farWrap + farWrap) % farWrap;
               if (bx > W + 180) continue;
               const by = H - b.height + camY * 0.02;
+              
+              // 3D Front Face
               this.ctx.fillStyle = '#050813';
               this.ctx.globalAlpha = 0.90;
               this.ctx.fillRect(bx, by, b.width, b.height + 280);
+
+              // 3D Side Projection Face
+              const pOffset = (bx - W / 2) * 0.03;
+              this.ctx.fillStyle = pOffset > 0 ? '#03050c' : '#070a18';
+              this.ctx.beginPath();
+              this.ctx.moveTo(pOffset > 0 ? bx + b.width : bx, by);
+              this.ctx.lineTo(pOffset > 0 ? bx + b.width + pOffset : bx + pOffset, by - 6);
+              this.ctx.lineTo(pOffset > 0 ? bx + b.width + pOffset : bx + pOffset, by + b.height + 280);
+              this.ctx.lineTo(pOffset > 0 ? bx + b.width : bx, by + b.height + 280);
+              this.ctx.closePath();
+              this.ctx.fill();
             }
             this.ctx.globalAlpha = 1;
 
-            // MID buildings (0.30x) — dim window lights
+            // 6. MID Buildings 3D Layer (0.30x Parallax) — Window Grids & Spires
             const midWrap = 9156;
             for (const b of this.buildingsMid) {
               const bx = ((b.x - camX * 0.30) % midWrap + midWrap) % midWrap;
               if (bx > W + 220) continue;
               const by = H - b.height + camY * 0.06;
+              const pOffset = (bx - W / 2) * 0.045;
+
+              // Front Face
               this.ctx.fillStyle = '#0c1130';
               this.ctx.fillRect(bx, by, b.width, b.height + 280);
+
+              // 3D Depth Side Face
+              this.ctx.fillStyle = pOffset > 0 ? '#070b21' : '#121942';
+              this.ctx.beginPath();
+              const sideX = pOffset > 0 ? bx + b.width : bx;
+              this.ctx.moveTo(sideX, by);
+              this.ctx.lineTo(sideX + pOffset, by - 8);
+              this.ctx.lineTo(sideX + pOffset, by + b.height + 280);
+              this.ctx.lineTo(sideX, by + b.height + 280);
+              this.ctx.closePath();
+              this.ctx.fill();
+
+              // 3D Roof Top Cap
+              this.ctx.fillStyle = '#161f4d';
+              this.ctx.beginPath();
+              this.ctx.moveTo(bx, by);
+              this.ctx.lineTo(bx + pOffset, by - 8);
+              this.ctx.lineTo(bx + b.width + pOffset, by - 8);
+              this.ctx.lineTo(bx + b.width, by);
+              this.ctx.closePath();
+              this.ctx.fill();
+
               if (b.windows) {
                 for (const w of b.windows) {
                   if (!w.lit) continue;
@@ -3383,32 +3542,60 @@
               }
             }
 
-            // NEAR buildings (0.60x) — sharp neon windows, billboards, antennae
+            // 7. NEAR Buildings 3D Layer (0.60x Parallax) — Sharp 3D Extrusions, Billboards, 3D Spires
             const nearWrap = 8832;
             for (const b of this.buildingsNear) {
               const bx = ((b.x - camX * 0.60) % nearWrap + nearWrap) % nearWrap;
               if (bx > W + 280) continue;
               const by = H - b.height + camY * 0.12;
+              const pOffset = (bx - W / 2) * 0.07;
 
-              // Building body
+              // Building body 3D front face
               const bGrad = this.ctx.createLinearGradient(bx, by, bx + b.width, by);
               bGrad.addColorStop(0, '#101838');
               bGrad.addColorStop(1, '#141f44');
               this.ctx.fillStyle = bGrad;
               this.ctx.fillRect(bx, by, b.width, b.height + 280);
 
-              // Roof cap + antenna
-              this.ctx.fillStyle = '#1e2d5a';
-              this.ctx.fillRect(bx, by, b.width, 3);
-              this.ctx.fillStyle = '#182044';
-              this.ctx.fillRect(bx + b.width * 0.44, by - 20, 5, 20);
-              // Blinking antenna light
-              if (Math.sin(now * 1.85 + b.x * 0.009) > 0.18) {
-                this.ctx.fillStyle = '#ff4444';
-                this.ctx.shadowColor = '#ff4444';
-                this.ctx.shadowBlur = 7;
+              // 3D Depth Side Projection
+              this.ctx.fillStyle = pOffset > 0 ? '#0a1028' : '#1b2959';
+              this.ctx.beginPath();
+              const sideX = pOffset > 0 ? bx + b.width : bx;
+              this.ctx.moveTo(sideX, by);
+              this.ctx.lineTo(sideX + pOffset, by - 12);
+              this.ctx.lineTo(sideX + pOffset, by + b.height + 280);
+              this.ctx.lineTo(sideX, by + b.height + 280);
+              this.ctx.closePath();
+              this.ctx.fill();
+
+              // 3D Roof Cap
+              this.ctx.fillStyle = '#223466';
+              this.ctx.beginPath();
+              this.ctx.moveTo(bx, by);
+              this.ctx.lineTo(bx + pOffset, by - 12);
+              this.ctx.lineTo(bx + b.width + pOffset, by - 12);
+              this.ctx.lineTo(bx + b.width, by);
+              this.ctx.closePath();
+              this.ctx.fill();
+
+              // 3D Empire/Chrysler Style Metallic Spire
+              const spireX = bx + b.width * 0.5 + pOffset * 0.5;
+              const spireH = 35 + (b.width % 30);
+              this.ctx.fillStyle = '#2d3f75';
+              this.ctx.beginPath();
+              this.ctx.moveTo(spireX - 4, by - 12);
+              this.ctx.lineTo(spireX, by - 12 - spireH);
+              this.ctx.lineTo(spireX + 4, by - 12);
+              this.ctx.closePath();
+              this.ctx.fill();
+
+              // Blinking 3D Aviation Beacon Light on Spire Tip
+              if (Math.sin(now * 2.2 + b.x * 0.009) > 0.10) {
+                this.ctx.fillStyle = '#ff2a55';
+                this.ctx.shadowColor = '#ff2a55';
+                this.ctx.shadowBlur = 9;
                 this.ctx.beginPath();
-                this.ctx.arc(bx + b.width * 0.44 + 2.5, by - 22, 3.2, 0, Math.PI * 2);
+                this.ctx.arc(spireX, by - 12 - spireH, 3.5, 0, Math.PI * 2);
                 this.ctx.fill();
                 this.ctx.shadowBlur = 0;
               }
@@ -3448,7 +3635,7 @@
               }
             }
 
-            // FOREGROUND silhouettes (0.88x) — fire escapes & water towers
+            // 8. FOREGROUND silhouettes (0.88x) — fire escapes & water towers
             const fgWrap = 8520;
             for (const fg of this.buildingsFg) {
               const fx = ((fg.x - camX * 0.88) % fgWrap + fgWrap) % fgWrap;
@@ -3478,6 +3665,23 @@
               this.ctx.globalAlpha = 1;
             }
 
+            // 9. 3D NYC Ground Street Grid Traffic Light Glow (Far Below Depth)
+            const streetGrad = this.ctx.createLinearGradient(0, H - 45, 0, H);
+            streetGrad.addColorStop(0, 'rgba(255, 42, 85, 0)');
+            streetGrad.addColorStop(0.5, 'rgba(255, 165, 2, 0.12)');
+            streetGrad.addColorStop(1, 'rgba(0, 240, 255, 0.18)');
+            this.ctx.fillStyle = streetGrad;
+            this.ctx.fillRect(0, H - 45, W, 45);
+
+            // Pulsing 3D street traffic particles moving in depth
+            for (let i = 0; i < 16; i++) {
+              const tx = ((i * 140 + now * 90) % (W + 200)) - 100;
+              const ty = H - 8 - Math.sin(i * 1.5) * 6;
+              this.ctx.fillStyle = i % 2 === 0 ? 'rgba(255, 42, 85, 0.65)' : 'rgba(255, 200, 80, 0.65)';
+              this.ctx.beginPath();
+              this.ctx.arc(tx, ty, 3 + (i % 3), 0, Math.PI * 2);
+              this.ctx.fill();
+            }
           } else if (this.theme === 'monkey') {
             const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
             grad.addColorStop(0, '#022c22');
@@ -3814,36 +4018,28 @@
           if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
             e.preventDefault();
             if (window.stickmanGame) {
-              if (window.stickmanGame.isPaused) {
-                window.resumeSwingsGame();
-              } else {
-                window.pauseSwingsGame();
-              }
+              window.stickmanGame.togglePause();
             }
           }
         });
 
-        // Instant trigger on first Escape when exiting native browser fullscreen
-        const handleFullscreenExitSwings = () => {
-          const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-          if (!isFs && window.stickmanGame && !window.stickmanGame.isPaused) {
-            window.pauseSwingsGame();
+        window.addEventListener('message', (e) => {
+          if (e.data && (e.data.type === 'KRAZY_ESC_PAUSE' || e.data.type === 'KRAZY_PAUSE_TOGGLE')) {
+            if (window.stickmanGame) {
+              window.stickmanGame.togglePause();
+            }
           }
-        };
-        document.addEventListener('fullscreenchange', handleFullscreenExitSwings);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenExitSwings);
-        document.addEventListener('mozfullscreenchange', handleFullscreenExitSwings);
-        document.addEventListener('MSFullscreenChange', handleFullscreenExitSwings);
+        });
 
         if (pauseBtn) {
           pauseBtn.addEventListener('click', () => {
-            window.pauseSwingsGame();
+            if (window.stickmanGame) window.stickmanGame.togglePause();
           });
         }
 
         if (resumeBtn) {
           resumeBtn.addEventListener('click', () => {
-            window.resumeSwingsGame();
+            if (window.stickmanGame) window.stickmanGame.togglePause();
           });
         }
 

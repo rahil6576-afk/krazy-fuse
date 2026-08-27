@@ -26,6 +26,7 @@ let currentDecision = null;
 let shakeTimer = 0;
 let radioLoreIndex = 0;
 let timeWarpTimer = 0;
+let isDoomPaused = false;
 
 // Elevator Dimensions
 const ELEVATOR = {
@@ -52,6 +53,7 @@ function resetFloorTiles() {
         });
     }
 }
+resetFloorTiles();
 
 // Weapon Arsenal Definitions
 const WEAPONS = {
@@ -195,7 +197,7 @@ class Player {
         this.y = ELEVATOR.floorY - this.h;
         this.vx = 0;
         this.vy = 0;
-        this.speed = 4.8;
+        this.speed = 3.2;
         this.isGrounded = true;
         this.isAlive = true;
         this.facing = 1; // 1 = right, -1 = left
@@ -336,7 +338,7 @@ class Player {
         if (this.ability.id === 'DASH') {
             this.isDashing = this.ability.duration;
             this.abilityCooldown = this.ability.cooldownMax;
-            this.vx = this.facing * 14;
+            this.vx = this.facing * 9.5;
             if (window.doomAudio) window.doomAudio.playDash();
             createGhostTrail(this.x, this.y, this.w, this.h);
         } else if (this.ability.id === 'TIME_WARP') {
@@ -379,14 +381,14 @@ class Player {
 
             // Jump
             if ((keys['KeyW'] || keys['ArrowUp'] || keys['Space']) && this.isGrounded) {
-                this.vy = -12.5;
+                this.vy = -10.0;
                 this.isGrounded = false;
                 if (window.doomAudio) window.doomAudio.playJump();
             }
         }
 
         // Gravity & Physics
-        this.vy += 0.65;
+        this.vy += 0.50;
         this.x += this.vx;
         this.y += this.vy;
 
@@ -498,7 +500,7 @@ class Enemy {
             this.h = 48;
             this.hp = 85;
             this.maxHp = 85;
-            this.speed = 1.6;
+            this.speed = 1.1;
             this.color = '#78350f';
             this.damage = 30;
             this.attackRange = 48;
@@ -509,7 +511,7 @@ class Enemy {
             this.h = 46;
             this.hp = 65;
             this.maxHp = 65;
-            this.speed = 2.4;
+            this.speed = 1.6;
             this.color = '#1e1b4b';
             this.damage = 35;
             this.attackRange = 40;
@@ -521,7 +523,7 @@ class Enemy {
             this.h = 24;
             this.hp = 45;
             this.maxHp = 45;
-            this.speed = 3.6;
+            this.speed = 2.3;
             this.color = '#15803d';
             this.damage = 20;
             this.attackRange = 36;
@@ -544,7 +546,7 @@ class Enemy {
             this.h = 36;
             this.hp = 50;
             this.maxHp = 50;
-            this.speed = 2.0;
+            this.speed = 1.3;
             this.color = '#38bdf8';
             this.damage = 25;
             this.attackRange = 350;
@@ -555,7 +557,7 @@ class Enemy {
             this.h = 32;
             this.hp = 30;
             this.maxHp = 30;
-            this.speed = 4.2;
+            this.speed = 2.8;
             this.color = '#ec4899';
             this.damage = 15;
             this.attackRange = 30;
@@ -579,7 +581,7 @@ class Enemy {
         // Wake up mimic if sleeping
         if (this.type === 'MIMIC' && !this.isAwake) {
             this.isAwake = true;
-            this.speed = 3.2;
+            this.speed = 2.2;
         }
 
         if (this.hp <= 0) {
@@ -658,7 +660,7 @@ class Enemy {
             // High speed scuttle & jump
             this.vx = Math.sign(dx) * this.speed * timeMod;
             if (dist < 120 && this.vy === 0 && Math.random() < 0.04) {
-                this.vy = -9; // Pounce jump!
+                this.vy = -6.5; // Pounce jump!
             }
             if (dist < this.attackRange && this.attackCooldown <= 0) {
                 this.attackCooldown = this.attackCooldownMax;
@@ -668,7 +670,7 @@ class Enemy {
             // Wait until player approaches
             if (!this.isAwake && dist < 70) {
                 this.isAwake = true;
-                this.speed = 3.4;
+                this.speed = 2.2;
                 createSparks(this.x, this.y, '#eab308', 15);
                 if (window.doomAudio) window.doomAudio.playAlarm();
             }
@@ -696,7 +698,7 @@ class Enemy {
                 projectiles.push({
                     x: this.x + this.w / 2,
                     y: this.y + this.h / 2,
-                    vx: Math.sign(dx) * 7,
+                    vx: Math.sign(dx) * 5,
                     vy: 0,
                     radius: 4,
                     damage: this.damage,
@@ -809,28 +811,28 @@ class Boss {
             this.hp = 350;
             this.maxHp = 350;
             this.color = '#78350f';
-            this.speed = 2.2;
+            this.speed = 1.4;
         } else if (floor <= 20) {
             this.name = 'SECURITY CHIEF V-9000';
             this.icon = '🤖';
             this.hp = 500;
             this.maxHp = 500;
             this.color = '#0284c7';
-            this.speed = 2.8;
+            this.speed = 1.8;
         } else if (floor <= 30) {
             this.name = 'THE ELEVATOR MAN (UNBOUND)';
             this.icon = '🕴️';
             this.hp = 680;
             this.maxHp = 680;
             this.color = '#581c87';
-            this.speed = 3.5;
+            this.speed = 2.3;
         } else {
             this.name = 'THE HARBINGER OF DOOM';
             this.icon = '💀';
             this.hp = 950;
             this.maxHp = 950;
             this.color = '#b91c1c';
-            this.speed = 4.0;
+            this.speed = 2.6;
         }
 
         showBossHUD(this);
@@ -1279,7 +1281,7 @@ function cashOutAndEscape() {
 function advanceToNextFloor() {
     document.getElementById('safe-room-modal').classList.add('hidden');
     currentFloor++;
-    doomLevel = Math.min(100, doomLevel + 6); // Doom rises each floor!
+    doomLevel = Math.min(100, doomLevel + 3); // Doom rises each floor!
 
     // Doors open animation
     document.getElementById('door-left').classList.remove('closed');
@@ -1318,6 +1320,7 @@ function triggerGameOver(reason) {
 
 // Init / Start Match
 function startNewRun() {
+    if (window.doomAudio) window.doomAudio.init();
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('gameover-screen').classList.add('hidden');
     document.getElementById('safe-room-modal').classList.add('hidden');
@@ -1331,9 +1334,13 @@ function startNewRun() {
     doomLevel = 0;
     timeWarpTimer = 0;
 
+    resetFloorTiles();
     player.resetForMatch();
-    player.weapon = WEAPONS.KNIFE;
-    player.ability = ABILITIES.DASH;
+    player.maxHp = selectedSurvivor ? selectedSurvivor.hp : 100;
+    player.hp = player.maxHp;
+    player.speed = selectedSurvivor ? selectedSurvivor.speed : 3.2;
+    player.weapon = selectedSurvivor ? selectedSurvivor.weapon : WEAPONS.KNIFE;
+    player.ability = selectedSurvivor ? selectedSurvivor.ability : ABILITIES.DASH;
     player.passives = [];
     updatePassivesHUD();
     updateHUD();
@@ -1347,12 +1354,14 @@ function startNewRun() {
 
 // Main Game Loop
 function update() {
+    if (isDoomPaused) return;
+
     if (shakeTimer > 0) shakeTimer--;
     if (timeWarpTimer > 0) timeWarpTimer--;
 
     // Slowly increase Doom Meter over time during active combat
     if (gameState === STATE.COMBAT) {
-        doomLevel = Math.min(100, doomLevel + 0.015);
+        doomLevel = Math.min(100, doomLevel + 0.008);
 
         // Check Malfunctioning Floor (75% Doom)
         if (doomLevel >= 75 && Math.random() < 0.005) {
@@ -1605,6 +1614,21 @@ function render() {
         ctx.fillText(dn.text, dn.x, dn.y);
     });
 
+    // Draw Pause Overlay if Paused
+    if (isDoomPaused) {
+        ctx.fillStyle = 'rgba(6, 10, 20, 0.78)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = 'bold 36px Outfit, sans-serif';
+        ctx.fillStyle = '#facc15';
+        ctx.textAlign = 'center';
+        ctx.fillText('⏸️ GAME PAUSED', canvas.width / 2, canvas.height / 2 - 15);
+
+        ctx.font = '500 16px Outfit, sans-serif';
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText('Press ESC or P to Resume Match', canvas.width / 2, canvas.height / 2 + 25);
+    }
+
     ctx.restore();
 }
 
@@ -1633,8 +1657,16 @@ window.addEventListener('keydown', e => {
         }
     }
 
-    if (e.code === 'Escape') {
-        pauseElevatorGame();
+    if (e.code === 'Escape' || e.code === 'KeyP') {
+        e.preventDefault();
+        if (gameState === STATE.COMBAT) {
+            isDoomPaused = !isDoomPaused;
+        }
+        if (window.parent !== window) {
+            window.parent.postMessage({ type: 'KRAZY_ESC', gameId: 'elevator-doom', isPaused: isDoomPaused }, '*');
+        } else {
+            window.location.href = '../index.html?game=elevator-doom';
+        }
     }
 });
 
@@ -1648,391 +1680,134 @@ canvas.addEventListener('mousedown', e => {
     }
 });
 
-// Button Bindings
-document.getElementById('btn-start-game').onclick = startNewRun;
-document.getElementById('btn-restart').onclick = startNewRun;
-document.getElementById('btn-cash-out').onclick = cashOutAndEscape;
-document.getElementById('btn-go-higher').onclick = advanceToNextFloor;
-
-document.getElementById('btn-sound-toggle').onclick = () => {
-    if (window.doomAudio) {
-        window.doomAudio.muted = !window.doomAudio.muted;
-        document.getElementById('btn-sound-toggle').textContent = window.doomAudio.muted ? '🔇' : '🔊';
+// Survivor Archetypes & Starting Loadouts
+const SURVIVORS = [
+    {
+        id: 'intern',
+        name: 'Corporate Intern',
+        icon: '💼',
+        role: 'Agile & Fast',
+        hp: 100,
+        speed: 3.2,
+        weapon: WEAPONS.KNIFE,
+        ability: ABILITIES.DASH,
+        desc: 'Quick reflexes with a rapid slash knife & tactical dash.'
+    },
+    {
+        id: 'executive',
+        name: 'VP of Risk',
+        icon: '👔',
+        role: 'Tactical Blaster',
+        hp: 120,
+        speed: 2.8,
+        weapon: WEAPONS.BLASTER,
+        ability: ABILITIES.SHIELD,
+        desc: 'High resilience equipped with kinetic blaster & shield bubble.'
+    },
+    {
+        id: 'engineer',
+        name: 'Chief Engineer',
+        icon: '⚡',
+        role: 'Crowd Stunner',
+        hp: 90,
+        speed: 3.4,
+        weapon: WEAPONS.BATON,
+        ability: ABILITIES.TIME_WARP,
+        desc: 'High speed with chain shock baton & temporal slow-motion.'
+    },
+    {
+        id: 'janitor',
+        name: 'Master Janitor',
+        icon: '🧹',
+        role: 'Heavy Artillery',
+        hp: 140,
+        speed: 2.7,
+        weapon: WEAPONS.LAUNCHER,
+        ability: ABILITIES.STIM,
+        desc: 'Tanky veteran armed with Doom explosive launcher & health stim.'
     }
-};
+];
 
-// Pause Game Controls
-function pauseElevatorGame() {
-    document.body.classList.add('portal-paused');
-}
+let selectedSurvivor = SURVIVORS[0];
 
-function resumeElevatorGame() {
-    document.body.classList.remove('portal-paused');
-}
-
-window.pauseElevatorGame = pauseElevatorGame;
-window.resumeElevatorGame = resumeElevatorGame;
-
-// Start Loop
-requestAnimationFrame(gameLoop);
-
-    if (victory) {
-        badge.textContent = '🏆 DOOM SURVIVOR';
-        badge.style.borderColor = '#10b981';
-        badge.style.color = '#10b981';
-        title.textContent = 'YOU CONQUERED FLOOR 99!';
-        sub.textContent = 'You escaped the Elevator of Doom alive!';
-        window.doomAudio.playVictory();
-    } else {
-        badge.textContent = '💀 ELIMINATED';
-        badge.style.borderColor = '#ef4444';
-        badge.style.color = '#ef4444';
-        title.textContent = 'You Were Eliminated!';
-        sub.textContent = `Floor ${currentFloor}: ${reason || 'Crushed by the elevator doom.'}`;
-    }
-
-    document.getElementById('res-floor').textContent = 'Floor ' + currentFloor;
-    document.getElementById('res-dooms').textContent = survivalRounds;
-    document.getElementById('res-sabotages').textContent = sabotagesCount;
-    document.getElementById('res-rank').textContent = victory ? '🥇 Elevator Legend' : (currentFloor > 60 ? '🥈 Chaos Veteran' : '💀 Certified Splat');
-}
-
-// Input Handling
-const keys = {};
-let isElevatorPaused = false;
-let __countdownTimerElevator = null;
-
-function playCountdownAudioElevator(freq = 440, type = 'sine', duration = 0.15) {
-    try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        if (!window.__cdCtxElevator) window.__cdCtxElevator = new AudioCtx();
-        const ctx = window.__cdCtxElevator;
-        if (ctx.state === 'suspended') ctx.resume();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        gain.gain.setValueAtTime(0.18, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + duration);
-    } catch (e) {}
-}
-
-function runResumeCountdownElevator(onComplete) {
-    if (__countdownTimerElevator) {
-        clearInterval(__countdownTimerElevator);
-        __countdownTimerElevator = null;
-    }
-    let overlay = document.getElementById('resumeCountdownOverlayElevator');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'resumeCountdownOverlayElevator';
-        overlay.className = 'resume-countdown-overlay';
-        document.body.appendChild(overlay);
-    }
-    overlay.classList.add('active');
-
-    let count = 3;
-    const updateDisplay = () => {
-        if (count > 0) {
-            overlay.innerHTML = `
-                <div class="resume-countdown-number" key="${count}">${count}</div>
-                <div class="resume-countdown-sub">⚡ GET READY • RESUMING</div>
-            `;
-            playCountdownAudioElevator(count === 3 ? 440 : count === 2 ? 554 : 659, 'sine', 0.18);
-            count--;
-        } else if (count === 0) {
-            overlay.innerHTML = `
-                <div class="resume-countdown-number" style="color: #4ade80; text-shadow: 0 0 45px rgba(74, 222, 128, 0.9);">SURVIVE!</div>
-                <div class="resume-countdown-sub" style="color: #4ade80;">🛗 ELEVATOR RUNNING!</div>
-            `;
-            playCountdownAudioElevator(880, 'triangle', 0.3);
-            count--;
-        } else {
-            if (__countdownTimerElevator) {
-                clearInterval(__countdownTimerElevator);
-                __countdownTimerElevator = null;
-            }
-            overlay.classList.remove('active');
-            setTimeout(() => {
-                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-            }, 200);
-            if (typeof onComplete === 'function') onComplete();
-        }
-    };
-
-    updateDisplay();
-    __countdownTimerElevator = setInterval(updateDisplay, 1000);
-}
-
-window.pauseElevatorGame = function() {
-    if (gameState === STATE.LOBBY || gameState === STATE.GAMEOVER || gameState === STATE.VICTORY) return;
-    if (__countdownTimerElevator) {
-        clearInterval(__countdownTimerElevator);
-        __countdownTimerElevator = null;
-        const overlay = document.getElementById('resumeCountdownOverlayElevator');
-        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-    }
-    isElevatorPaused = true;
-    document.body.classList.add('portal-paused');
-    const bankBadge = document.getElementById('portal-top-bank');
-    if (bankBadge) {
-        const pts = localStorage.getItem('krazio_user_points') || localStorage.getItem('coins') || localStorage.getItem('office_escape_coins') || '76';
-        bankBadge.textContent = `🪙 ${pts} P`;
-    }
-};
-
-window.resumeElevatorGame = function(requestFullscreen = true) {
-    // 1. Immediately expand back to fullscreen and dismiss paused portal UI
-    document.body.classList.remove('portal-paused');
-    if (requestFullscreen && !document.fullscreenElement && !document.webkitFullscreenElement) {
-        const docEl = document.documentElement;
-        const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
-        if (req) req.call(docEl).catch(() => {});
-    }
-
-    // 2. Start 3-second countdown before unfreezing physics
-    runResumeCountdownElevator(() => {
-        isElevatorPaused = false;
-    });
-};
-
-window.addEventListener('keydown', (e) => {
-    if (e.code === 'Escape' || e.code === 'KeyP') {
-        if (gameState !== STATE.LOBBY && gameState !== STATE.GAMEOVER && gameState !== STATE.VICTORY) {
-            e.preventDefault();
-            if (isElevatorPaused || document.body.classList.contains('portal-paused')) {
-                window.resumeElevatorGame();
-            } else {
-                window.pauseElevatorGame();
-            }
-            return;
-        }
-    }
-
-    keys[e.code] = true;
-
-    if (e.code === 'KeyE' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-        const player = players.find(p => p.isPlayer);
-        if (player && !isElevatorPaused) player.useAbility();
-    }
-
-    if (e.code === 'Space' && (gameState === STATE.GAMEOVER || gameState === STATE.VICTORY)) {
-        initMatch();
-    }
-});
-
-window.addEventListener('keyup', (e) => {
-    keys[e.code] = false;
-});
-
-// Instant trigger on first Escape when exiting native browser fullscreen
-const handleFullscreenExitElevator = () => {
-    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-    if (!isFs && gameState !== STATE.LOBBY && gameState !== STATE.GAMEOVER && gameState !== STATE.VICTORY && !isElevatorPaused) {
-        window.pauseElevatorGame();
-    }
-};
-document.addEventListener('fullscreenchange', handleFullscreenExitElevator);
-document.addEventListener('webkitfullscreenchange', handleFullscreenExitElevator);
-document.addEventListener('mozfullscreenchange', handleFullscreenExitElevator);
-document.addEventListener('MSFullscreenChange', handleFullscreenExitElevator);
-
-// Update & Render Loop
-function update() {
-    if (isElevatorPaused || document.body.classList.contains('portal-paused')) return;
-
-    if (shakeTime > 0) shakeTime--;
-
-    const player = players.find(p => p.isPlayer);
-    if (player && player.isAlive) {
-        if (keys['KeyA'] || keys['ArrowLeft']) player.vx -= 0.65;
-        if (keys['KeyD'] || keys['ArrowRight']) player.vx += 0.65;
-        if (keys['KeyW'] || keys['Space'] || keys['ArrowUp']) player.jump();
-        player.isCrouching = !!(keys['KeyS'] || keys['ArrowDown']);
-    }
-
-    // Update all passengers
-    players.forEach(p => p.update());
-
-    // Update Doom Events
-    if (gameState === STATE.DOOM_EVENT && currentEvent) {
-        currentEvent.duration--;
-
-        // Bomb collision transfer
-        if (currentEvent.type === 'BOMB') {
-            players.forEach(p1 => {
-                if (p1.hasBomb && p1.isAlive) {
-                    players.forEach(p2 => {
-                        if (p2 !== p1 && p2.isAlive) {
-                            if (Math.abs(p1.x - p2.x) < 28 && Math.abs(p1.y - p2.y) < 32) {
-                                p1.hasBomb = false;
-                                p2.hasBomb = true;
-                                p2.bark('TAG! YOU HAVE THE BOMB!');
-                                window.doomAudio.playPunch();
-                            }
-                        }
-                    });
-                }
-            });
-
-            // Bomb explosion at 0
-            if (currentEvent.duration <= 0) {
-                const bombGuy = players.find(p => p.hasBomb && p.isAlive);
-                if (bombGuy) bombGuy.eliminate('Blown to pieces by the ticking bomb!');
-                nextFloorTransition();
-            }
-        }
-
-        // Laser collision (Smooth, readable sweep speed)
-        if (currentEvent.type === 'LASER') {
-            currentEvent.laserX += 2.1;
-            players.forEach(p => {
-                if (p.isAlive && Math.abs(p.x + p.w/2 - currentEvent.laserX) < 14) {
-                    if (currentEvent.laserY > 450 && p.isGrounded && !p.isCrouching) {
-                        p.eliminate('Vaporized by the laser beam!');
-                    } else if (currentEvent.laserY <= 450 && !p.isCrouching) {
-                        p.eliminate('Decapitated by the high laser beam!');
-                    }
-                }
-            });
-
-            if (currentEvent.duration <= 0) nextFloorTransition();
-        }
-
-        // Floor 99 Escape Hatch
-        if (currentEvent.type === 'ESCAPE_HATCH') {
-            players.forEach(p => {
-                if (p.isAlive && Math.abs(p.x - currentEvent.hatchX) < 40 && Math.abs(p.y - currentEvent.hatchY) < 40) {
-                    if (p.isPlayer) endGame(true);
-                    else p.eliminate('Left behind in the abyss!');
-                }
-            });
-        }
-
-        if (currentEvent.type !== 'BOMB' && currentEvent.type !== 'LASER' && currentEvent.duration <= 0) {
-            nextFloorTransition();
-        }
-    }
-
-    // Update Particles
-    for (let i = particles.length - 1; i >= 0; i--) {
-        const pt = particles[i];
-        pt.x += pt.vx;
-        pt.y += pt.vy;
-        pt.life--;
-        if (pt.life <= 0) particles.splice(i, 1);
-    }
-}
-
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.save();
-    if (shakeTime > 0) {
-        ctx.translate((Math.random() - 0.5) * 6, (Math.random() - 0.5) * 6);
-    }
-
-    // Background Shaft
-    ctx.fillStyle = '#050811';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Elevator Cabin Shell
-    ctx.fillStyle = '#0f172a';
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 4;
-    ctx.fillRect(ELEVATOR.x, ELEVATOR.y, ELEVATOR.w, ELEVATOR.h);
-    ctx.strokeRect(ELEVATOR.x, ELEVATOR.y, ELEVATOR.w, ELEVATOR.h);
-
-    // Overhead Light Cones
-    const grad = ctx.createLinearGradient(0, ELEVATOR.y, 0, ELEVATOR.floorY);
-    grad.addColorStop(0, 'rgba(56, 189, 248, 0.15)');
-    grad.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad;
-    ctx.fillRect(ELEVATOR.x + 20, ELEVATOR.y, ELEVATOR.w - 40, ELEVATOR.h);
-
-    // Floor Tiles
-    floorTiles.forEach(tile => {
-        if (tile.active) {
-            ctx.fillStyle = tile.blinking && Math.floor(Date.now() / 150) % 2 === 0 ? '#ef4444' : '#1e293b';
-            ctx.strokeStyle = '#475569';
-            ctx.lineWidth = 2;
-            ctx.fillRect(tile.x + 2, ELEVATOR.floorY, tile.w - 4, 30);
-            ctx.strokeRect(tile.x + 2, ELEVATOR.floorY, tile.w - 4, 30);
-        }
-    });
-
-    // Draw Laser if active
-    if (currentEvent && currentEvent.type === 'LASER') {
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 6;
-        ctx.shadowColor = '#ef4444';
-        ctx.shadowBlur = 15;
-        ctx.beginPath();
-        ctx.moveTo(currentEvent.laserX, ELEVATOR.y);
-        ctx.lineTo(currentEvent.laserX, ELEVATOR.floorY + 20);
-        ctx.stroke();
-    }
-
-    // Draw Floor 99 Golden Escape Hatch
-    if (currentEvent && currentEvent.type === 'ESCAPE_HATCH') {
-        ctx.fillStyle = '#fbbf24';
-        ctx.shadowColor = '#fbbf24';
-        ctx.shadowBlur = 25;
-        ctx.beginPath();
-        ctx.arc(currentEvent.hatchX + 30, currentEvent.hatchY + 20, 36, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#000000';
-        ctx.font = 'bold 12px Outfit';
-        ctx.textAlign = 'center';
-        ctx.fillText('ESCAPE!', currentEvent.hatchX + 30, currentEvent.hatchY + 24);
-    }
-
-    // Draw Passengers
-    players.forEach(p => p.draw());
-
-    // Draw Particles
-    particles.forEach(pt => {
-        ctx.fillStyle = pt.color;
-        ctx.fillRect(pt.x, pt.y, 4, 4);
-    });
-
-    ctx.restore();
-}
-
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-// Render Lobby Roster
-function renderLobbyRoster() {
+function initLobby() {
     const grid = document.getElementById('passenger-grid');
     if (!grid) return;
     grid.innerHTML = '';
-    ROSTER.forEach(r => {
-        const slot = document.createElement('div');
-        slot.className = `p-slot ${r.isPlayer ? 'is-you' : ''}`;
-        slot.innerHTML = `
-            <span class="p-emoji">${r.emoji}</span>
-            <span class="p-name">${r.name}</span>
+
+    SURVIVORS.forEach((s, idx) => {
+        const card = document.createElement('div');
+        card.className = `passenger-card ${s.id === selectedSurvivor.id ? 'selected' : ''}`;
+        card.style.cssText = `
+            background: ${s.id === selectedSurvivor.id ? 'rgba(56, 189, 248, 0.2)' : 'rgba(30, 41, 59, 0.7)'};
+            border: 2px solid ${s.id === selectedSurvivor.id ? '#38bdf8' : 'rgba(255, 255, 255, 0.12)'};
+            border-radius: 14px;
+            padding: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
         `;
-        grid.appendChild(slot);
+        card.innerHTML = `
+            <div style="font-size: 2rem; margin-bottom: 2px;">${s.icon}</div>
+            <strong style="font-size: 0.88rem; color: #fff; font-family: 'Outfit', sans-serif;">${s.name}</strong>
+            <small style="font-size: 0.70rem; color: #38bdf8; font-weight: 800;">${s.role}</small>
+            <div style="font-size: 0.68rem; color: #cbd5e1; margin-top: 4px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; width: 100%;">
+                ❤️ ${s.hp} HP &nbsp;|&nbsp; ${s.weapon.icon} ${s.weapon.name}
+            </div>
+        `;
+        card.onclick = () => {
+            selectedSurvivor = s;
+            player.maxHp = s.hp;
+            player.hp = s.hp;
+            player.speed = s.speed;
+            player.weapon = s.weapon;
+            player.ability = s.ability;
+            initLobby();
+        };
+        grid.appendChild(card);
     });
 }
 
-// Wire Up Buttons
-document.getElementById('btn-start-game').addEventListener('click', initMatch);
-document.getElementById('btn-restart').addEventListener('click', initMatch);
-document.getElementById('btn-sound-toggle').addEventListener('click', () => {
-    window.doomAudio.muted = !window.doomAudio.muted;
-    document.getElementById('btn-sound-toggle').textContent = window.doomAudio.muted ? '🔇' : '🔊';
-});
+// Window Exposed Pause & Resume Handlers
+window.pauseElevatorGame = function() {
+    isDoomPaused = true;
+    document.body.classList.add('portal-paused');
+};
 
-renderLobbyRoster();
-gameLoop();
+window.resumeElevatorGame = function() {
+    isDoomPaused = false;
+    document.body.classList.remove('portal-paused');
+};
+
+window.startNewRun = startNewRun;
+
+// Button Bindings
+const btnStart = document.getElementById('btn-start-game');
+if (btnStart) btnStart.onclick = startNewRun;
+
+const btnRestart = document.getElementById('btn-restart');
+if (btnRestart) btnRestart.onclick = startNewRun;
+
+const btnCashOut = document.getElementById('btn-cash-out');
+if (btnCashOut) btnCashOut.onclick = cashOutAndEscape;
+
+const btnGoHigher = document.getElementById('btn-go-higher');
+if (btnGoHigher) btnGoHigher.onclick = advanceToNextFloor;
+
+const btnSoundToggle = document.getElementById('btn-sound-toggle');
+if (btnSoundToggle) {
+    btnSoundToggle.onclick = () => {
+        if (window.doomAudio) {
+            window.doomAudio.muted = !window.doomAudio.muted;
+            btnSoundToggle.textContent = window.doomAudio.muted ? '🔇' : '🔊';
+        }
+    };
+}
+
+// Initialize Lobby & Start Game Loop
+initLobby();
+requestAnimationFrame(gameLoop);

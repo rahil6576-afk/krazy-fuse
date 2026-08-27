@@ -235,7 +235,13 @@ export class MenuManager {
 
         document.getElementById('btn-exit-game')?.addEventListener('click', () => {
             soundEngine.playMenuSelect();
-            window.location.href = '../index.html';
+            if (window.exitToPortal) {
+                window.exitToPortal();
+            } else if (window.parent !== window) {
+                window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
+            } else {
+                window.location.href = '../index.html';
+            }
         });
 
         // 5. NAVIGATION BACK BUTTONS

@@ -124,7 +124,7 @@
                     transition: opacity 0.03s ease-in;
                 }
 
-                /* Floating 3D Screenshot HUD Button */
+                /* Floating 3D Screenshot HUD Button - ONLY VISIBLE IN FULLSCREEN MODE */
                 .krazy-screenshot-btn {
                     position: fixed;
                     top: max(18px, env(safe-area-inset-top, 18px));
@@ -139,7 +139,7 @@
                     border: 2px solid rgba(255, 255, 255, 0.25);
                     color: #f1f5f9;
                     font-size: 1.25rem;
-                    display: flex;
+                    display: none; /* Hidden by default in standard mode */
                     align-items: center;
                     justify-content: center;
                     cursor: pointer;
@@ -152,6 +152,17 @@
                     user-select: none;
                     -webkit-user-select: none;
                 }
+
+                /* Display only when browser is in Fullscreen */
+                :fullscreen .krazy-screenshot-btn,
+                :-webkit-full-screen .krazy-screenshot-btn,
+                :-moz-full-screen .krazy-screenshot-btn,
+                :-ms-fullscreen .krazy-screenshot-btn,
+                body.is-fullscreen .krazy-screenshot-btn,
+                .krazy-screenshot-btn.fullscreen-visible {
+                    display: flex !important;
+                }
+
                 .krazy-screenshot-btn:hover {
                     transform: translateY(-2px) scale(1.08);
                     border-color: #38bdf8;
@@ -230,27 +241,19 @@
                 document.body.appendChild(flash);
             }
 
-            // 2. Check if in top HUD or create Floating Camera Button
+            // 2. Create Floating Camera Button (Enabled only in Fullscreen)
             if (!document.getElementById('krazy-screenshot-btn')) {
                 const btn = document.createElement('button');
                 btn.id = 'krazy-screenshot-btn';
-                btn.className = 'krazy-screenshot-btn hud-btn';
-                btn.title = 'Take In-Game Screenshot (Shortcut: C or S)';
+                btn.className = 'krazy-screenshot-btn';
+                btn.title = 'Take Screenshot in Fullscreen (Shortcut: F2, PrintScreen, or C)';
                 btn.setAttribute('aria-label', 'Screenshot');
                 btn.innerHTML = '📸';
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.capture();
                 });
-
-                // If game has .top-hud-right or header, insert inside; else float fixed
-                const topHudRight = document.querySelector('.top-hud-right, .hud-right, .header-right');
-                if (topHudRight) {
-                    btn.style.position = 'static';
-                    topHudRight.insertBefore(btn, topHudRight.firstChild);
-                } else {
-                    document.body.appendChild(btn);
-                }
+                document.body.appendChild(btn);
             }
 
             // 3. Toast Container
@@ -267,15 +270,38 @@
                 `;
                 document.body.appendChild(toast);
             }
+
+            this.syncFullscreenVisibility();
+        }
+
+        syncFullscreenVisibility() {
+            const btn = document.getElementById('krazy-screenshot-btn');
+            if (!btn) return;
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+            if (isFs) {
+                btn.classList.add('fullscreen-visible');
+                document.body.classList.add('is-fullscreen');
+            } else {
+                btn.classList.remove('fullscreen-visible');
+                document.body.classList.remove('is-fullscreen');
+            }
         }
 
         bindEvents() {
+            const updateFs = () => this.syncFullscreenVisibility();
+            document.addEventListener('fullscreenchange', updateFs);
+            document.addEventListener('webkitfullscreenchange', updateFs);
+            document.addEventListener('mozfullscreenchange', updateFs);
+            document.addEventListener('MSFullscreenChange', updateFs);
+
             window.addEventListener('keydown', (e) => {
                 const tag = e.target && e.target.tagName ? e.target.tagName.toLowerCase() : '';
                 if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
 
-                // 'C', 'c', 'S', 's' (without modifier when not playing letter games), 'F2', 'PrintScreen'
-                if (e.key === 'F2' || e.key === 'PrintScreen' || (e.code === 'KeyC' && !e.ctrlKey && !e.altKey && !e.metaKey)) {
+                const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+
+                // 'F2', 'PrintScreen', or 'C' in fullscreen mode
+                if (e.key === 'F2' || e.key === 'PrintScreen' || (isFs && e.code === 'KeyC' && !e.ctrlKey && !e.altKey && !e.metaKey)) {
                     e.preventDefault();
                     this.capture();
                 }

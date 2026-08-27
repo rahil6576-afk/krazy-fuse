@@ -1295,13 +1295,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const portalBackBtn = document.getElementById('krazio-floating-back');
     if (portalBackBtn) {
         portalBackBtn.addEventListener('click', (e) => {
-            if (window.game && (window.game.gameState === STATE.PLAYING || window.game.gameState === STATE.PAUSED || window.game.gameState === STATE.GAMEOVER)) {
-                e.preventDefault();
-                window.game.gameState = STATE.MENU;
-                if (window.gravityAudio) window.gravityAudio.stopBGM();
-                document.getElementById('pause-screen').classList.add('hidden');
-                document.getElementById('gameover-screen').classList.add('hidden');
-                document.getElementById('start-screen').classList.remove('hidden');
+            e.preventDefault();
+            if (window.exitToPortal) {
+                window.exitToPortal();
+            } else if (window.parent !== window) {
+                window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
             } else {
                 window.location.href = '../index.html';
             }
