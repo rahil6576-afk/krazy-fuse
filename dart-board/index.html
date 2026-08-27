@@ -408,7 +408,7 @@
         .modal-overlay {
             position: absolute;
             inset: 0;
-            background: #000000;
+            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -424,6 +424,11 @@
         .modal-overlay.active {
             opacity: 1;
             pointer-events: auto;
+        }
+
+        /* Ensure #modalOverlay specifically covers the entire gameApp */
+        #modalOverlay {
+            background: #0b0f19;
         }
 
         /* Match Result Modal Styling */
@@ -781,6 +786,18 @@
             perspective: 1200px;
             transform-style: preserve-3d;
             overflow: hidden;
+        }
+
+        /* Always-visible image fallback */
+        #dartHomeBgImg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            z-index: 0;
+            display: block;
         }
 
         .dart-home-bg-video {
