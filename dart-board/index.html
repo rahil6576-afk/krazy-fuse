@@ -1791,7 +1791,7 @@
             <div class="dart-home-viewport">
                 <!-- Atmospheric Background Image (Always visible fallback) -->
                 <img id="dartHomeBgImg" class="dart-home-bg-img" src="dart_home_bg.webp" alt="Dart Home Background">
-                <video id="dartHomeBgVideo" class="dart-home-bg-video" autoplay muted playsinline loop poster="dart_home_bg.webp" style="opacity: 1;">
+                <video id="dartHomeBgVideo" class="dart-home-bg-video" autoplay muted playsinline poster="dart_home_bg.webp" style="opacity: 1;">
                     <source src="dart_home_bg.webm" type="video/webm">
                 </video>
 
@@ -3644,22 +3644,27 @@
             // Reveal buttons immediately
             showBoardButtons();
 
-            // Video background: always try to play, WebP img is always visible underneath as fallback.
+            // Video background: plays exactly ONCE, then stops on final frame with WebP fallback.
             if (homeBgVideo) {
                 homeBgVideo.muted = true;
-                homeBgVideo.loop = true;
-                // Don't hide the video - it starts visible. Just ensure it plays.
+                homeBgVideo.loop = false;
+
+                homeBgVideo.addEventListener('ended', () => {
+                    homeBgVideo.pause();
+                });
+
                 const tryPlay = () => {
+                    if (homeBgVideo.ended) return;
                     const p = homeBgVideo.play();
                     if (p !== undefined) {
                         p.catch(() => {
-                            // Autoplay blocked - img fallback is already visible, nothing to do.
+                            // Autoplay blocked - fallback image is already visible
                         });
                     }
                 };
                 // Try immediately
                 tryPlay();
-                // Also try on first user interaction (handles strict autoplay policies)
+                // Also try on first user interaction if browser blocked initial autoplay
                 const onInteract = () => {
                     tryPlay();
                     document.removeEventListener('click', onInteract);
