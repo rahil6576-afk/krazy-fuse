@@ -779,7 +779,7 @@
             max-width: calc((100vh - 20px) * (1672 / 941));
             max-height: calc((100vw - 20px) * (941 / 1672));
             aspect-ratio: 1672 / 941;
-            background: #1a2e1a url('dart_home_bg.jpg') no-repeat center center / cover;
+            background: #1a2e1a url('dart_home_bg.webp') no-repeat center center / cover;
             margin: auto;
             border-radius: 16px;
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
@@ -1840,8 +1840,8 @@
         <div class="modal-overlay active" id="modalOverlay">
             <div class="dart-home-viewport">
                 <!-- Atmospheric Background Image (Always visible fallback) -->
-                <img id="dartHomeBgImg" class="dart-home-bg-img" src="dart_home_bg.jpg" alt="Dart Home Background">
-                <video id="dartHomeBgVideo" class="dart-home-bg-video" autoplay muted playsinline poster="dart_home_bg.webp" style="opacity: 0; transition: opacity 0.3s ease;">
+                <img id="dartHomeBgImg" class="dart-home-bg-img" src="dart_home_bg.webp" alt="Dart Home Background">
+                <video id="dartHomeBgVideo" class="dart-home-bg-video" autoplay muted playsinline loop poster="dart_home_bg.webp" style="opacity: 1;">
                     <source src="dart_home_bg.webm" type="video/webm">
                 </video>
 
@@ -3703,36 +3703,29 @@
             // Reveal buttons immediately
             showBoardButtons();
 
+            // Video background: always try to play, WebP img is always visible underneath as fallback.
             if (homeBgVideo) {
-                homeBgVideo.loop = false;
-                let revealed = false;
-                const onAnimationDone = () => {
-                    if (revealed) return;
-                    revealed = true;
-                    try { homeBgVideo.pause(); } catch(e) {}
-                    showBoardButtons();
+                homeBgVideo.muted = true;
+                homeBgVideo.loop = true;
+                // Don't hide the video - it starts visible. Just ensure it plays.
+                const tryPlay = () => {
+                    const p = homeBgVideo.play();
+                    if (p !== undefined) {
+                        p.catch(() => {
+                            // Autoplay blocked - img fallback is already visible, nothing to do.
+                        });
+                    }
                 };
-
-                homeBgVideo.addEventListener('ended', onAnimationDone);
-                homeBgVideo.addEventListener('error', () => {
-                    homeBgVideo.style.display = 'none';
-                    onAnimationDone();
-                });
-
-                const playPromise = homeBgVideo.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        homeBgVideo.style.opacity = '1';
-                    }).catch(() => {
-                        homeBgVideo.style.display = 'none';
-                        onAnimationDone();
-                    });
-                }
-                
-                // Fallback timer
-                setTimeout(onAnimationDone, 3000);
-            } else {
-                showBoardButtons();
+                // Try immediately
+                tryPlay();
+                // Also try on first user interaction (handles strict autoplay policies)
+                const onInteract = () => {
+                    tryPlay();
+                    document.removeEventListener('click', onInteract);
+                    document.removeEventListener('touchstart', onInteract);
+                };
+                document.addEventListener('click', onInteract);
+                document.addEventListener('touchstart', onInteract);
             }
         });
     })();
