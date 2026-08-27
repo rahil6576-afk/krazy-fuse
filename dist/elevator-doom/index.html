@@ -285,9 +285,12 @@
             </div>
         </div>
 
-        <div class="action-row">
+        <div class="action-row" style="flex-wrap: wrap; gap: 12px; justify-content: center;">
             <button id="btn-start-game" class="btn-play-primary">
                 <span>🚪 ENTER ELEVATOR & SURVIVE</span>
+            </button>
+            <button id="btn-lobby-continue-floor" class="btn-secondary-lobby hidden" style="border-color: #f59e0b; color: #fef3c7; background: rgba(245, 158, 11, 0.15);">
+                <span>🛗 RESUME AT FAILED FLOOR</span>
             </button>
             <a href="../index.html" class="btn-secondary-lobby">
                 <span>🏠 KRAZY FUSE HUB</span>
@@ -307,7 +310,7 @@
     <div id="gameover-screen" class="screen hidden">
         <div class="gameover-box">
             <div id="gameover-badge" class="result-badge">💀 ELEVATOR CRUSHED</div>
-            <h2 id="gameover-title" class="result-title">You Were Doomed!</h2>
+            <h2 id="gameover-title" class="result-title">You Were Eliminated!</h2>
             <div class="cause-of-death-box">
                 <span class="cod-label">CAUSE OF DEATH:</span>
                 <p id="gameover-subtitle" class="cod-text">"Tried to high-five The Elevator Man on Floor 37."</p>
@@ -345,9 +348,12 @@
                 <span>FINAL BUILD: 🗡️ Rusty Knife + 💨 Dash (3 Passives)</span>
             </div>
 
-            <div class="action-row" style="margin-top: 20px;">
-                <button id="btn-restart" class="btn-play-primary">
-                    <span>⚡ RIDE AGAIN (SPACE)</span>
+            <div class="action-row" style="margin-top: 20px; flex-wrap: wrap; gap: 12px; justify-content: center;">
+                <button id="btn-retry-floor" class="btn-play-primary btn-retry-highlight">
+                    <span>🔄 RESTART AT FAILED FLOOR</span>
+                </button>
+                <button id="btn-restart" class="btn-secondary-lobby">
+                    <span>⚡ NEW RUN (FLOOR 1)</span>
                 </button>
                 <a href="../index.html" class="btn-secondary-lobby">
                     <span>🌐 KRAZY FUSE HUB</span>

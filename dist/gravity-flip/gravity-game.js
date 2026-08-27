@@ -1,4 +1,5 @@
-// gravity-game.js — Cavern Stalactite Gravity Runner with 2D Animated Character & Dynamic Cave Biomes
+// gravity-game.js — Cavern Stalactite Gravity Runner (Pure 2D Canvas Edition)
+// Features 2D Animated Character, Dynamic Cavern Biomes, Stalactites, Stalagmites, and Powerups
 
 const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 600;
@@ -96,8 +97,8 @@ class CaveGravityRunner {
             angle: 0,
             scaleX: 1,
             scaleY: 1,
-            runCycle: 0, // Leg animation cycle
-            scarfPoints: [], // Scarf physics trail
+            runCycle: 0,
+            scarfPoints: [],
             shield: false,
             invulnerableTimer: 0,
             magnetTimer: 0,
@@ -123,7 +124,7 @@ class CaveGravityRunner {
         this.waterDrops = [];
 
         this.highScore = parseInt(localStorage.getItem('gravity_highscore') || '0', 10);
-        this.totalCoins = parseInt(localStorage.getItem('gravity_total_coins') || '0', 10);
+        this.bestDistance = parseInt(localStorage.getItem('gravity_best_dist') || '0', 10);
 
         this.shakeTimer = 0;
         this.spawnTimer = 0;
@@ -159,12 +160,14 @@ class CaveGravityRunner {
         };
 
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'ArrowDown' || e.code === 'KeyW') {
                 e.preventDefault();
                 doFlip();
             }
             if (e.code === 'KeyP' || e.code === 'Escape') {
-                if (this.gameState === STATE.PLAYING) this.togglePause();
+                if (this.gameState === STATE.PLAYING || this.gameState === STATE.PAUSED) {
+                    this.togglePause();
+                }
             }
         });
 
@@ -184,11 +187,6 @@ class CaveGravityRunner {
     }
 
     startGame() {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-            const el = document.documentElement;
-            const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-            if (req) req.call(el).catch(() => {});
-        }
         window.gravityAudio.init();
         window.gravityAudio.startBGM();
 
@@ -197,8 +195,8 @@ class CaveGravityRunner {
         this.coins = 0;
         this.flips = 0;
         this.level = 1;
-        this.baseSpeed = 2.8; // Smooth start
-        this.speed = 2.8;
+        this.baseSpeed = 4.2;
+        this.speed = 4.2;
         this.combo = 1;
         this.highestCombo = 1;
         this.gameStartTime = performance.now();
@@ -251,7 +249,6 @@ class CaveGravityRunner {
         if (this.player.invulnerableTimer > 0) return;
 
         if (this.player.shield) {
-            // Chrono/Crystal Shield absorbs fatal rock crash
             this.player.shield = false;
             this.player.invulnerableTimer = 60;
             this.shakeTimer = 20;
@@ -293,7 +290,7 @@ class CaveGravityRunner {
     update() {
         if (this.gameState !== STATE.PLAYING) return;
 
-        // Progressive Cave Biome Level Ups (Every 450m)
+        // Progressive Level Ups
         const targetLevel = Math.min(5, Math.floor(this.distance / 450) + 1);
         if (targetLevel > this.level) {
             this.level = targetLevel;
@@ -303,9 +300,9 @@ class CaveGravityRunner {
             window.gravityAudio.playLevelUp();
         }
 
-        // Continuous Progression: Speed ramps up noticeably with seconds played + distance explored!
+        // Speed Progression
         const elapsedSec = (performance.now() - (this.gameStartTime || performance.now())) / 1000;
-        const timeSpeedBonus = Math.min(3.8, elapsedSec * 0.045); // +0.45 speed every 10 seconds
+        const timeSpeedBonus = Math.min(3.8, elapsedSec * 0.045);
         const distSpeedBonus = Math.min(3.5, this.distance * 0.001);
         let effectiveSpeed = this.baseSpeed + timeSpeedBonus + distSpeedBonus;
         
@@ -317,7 +314,6 @@ class CaveGravityRunner {
         this.distance += this.speed * 0.04;
         this.bgOffset += this.speed;
 
-        // Animate Player Running Cycle
         this.player.runCycle += this.speed * 0.07;
 
         // Soft, controlled Gravity Physics
@@ -331,27 +327,22 @@ class CaveGravityRunner {
             this.player.vy = 0;
             this.player.isGrounded = true;
             this.player.angle = 0;
-            this.player.scaleX = 1;
-            this.player.scaleY = 1;
         } else if (this.player.gravDir === -1 && this.player.y <= this.ceilY) {
             this.player.y = this.ceilY;
             this.player.vy = 0;
             this.player.isGrounded = true;
             this.player.angle = Math.PI;
-            this.player.scaleX = 1;
-            this.player.scaleY = 1;
         } else {
-            // Smooth flip spin in air
             this.player.angle += this.player.gravDir * 0.15;
         }
 
-        // Update Scarf Physics Trail
+        // Scarf Physics Trail
         const neckX = this.player.x + 8;
         const neckY = this.player.gravDir === 1 ? this.player.y + 16 : this.player.y + 26;
         this.player.scarfPoints.unshift({ x: neckX, y: neckY });
         if (this.player.scarfPoints.length > 7) this.player.scarfPoints.pop();
 
-        // Update Ambient Cave Dust
+        // Cave Dust
         this.caveDust.forEach(d => {
             d.x += d.vx;
             d.y += d.vy;
@@ -360,13 +351,12 @@ class CaveGravityRunner {
             if (d.y > this.floorY) d.y = this.ceilY;
         });
 
-        // Water Drops from Stalactites
+        // Water Drops
         if (Math.random() < 0.08) {
             this.waterDrops.push({
                 x: Math.random() * CANVAS_WIDTH,
                 y: this.ceilY + 10,
-                vy: Math.random() * 3 + 3,
-                life: 60
+                vy: Math.random() * 3 + 3
             });
         }
         for (let i = this.waterDrops.length - 1; i >= 0; i--) {
@@ -383,7 +373,7 @@ class CaveGravityRunner {
         if (this.player.magnetTimer > 0) this.player.magnetTimer--;
         if (this.player.slowMoTimer > 0) this.player.slowMoTimer--;
 
-        // Spawn Procedural Cave Obstacles (Ramps up with speed and time)
+        // Procedural Cave Hazard Spawning
         this.spawnTimer--;
         if (this.spawnTimer <= 0) {
             this.spawnProceduralCavePattern();
@@ -391,12 +381,11 @@ class CaveGravityRunner {
             this.spawnTimer = Math.max(34, Math.floor(82 - timeReduction - this.level * 5));
         }
 
-        // Update Obstacles (Stalagmites, Stalactites, Falling Boulders, Lasers, Magma Jets, Saws, Crushers)
+        // Update Obstacles
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
             const obs = this.obstacles[i];
             obs.x -= this.speed;
 
-            // Falling Stalactite Rock Hazard
             if (obs.type === 'FALLING_STALACTITE') {
                 if (Math.abs(this.player.x - obs.x) < 220 && !obs.falling) {
                     obs.falling = true;
@@ -413,57 +402,18 @@ class CaveGravityRunner {
                 }
             }
 
-            // Rotating Saw Blade Spin
             if (obs.type === 'ROTATING_SAW') {
                 obs.rot = (obs.rot || 0) + 0.14;
             }
 
-            // Magma Jet Flame Pulse
-            if (obs.type === 'MAGMA_JET') {
-                obs.pulsePhase = (obs.pulsePhase || 0) + 0.08;
-                if (Math.random() < 0.3) {
-                    this.particles.push({
-                        x: obs.x + obs.w / 2 + (Math.random() - 0.5) * 16,
-                        y: obs.dir === 'up' ? obs.y : obs.y + obs.h,
-                        vx: (Math.random() - 0.5) * 3,
-                        vy: obs.dir === 'up' ? -Math.random() * 4 - 2 : Math.random() * 4 + 2,
-                        life: 20,
-                        color: Math.random() > 0.5 ? '#f97316' : '#ef4444',
-                        size: Math.random() * 3 + 2
-                    });
-                }
-            }
-
-            // Runic Crusher Compression Cycle
-            if (obs.type === 'RUNIC_CRUSHER') {
-                obs.phase = (obs.phase || 0) + 0.04;
-                const shift = Math.sin(obs.phase) * 18;
-                if (obs.dir === 'top') {
-                    obs.h = obs.baseH + shift;
-                } else {
-                    obs.h = obs.baseH + shift;
-                    obs.y = this.floorY - obs.h;
-                }
-            }
-
-            // Laser Barrier Spark Arcs
-            if (obs.type === 'LASER_BARRIER') {
-                obs.laserTimer = (obs.laserTimer || 0) + 1;
-            }
-
-            // Remove off-screen obstacles
             if (obs.x + obs.w < -50) {
                 this.obstacles.splice(i, 1);
                 continue;
             }
 
-            // Check Player Collision with Spikes / Obstacles
             if (this.checkCollision(this.player, obs)) {
-                if (this.player.invulnerableTimer > 0) {
-                    continue;
-                }
+                if (this.player.invulnerableTimer > 0) continue;
                 if (this.player.shield) {
-                    // Chrono Shield absorbs hit, shatters the obstacle, grants 60 frames of invulnerability!
                     this.player.shield = false;
                     this.player.invulnerableTimer = 60;
                     this.shakeTimer = 20;
@@ -480,12 +430,11 @@ class CaveGravityRunner {
             }
         }
 
-        // Update Collectibles (Gems & Ancient Relics)
+        // Update Collectibles
         for (let i = this.collectibles.length - 1; i >= 0; i--) {
             const item = this.collectibles[i];
             item.x -= this.speed;
 
-            // Magnetic Attraction towards Player
             if (this.player.magnetTimer > 0) {
                 const dx = (this.player.x + 14) - (item.x + item.w / 2);
                 const dy = (this.player.y + 21) - (item.y + item.h / 2);
@@ -496,7 +445,6 @@ class CaveGravityRunner {
                 }
             }
 
-            // Collect Item (Generous pickup hitbox for ceiling and floor stars)
             if (this.checkItemPickup(this.player, item)) {
                 if (item.type === 'GEM') {
                     this.coins += this.combo;
@@ -525,13 +473,12 @@ class CaveGravityRunner {
                 continue;
             }
 
-            // Remove offscreen
             if (item.x + item.w < -50) {
                 this.collectibles.splice(i, 1);
             }
         }
 
-        // Update Dust Particles
+        // Particles
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const p = this.particles[i];
             p.x += p.vx;
@@ -540,7 +487,7 @@ class CaveGravityRunner {
             if (p.life <= 0) this.particles.splice(i, 1);
         }
 
-        // Update Floating Texts
+        // Floating texts
         for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
             const ft = this.floatingTexts[i];
             ft.y += ft.vy;
@@ -556,9 +503,7 @@ class CaveGravityRunner {
         const startX = CANVAS_WIDTH + 40;
         const lvl = this.level;
 
-        // Higher levels unlock more intense & varied hazard patterns!
         if (lvl >= 5 && rand < 0.22) {
-            // Level 5+ Hazard: Dual Ancient Runic Compressors
             this.obstacles.push({
                 type: 'RUNIC_CRUSHER',
                 x: startX,
@@ -582,7 +527,6 @@ class CaveGravityRunner {
             this.spawnGemArc(startX + 80, (this.floorY + this.ceilY) / 2, 3);
             this.spawnRelic(startX + 220, this.floorY - 30);
         } else if (lvl >= 4 && rand < 0.38) {
-            // Level 4+ Hazard: Rotating Energy Saw Blade in Mid-Cavern
             this.obstacles.push({
                 type: 'ROTATING_SAW',
                 x: startX,
@@ -591,14 +535,12 @@ class CaveGravityRunner {
                 h: 52,
                 rot: 0
             });
-            // Safe running paths exist on ceiling or floor
             if (Math.random() < 0.5) {
                 this.spawnGemArc(startX - 20, this.ceilY + 8, 3);
             } else {
                 this.spawnGemArc(startX - 20, this.floorY - 30, 3);
             }
         } else if (lvl >= 3 && rand < 0.52) {
-            // Level 3+ Hazard: Erupting Magma Flame Jet
             const isFloor = Math.random() < 0.5;
             this.obstacles.push({
                 type: 'MAGMA_JET',
@@ -608,10 +550,8 @@ class CaveGravityRunner {
                 h: 65,
                 dir: isFloor ? 'up' : 'down'
             });
-            // Gems on safe opposite surface
             this.spawnGemArc(startX, isFloor ? this.ceilY + 8 : this.floorY - 30, 3);
         } else if (lvl >= 2 && rand < 0.68) {
-            // Level 2+ Hazard: Pulsing Electric Laser Barrier with flip gap
             const isFloorBeam = Math.random() < 0.5;
             this.obstacles.push({
                 type: 'LASER_BARRIER',
@@ -627,7 +567,6 @@ class CaveGravityRunner {
                 this.spawnRelic(startX + 90, (this.floorY + this.ceilY) / 2);
             }
         } else if (rand < 0.82) {
-            // Standard Pattern 1: Stalagmites or Stalactites
             const isCeil = Math.random() < 0.5;
             const count = Math.random() < 0.5 ? 1 : 2;
             for (let i = 0; i < count; i++) {
@@ -643,7 +582,6 @@ class CaveGravityRunner {
             }
             this.spawnGemArc(startX, isCeil ? this.floorY - 32 : this.ceilY + 8, 3);
         } else {
-            // Standard Pattern 2: Dual Staggered Pinch
             this.obstacles.push({
                 type: 'STALAGMITE',
                 x: startX,
@@ -670,7 +608,6 @@ class CaveGravityRunner {
             const gemX = x + i * 38;
             const gemY = y;
 
-            // Safe validation: Ensure gem is never inside or within 35px of any obstacle spike
             let isInsideSpike = false;
             for (const obs of this.obstacles) {
                 if (
@@ -707,7 +644,6 @@ class CaveGravityRunner {
         });
     }
 
-    // Strict obstacle collision for fatal rock hazards
     checkCollision(p, obj) {
         const pad = 6;
         return (
@@ -718,7 +654,6 @@ class CaveGravityRunner {
         );
     }
 
-    // Generous, forgiving pickup collision for Stars, Gems, and Relics
     checkItemPickup(p, obj) {
         const pickupRadius = 14;
         return (
@@ -787,6 +722,7 @@ class CaveGravityRunner {
 
     updatePowerupHUD() {
         const strip = document.getElementById('powerup-status-strip');
+        if (!strip) return;
         strip.innerHTML = '';
         if (this.player.shield) {
             strip.innerHTML += `<span class="status-badge" style="border-color: #38bdf8; color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);">🛡️ CHRONO SHIELD</span>`;
@@ -824,14 +760,12 @@ class CaveGravityRunner {
         this.ctx.fillStyle = theme.rockShadow;
         const bgShift = (this.bgOffset * 0.3) % 120;
         for (let x = -bgShift; x < CANVAS_WIDTH + 120; x += 120) {
-            // Distant ceiling stalactite silhouette
             this.ctx.beginPath();
             this.ctx.moveTo(x, this.ceilY);
             this.ctx.lineTo(x + 40, this.ceilY + 70);
             this.ctx.lineTo(x + 80, this.ceilY);
             this.ctx.fill();
 
-            // Distant floor stalagmite silhouette
             this.ctx.beginPath();
             this.ctx.moveTo(x + 50, this.floorY);
             this.ctx.lineTo(x + 90, this.floorY - 80);
@@ -870,7 +804,6 @@ class CaveGravityRunner {
         this.collectibles.forEach(col => {
             this.ctx.save();
             if (col.type === 'GEM') {
-                // Sparkling Raw Crystal / Gold Nugget
                 this.ctx.fillStyle = theme.crystalColor;
                 this.ctx.shadowColor = theme.crystalColor;
                 this.ctx.shadowBlur = 12;
@@ -886,7 +819,6 @@ class CaveGravityRunner {
                 this.ctx.closePath();
                 this.ctx.fill();
 
-                // Gem Highlight facet
                 this.ctx.fillStyle = '#ffffff';
                 this.ctx.beginPath();
                 this.ctx.moveTo(cx, cy - 9);
@@ -895,7 +827,6 @@ class CaveGravityRunner {
                 this.ctx.closePath();
                 this.ctx.fill();
             } else {
-                // Power-up Relics
                 const icons = { SHIELD: '🛡️', MAGNET: '🧲', SLOWMO: '⏱️' };
                 this.ctx.font = '24px Outfit';
                 this.ctx.fillText(icons[col.type] || '⭐', col.x, col.y + 22);
@@ -936,347 +867,205 @@ class CaveGravityRunner {
         this.ctx.restore();
     }
 
-    // Draw Rocky Cave Ceiling & Floor with Mineral Layers
     drawCaveStrata(theme) {
         this.ctx.save();
-
-        // Ceil Rock Bedrock
         this.ctx.fillStyle = theme.rockMain;
         this.ctx.fillRect(0, 0, CANVAS_WIDTH, this.ceilY);
-        // Jagged rocky edge on ceiling
         this.ctx.fillStyle = theme.rockHighlight;
         this.ctx.fillRect(0, this.ceilY - 4, CANVAS_WIDTH, 4);
 
-        // Floor Rock Bedrock
         this.ctx.fillStyle = theme.rockMain;
         this.ctx.fillRect(0, this.floorY, CANVAS_WIDTH, CANVAS_HEIGHT - this.floorY);
-        // Jagged rocky top on floor
         this.ctx.fillStyle = theme.rockHighlight;
         this.ctx.fillRect(0, this.floorY, CANVAS_WIDTH, 4);
-
-        // Natural Rocky Bumps along Floor & Ceiling
-        this.ctx.fillStyle = theme.rockShadow;
-        const bumpShift = (this.bgOffset) % 60;
-        for (let x = -bumpShift; x < CANVAS_WIDTH + 60; x += 60) {
-            // Ceiling stone bump
-            this.ctx.beginPath();
-            this.ctx.moveTo(x, this.ceilY);
-            this.ctx.lineTo(x + 30, this.ceilY + 12);
-            this.ctx.lineTo(x + 60, this.ceilY);
-            this.ctx.fill();
-
-            // Floor stone bump
-            this.ctx.beginPath();
-            this.ctx.moveTo(x + 10, this.floorY);
-            this.ctx.lineTo(x + 40, this.floorY - 12);
-            this.ctx.lineTo(x + 70, this.floorY);
-            this.ctx.fill();
-        }
-
         this.ctx.restore();
     }
 
-    // Draw Realistic Jagged Stalactites and Stalagmites
     drawCaveObstacle(obs, theme) {
         this.ctx.save();
-        this.ctx.fillStyle = theme.rockHighlight;
-        this.ctx.strokeStyle = theme.rockShadow;
-        this.ctx.lineWidth = 2;
 
-        if (obs.type === 'STALAGMITE') {
-            // Rising jagged limestone stalagmite from ground
+        const x = obs.x;
+        const y = obs.y;
+        const w = obs.w;
+        const h = obs.h;
+
+        if (obs.type === 'STALACTITE' || obs.type === 'FALLING_STALACTITE') {
+            this.ctx.fillStyle = theme.rockMain;
             this.ctx.beginPath();
-            this.ctx.moveTo(obs.x, obs.y + obs.h);
-            this.ctx.lineTo(obs.x + 8, obs.y + obs.h * 0.4);
-            this.ctx.lineTo(obs.x + obs.w / 2, obs.y); // Sharp tip
-            this.ctx.lineTo(obs.x + obs.w - 8, obs.y + obs.h * 0.5);
-            this.ctx.lineTo(obs.x + obs.w, obs.y + obs.h);
+            this.ctx.moveTo(x, y);
+            this.ctx.lineTo(x + w / 2, y + h);
+            this.ctx.lineTo(x + w, y);
             this.ctx.closePath();
             this.ctx.fill();
-            this.ctx.stroke();
 
-            // Mineral highlight ridge
-            this.ctx.strokeStyle = theme.crystalColor;
+            this.ctx.fillStyle = theme.rockHighlight;
             this.ctx.beginPath();
-            this.ctx.moveTo(obs.x + obs.w / 2, obs.y);
-            this.ctx.lineTo(obs.x + obs.w / 2, obs.y + obs.h);
-            this.ctx.stroke();
-        } else if (obs.type === 'STALACTITE' || obs.type === 'FALLING_STALACTITE') {
-            // Hanging jagged rock spike from ceiling
-            this.ctx.beginPath();
-            this.ctx.moveTo(obs.x, obs.y);
-            this.ctx.lineTo(obs.x + 8, obs.y + obs.h * 0.5);
-            this.ctx.lineTo(obs.x + obs.w / 2, obs.y + obs.h); // Sharp down tip
-            this.ctx.lineTo(obs.x + obs.w - 8, obs.y + obs.h * 0.4);
-            this.ctx.lineTo(obs.x + obs.w, obs.y);
+            this.ctx.moveTo(x + w / 2, y + h);
+            this.ctx.lineTo(x + w, y);
+            this.ctx.lineTo(x + w * 0.7, y);
             this.ctx.closePath();
             this.ctx.fill();
-            this.ctx.stroke();
-
-            // Mineral highlight ridge
-            this.ctx.strokeStyle = theme.crystalColor;
+        } else if (obs.type === 'STALAGMITE') {
+            this.ctx.fillStyle = theme.rockMain;
             this.ctx.beginPath();
-            this.ctx.moveTo(obs.x + obs.w / 2, obs.y + obs.h);
-            this.ctx.lineTo(obs.x + obs.w / 2, obs.y);
-            this.ctx.stroke();
-        } else if (obs.type === 'LASER_BARRIER') {
-            // High-voltage laser emitter posts & pulsing energy beam
-            const isFloor = obs.side === 'floor';
-            const nodeY = isFloor ? this.floorY - 14 : this.ceilY;
-
-            // Emitter Post Node
-            this.ctx.fillStyle = '#0f172a';
-            this.ctx.fillRect(obs.x + 4, nodeY, obs.w - 8, 14);
-            this.ctx.strokeStyle = '#38bdf8';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(obs.x + 4, nodeY, obs.w - 8, 14);
-
-            // Pulsing Laser Energy Beam
-            this.ctx.shadowColor = '#00f0ff';
-            this.ctx.shadowBlur = 18;
-            this.ctx.fillStyle = '#38bdf8';
-            this.ctx.fillRect(obs.x + obs.w / 2 - 4, obs.y, 8, obs.h);
-
-            // Inner Core Laser Wire
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillRect(obs.x + obs.w / 2 - 1.5, obs.y, 3, obs.h);
-
-            // Top/Bottom Hazard Pips
-            this.ctx.fillStyle = '#fde047';
-            this.ctx.beginPath();
-            this.ctx.arc(obs.x + obs.w / 2, isFloor ? nodeY + 7 : nodeY + 7, 4, 0, Math.PI * 2);
+            this.ctx.moveTo(x, y + h);
+            this.ctx.lineTo(x + w / 2, y);
+            this.ctx.lineTo(x + w, y + h);
+            this.ctx.closePath();
             this.ctx.fill();
-        } else if (obs.type === 'MAGMA_JET') {
-            // Volcanic Magma Jet Erupter
-            const isUp = obs.dir === 'up';
-            const baseY = isUp ? this.floorY - 12 : this.ceilY;
 
-            // Volcanic vent nozzle
-            this.ctx.fillStyle = '#262626';
-            this.ctx.fillRect(obs.x + 2, baseY, obs.w - 4, 12);
-            this.ctx.strokeStyle = '#f97316';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(obs.x + 2, baseY, obs.w - 4, 12);
-
-            // Erupting Magma Flame Jet
-            this.ctx.shadowColor = '#ea580c';
-            this.ctx.shadowBlur = 22;
-            const jetGrad = this.ctx.createLinearGradient(obs.x, obs.y, obs.x, obs.y + obs.h);
-            if (isUp) {
-                jetGrad.addColorStop(0, '#fef08a');
-                jetGrad.addColorStop(0.3, '#f97316');
-                jetGrad.addColorStop(1, '#dc2626');
-            } else {
-                jetGrad.addColorStop(0, '#dc2626');
-                jetGrad.addColorStop(0.7, '#f97316');
-                jetGrad.addColorStop(1, '#fef08a');
-            }
-            this.ctx.fillStyle = jetGrad;
-
-            // Jagged flame tongue shape
+            this.ctx.fillStyle = theme.rockHighlight;
             this.ctx.beginPath();
-            if (isUp) {
-                this.ctx.moveTo(obs.x + 4, obs.y + obs.h);
-                this.ctx.lineTo(obs.x + obs.w / 2, obs.y);
-                this.ctx.lineTo(obs.x + obs.w - 4, obs.y + obs.h);
-            } else {
-                this.ctx.moveTo(obs.x + 4, obs.y);
-                this.ctx.lineTo(obs.x + obs.w / 2, obs.y + obs.h);
-                this.ctx.lineTo(obs.x + obs.w - 4, obs.y);
-            }
+            this.ctx.moveTo(x + w / 2, y);
+            this.ctx.lineTo(x + w, y + h);
+            this.ctx.lineTo(x + w * 0.7, y + h);
             this.ctx.closePath();
             this.ctx.fill();
         } else if (obs.type === 'ROTATING_SAW') {
-            // Spinning Circular Energy Saw Blade
-            const cx = obs.x + obs.w / 2;
-            const cy = obs.y + obs.h / 2;
-            const radius = obs.w / 2;
-
-            this.ctx.save();
-            this.ctx.translate(cx, cy);
+            this.ctx.translate(x + w / 2, y + h / 2);
             this.ctx.rotate(obs.rot || 0);
 
-            this.ctx.shadowColor = '#f43f5e';
-            this.ctx.shadowBlur = 18;
-
-            // Saw Blade Teeth
-            this.ctx.fillStyle = '#475569';
-            this.ctx.strokeStyle = '#ef4444';
-            this.ctx.lineWidth = 2;
-            const teeth = 8;
+            this.ctx.fillStyle = '#ef4444';
+            this.ctx.shadowColor = '#ef4444';
+            this.ctx.shadowBlur = 12;
             this.ctx.beginPath();
-            for (let t = 0; t < teeth; t++) {
-                const a1 = (t / teeth) * Math.PI * 2;
-                const a2 = ((t + 0.5) / teeth) * Math.PI * 2;
-                this.ctx.lineTo(Math.cos(a1) * radius, Math.sin(a1) * radius);
-                this.ctx.lineTo(Math.cos(a2) * (radius - 8), Math.sin(a2) * (radius - 8));
+            const teeth = 8;
+            for (let i = 0; i < teeth * 2; i++) {
+                const r = i % 2 === 0 ? w / 2 : w / 4;
+                const a = (i * Math.PI) / teeth;
+                this.ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
             }
             this.ctx.closePath();
             this.ctx.fill();
-            this.ctx.stroke();
 
-            // Inner Core
-            this.ctx.fillStyle = '#f43f5e';
-            this.ctx.beginPath();
-            this.ctx.arc(0, 0, 9, 0, Math.PI * 2);
-            this.ctx.fill();
             this.ctx.fillStyle = '#ffffff';
             this.ctx.beginPath();
-            this.ctx.arc(0, 0, 4, 0, Math.PI * 2);
+            this.ctx.arc(0, 0, 6, 0, Math.PI * 2);
             this.ctx.fill();
-
-            this.ctx.restore();
         } else if (obs.type === 'RUNIC_CRUSHER') {
-            // Massive Ancient Runic Crusher Block
-            this.ctx.shadowColor = '#c084fc';
-            this.ctx.shadowBlur = 16;
-
-            // Carved Slate Block
-            this.ctx.fillStyle = '#1e1b4b';
-            this.ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
-            this.ctx.strokeStyle = '#a855f7';
+            this.ctx.fillStyle = theme.rockHighlight;
+            this.ctx.strokeStyle = theme.torchGlow;
             this.ctx.lineWidth = 3;
-            this.ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
-
-            // Glowing Arcane Rune Emblem
-            this.ctx.fillStyle = '#e879f9';
-            this.ctx.font = 'bold 16px sans-serif';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('ᚱ', obs.x + obs.w / 2, obs.y + obs.h / 2 + 6);
-        } else if (obs.type === 'PENDULUM') {
-            // Hanging chain & heavy glowing rune crystal
-            this.ctx.strokeStyle = '#64748b';
-            this.ctx.lineWidth = 3;
-            this.ctx.beginPath();
-            this.ctx.moveTo(obs.x + obs.w/2, this.ceilY);
-            this.ctx.lineTo(obs.x + obs.w/2, obs.y);
-            this.ctx.stroke();
-
-            // Crystal Core
-            this.ctx.fillStyle = theme.crystalColor;
-            this.ctx.shadowColor = theme.crystalColor;
+            this.ctx.fillRect(x, y, w, h);
+            this.ctx.strokeRect(x, y, w, h);
+        } else if (obs.type === 'MAGMA_JET') {
+            const grad = this.ctx.createLinearGradient(x, y, x, y + h);
+            grad.addColorStop(0, '#ef4444');
+            grad.addColorStop(0.5, '#f97316');
+            grad.addColorStop(1, 'transparent');
+            this.ctx.fillStyle = grad;
+            this.ctx.fillRect(x, y, w, h);
+        } else if (obs.type === 'LASER_BARRIER') {
+            this.ctx.strokeStyle = '#38bdf8';
+            this.ctx.shadowColor = '#38bdf8';
             this.ctx.shadowBlur = 15;
-            this.ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+            this.ctx.lineWidth = 6;
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + w / 2, y);
+            this.ctx.lineTo(x + w / 2, y + h);
+            this.ctx.stroke();
         }
 
         this.ctx.restore();
     }
 
-    // 2D ANIMATED CHARACTER: Spelunker Cave Runner with Headlamp Beam & Running Legs
     drawCharacter(theme) {
         const p = this.player;
-
-        // Invulnerability Flash (Flicker when recovering from shield break)
-        if (p.invulnerableTimer > 0 && Math.floor(p.invulnerableTimer / 4) % 2 === 0) {
-            return;
-        }
-
         this.ctx.save();
-        this.ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
+
+        const cx = p.x + p.w / 2;
+        const cy = p.y + p.h / 2;
+
+        this.ctx.translate(cx, cy);
         this.ctx.rotate(p.angle);
-        this.ctx.scale(p.scaleX, p.scaleY);
 
-        const cx = 0;
-        const cy = 0;
-
-        // 1. Glowing Explorer Headlamp Beam (Lights up the dark cave ahead!)
-        const beamAngle = 0.08;
-        const beamDist = 280;
-        const lampX = cx + 8;
-        const lampY = cy - 14;
-
-        const lightGrad = this.ctx.createRadialGradient(lampX, lampY, 5, lampX + 160, lampY, beamDist);
-        lightGrad.addColorStop(0, 'rgba(255, 245, 180, 0.45)');
-        lightGrad.addColorStop(0.6, 'rgba(255, 230, 140, 0.15)');
-        lightGrad.addColorStop(1, 'transparent');
-
-        this.ctx.fillStyle = lightGrad;
+        // Ambient Soft Headlamp Glow
+        const flashGrad = this.ctx.createRadialGradient(10, -5, 2, 90, 0, 75);
+        flashGrad.addColorStop(0, 'rgba(255, 245, 192, 0.35)');
+        flashGrad.addColorStop(1, 'transparent');
+        this.ctx.fillStyle = flashGrad;
         this.ctx.beginPath();
-        this.ctx.moveTo(lampX, lampY);
-        this.ctx.lineTo(lampX + beamDist, lampY - Math.tan(beamAngle) * beamDist - 60);
-        this.ctx.lineTo(lampX + beamDist, lampY + Math.tan(beamAngle) * beamDist + 60);
+        this.ctx.arc(10, -5, 75, -0.4, 0.4);
+        this.ctx.lineTo(10, -5);
         this.ctx.closePath();
         this.ctx.fill();
 
-        // 2. Chrono Shield Barrier (Multi-layer Pulsing Cyber Energy Shield)
+        // Shield Bubble
         if (p.shield) {
-            const pulse = 0.88 + Math.sin(Date.now() * 0.008) * 0.12;
-            this.ctx.save();
-            this.ctx.strokeStyle = '#00f0ff';
-            this.ctx.shadowColor = '#00f0ff';
-            this.ctx.shadowBlur = 20 * pulse;
+            this.ctx.strokeStyle = '#38bdf8';
+            this.ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
+            this.ctx.shadowColor = '#38bdf8';
+            this.ctx.shadowBlur = 16;
             this.ctx.lineWidth = 3;
             this.ctx.beginPath();
-            this.ctx.arc(cx, cy, 32 * pulse, 0, Math.PI * 2);
+            this.ctx.arc(0, 0, 28, 0, Math.PI * 2);
+            this.ctx.fill();
             this.ctx.stroke();
-
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-            this.ctx.lineWidth = 1.5;
-            this.ctx.beginPath();
-            this.ctx.arc(cx, cy, 26 * pulse, 0, Math.PI * 2);
-            this.ctx.stroke();
-            this.ctx.restore();
+            this.ctx.shadowBlur = 0;
         }
 
-        // 3. Flowing Scarf / Cloak Trail
-        if (p.scarfPoints.length > 2) {
+        // Animated Scarf Physics Trail
+        if (p.scarfPoints && p.scarfPoints.length > 0) {
             this.ctx.strokeStyle = '#f97316';
             this.ctx.lineWidth = 4;
-            this.ctx.lineCap = 'round';
             this.ctx.beginPath();
-            p.scarfPoints.forEach((pt, idx) => {
-                const relX = pt.x - (p.x + p.w/2);
-                const relY = pt.y - (p.y + p.h/2);
-                if (idx === 0) this.ctx.moveTo(relX, relY);
-                else this.ctx.lineTo(relX - idx * 4, relY);
-            });
+            this.ctx.moveTo(-4, -6);
+            for (let i = 0; i < 5; i++) {
+                this.ctx.lineTo(-10 - i * 5, -6 + Math.sin(p.runCycle + i * 0.5) * 3);
+            }
             this.ctx.stroke();
         }
 
-        // 4. Explorer Backpack / Oxygen Pack
-        this.ctx.fillStyle = '#475569';
-        this.ctx.fillRect(cx - 14, cy - 10, 8, 18);
+        // Oxygen Backpack / Jetpack
+        this.ctx.fillStyle = '#334155';
+        this.ctx.fillRect(-14, -12, 7, 18);
 
-        // 5. Torso / Adventure Vest
+        // Body Torso / Blue Tech Suit
         this.ctx.fillStyle = '#0284c7';
-        this.ctx.fillRect(cx - 8, cy - 8, 16, 18);
-        // Belt
-        this.ctx.fillStyle = '#b45309';
-        this.ctx.fillRect(cx - 8, cy + 6, 16, 4);
+        this.ctx.fillRect(-7, -10, 14, 18);
 
-        // 6. Explorer Helmet & Head
-        this.ctx.fillStyle = '#f59e0b'; // Amber hard hat helmet
+        // Gold Utility Belt
+        this.ctx.fillStyle = '#f59e0b';
+        this.ctx.fillRect(-7, 4, 14, 4);
+
+        // Head / Skin
+        this.ctx.fillStyle = '#fed7aa';
+        this.ctx.fillRect(-5, -20, 10, 8);
+
+        // Spelunker Helmet (Bright Yellow / Amber)
+        this.ctx.fillStyle = '#f59e0b';
         this.ctx.beginPath();
-        this.ctx.arc(cx + 2, cy - 14, 10, Math.PI, Math.PI * 2);
+        this.ctx.arc(0, -18, 9, Math.PI, Math.PI * 2);
         this.ctx.fill();
+        this.ctx.fillRect(-9, -19, 18, 3);
 
-        this.ctx.fillStyle = '#fed7aa'; // Face
-        this.ctx.fillRect(cx - 5, cy - 14, 14, 8);
+        // Visor / Headlamp Spotlight Unit
+        this.ctx.fillStyle = '#38bdf8';
+        this.ctx.fillRect(2, -18, 5, 4);
 
-        // Headlamp Lamp Unit
         this.ctx.fillStyle = '#ffffff';
         this.ctx.shadowColor = '#ffffff';
-        this.ctx.shadowBlur = 12;
-        this.ctx.fillRect(cx + 6, cy - 17, 5, 5);
+        this.ctx.shadowBlur = 10;
+        this.ctx.fillRect(5, -17, 3, 3);
         this.ctx.shadowBlur = 0;
 
-        // 7. Animated Kinematic Running Legs
+        // Animated Running Legs
         const legPhase = p.runCycle;
-        const leg1Angle = p.isGrounded ? Math.sin(legPhase) * 0.75 : 0.4;
-        const leg2Angle = p.isGrounded ? -Math.sin(legPhase) * 0.75 : -0.4;
+        const leg1Angle = p.isGrounded ? Math.sin(legPhase) * 0.7 : 0.3;
+        const leg2Angle = p.isGrounded ? -Math.sin(legPhase) * 0.7 : -0.3;
 
         // Left Leg
         this.ctx.strokeStyle = '#0f172a';
         this.ctx.lineWidth = 4;
         this.ctx.beginPath();
-        this.ctx.moveTo(cx - 3, cy + 10);
-        this.ctx.lineTo(cx - 3 + Math.sin(leg1Angle) * 12, cy + 10 + Math.cos(leg1Angle) * 12);
+        this.ctx.moveTo(-3, 8);
+        this.ctx.lineTo(-3 + Math.sin(leg1Angle) * 10, 8 + Math.cos(leg1Angle) * 10);
         this.ctx.stroke();
 
         // Right Leg
         this.ctx.beginPath();
-        this.ctx.moveTo(cx + 3, cy + 10);
-        this.ctx.lineTo(cx + 3 + Math.sin(leg2Angle) * 12, cy + 10 + Math.cos(leg2Angle) * 12);
+        this.ctx.moveTo(3, 8);
+        this.ctx.lineTo(3 + Math.sin(leg2Angle) * 10, 8 + Math.cos(leg2Angle) * 10);
         this.ctx.stroke();
 
         this.ctx.restore();
@@ -1291,18 +1080,4 @@ class CaveGravityRunner {
 
 window.addEventListener('DOMContentLoaded', () => {
     window.game = new CaveGravityRunner();
-
-    const portalBackBtn = document.getElementById('krazio-floating-back');
-    if (portalBackBtn) {
-        portalBackBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (window.exitToPortal) {
-                window.exitToPortal();
-            } else if (window.parent !== window) {
-                window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
-            } else {
-                window.location.href = '../index.html';
-            }
-        });
-    }
 });

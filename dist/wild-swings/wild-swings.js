@@ -851,18 +851,63 @@ class WildSwingsGame {
     const camY = this.camera.y;
 
     if (this.theme === 'spiderman') {
-      // Midnight NYC Skyline with Searchlights
-      const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
-      grad.addColorStop(0, '#0c0e29');
-      grad.addColorStop(0.6, '#181a44');
-      grad.addColorStop(1, '#2d143c');
-      this.ctx.fillStyle = grad;
-      this.ctx.fillRect(0, 0, this.width, this.height);
+      const W = this.width;
+      const H = this.height;
+      const now = performance.now() / 1000;
 
-      // Twinkling stars
+      // 1. Deep NYC Twilight Night Sky Gradient
+      const grad = this.ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0,   '#02041a');
+      grad.addColorStop(0.45, '#0a0d36');
+      grad.addColorStop(0.8,  '#1d0d33');
+      grad.addColorStop(1,    '#2b0e2d');
+      this.ctx.fillStyle = grad;
+      this.ctx.fillRect(0, 0, W, H);
+
+      // 2. 3D Sweeping Searchlight Beams in Sky
+      const beamAngle1 = Math.sin(now * 0.4) * 0.35;
+      const beamAngle2 = Math.cos(now * 0.3) * 0.40;
+      
+      // Searchlight 1 (Cyan/Blue Beam)
+      this.ctx.save();
+      this.ctx.translate(W * 0.25, H);
+      this.ctx.rotate(beamAngle1);
+      const beamGrad1 = this.ctx.createLinearGradient(0, 0, 0, -H * 1.2);
+      beamGrad1.addColorStop(0, 'rgba(0, 240, 255, 0.12)');
+      beamGrad1.addColorStop(0.6, 'rgba(0, 240, 255, 0.04)');
+      beamGrad1.addColorStop(1, 'rgba(0, 240, 255, 0)');
+      this.ctx.fillStyle = beamGrad1;
+      this.ctx.beginPath();
+      this.ctx.moveTo(-15, 0);
+      this.ctx.lineTo(-90, -H * 1.2);
+      this.ctx.lineTo(90, -H * 1.2);
+      this.ctx.lineTo(15, 0);
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.restore();
+
+      // Searchlight 2 (Magenta/Spider Red Beam)
+      this.ctx.save();
+      this.ctx.translate(W * 0.75, H);
+      this.ctx.rotate(beamAngle2);
+      const beamGrad2 = this.ctx.createLinearGradient(0, 0, 0, -H * 1.2);
+      beamGrad2.addColorStop(0, 'rgba(255, 42, 85, 0.10)');
+      beamGrad2.addColorStop(0.6, 'rgba(255, 42, 85, 0.03)');
+      beamGrad2.addColorStop(1, 'rgba(255, 42, 85, 0)');
+      this.ctx.fillStyle = beamGrad2;
+      this.ctx.beginPath();
+      this.ctx.moveTo(-15, 0);
+      this.ctx.lineTo(-80, -H * 1.2);
+      this.ctx.lineTo(80, -H * 1.2);
+      this.ctx.lineTo(15, 0);
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.restore();
+
+      // 3. Stars with Per-Star Twinkle
       this.ctx.fillStyle = '#ffffff';
       for (const s of this.bgStars) {
-        const sx = ((s.x - camX * 0.05) % (this.width + 400) + this.width + 400) % (this.width + 400) - 200;
+        const sx = ((s.x - camX * 0.05) % (W + 400) + W + 400) % (W + 400) - 200;
         this.ctx.globalAlpha = s.opacity;
         this.ctx.beginPath();
         this.ctx.arc(sx, s.y, s.radius, 0, Math.PI * 2);
@@ -870,15 +915,62 @@ class WildSwingsGame {
       }
       this.ctx.globalAlpha = 1;
 
-      // Parallax Skyscraper Silhouettes
+      // 4. Parallax 3D Skyscraper Projections with Front & Side Depth Faces
       for (const b of this.cityBuildings) {
         const factor = b.layer === 1 ? 0.12 : b.layer === 2 ? 0.25 : 0.42;
         const bx = b.x - camX * factor;
-        const by = this.height - b.height + camY * 0.1;
+        const by = H - b.height + camY * 0.1;
+        const pOffset = (bx - W / 2) * (b.layer === 1 ? 0.03 : b.layer === 2 ? 0.05 : 0.07);
 
-        if (bx > -200 && bx < this.width + 200) {
+        if (bx > -200 && bx < W + 200) {
+          // Front Face
           this.ctx.fillStyle = b.layer === 1 ? '#0a0d24' : b.layer === 2 ? '#121738' : '#1c224f';
           this.ctx.fillRect(bx, by, b.width, b.height + 400);
+
+          // 3D Depth Side Face
+          this.ctx.fillStyle = pOffset > 0 ? '#050717' : '#232b60';
+          this.ctx.beginPath();
+          const sideX = pOffset > 0 ? bx + b.width : bx;
+          this.ctx.moveTo(sideX, by);
+          this.ctx.lineTo(sideX + pOffset, by - 10);
+          this.ctx.lineTo(sideX + pOffset, by + b.height + 400);
+          this.ctx.lineTo(sideX, by + b.height + 400);
+          this.ctx.closePath();
+          this.ctx.fill();
+
+          // 3D Roof Top Cap
+          this.ctx.fillStyle = '#28326d';
+          this.ctx.beginPath();
+          this.ctx.moveTo(bx, by);
+          this.ctx.lineTo(bx + pOffset, by - 10);
+          this.ctx.lineTo(bx + b.width + pOffset, by - 10);
+          this.ctx.lineTo(bx + b.width, by);
+          this.ctx.closePath();
+          this.ctx.fill();
+
+          // 3D Metallic Rooftop Spire
+          if (b.hasAntenna) {
+            const spireX = bx + b.width * 0.5 + pOffset * 0.5;
+            const spireH = 30 + (b.width % 25);
+            this.ctx.fillStyle = '#3a498c';
+            this.ctx.beginPath();
+            this.ctx.moveTo(spireX - 3, by - 10);
+            this.ctx.lineTo(spireX, by - 10 - spireH);
+            this.ctx.lineTo(spireX + 3, by - 10);
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            // Blinking 3D Aviation Light
+            if (Math.sin(now * 2.2 + b.x * 0.01) > 0.1) {
+              this.ctx.fillStyle = '#ff2a55';
+              this.ctx.shadowColor = '#ff2a55';
+              this.ctx.shadowBlur = 8;
+              this.ctx.beginPath();
+              this.ctx.arc(spireX, by - 10 - spireH, 3, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.shadowBlur = 0;
+            }
+          }
 
           // Lit Windows Grid
           if (b.windowsLit) {
@@ -892,6 +984,24 @@ class WildSwingsGame {
             }
           }
         }
+      }
+
+      // 5. 3D NYC Ground Street Grid Traffic Light Glow
+      const streetGrad = this.ctx.createLinearGradient(0, H - 45, 0, H);
+      streetGrad.addColorStop(0, 'rgba(255, 42, 85, 0)');
+      streetGrad.addColorStop(0.5, 'rgba(255, 165, 2, 0.12)');
+      streetGrad.addColorStop(1, 'rgba(0, 240, 255, 0.18)');
+      this.ctx.fillStyle = streetGrad;
+      this.ctx.fillRect(0, H - 45, W, 45);
+
+      // Pulsing traffic particles in depth
+      for (let i = 0; i < 16; i++) {
+        const tx = ((i * 140 + now * 90) % (W + 200)) - 100;
+        const ty = H - 8 - Math.sin(i * 1.5) * 6;
+        this.ctx.fillStyle = i % 2 === 0 ? 'rgba(255, 42, 85, 0.65)' : 'rgba(255, 200, 80, 0.65)';
+        this.ctx.beginPath();
+        this.ctx.arc(tx, ty, 3 + (i % 3), 0, Math.PI * 2);
+        this.ctx.fill();
       }
     } else if (this.theme === 'monkey') {
       // Lush Tropical Jungle with Canopy Light Beams

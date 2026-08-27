@@ -1293,16 +1293,50 @@ function advanceToNextFloor() {
     }, 600);
 }
 
+let lastFailedFloor = parseInt(localStorage.getItem('doom_failed_floor') || '1', 10);
+
+function updateRetryFloorButtons() {
+    const btnRetry = document.getElementById('btn-retry-floor');
+    if (btnRetry) {
+        if (lastFailedFloor > 1) {
+            btnRetry.classList.remove('hidden');
+            btnRetry.style.display = 'inline-flex';
+            const textSpan = btnRetry.querySelector('span');
+            if (textSpan) textSpan.textContent = `🔄 RESTART AT FLOOR ${lastFailedFloor}`;
+        } else {
+            btnRetry.classList.add('hidden');
+            btnRetry.style.display = 'none';
+        }
+    }
+
+    const btnLobbyContinue = document.getElementById('btn-lobby-continue-floor');
+    if (btnLobbyContinue) {
+        if (lastFailedFloor > 1) {
+            btnLobbyContinue.classList.remove('hidden');
+            btnLobbyContinue.style.display = 'inline-flex';
+            const textSpan = btnLobbyContinue.querySelector('span');
+            if (textSpan) textSpan.textContent = `🛗 RESUME AT FAILED FLOOR ${lastFailedFloor}`;
+        } else {
+            btnLobbyContinue.classList.add('hidden');
+            btnLobbyContinue.style.display = 'none';
+        }
+    }
+}
+
 // Game Over Screen
 function triggerGameOver(reason) {
     gameState = STATE.GAMEOVER;
     if (window.doomAudio) window.doomAudio.playGameOver();
 
+    // Save failed floor checkpoint
+    lastFailedFloor = currentFloor;
+    localStorage.setItem('doom_failed_floor', lastFailedFloor.toString());
+
     // Cause of death
     const randomDeath = CAUSES_OF_DEATH[Math.floor(Math.random() * CAUSES_OF_DEATH.length)];
     const finalReason = reason || randomDeath;
 
-    document.getElementById('gameover-badge').textContent = '💀 DOOMED';
+    document.getElementById('gameover-badge').textContent = '💀 ELEVATOR CRUSHED';
     document.getElementById('gameover-badge').style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
     document.getElementById('gameover-title').textContent = 'You Were Eliminated!';
     document.getElementById('gameover-subtitle').textContent = `"${finalReason}"`;
@@ -1315,10 +1349,45 @@ function triggerGameOver(reason) {
     document.getElementById('res-rank').textContent = 'Certified Splat 💀';
     document.getElementById('res-build-summary').textContent = `FINAL BUILD: ${player.weapon.name} + ${player.ability.name} (${player.passives.length} Perks)`;
 
+    updateRetryFloorButtons();
     document.getElementById('gameover-screen').classList.remove('hidden');
 }
 
-// Init / Start Match
+// Restart at Failed Floor Checkpoint
+function restartAtFailedFloor() {
+    if (window.doomAudio) window.doomAudio.init();
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('gameover-screen').classList.add('hidden');
+    document.getElementById('safe-room-modal').classList.add('hidden');
+    document.getElementById('decision-modal').classList.add('hidden');
+
+    currentFloor = Math.max(1, lastFailedFloor);
+    runCoins = 0;
+    enemiesSlain = 0;
+    bossesDefeated = 0;
+    secretsFound = 0;
+    doomLevel = Math.min(60, (currentFloor - 1) * 2.5);
+    timeWarpTimer = 0;
+
+    resetFloorTiles();
+    player.resetForMatch();
+    player.maxHp = selectedSurvivor ? selectedSurvivor.hp : 100;
+    player.hp = player.maxHp;
+    player.speed = selectedSurvivor ? selectedSurvivor.speed : 3.2;
+    player.weapon = selectedSurvivor ? selectedSurvivor.weapon : WEAPONS.KNIFE;
+    player.ability = selectedSurvivor ? selectedSurvivor.ability : ABILITIES.DASH;
+    player.passives = [];
+    updatePassivesHUD();
+    updateHUD();
+
+    document.getElementById('door-left').classList.remove('closed');
+    document.getElementById('door-right').classList.remove('closed');
+
+    if (window.doomAudio) window.doomAudio.playDoorOpen();
+    generateFloorDecision(currentFloor);
+}
+
+// Init / Start Match (New Run from Floor 1)
 function startNewRun() {
     if (window.doomAudio) window.doomAudio.init();
     document.getElementById('start-screen').classList.add('hidden');
@@ -1792,6 +1861,12 @@ if (btnStart) btnStart.onclick = startNewRun;
 const btnRestart = document.getElementById('btn-restart');
 if (btnRestart) btnRestart.onclick = startNewRun;
 
+const btnRetryFloor = document.getElementById('btn-retry-floor');
+if (btnRetryFloor) btnRetryFloor.onclick = restartAtFailedFloor;
+
+const btnLobbyContinue = document.getElementById('btn-lobby-continue-floor');
+if (btnLobbyContinue) btnLobbyContinue.onclick = restartAtFailedFloor;
+
 const btnCashOut = document.getElementById('btn-cash-out');
 if (btnCashOut) btnCashOut.onclick = cashOutAndEscape;
 
@@ -1810,4 +1885,5 @@ if (btnSoundToggle) {
 
 // Initialize Lobby & Start Game Loop
 initLobby();
+updateRetryFloorButtons();
 requestAnimationFrame(gameLoop);
