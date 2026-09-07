@@ -61,6 +61,10 @@
             <button id="btn-theme-toggle" class="btn-theme" title="Toggle Day/Night Theme">
                 <span>☀️ Day</span>
             </button>
+            <button id="btn-storage-manager" class="nav-btn btn-storage-toggle" title="Device Storage & Cache Manager">
+                <span class="storage-btn-icon">💾</span>
+                <span class="storage-btn-text">Storage <strong id="nav-storage-badge" class="nav-storage-badge">0.0 MB</strong></span>
+            </button>
             <button id="btn-open-suggest" class="nav-btn">
                 <span>💡 Pitch Idea</span>
             </button>
@@ -150,11 +154,82 @@
                         <!-- Central Embedded Game Screen (Glowing Neon Frame) -->
                         <div class="game-screen-wrapper" id="game-screen-wrapper">
                             <div class="game-screen-inner" id="game-screen-inner">
-                                <!-- Loading Spinner -->
+                                <!-- High-Performance Game Loading Screen with Real Device Storage Progress -->
                                 <div class="game-loader-overlay" id="game-loader-overlay">
-                                    <div class="game-loader-spinner"></div>
-                                    <div class="game-loader-title" id="game-loader-title">Loading Game...</div>
-                                    <div class="game-loader-sub">Preparing Krazy Fuse Engine ⚡</div>
+                                    <div class="loader-backdrop-glow" id="loader-backdrop-glow"></div>
+                                    <div class="loader-content-card">
+                                        <!-- Header: Icon, Title & Meta Badges -->
+                                        <div class="loader-header">
+                                            <div class="loader-icon-wrap" id="loader-game-icon">🏃</div>
+                                            <div class="loader-title-wrap">
+                                                <div class="loader-badge-row">
+                                                    <span class="loader-tag-pill" id="loader-game-tag">Action</span>
+                                                    <span class="loader-size-pill" id="loader-size-pill" title="Physical download & storage package size">
+                                                        <span class="pill-icon">📦</span> Package: <strong id="loader-size-val">0.0 MB</strong>
+                                                    </span>
+                                                    <span class="loader-cache-pill" id="loader-cache-pill" title="Local CacheStorage status">
+                                                        <span class="pill-icon">💾</span> <span id="loader-cache-status">Checking Storage...</span>
+                                                    </span>
+                                                </div>
+                                                <h2 class="loader-title" id="loader-game-title">Office Escape</h2>
+                                            </div>
+                                        </div>
+
+                                        <!-- Cyber Dynamic Progress Bar -->
+                                        <div class="loader-progress-box">
+                                            <div class="loader-progress-top">
+                                                <span class="loader-stage-msg" id="loader-stage-msg">Allocating device storage cache buffer...</span>
+                                                <span class="loader-percent" id="loader-percent">0%</span>
+                                            </div>
+                                            <div class="loader-track">
+                                                <div class="loader-fill" id="loader-fill" style="width: 0%;">
+                                                    <div class="loader-sheen"></div>
+                                                </div>
+                                            </div>
+                                            <div class="loader-progress-bottom">
+                                                <span class="loader-mb-counter" id="loader-mb-counter">0.0 MB / 0.0 MB</span>
+                                                <span class="loader-status-mode" id="loader-status-mode">⚡ Low Device Load Mode Active</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Diagnostic Step Checklist -->
+                                        <div class="loader-diagnostics-grid">
+                                            <div class="diag-item" id="diag-storage">
+                                                <span class="diag-icon" id="diag-storage-icon">⏳</span>
+                                                <span class="diag-label">Device Cache</span>
+                                            </div>
+                                            <div class="diag-item" id="diag-assets">
+                                                <span class="diag-icon" id="diag-assets-icon">⏳</span>
+                                                <span class="diag-label">Asset Pipeline</span>
+                                            </div>
+                                            <div class="diag-item" id="diag-audio">
+                                                <span class="diag-icon" id="diag-audio-icon">⏳</span>
+                                                <span class="diag-label">Audio & SFX</span>
+                                            </div>
+                                            <div class="diag-item" id="diag-engine">
+                                                <span class="diag-icon" id="diag-engine-icon">⏳</span>
+                                                <span class="diag-label">Low CPU Guard</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Pro Tip & Controls Teaser -->
+                                        <div class="loader-tip-card">
+                                            <div class="loader-tip-title">
+                                                <span class="tip-sparkle">💡</span> <strong>PRO TIP & CONTROLS:</strong>
+                                            </div>
+                                            <div class="loader-tip-text" id="loader-tip-text">Slide under meeting room glass dividers by pressing S or Down Arrow!</div>
+                                            <div class="loader-controls-tags" id="loader-controls-tags">
+                                                <!-- Populated dynamically -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Launch Button (Appears on ready) -->
+                                        <div class="loader-actions-row">
+                                            <button id="btn-loader-launch" class="btn-loader-launch hidden">
+                                                <span>🚀 START GAME</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- The Game iframe -->
@@ -211,6 +286,11 @@
                                 <!-- Viewport Aspect Toggle -->
                                 <button id="btn-game-aspect" class="game-ctrl-btn" title="Toggle Aspect Ratio">
                                     <span class="ctrl-icon">📱</span>
+                                </button>
+
+                                <!-- Low Device Load / Battery Saver Toggle -->
+                                <button id="btn-game-eco" class="game-ctrl-btn" title="Toggle Low Device Load (Eco Battery Saver)">
+                                    <span class="ctrl-icon" id="game-eco-icon">⚡</span>
                                 </button>
 
                                 <!-- Sound Mute Toggle -->
@@ -452,6 +532,69 @@
                 <button id="btn-toggle-saved" class="nav-btn" style="font-size: 0.82rem;">📋 Saved (<span id="saved-ideas-count">0</span>)</button>
                 <button id="btn-close-modal" class="nav-btn">Cancel</button>
                 <button id="btn-submit-idea" class="btn-arcade-cta" style="padding: 8px 20px; font-size: 1rem;">SUBMIT CONCEPT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Storage & Game Cache Manager Modal -->
+    <div id="storage-modal" class="modal-backdrop">
+        <div class="modal-box storage-modal-box">
+            <div class="storage-modal-header">
+                <div class="sm-title-wrap">
+                    <span class="sm-header-icon">💾</span>
+                    <div>
+                        <h3 class="modal-title">Device Storage & Load Guard</h3>
+                        <p class="storage-modal-desc">
+                            Games cache assets into local device storage (<code class="code-tag">CacheStorage API</code>) to eliminate streaming lag and reduce CPU, GPU & battery consumption.
+                        </p>
+                    </div>
+                </div>
+                <button id="btn-close-storage-modal" class="modal-close-icon-btn" title="Close">✕</button>
+            </div>
+
+            <!-- Storage Health & Quota Overview Grid -->
+            <div class="storage-stats-grid">
+                <div class="storage-stat-card">
+                    <span class="stat-card-label">Game Cache Occupied</span>
+                    <div class="stat-card-val"><span id="storage-total-occupied">0.0</span> <span class="stat-unit">MB</span></div>
+                    <span class="stat-subtext" id="storage-games-count">0 of 10 Games Cached</span>
+                </div>
+                <div class="storage-stat-card">
+                    <span class="stat-card-label">Device Quota</span>
+                    <div class="stat-card-val"><span id="storage-quota-available">Available</span></div>
+                    <span class="stat-subtext" id="storage-quota-subtext">Disk storage via Browser API</span>
+                </div>
+                <div class="storage-stat-card">
+                    <span class="stat-card-label">Device Load Guard</span>
+                    <div class="stat-card-val"><span id="storage-eco-state">Eco Balanced</span></div>
+                    <span class="stat-subtext">Low CPU / GPU background overhead</span>
+                </div>
+            </div>
+
+            <!-- Games Storage Breakdown List -->
+            <div class="storage-games-section">
+                <div class="storage-games-header">
+                    <h4>GAMES STORAGE ALLOCATION</h4>
+                    <span class="sm-hint">Pre-cache to play instantly offline or free up space anytime</span>
+                </div>
+                <div class="storage-games-list" id="storage-games-list">
+                    <!-- Populated dynamically with each game's size and cache status -->
+                </div>
+            </div>
+
+            <!-- Storage Modal Actions -->
+            <div class="storage-modal-actions">
+                <div class="sm-actions-left">
+                    <button id="btn-precache-all" class="nav-btn btn-precache-all" title="Cache all games for instant play">
+                        <span>⚡ Pre-Cache All Games</span>
+                    </button>
+                    <button id="btn-clear-all-storage" class="nav-btn btn-danger-storage" title="Free up all cached game storage">
+                        <span>🗑️ Free All Storage</span>
+                    </button>
+                </div>
+                <div class="sm-actions-right">
+                    <button id="btn-storage-close" class="btn-arcade-cta" style="padding: 8px 24px; font-size: 0.95rem;">Done</button>
+                </div>
             </div>
         </div>
     </div>

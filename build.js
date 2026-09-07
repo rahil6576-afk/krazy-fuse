@@ -23,7 +23,8 @@ const itemsToCopy = [
   'flappy-man',
   'bomb-panic',
   'tic-tac-toe',
-  'assets'
+  'assets',
+  'game-manifests.json'
 ];
 
 

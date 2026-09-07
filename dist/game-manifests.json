@@ -1,0 +1,218 @@
+{
+  "office-escape": {
+    "id": "office-escape",
+    "title": "Office Escape: Corporate Run",
+    "directory": "office-escape",
+    "fileCount": 9,
+    "totalBytes": 426993,
+    "sizeMB": 0.41,
+    "formattedSize": "0.41 MB",
+    "tip": "Slide under meeting room glass dividers by pressing S or Down Arrow!",
+    "primaryAssets": [
+      "/office-escape/audio.js",
+      "/office-escape/game.js",
+      "/office-escape/game_new.js",
+      "/office-escape/home.html",
+      "/office-escape/index.html",
+      "/office-escape/krazio-icon.svg",
+      "/office-escape/krazio-logo.svg",
+      "/office-escape/style.css",
+      "/office-escape/VISUAL_UPGRADE_V2.md"
+    ]
+  },
+  "dart-board": {
+    "id": "dart-board",
+    "title": "Dart Master: 301 / 501 Arena",
+    "directory": "dart-board",
+    "fileCount": 14,
+    "totalBytes": 8306875,
+    "sizeMB": 7.92,
+    "formattedSize": "7.92 MB",
+    "tip": "Finish on a double or bullseye to claim the championship match!",
+    "primaryAssets": [
+      "/dart-board/dart-audio.js",
+      "/dart-board/dart-game.js",
+      "/dart-board/dart-style.css",
+      "/dart-board/dartboard_3d.jpg",
+      "/dart-board/dart_blue_3d.jpg",
+      "/dart-board/dart_home_bg.jpg",
+      "/dart-board/dart_home_bg.webm",
+      "/dart-board/dart_home_bg.webp",
+      "/dart-board/dart_red_3d.jpg",
+      "/dart-board/index.html",
+      "/dart-board/venue_brick_pub.jpg",
+      "/dart-board/venue_painted_wood.jpg",
+      "/dart-board/venue_stone_tavern.jpg",
+      "/dart-board/venue_wood_classic.jpg"
+    ]
+  },
+  "elevator-doom": {
+    "id": "elevator-doom",
+    "title": "Elevator of Doom: Floor 99",
+    "directory": "elevator-doom",
+    "fileCount": 6,
+    "totalBytes": 133442,
+    "sizeMB": 0.13,
+    "formattedSize": "0.13 MB",
+    "tip": "Bank your coins at safe rooms or risk it all for legendary Floor 99 perks!",
+    "primaryAssets": [
+      "/elevator-doom/elevator-audio.js",
+      "/elevator-doom/elevator-doom.css",
+      "/elevator-doom/elevator-game.js",
+      "/elevator-doom/index.html",
+      "/elevator-doom/krazio-icon.svg",
+      "/elevator-doom/krazio-logo.svg"
+    ]
+  },
+  "bomb-panic": {
+    "id": "bomb-panic",
+    "title": "Bomb Panic: Hot Potato",
+    "directory": "bomb-panic",
+    "fileCount": 1,
+    "totalBytes": 119828,
+    "sizeMB": 0.11,
+    "formattedSize": "0.11 MB",
+    "tip": "Sprint surge (Shift) into opponents to transfer the ticking bomb with seconds to spare!",
+    "primaryAssets": [
+      "/bomb-panic/index.html"
+    ]
+  },
+  "flappy-man": {
+    "id": "flappy-man",
+    "title": "Flappy Man: Superhero Flight",
+    "directory": "flappy-man",
+    "fileCount": 1,
+    "totalBytes": 138153,
+    "sizeMB": 0.13,
+    "formattedSize": "0.13 MB",
+    "tip": "Press number keys 1-5 mid-flight to change superhero skins and gravity dynamics!",
+    "primaryAssets": [
+      "/flappy-man/index.html"
+    ]
+  },
+  "wild-swings": {
+    "id": "wild-swings",
+    "title": "Wild Swings: Hook & Flight",
+    "directory": "wild-swings",
+    "fileCount": 6,
+    "totalBytes": 216177,
+    "sizeMB": 0.21,
+    "formattedSize": "0.21 MB",
+    "tip": "Hold grapple at the bottom of the pendulum swing to maximize launch velocity!",
+    "primaryAssets": [
+      "/wild-swings/index.html",
+      "/wild-swings/krazio-icon.svg",
+      "/wild-swings/krazio-logo.svg",
+      "/wild-swings/wild-swings-audio.js",
+      "/wild-swings/wild-swings.css",
+      "/wild-swings/wild-swings.js"
+    ]
+  },
+  "fallen-one": {
+    "id": "fallen-one",
+    "title": "Cyber Clash: PvP Arena",
+    "directory": "fallen-one",
+    "fileCount": 215,
+    "totalBytes": 57116222,
+    "sizeMB": 54.47,
+    "formattedSize": "54.47 MB",
+    "tip": "Cancel standard punch into a crouching sweep to break enemy guard blocks!",
+    "primaryAssets": [
+      "/fallen-one/index.html",
+      "/fallen-one/node_modules/@img/sharp-win32-x64/lib/libvips-42.dll",
+      "/fallen-one/assets/characters/ChatGPT Image Aug 19, 2026, 12_26_29 PM.png",
+      "/fallen-one/assets/characters/ChatGPT Image Aug 19, 2026, 12_26_34 PM.png",
+      "/fallen-one/assets/characters/ChatGPT Image Aug 19, 2026, 12_31_29 PM.png",
+      "/fallen-one/assets/characters/champions_spritesheet.png",
+      "/fallen-one/assets/characters/ChatGPT Image Aug 18, 2026, 05_32_05 PM.png",
+      "/fallen-one/assets/characters/aarav_clean.png",
+      "/fallen-one/assets/characters/ChatGPT Image Aug 19, 2026, 12_04_54 PM.png",
+      "/fallen-one/assets/characters/ChatGPT Image Aug 19, 2026, 12_26_41 PM.png",
+      "/fallen-one/assets/characters/ChatGPT Image Aug 19, 2026, 12_26_51 PM.png",
+      "/fallen-one/assets/characters/volt_preview.jpg",
+      "/fallen-one/assets/characters/solar_preview.jpg",
+      "/fallen-one/assets/characters/shadow_preview.jpg",
+      "/fallen-one/assets/characters/terra_preview.jpg",
+      "/fallen-one/assets/stages/frozen_base.jpg",
+      "/fallen-one/assets/stages/future_city.jpg",
+      "/fallen-one/assets/characters/volt_clean.png",
+      "/fallen-one/assets/characters/frost_preview.jpg",
+      "/fallen-one/assets/stages/training_dojo.jpg",
+      "/fallen-one/assets/characters/aarav_preview.jpg",
+      "/fallen-one/assets/stages/volcanic_core.jpg",
+      "/fallen-one/assets/characters/frost_clean.png",
+      "/fallen-one/assets/characters/terra_clean.png",
+      "/fallen-one/assets/characters/solar_clean.png"
+    ]
+  },
+  "gravity-flip": {
+    "id": "gravity-flip",
+    "title": "Gravity Flip: Cavern Runner",
+    "directory": "gravity-flip",
+    "fileCount": 8,
+    "totalBytes": 132405,
+    "sizeMB": 0.13,
+    "formattedSize": "0.13 MB",
+    "tip": "Time your gravity flips between ceilings to avoid laser tripwires!",
+    "primaryAssets": [
+      "/gravity-flip/gravity-3d-bg.js",
+      "/gravity-flip/gravity-3d-engine.js",
+      "/gravity-flip/gravity-audio.js",
+      "/gravity-flip/gravity-flip.css",
+      "/gravity-flip/gravity-game.js",
+      "/gravity-flip/index.html",
+      "/gravity-flip/krazio-icon.svg",
+      "/gravity-flip/krazio-logo.svg"
+    ]
+  },
+  "pop-up": {
+    "id": "pop-up",
+    "title": "Pop Up: Balloon Blitz",
+    "directory": "popup-game",
+    "fileCount": 72,
+    "totalBytes": 34678716,
+    "sizeMB": 33.07,
+    "formattedSize": "33.07 MB",
+    "tip": "Aim for clustered balloon bundles to trigger cascading point explosions!",
+    "primaryAssets": [
+      "/popup-game/index.html",
+      "/popup-game/assets/dystopia_dynamic-xRw41SFD.gif",
+      "/popup-game/dystopia_dynamic.gif",
+      "/popup-game/images/dystopia_dynamic.gif",
+      "/popup-game/assets/beach_theme_bg-DJgZ4iMH.jpg",
+      "/popup-game/beach_theme_bg.jpg",
+      "/popup-game/images/beach_theme_bg.jpg",
+      "/popup-game/assets/bhai_theme_bg-BxX2Q_wl.jpg",
+      "/popup-game/bhai_theme_bg.jpg",
+      "/popup-game/images/bhai_theme_bg.jpg",
+      "/popup-game/assets/salman_angry-XETAdCzc.jpg",
+      "/popup-game/images/salman_angry.jpg",
+      "/popup-game/salman_angry.jpg",
+      "/popup-game/assets/hunter_angry-f7IalNsM.jpg",
+      "/popup-game/hunter_angry.jpg",
+      "/popup-game/images/hunter_angry.jpg",
+      "/popup-game/assets/hunter_happy-CnIEuOl-.jpg",
+      "/popup-game/hunter_happy.jpg",
+      "/popup-game/images/hunter_happy.jpg",
+      "/popup-game/assets/hunter_idle-C6SFj8eO.jpg",
+      "/popup-game/hunter_idle.jpg",
+      "/popup-game/images/hunter_idle.jpg",
+      "/popup-game/assets/salman_idle-By9R1zBJ.jpg",
+      "/popup-game/images/salman_idle.jpg",
+      "/popup-game/salman_idle.jpg"
+    ]
+  },
+  "tic-tac-toe": {
+    "id": "tic-tac-toe",
+    "title": "Sumi-e Tac Toe: Zen Brush & AI",
+    "directory": "tic-tac-toe",
+    "fileCount": 1,
+    "totalBytes": 54236,
+    "sizeMB": 0.05,
+    "formattedSize": "0.05 MB",
+    "tip": "Control the center canvas square to force the Zen AI bot into defensive strokes!",
+    "primaryAssets": [
+      "/tic-tac-toe/index.html"
+    ]
+  }
+}
