@@ -765,7 +765,8 @@ body.portal-paused .portal-rec-col {
     radial-gradient(ellipse at 20% 20%, rgba(157, 78, 221, 0.12) 0%, transparent 60%),
     radial-gradient(ellipse at 80% 80%, rgba(0, 180, 216, 0.1) 0%, transparent 60%),
     radial-gradient(ellipse at 70% 30%, rgba(255, 102, 196, 0.08) 0%, transparent 50%);
-  filter: blur(40px);
+  filter: blur(6px);
+  will-change: transform;
   animation: nebulaDrift 25s ease-in-out infinite alternate;
 }
 
@@ -882,7 +883,8 @@ body.portal-paused .portal-rec-col {
   height: 450px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 255, 230, 0.35) 0%, rgba(255, 220, 120, 0.15) 45%, transparent 70%);
-  filter: blur(30px);
+  filter: blur(6px);
+  will-change: transform, opacity;
   pointer-events: none;
   animation: sunGleamPulse 6s ease-in-out infinite alternate;
 }
@@ -901,7 +903,8 @@ body.portal-paused .portal-rec-col {
   height: 45%;
   background: radial-gradient(ellipse at 70% 25%, rgba(255, 255, 255, 0.12) 0%, transparent 60%),
               radial-gradient(ellipse at 25% 15%, rgba(255, 255, 255, 0.1) 0%, transparent 55%);
-  filter: blur(20px);
+  filter: blur(6px);
+  will-change: transform;
   animation: cloudSlowDrift 30s linear infinite alternate;
   pointer-events: none;
 }
@@ -1126,7 +1129,8 @@ body.portal-paused .portal-rec-col {
   width: 250px;
   height: 250px;
   background: radial-gradient(circle, rgba(255, 0, 128, 0.2) 0%, rgba(0, 240, 255, 0.1) 50%, transparent 75%);
-  filter: blur(25px);
+  filter: blur(6px);
+  will-change: transform, opacity;
   pointer-events: none;
   z-index: 2;
   animation: neonBeaconPulse 4s ease-in-out infinite alternate;
@@ -2720,11 +2724,14 @@ body.portal-paused .portal-rec-col {
    ========================================================================== */
 .projectile-entity {
   position: fixed;
+  top: 0;
+  left: 0;
   z-index: 40;
   pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  will-change: transform;
 }
 
 /* 1. Space: Plasma Bullet */

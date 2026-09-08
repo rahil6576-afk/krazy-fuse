@@ -852,11 +852,25 @@ class BalloonGameEngine {
   }
 
   bindEvents() {
-    // Pointer / Touch Aim & Firing
+    // Pointer / Touch Aim & Firing (Throttled with requestAnimationFrame for 60-144 FPS smooth aiming)
+    let pendingAimX = null;
+    let pendingAimY = null;
+    let aimRafId = null;
+
     const onPointerMove = (e) => {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      this.updateAim(clientX, clientY);
+      pendingAimX = clientX;
+      pendingAimY = clientY;
+
+      if (!aimRafId) {
+        aimRafId = requestAnimationFrame(() => {
+          if (pendingAimX !== null && pendingAimY !== null) {
+            this.updateAim(pendingAimX, pendingAimY);
+          }
+          aimRafId = null;
+        });
+      }
     };
 
     window.addEventListener('mousemove', onPointerMove, { passive: true });
@@ -1212,23 +1226,6 @@ class BalloonGameEngine {
     sound.playShoot(this.theme);
     this.shotsFired++;
 
-    // 1. Direct Touch/Click Proximity Pop
-    const balloonElements = document.querySelectorAll('.balloon-wrapper:not(.popping)');
-    for (let i = 0; i < balloonElements.length; i++) {
-      const el = balloonElements[i];
-      const rect = el.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const radius = Math.max(48, Math.max(rect.width, rect.height) * 0.55);
-      if (Math.hypot(clientX - cx, clientY - cy) <= radius) {
-        const id = el.getAttribute('data-id');
-        const color = el.getAttribute('data-color');
-        if (id && color) {
-          this.triggerPop(id, color, clientX, clientY);
-          return;
-        }
-      }
-    }
 
     // 2. Projectile Launch
     const originX = window.innerWidth / 2;
@@ -1640,19 +1637,20 @@ class BalloonGameEngine {
   triggerPop(id, color, hitX, hitY) {
     if (this.gameState !== 'playing') return;
 
+    // Prevent double-popping already popped targets
+    const bObj = this.balloons.find(b => String(b.id) === String(id));
+    if (bObj && bObj.isPopping) return;
+    if (bObj) bObj.isPopping = true;
+
     this.shotsHit++;
     const isCorrect = color === this.targetColor;
 
-    // Remove balloon node from DOM
+    // Remove balloon node from DOM with smooth pop animation
     const balloonNode = document.getElementById(`balloon-node-${id}`);
     if (balloonNode) {
       balloonNode.classList.add('popping');
       setTimeout(() => balloonNode.remove(), 250);
     }
-
-    // Mark in memory
-    const bObj = this.balloons.find(b => String(b.id) === String(id));
-    if (bObj) bObj.isPopping = true;
 
     if (isCorrect) {
       this.combo++;
@@ -2066,49 +2064,58 @@ class BalloonGameEngine {
   startRenderLoop() {
     const loop = () => {
       if (this.gameState === 'playing' && !document.hidden) {
-        // Move Cannonballs
+        // Move Cannonballs & perform precise collision detection
         if (this.cannonballs.length > 0) {
           const winW = window.innerWidth;
           const winH = window.innerHeight;
           const remainingBalls = [];
 
-          // Collect balloon elements
+          // Collect balloon elements with accurate visual centers
           const balloonElements = document.querySelectorAll('.balloon-wrapper:not(.popping)');
           const activeTargets = [];
           for (let i = 0; i < balloonElements.length; i++) {
             const el = balloonElements[i];
-            const rect = el.getBoundingClientRect();
-            if (rect.bottom < -40 || rect.top > winH + 40 || rect.right < -40 || rect.left > winW + 40) continue;
             const id = el.getAttribute('data-id');
             const color = el.getAttribute('data-color');
-            if (id && color) {
-              activeTargets.push({
-                id,
-                color,
-                cx: rect.left + rect.width / 2,
-                cy: rect.top + rect.height / 2,
-                radius: Math.max(48, Math.max(rect.width, rect.height) * 0.55),
-              });
-            }
+            if (!id || !color) continue;
+
+            // Target the actual visual graphic element inside the wrapper for true center and visual radius
+            const visualEl = el.querySelector('.space-asteroid, .beach-ball, .slime-monster, .cyber-zombie, .blackbuck-deer, svg') || el;
+            const rect = visualEl.getBoundingClientRect();
+            if (rect.bottom < -20 || rect.top > winH + 20 || rect.right < -20 || rect.left > winW + 20) continue;
+
+            activeTargets.push({
+              id,
+              color,
+              cx: rect.left + rect.width / 2,
+              cy: rect.top + rect.height / 2,
+              // True visual radius: 40% of the graphic size (approx 30-34px for an 80px target)
+              radius: Math.min(rect.width, rect.height) * 0.40,
+              popped: false
+            });
           }
 
           for (const ball of this.cannonballs) {
             const nextX = ball.x + ball.vx;
             const nextY = ball.y + ball.vy;
 
+            // Check if ball left screen bounds
             if (nextX < -60 || nextX > winW + 60 || nextY < -60 || nextY > winH + 60) {
               continue;
             }
 
             let hit = false;
-            const ballRadius = (ball.size || 26) / 2;
+            // Precise bullet radius
+            const ballRadius = Math.max(6, (ball.size || 16) * 0.38);
 
             for (const t of activeTargets) {
+              if (t.popped) continue;
               const hitDist = t.radius + ballRadius;
               const d2 = this.distToSegmentSquared(t.cx, t.cy, ball.x, ball.y, nextX, nextY);
 
               if (d2 <= hitDist * hitDist) {
                 hit = true;
+                t.popped = true;
                 this.triggerPop(t.id, t.color, t.cx, t.cy);
                 break;
               }
@@ -2138,37 +2145,47 @@ class BalloonGameEngine {
     const container = document.getElementById('projectiles-layer');
     if (!container) return;
 
-    container.innerHTML = this.cannonballs.map(ball => {
-      const ballTheme = ball.theme || this.theme || 'space';
+    if (!this.projElementMap) this.projElementMap = new Map();
+    const activeIds = new Set();
 
-      let inner = '';
-      if (ballTheme === 'space') {
-        inner = '<div class="plasma-bullet-node"><div class="plasma-trail"></div></div>';
-      } else if (ballTheme === 'slimy') {
-        inner = '<div class="shotgun-bullet-node"><div class="shotgun-shell-casing"></div><div class="shotgun-smoke-trail"></div></div>';
-      } else if (ballTheme === 'dystopian') {
-        inner = '<div class="laser-beam-node"><div class="laser-core-beam"></div><div class="laser-spark-corona"></div></div>';
-      } else if (ballTheme === 'beach') {
-        inner = '<div class="watermelon-node"><div class="watermelon-skin">🍉</div><div class="watermelon-splash-trail"></div></div>';
-      } else if (ballTheme === 'salman') {
-        inner = '<div class="flying-car-node"><div class="flying-car-body">🚗</div><div class="car-exhaust-fire"></div><div class="car-drift-sparks"></div></div>';
+    for (const ball of this.cannonballs) {
+      activeIds.add(ball.id);
+      let el = this.projElementMap.get(ball.id);
+      if (!el) {
+        el = document.createElement('div');
+        const ballTheme = ball.theme || this.theme || 'space';
+        el.className = `projectile-entity proj-${ballTheme}`;
+        el.style.width = `${ball.size}px`;
+        el.style.height = `${ball.size}px`;
+
+        let inner = '';
+        if (ballTheme === 'space') {
+          inner = '<div class="plasma-bullet-node"><div class="plasma-trail"></div></div>';
+        } else if (ballTheme === 'slimy') {
+          inner = '<div class="shotgun-bullet-node"><div class="shotgun-shell-casing"></div><div class="shotgun-smoke-trail"></div></div>';
+        } else if (ballTheme === 'dystopian') {
+          inner = '<div class="laser-beam-node"><div class="laser-core-beam"></div><div class="laser-spark-corona"></div></div>';
+        } else if (ballTheme === 'beach') {
+          inner = '<div class="watermelon-node"><div class="watermelon-skin">🍉</div><div class="watermelon-splash-trail"></div></div>';
+        } else if (ballTheme === 'salman') {
+          inner = '<div class="flying-car-node"><div class="flying-car-body">🚗</div><div class="car-exhaust-fire"></div><div class="car-drift-sparks"></div></div>';
+        }
+        el.innerHTML = inner;
+        container.appendChild(el);
+        this.projElementMap.set(ball.id, el);
       }
 
-      return `
-        <div
-          class="projectile-entity proj-${ballTheme}"
-          style="
-            left: ${ball.x}px;
-            top: ${ball.y}px;
-            width: ${ball.size}px;
-            height: ${ball.size}px;
-            transform: translate(-50%, -50%) rotate(${ball.angle || 0}deg);
-          "
-        >
-          ${inner}
-        </div>
-      `;
-    }).join('');
+      // Fast hardware-accelerated 3D transform without innerHTML churn
+      el.style.transform = `translate3d(${ball.x}px, ${ball.y}px, 0) translate(-50%, -50%) rotate(${ball.angle || 0}deg)`;
+    }
+
+    // Remove any projectile elements that no longer exist
+    for (const [id, el] of this.projElementMap.entries()) {
+      if (!activeIds.has(id)) {
+        el.remove();
+        this.projElementMap.delete(id);
+      }
+    }
   }
 }
 
