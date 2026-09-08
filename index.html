@@ -67,16 +67,14 @@
             <button id="btn-theme-toggle" class="btn-theme" title="Toggle Day/Night Theme">
                 <span>☀️ Day</span>
             </button>
-            <button id="btn-storage-manager" class="nav-btn btn-storage-toggle" title="Device Storage & Cache Manager">
-                <span class="storage-btn-icon">💾</span>
-                <span class="storage-btn-text">Storage <strong id="nav-storage-badge" class="nav-storage-badge">0.0 MB</strong></span>
-            </button>
             <button id="btn-open-suggest" class="nav-btn">
                 <span>💡 Pitch Idea</span>
             </button>
-            <div class="user-avatar-badge" title="Gamer Profile">
-                <span>👾</span>
-            </div>
+            <button id="btn-user-auth" class="nav-btn btn-auth-toggle" title="Gamer Account & Profiles">
+                <span id="nav-user-avatar" class="user-avatar-icon">👾</span>
+                <span id="nav-user-name" class="user-name-text">Guest</span>
+                <span id="nav-auth-status" class="auth-status-dot guest" title="Guest Session - Cleared on Reload"></span>
+            </button>
         </div>
     </header>
 
@@ -173,8 +171,8 @@
                                                     <span class="loader-size-pill" id="loader-size-pill" title="Physical download & storage package size">
                                                         <span class="pill-icon">📦</span> Package: <strong id="loader-size-val">0.0 MB</strong>
                                                     </span>
-                                                    <span class="loader-cache-pill" id="loader-cache-pill" title="Local CacheStorage status">
-                                                        <span class="pill-icon">💾</span> <span id="loader-cache-status">Checking Storage...</span>
+                                                    <span class="loader-cache-pill" id="loader-cache-pill" title="Arcade Engine Status">
+                                                        <span class="pill-icon">⚡</span> <span id="loader-cache-status">Engine Ready</span>
                                                     </span>
                                                 </div>
                                                 <h2 class="loader-title" id="loader-game-title">Office Escape</h2>
@@ -548,65 +546,102 @@
         </div>
     </div>
 
-    <!-- Device Storage & Game Cache Manager Modal -->
-    <div id="storage-modal" class="modal-backdrop">
-        <div class="modal-box storage-modal-box">
-            <div class="storage-modal-header">
-                <div class="sm-title-wrap">
-                    <span class="sm-header-icon">💾</span>
+    <!-- Gamer Account & Cloud Saves Modal -->
+    <div id="auth-modal" class="modal-backdrop">
+        <div class="modal-box auth-modal-box">
+            <div class="auth-modal-header">
+                <div class="auth-title-wrap">
+                    <span class="auth-header-icon" id="modal-auth-avatar-preview">👾</span>
                     <div>
-                        <h3 class="modal-title">Device Storage & Load Guard</h3>
-                        <p class="storage-modal-desc">
-                            Games cache assets into local device storage (<code class="code-tag">CacheStorage API</code>) to eliminate streaming lag and reduce CPU, GPU & battery consumption.
+                        <h3 class="modal-title">Gamer Account & Saves</h3>
+                        <p class="auth-modal-desc">
+                            Log in with your credentials to preserve high scores, coins, and progress for each game. 
+                            In Guest Mode, all game data automatically clears whenever the website is reloaded.
                         </p>
                     </div>
                 </div>
-                <button id="btn-close-storage-modal" class="modal-close-icon-btn" title="Close">✕</button>
+                <button id="btn-close-auth-modal" class="modal-close-icon-btn" title="Close">✕</button>
             </div>
 
-            <!-- Storage Health & Quota Overview Grid -->
-            <div class="storage-stats-grid">
-                <div class="storage-stat-card">
-                    <span class="stat-card-label">Game Cache Occupied</span>
-                    <div class="stat-card-val"><span id="storage-total-occupied">0.0</span> <span class="stat-unit">MB</span></div>
-                    <span class="stat-subtext" id="storage-games-count">0 of 10 Games Cached</span>
+            <!-- Current Profile Status Card -->
+            <div class="auth-status-card" id="auth-status-card">
+                <div class="auth-status-left">
+                    <div class="auth-avatar-bubble" id="auth-current-avatar">👾</div>
+                    <div class="auth-current-info">
+                        <div class="auth-current-name-row">
+                            <h4 id="auth-current-username">Guest Player</h4>
+                            <span class="auth-badge-pill guest" id="auth-current-badge">⚡ GUEST SESSION</span>
+                        </div>
+                        <p class="auth-current-sub" id="auth-current-notice">
+                            ⚠️ Temporary Session — All game progress automatically clears when the website is reloaded.
+                        </p>
+                    </div>
                 </div>
-                <div class="storage-stat-card">
-                    <span class="stat-card-label">Device Quota</span>
-                    <div class="stat-card-val"><span id="storage-quota-available">Available</span></div>
-                    <span class="stat-subtext" id="storage-quota-subtext">Disk storage via Browser API</span>
-                </div>
-                <div class="storage-stat-card">
-                    <span class="stat-card-label">Device Load Guard</span>
-                    <div class="stat-card-val"><span id="storage-eco-state">Eco Balanced</span></div>
-                    <span class="stat-subtext">Low CPU / GPU background overhead</span>
-                </div>
-            </div>
-
-            <!-- Games Storage Breakdown List -->
-            <div class="storage-games-section">
-                <div class="storage-games-header">
-                    <h4>GAMES STORAGE ALLOCATION</h4>
-                    <span class="sm-hint">Pre-cache to play instantly offline or free up space anytime</span>
-                </div>
-                <div class="storage-games-list" id="storage-games-list">
-                    <!-- Populated dynamically with each game's size and cache status -->
+                <div class="auth-status-right">
+                    <button id="btn-auth-logout" class="nav-btn btn-auth-logout hidden" title="Log out to guest mode">🚪 Log Out</button>
                 </div>
             </div>
 
-            <!-- Storage Modal Actions -->
-            <div class="storage-modal-actions">
-                <div class="sm-actions-left">
-                    <button id="btn-precache-all" class="nav-btn btn-precache-all" title="Cache all games for instant play">
-                        <span>⚡ Pre-Cache All Games</span>
-                    </button>
-                    <button id="btn-clear-all-storage" class="nav-btn btn-danger-storage" title="Free up all cached game storage">
-                        <span>🗑️ Free All Storage</span>
-                    </button>
+            <!-- Switch or Register Profile Form -->
+            <div class="auth-form-section">
+                <h4 class="auth-section-title">SIGN IN / CREATE GAMER PROFILE</h4>
+                <div class="auth-inputs-grid">
+                    <div class="auth-input-group">
+                        <label for="auth-username-input">Gamer Tag / Username</label>
+                        <input type="text" id="auth-username-input" class="auth-text-input" placeholder="e.g. Rahil, SolarAce, Ninja99" maxlength="20" autocomplete="off">
+                    </div>
+                    <div class="auth-input-group">
+                        <label for="auth-pin-input">PIN / Passcode (Optional)</label>
+                        <input type="password" id="auth-pin-input" class="auth-text-input" placeholder="4-digit PIN or password" maxlength="16">
+                    </div>
                 </div>
-                <div class="sm-actions-right">
-                    <button id="btn-storage-close" class="btn-arcade-cta" style="padding: 8px 24px; font-size: 0.95rem;">Done</button>
+
+                <div class="auth-avatar-select-section">
+                    <label>Choose Gamer Avatar</label>
+                    <div class="auth-avatar-grid" id="auth-avatar-picker">
+                        <button type="button" class="avatar-pick-btn active" data-avatar="👾">👾</button>
+                        <button type="button" class="avatar-pick-btn" data-avatar="🎮">🎮</button>
+                        <button type="button" class="avatar-pick-btn" data-avatar="⚡">⚡</button>
+                        <button type="button" class="avatar-pick-btn" data-avatar="👑">👑</button>
+                        <button type="button" class="avatar-pick-btn" data-avatar="🐱">🐱</button>
+                        <button type="button" class="avatar-pick-btn" data-avatar="🦊">🦊</button>
+                        <button type="button" class="avatar-pick-btn" data-avatar="🐉">🐉</button>
+                        <button type="button" class="avatar-pick-btn" data-avatar="🚀">🚀</button>
+                        <button type="button" class="avatar-pick-btn" data-avatar="🤖">🤖</button>
+                        <button type="button" class="avatar-pick-btn" data-avatar="🥋">🥋</button>
+                    </div>
                 </div>
+
+                <div class="auth-form-actions">
+                    <button id="btn-auth-login-submit" class="btn-arcade-cta" style="padding: 9px 24px;">🚀 LOG IN / SAVE PROFILE</button>
+                    <button id="btn-auth-switch-guest" class="nav-btn">⚡ Play as Guest (Auto-Clears on Reload)</button>
+                </div>
+            </div>
+
+            <!-- Saved Profiles Quick Switcher -->
+            <div class="auth-saved-profiles-section" id="auth-saved-profiles-section">
+                <h4 class="auth-section-title">SAVED PROFILES ON THIS DEVICE</h4>
+                <div class="auth-profiles-chips" id="auth-profiles-chips">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Active User Game Data Summary -->
+            <div class="auth-game-saves-section">
+                <div class="auth-saves-header">
+                    <h4 class="auth-section-title">ACTIVE GAME DATA & PROGRESS</h4>
+                    <span class="auth-saves-hint" id="auth-saves-hint">Scoped to current active credentials</span>
+                </div>
+                <div class="auth-game-saves-grid" id="auth-game-saves-grid">
+                    <!-- Populated dynamically with each game's saved score/coins/progress -->
+                </div>
+            </div>
+
+            <div class="auth-modal-footer">
+                <button id="btn-auth-clear-current" class="nav-btn btn-danger-storage" title="Clear current session game data">
+                    🗑️ Reset Current Session Data
+                </button>
+                <button id="btn-auth-modal-close" class="btn-arcade-cta" style="padding: 8px 24px; font-size: 0.95rem;">Done</button>
             </div>
         </div>
     </div>
@@ -614,7 +649,7 @@
     <!-- Audience Demographics & Live Insights Modal -->
     <div id="audience-modal" class="modal-backdrop">
         <div class="modal-box audience-modal-box">
-            <div class="storage-modal-header">
+            <div class="audience-modal-header">
                 <div class="sm-title-wrap">
                     <span class="sm-header-icon">📊</span>
                     <div>
@@ -622,7 +657,7 @@
                             <h3 class="modal-title">Live Audience Intelligence</h3>
                             <span class="audience-live-tag"><span class="live-pulse-dot"></span> LIVE MODEL</span>
                         </div>
-                        <p class="storage-modal-desc">
+                        <p class="audience-modal-desc">
                             Real-time platform viewership dynamically calculated from the <strong>251,136-row Gaming Audience Master Dataset</strong> (diurnal traffic curves, device distribution & genre session times).
                         </p>
                     </div>
@@ -631,23 +666,23 @@
             </div>
 
             <!-- Diurnal & Live Activity Grid -->
-            <div class="storage-stats-grid audience-stats-grid">
-                <div class="storage-stat-card">
+            <div class="audience-stats-grid">
+                <div class="audience-stat-card">
                     <span class="stat-card-label">Current Diurnal Cycle</span>
                     <div class="stat-card-val"><span id="aud-current-cycle">Morning (8-12)</span></div>
                     <span class="stat-subtext" id="aud-cycle-share">10.0% of Daily Traffic</span>
                 </div>
-                <div class="storage-stat-card">
+                <div class="audience-stat-card">
                     <span class="stat-card-label">Live Concurrent Players</span>
                     <div class="stat-card-val"><span id="aud-live-total">142,850</span></div>
                     <span class="stat-subtext" id="aud-cycle-trend">Trending toward 32.0% Evening Peak</span>
                 </div>
-                <div class="storage-stat-card">
+                <div class="audience-stat-card">
                     <span class="stat-card-label">Peak Audience Window</span>
                     <div class="stat-card-val"><span style="color:#22c55e;">17:00 – 21:00</span></div>
                     <span class="stat-subtext">Evening Prime (32.0% global surge)</span>
                 </div>
-                <div class="storage-stat-card">
+                <div class="audience-stat-card">
                     <span class="stat-card-label">Top Device Share</span>
                     <div class="stat-card-val"><span style="color:#38bdf8;">Android 51.5%</span></div>
                     <span class="stat-subtext">Windows PC 14.2% · iOS 13.7%</span>
@@ -678,7 +713,7 @@
                 </div>
             </div>
 
-            <div class="storage-modal-actions" style="margin-top: 20px;">
+            <div class="audience-modal-actions" style="margin-top: 20px;">
                 <div class="sm-actions-left" style="color: var(--text-muted); font-size: 0.8rem;">
                     Source: Sensor Tower FY2024-25 & Master Gaming Demographic Model
                 </div>

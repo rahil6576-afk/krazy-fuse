@@ -486,190 +486,319 @@ function formatKeyForPlatform(keyStr) {
 }
 
 // ==========================================================
-// PHYSICAL DEVICE STORAGE CACHE ENGINE (CacheStorage API)
+// GAMER AUTHENTICATION & MULTI-ACCOUNT CREDENTIALS ENGINE
 // ==========================================================
-const StorageCacheManager = {
-    PREFIX: 'kf_game_cache_',
+const AuthManager = {
+    STORAGE_REGISTRY_KEY: 'kf_accounts_registry',
+    ACTIVE_USER_SESSION_KEY: 'kf_active_session_user',
+    ACTIVE_USER_PERSIST_KEY: 'kf_active_user_persist',
 
-    getCacheName(gameId) {
-        return `krazyfuse-game-${gameId}`;
+    currentUser: {
+        username: 'Guest',
+        avatar: '👾',
+        isLoggedIn: false
     },
 
-    isGameCached(gameId) {
-        return !!localStorage.getItem(this.PREFIX + gameId);
+    init() {
+        // 1. Check if user is logged in
+        let savedUser = sessionStorage.getItem(this.ACTIVE_USER_SESSION_KEY);
+        if (!savedUser) {
+            savedUser = localStorage.getItem(this.ACTIVE_USER_PERSIST_KEY);
+        }
+
+        if (savedUser) {
+            try {
+                const parsed = JSON.parse(savedUser);
+                if (parsed && parsed.username && parsed.username !== 'Guest') {
+                    this.currentUser = {
+                        username: parsed.username,
+                        avatar: parsed.avatar || '👾',
+                        isLoggedIn: true
+                    };
+                }
+            } catch (e) {}
+        }
+
+        if (!this.currentUser || !this.currentUser.isLoggedIn) {
+            this.currentUser = {
+                username: 'Guest',
+                avatar: '👾',
+                isLoggedIn: false
+            };
+            // AUTO-CLEAR ON RELOAD FOR GUEST:
+            // "ONCE THE WEBSITE is reloaded the data should automatically clear"
+            this.clearGuestData();
+        }
+
+        this.updateNavUI();
+        this.bindUnloadAutoClear();
     },
 
-    getGameCacheMeta(gameId) {
+    bindUnloadAutoClear() {
+        window.addEventListener('beforeunload', () => {
+            if (!this.isLoggedIn()) {
+                this.clearGuestData();
+            }
+        });
+    },
+
+    isLoggedIn() {
+        return !!(this.currentUser && this.currentUser.isLoggedIn && this.currentUser.username !== 'Guest');
+    },
+
+    getActiveUser() {
+        return this.currentUser || { username: 'Guest', avatar: '👾', isLoggedIn: false };
+    },
+
+    login(username, pin = '', avatar = '👾') {
+        const cleanName = (username || '').trim();
+        if (!cleanName || cleanName.toLowerCase() === 'guest') {
+            this.logout();
+            return;
+        }
+
+        const registry = this.getRegistry();
+        if (!registry[cleanName]) {
+            registry[cleanName] = {
+                username: cleanName,
+                pin: pin,
+                avatar: avatar,
+                createdAt: Date.now(),
+                games: {}
+            };
+        } else {
+            if (avatar) registry[cleanName].avatar = avatar;
+            if (pin) registry[cleanName].pin = pin;
+        }
+        this.saveRegistry(registry);
+
+        this.currentUser = {
+            username: cleanName,
+            avatar: avatar || registry[cleanName].avatar || '👾',
+            isLoggedIn: true
+        };
+
+        sessionStorage.setItem(this.ACTIVE_USER_SESSION_KEY, JSON.stringify(this.currentUser));
+        localStorage.setItem(this.ACTIVE_USER_PERSIST_KEY, JSON.stringify(this.currentUser));
+
+        this.updateNavUI();
+        showToast(`Welcome, ${cleanName}! Game saves active for your profile.`, this.currentUser.avatar);
+
+        // If a game is currently playing, sync with the newly authenticated credentials
+        KrazyGameStorage.syncActiveGameIframe();
+    },
+
+    logout() {
+        this.currentUser = {
+            username: 'Guest',
+            avatar: '👾',
+            isLoggedIn: false
+        };
+
+        sessionStorage.removeItem(this.ACTIVE_USER_SESSION_KEY);
+        localStorage.removeItem(this.ACTIVE_USER_PERSIST_KEY);
+
+        // Clean temporary session data
+        this.clearGuestData();
+
+        this.updateNavUI();
+        showToast('Switched to Guest mode. Data auto-clears on reload.', '⚡');
+
+        KrazyGameStorage.syncActiveGameIframe();
+    },
+
+    switchUser(username) {
+        const registry = this.getRegistry();
+        if (registry[username]) {
+            const acc = registry[username];
+            this.login(acc.username, acc.pin, acc.avatar);
+        } else if (username === 'Guest') {
+            this.logout();
+        }
+    },
+
+    getRegistry() {
         try {
-            const data = localStorage.getItem(this.PREFIX + gameId);
-            return data ? JSON.parse(data) : null;
+            const raw = localStorage.getItem(this.STORAGE_REGISTRY_KEY);
+            return raw ? JSON.parse(raw) : {};
         } catch (e) {
-            return null;
+            return {};
         }
     },
 
-    async cacheGameAssets(gameId, onProgress) {
-        const manifest = GAME_MANIFESTS[gameId] || {
-            id: gameId,
-            title: gameId,
-            sizeMB: 1.0,
-            formattedSize: '1.0 MB',
-            totalBytes: 1048576,
-            primaryAssets: []
-        };
+    saveRegistry(reg) {
+        try {
+            localStorage.setItem(this.STORAGE_REGISTRY_KEY, JSON.stringify(reg));
+        } catch (e) {}
+    },
 
-        const cacheName = this.getCacheName(gameId);
-        let cache = null;
-        if ('caches' in window) {
-            try {
-                cache = await caches.open(cacheName);
-            } catch (e) {
-                console.warn('CacheStorage open note:', e);
+    clearGuestData() {
+        // Automatically clears all temporary guest game keys
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && (
+                k.startsWith('kf_guest_') || 
+                k.startsWith('wild_swings_') || 
+                k.startsWith('doom_') || 
+                k.startsWith('float_') || 
+                k.startsWith('sumi_') ||
+                k.startsWith('kf_game_cache_')
+            )) {
+                toRemove.push(k);
             }
         }
+        toRemove.forEach(k => localStorage.removeItem(k));
+    },
 
-        const assets = (manifest.primaryAssets && manifest.primaryAssets.length) 
-            ? manifest.primaryAssets 
-            : [manifest.directory ? `/${manifest.directory}/index.html` : `/${gameId}/index.html`];
+    getUserCoins(username) {
+        const doomCoins = KrazyGameStorage.getItem('elevator-doom', 'doom_banked_coins', '0');
+        return parseInt(doomCoins, 10) || 0;
+    },
 
-        const targetBytes = manifest.totalBytes || 1048576;
-        let downloadedBytes = 0;
+    updateNavUI() {
+        const avatarEl = document.getElementById('nav-user-avatar');
+        const nameEl = document.getElementById('nav-user-name');
+        const statusEl = document.getElementById('nav-auth-status');
+        const bankBadge = document.getElementById('portal-top-bank');
 
-        if (onProgress) onProgress(0.12, downloadedBytes, targetBytes, 'Allocating device storage cache buffer...');
-        await new Promise(r => setTimeout(r, 60));
+        const user = this.getActiveUser();
 
-        // Fetch & cache primary assets with URL normalization for Safari / WebKit & Chrome / Edge
-        for (let i = 0; i < assets.length; i++) {
-            const assetUrl = assets[i];
-            try {
-                const fullUrl = new URL(assetUrl, window.location.origin).toString();
-                const response = await fetch(fullUrl, { cache: 'no-cache' });
-                if (response.ok && cache) {
-                    try {
-                        await cache.put(fullUrl, response.clone());
-                    } catch (cPutErr) {
-                        console.warn('Cache put notice (Safari sandbox):', cPutErr);
-                    }
-                    const blob = await response.blob();
-                    downloadedBytes += blob.size;
+        if (avatarEl) avatarEl.textContent = user.avatar;
+        if (nameEl) nameEl.textContent = user.isLoggedIn ? user.username : 'Guest';
+        if (statusEl) {
+            statusEl.className = 'auth-status-dot ' + (user.isLoggedIn ? 'online' : 'guest');
+            statusEl.title = user.isLoggedIn 
+                ? `Logged in as ${user.username} (Saved per game)` 
+                : 'Guest Session (Auto-clears on website reload)';
+        }
+
+        if (bankBadge) {
+            const coins = this.getUserCoins(user.username);
+            bankBadge.textContent = `🪙 ${coins} P`;
+        }
+    }
+};
+
+// ==========================================================
+// UNIVERSAL GAME STORAGE MANAGER (ISOLATED PER GAME & USER)
+// ==========================================================
+const KrazyGameStorage = {
+    getStorageKey(gameId, key) {
+        const user = AuthManager.getActiveUser();
+        if (user.isLoggedIn) {
+            return `kf_u_${user.username}_g_${gameId}_${key}`;
+        } else {
+            return `kf_guest_g_${gameId}_${key}`;
+        }
+    },
+
+    getItem(gameId, key, fallback = null) {
+        const fullKey = this.getStorageKey(gameId, key);
+        const val = localStorage.getItem(fullKey);
+        return val !== null ? val : fallback;
+    },
+
+    setItem(gameId, key, value) {
+        const fullKey = this.getStorageKey(gameId, key);
+        const strVal = value !== undefined && value !== null ? value.toString() : '';
+        localStorage.setItem(fullKey, strVal);
+
+        // Also record in active user's profile metadata in registry
+        const user = AuthManager.getActiveUser();
+        if (user.isLoggedIn) {
+            const registry = AuthManager.getRegistry();
+            if (registry[user.username]) {
+                if (!registry[user.username].games) registry[user.username].games = {};
+                if (!registry[user.username].games[gameId]) registry[user.username].games[gameId] = {};
+                registry[user.username].games[gameId][key] = strVal;
+                registry[user.username].games[gameId].lastUpdated = Date.now();
+                AuthManager.saveRegistry(registry);
+            }
+        }
+        AuthManager.updateNavUI();
+    },
+
+    removeItem(gameId, key) {
+        const fullKey = this.getStorageKey(gameId, key);
+        localStorage.removeItem(fullKey);
+    },
+
+    getAllGameKeys(gameId) {
+        const user = AuthManager.getActiveUser();
+        const prefix = user.isLoggedIn ? `kf_u_${user.username}_g_${gameId}_` : `kf_guest_g_${gameId}_`;
+        const res = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith(prefix)) {
+                const subKey = k.slice(prefix.length);
+                res[subKey] = localStorage.getItem(k);
+            }
+        }
+        return res;
+    },
+
+    getKnownKeysForGame(gameId) {
+        const map = {
+            'wild-swings': ['wild_swings_level', 'wild_swings_unlocked', 'wild_swings_best_endless', 'wild_swings_theme', 'wild_swings_muted'],
+            'elevator-doom': ['doom_banked_coins', 'doom_failed_floor'],
+            'popup-game': ['float_sound_muted', 'float_theme', 'float_player_name', 'float_high_score', 'float_scoreboard'],
+            'tic-tac-toe': ['sumi_sound_muted'],
+            'flappy-man': ['flappy_high_score'],
+            'fallen-one': ['fallen_high_score', 'fallen_last_fighter'],
+            'bomb-panic': ['bomb_high_score'],
+            'dart-board': ['dart_high_score'],
+            'gravity-flip': ['gravity_high_score'],
+            'office-escape': ['office_escape_coins', 'office_high_score']
+        };
+        return map[gameId] || [];
+    },
+
+    prepareGameEnvironment(gameId, iframeWindow) {
+        if (!iframeWindow) return;
+        const user = AuthManager.getActiveUser();
+        const savedData = this.getAllGameKeys(gameId);
+
+        try {
+            // Expose bridge in iframe
+            iframeWindow.KrazyGameStorage = this;
+            iframeWindow.KrazyActiveUser = user;
+
+            // Sync user's saved keys into iframe localStorage
+            const knownKeys = this.getKnownKeysForGame(gameId);
+            knownKeys.forEach(k => {
+                if (savedData[k] !== undefined) {
+                    iframeWindow.localStorage.setItem(k, savedData[k]);
                 } else {
-                    downloadedBytes += Math.floor(targetBytes / assets.length);
+                    iframeWindow.localStorage.removeItem(k);
                 }
-            } catch (err) {
-                downloadedBytes += Math.floor(targetBytes / assets.length);
-            }
+            });
 
-            const pct = 0.15 + (0.60 * ((i + 1) / assets.length));
-            const curMB = ((targetBytes * pct) / (1024 * 1024)).toFixed(1);
-            if (onProgress) onProgress(pct, targetBytes * pct, targetBytes, `Buffering assets to disk (${curMB} MB / ${manifest.formattedSize})...`);
-            await new Promise(r => setTimeout(r, 35));
+            // Populate points badge in games
+            const userCoins = AuthManager.getUserCoins(user.username);
+            iframeWindow.localStorage.setItem('krazio_user_points', userCoins.toString());
+            iframeWindow.localStorage.setItem('office_escape_coins', userCoins.toString());
+            iframeWindow.localStorage.setItem('coins', userCoins.toString());
+
+            // Hook iframe localStorage.setItem so in-game updates mirror to active user's storage
+            const originalSetItem = iframeWindow.localStorage.setItem.bind(iframeWindow.localStorage);
+            iframeWindow.localStorage.setItem = (k, v) => {
+                originalSetItem(k, v);
+                this.setItem(gameId, k, v);
+            };
+        } catch (e) {
+            console.warn('Game storage preparation note:', e);
         }
-
-        // Physically allocate dedicated storage buffer in CacheStorage to occupy MB space on disk
-        if (cache) {
-            try {
-                const bufKey = new URL(`/__pkg_buffer_${gameId}.bin`, window.location.origin).toString();
-                const existing = await cache.match(bufKey);
-                if (!existing) {
-                    const bufferSize = Math.min(Math.max(Math.floor(targetBytes * 0.35), 65536), 3145728);
-                    const dummyData = new Uint8Array(bufferSize);
-                    const bufferBlob = new Blob([dummyData], { type: 'application/octet-stream' });
-                    const resp = new Response(bufferBlob, {
-                        status: 200,
-                        statusText: 'OK',
-                        headers: {
-                            'Content-Type': 'application/octet-stream',
-                            'Content-Length': bufferSize.toString(),
-                            'X-KrazyFuse-Storage': 'true'
-                        }
-                    });
-                    await cache.put(bufKey, resp);
-                }
-            } catch (e) {
-                console.warn('Storage buffer note:', e);
-            }
-        }
-
-        if (onProgress) onProgress(0.92, targetBytes * 0.92, targetBytes, 'Compiling shaders & engaging Low Device Load mode...');
-        await new Promise(r => setTimeout(r, 80));
-
-        // Record metadata
-        const meta = {
-            gameId,
-            sizeMB: manifest.sizeMB,
-            totalBytes: targetBytes,
-            formattedSize: manifest.formattedSize,
-            cachedAt: Date.now()
-        };
-        localStorage.setItem(this.PREFIX + gameId, JSON.stringify(meta));
-
-        if (onProgress) onProgress(1.0, targetBytes, targetBytes, 'Ready to launch! Zero device throttling.');
-        this.updateNavBadge();
-        return true;
     },
 
-    async deleteGameCache(gameId) {
-        if ('caches' in window) {
-            try {
-                await caches.delete(this.getCacheName(gameId));
-            } catch (e) {}
+    syncActiveGameIframe() {
+        const iframe = document.getElementById('active-game-iframe');
+        if (iframe && iframe.contentWindow && window.currentGame) {
+            const game = window.currentGame;
+            const gameUrl = game.link.startsWith('/') ? game.link : '/' + game.link;
+            const embedUrl = gameUrl.includes('?') ? `${gameUrl}&embedded=true` : `${gameUrl}?embedded=true`;
+            iframe.src = embedUrl;
         }
-        localStorage.removeItem(this.PREFIX + gameId);
-        this.updateNavBadge();
-        return true;
-    },
-
-    async clearAllCaches() {
-        if ('caches' in window) {
-            try {
-                const keys = await caches.keys();
-                for (const key of keys) {
-                    if (key.startsWith('krazyfuse-game-')) {
-                        await caches.delete(key);
-                    }
-                }
-            } catch (e) {}
-        }
-        for (let i = 0; i < localStorage.length; i++) {
-            const k = localStorage.key(i);
-            if (k && k.startsWith(this.PREFIX)) {
-                localStorage.removeItem(k);
-                i--;
-            }
-        }
-        this.updateNavBadge();
-        return true;
-    },
-
-    getTotalCachedMB() {
-        let total = 0;
-        for (let i = 0; i < localStorage.length; i++) {
-            const k = localStorage.key(i);
-            if (k && k.startsWith(this.PREFIX)) {
-                try {
-                    const data = JSON.parse(localStorage.getItem(k));
-                    if (data && data.sizeMB) total += data.sizeMB;
-                } catch (e) {}
-            }
-        }
-        return total;
-    },
-
-    getCachedCount() {
-        let count = 0;
-        for (let i = 0; i < localStorage.length; i++) {
-            const k = localStorage.key(i);
-            if (k && k.startsWith(this.PREFIX)) count++;
-        }
-        return count;
-    },
-
-    updateNavBadge() {
-        const badge = document.getElementById('nav-storage-badge');
-        if (!badge) return;
-        const total = this.getTotalCachedMB();
-        badge.textContent = `${total.toFixed(1)} MB`;
-        badge.title = `${this.getCachedCount()} Games Cached locally in Device Storage`;
     }
 };
 
@@ -746,42 +875,27 @@ async function executeGameLoading(game, onReady) {
 
     loader.classList.remove('hidden');
 
-    const isAlreadyCached = StorageCacheManager.isGameCached(game.id);
+    const user = AuthManager.getActiveUser();
+    if (cacheStatus) {
+        cacheStatus.textContent = user.isLoggedIn ? `Save Profile: ${user.username}` : 'Guest Session (Clears on reload)';
+    }
+    if (stageMsg) {
+        stageMsg.textContent = user.isLoggedIn 
+            ? `⚡ Connected to profile "${user.username}" — Loading isolated game data...` 
+            : '⚡ Launching game in Guest mode — Progress clears on website reload...';
+    }
 
-    if (isAlreadyCached) {
-        if (cacheStatus) cacheStatus.textContent = 'Cached (Instant Play)';
-        if (stageMsg) stageMsg.textContent = '⚡ Verified in device storage cache! Zero streaming overhead...';
-        if (diagStorage) diagStorage.classList.add('done');
-        if (diagStorageIcon) diagStorageIcon.textContent = '✅';
-
-        // Fast disk verification sweep
-        for (let step = 1; step <= 10; step++) {
-            const p = step / 10;
-            if (fillEl) fillEl.style.width = `${Math.floor(p * 100)}%`;
-            if (pctEl) pctEl.textContent = `${Math.floor(p * 100)}%`;
-            if (mbCounter) mbCounter.textContent = `${(manifest.sizeMB * p).toFixed(1)} MB / ${manifest.formattedSize}`;
-            if (p >= 0.35 && diagAssets) { diagAssets.classList.add('done'); if (diagAssetsIcon) diagAssetsIcon.textContent = '✅'; }
-            if (p >= 0.70 && diagAudio) { diagAudio.classList.add('done'); if (diagAudioIcon) diagAudioIcon.textContent = '✅'; }
-            if (p >= 0.95 && diagEngine) { diagEngine.classList.add('done'); if (diagEngineIcon) diagEngineIcon.textContent = '✅'; }
-            await new Promise(r => setTimeout(r, 22));
-        }
-    } else {
-        if (cacheStatus) cacheStatus.textContent = 'Allocating Disk Cache...';
-        
-        await StorageCacheManager.cacheGameAssets(game.id, (pct, curBytes, totalBytes, msg) => {
-            const percent = Math.min(Math.floor(pct * 100), 100);
-            if (fillEl) fillEl.style.width = `${percent}%`;
-            if (pctEl) pctEl.textContent = `${percent}%`;
-            const curMB = (curBytes / (1024 * 1024)).toFixed(1);
-            if (mbCounter) mbCounter.textContent = `${curMB} MB / ${manifest.formattedSize}`;
-            if (stageMsg) stageMsg.textContent = msg;
-
-            if (pct >= 0.20 && diagStorage) { diagStorage.classList.add('done'); if (diagStorageIcon) diagStorageIcon.textContent = '✅'; }
-            if (pct >= 0.55 && diagAssets) { diagAssets.classList.add('done'); if (diagAssetsIcon) diagAssetsIcon.textContent = '✅'; }
-            if (pct >= 0.80 && diagAudio) { diagAudio.classList.add('done'); if (diagAudioIcon) diagAudioIcon.textContent = '✅'; }
-            if (pct >= 0.95 && diagEngine) { diagEngine.classList.add('done'); if (diagEngineIcon) diagEngineIcon.textContent = '✅'; }
-        });
-        if (cacheStatus) cacheStatus.textContent = 'Saved to Device';
+    // Fast, responsive engine verification sweep
+    for (let step = 1; step <= 10; step++) {
+        const p = step / 10;
+        if (fillEl) fillEl.style.width = `${Math.floor(p * 100)}%`;
+        if (pctEl) pctEl.textContent = `${Math.floor(p * 100)}%`;
+        if (mbCounter) mbCounter.textContent = `${(manifest.sizeMB * p).toFixed(1)} MB / ${manifest.formattedSize}`;
+        if (p >= 0.25 && diagStorage) { diagStorage.classList.add('done'); if (diagStorageIcon) diagStorageIcon.textContent = '✅'; }
+        if (p >= 0.55 && diagAssets) { diagAssets.classList.add('done'); if (diagAssetsIcon) diagAssetsIcon.textContent = '✅'; }
+        if (p >= 0.80 && diagAudio) { diagAudio.classList.add('done'); if (diagAudioIcon) diagAudioIcon.textContent = '✅'; }
+        if (p >= 0.95 && diagEngine) { diagEngine.classList.add('done'); if (diagEngineIcon) diagEngineIcon.textContent = '✅'; }
+        await new Promise(r => setTimeout(r, 18));
     }
 
     // Completed State
@@ -910,6 +1024,9 @@ function openGamePlayer(gameId) {
             
             iframe.onload = () => {
                 try {
+                    // Synchronize active user credentials & per-game isolated storage
+                    KrazyGameStorage.prepareGameEnvironment(game.id, iframe.contentWindow);
+
                     if (iframe.contentDocument && iframe.contentDocument.documentElement) {
                         iframe.contentDocument.documentElement.classList.add('is-embedded');
                         if (iframe.contentDocument.body) {
@@ -1498,26 +1615,33 @@ function setupEcoMode() {
     }
 }
 
-function setupStorageManagerModal() {
-    const btnToggle = document.getElementById('btn-storage-manager');
-    const modal = document.getElementById('storage-modal');
-    const btnClose = document.getElementById('btn-close-storage-modal');
-    const btnDone = document.getElementById('btn-storage-close');
-    const btnClearAll = document.getElementById('btn-clear-all-storage');
-    const btnPrecacheAll = document.getElementById('btn-precache-all');
+function setupAuthModal() {
+    const btnOpen = document.getElementById('btn-user-auth');
+    const modal = document.getElementById('auth-modal');
+    const btnClose = document.getElementById('btn-close-auth-modal');
+    const btnDone = document.getElementById('btn-auth-modal-close');
+    const btnLogin = document.getElementById('btn-auth-login-submit');
+    const btnGuest = document.getElementById('btn-auth-switch-guest');
+    const btnLogout = document.getElementById('btn-auth-logout');
+    const btnClearCurrent = document.getElementById('btn-auth-clear-current');
+    const usernameInput = document.getElementById('auth-username-input');
+    const pinInput = document.getElementById('auth-pin-input');
+    const avatarPicker = document.getElementById('auth-avatar-picker');
+
+    let selectedAvatar = '👾';
 
     if (!modal) return;
 
     function openModal() {
         modal.classList.add('active');
-        renderStorageModalContent();
+        renderAuthModalContent();
     }
 
     function closeModal() {
         modal.classList.remove('active');
     }
 
-    if (btnToggle) btnToggle.addEventListener('click', openModal);
+    if (btnOpen) btnOpen.addEventListener('click', openModal);
     if (btnClose) btnClose.addEventListener('click', closeModal);
     if (btnDone) btnDone.addEventListener('click', closeModal);
 
@@ -1525,121 +1649,194 @@ function setupStorageManagerModal() {
         if (e.target === modal) closeModal();
     });
 
-    if (btnClearAll) {
-        btnClearAll.addEventListener('click', async () => {
-            if (confirm('Free up all locally cached game storage? Games will stream cleanly when played.')) {
-                await StorageCacheManager.clearAllCaches();
-                renderStorageModalContent();
-                showToast('All game storage cleared!', '🗑️');
-            }
+    // Avatar selector
+    if (avatarPicker) {
+        avatarPicker.addEventListener('click', (e) => {
+            const btn = e.target.closest('.avatar-pick-btn');
+            if (!btn) return;
+            avatarPicker.querySelectorAll('.avatar-pick-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedAvatar = btn.getAttribute('data-avatar') || '👾';
+            const preview = document.getElementById('modal-auth-avatar-preview');
+            if (preview) preview.textContent = selectedAvatar;
         });
     }
 
-    if (btnPrecacheAll) {
-        btnPrecacheAll.addEventListener('click', async () => {
-            btnPrecacheAll.disabled = true;
-            btnPrecacheAll.innerHTML = '<span>⏳ Caching Games...</span>';
-            for (const game of GAMES_CATALOG) {
-                if (!StorageCacheManager.isGameCached(game.id)) {
-                    await StorageCacheManager.cacheGameAssets(game.id);
-                    renderStorageModalContent();
-                }
+    // Login submit
+    if (btnLogin) {
+        btnLogin.addEventListener('click', () => {
+            const name = usernameInput ? usernameInput.value.trim() : '';
+            const pin = pinInput ? pinInput.value.trim() : '';
+            if (!name) {
+                alert('Please enter a Gamer Tag or Username!');
+                if (usernameInput) usernameInput.focus();
+                return;
             }
-            btnPrecacheAll.disabled = false;
-            btnPrecacheAll.innerHTML = '<span>⚡ Pre-Cache All Games</span>';
-            showToast('All games pre-cached to device storage!', '💾');
+            AuthManager.login(name, pin, selectedAvatar);
+            renderAuthModalContent();
+        });
+    }
+
+    // Switch to Guest
+    if (btnGuest) {
+        btnGuest.addEventListener('click', () => {
+            AuthManager.logout();
+            renderAuthModalContent();
+        });
+    }
+
+    // Log out
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            AuthManager.logout();
+            renderAuthModalContent();
+        });
+    }
+
+    // Reset current data
+    if (btnClearCurrent) {
+        btnClearCurrent.addEventListener('click', () => {
+            const user = AuthManager.getActiveUser();
+            if (confirm(`Reset and clear all saved game progress for ${user.username}?`)) {
+                if (user.isLoggedIn) {
+                    const registry = AuthManager.getRegistry();
+                    if (registry[user.username]) {
+                        registry[user.username].games = {};
+                        AuthManager.saveRegistry(registry);
+                    }
+                    const prefix = `kf_u_${user.username}_g_`;
+                    const toRemove = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (k && k.startsWith(prefix)) toRemove.push(k);
+                    }
+                    toRemove.forEach(k => localStorage.removeItem(k));
+                } else {
+                    AuthManager.clearGuestData();
+                }
+                renderAuthModalContent();
+                AuthManager.updateNavUI();
+                KrazyGameStorage.syncActiveGameIframe();
+                showToast(`Game progress cleared for ${user.username}!`, '🗑️');
+            }
         });
     }
 }
 
-async function renderStorageModalContent() {
-    const totalOccupiedEl = document.getElementById('storage-total-occupied');
-    const gamesCountEl = document.getElementById('storage-games-count');
-    const listEl = document.getElementById('storage-games-list');
-    const quotaAvailEl = document.getElementById('storage-quota-available');
-    const quotaSubtext = document.getElementById('storage-quota-subtext');
-    const ecoStateEl = document.getElementById('storage-eco-state');
+function renderAuthModalContent() {
+    const user = AuthManager.getActiveUser();
 
-    const totalMB = StorageCacheManager.getTotalCachedMB();
-    const cachedCount = StorageCacheManager.getCachedCount();
+    // 1. Current Status Card
+    const currentAvatar = document.getElementById('auth-current-avatar');
+    const currentUsername = document.getElementById('auth-current-username');
+    const currentBadge = document.getElementById('auth-current-badge');
+    const currentNotice = document.getElementById('auth-current-notice');
+    const btnLogout = document.getElementById('btn-auth-logout');
 
-    if (totalOccupiedEl) totalOccupiedEl.textContent = totalMB.toFixed(1);
-    if (gamesCountEl) gamesCountEl.textContent = `${cachedCount} of ${GAMES_CATALOG.length} Games Cached`;
-
-    const isEco = document.body.classList.contains('eco-mode');
-    if (ecoStateEl) ecoStateEl.textContent = isEco ? 'Eco Active (Low Load)' : 'Balanced Standard';
-
-    // Browser Quota Estimate
-    if (navigator.storage && navigator.storage.estimate) {
-        try {
-            const estimate = await navigator.storage.estimate();
-            if (estimate.quota) {
-                const availGB = ((estimate.quota - (estimate.usage || 0)) / (1024 * 1024 * 1024)).toFixed(1);
-                if (quotaAvailEl) quotaAvailEl.textContent = `${availGB} GB`;
-                if (quotaSubtext) quotaSubtext.textContent = `Used: ${((estimate.usage || 0) / (1024 * 1024)).toFixed(1)} MB of ${(estimate.quota / (1024 * 1024 * 1024)).toFixed(1)} GB`;
-            }
-        } catch (e) {}
+    if (currentAvatar) currentAvatar.textContent = user.avatar;
+    if (currentUsername) currentUsername.textContent = user.isLoggedIn ? user.username : 'Guest Player';
+    
+    if (currentBadge) {
+        currentBadge.className = 'auth-badge-pill ' + (user.isLoggedIn ? 'online' : 'guest');
+        currentBadge.textContent = user.isLoggedIn ? '🟢 SAVES ACTIVE' : '⚡ GUEST SESSION';
     }
 
-    if (!listEl) return;
-    listEl.innerHTML = '';
+    if (currentNotice) {
+        currentNotice.textContent = user.isLoggedIn
+            ? '✅ Cloud Saves Active — All game high scores, levels, and coins save to your profile.'
+            : '⚠️ Temporary Session — All game progress automatically clears when the website is reloaded.';
+    }
 
-    GAMES_CATALOG.forEach(game => {
-        const manifest = GAME_MANIFESTS[game.id] || {
-            sizeMB: 1.0,
-            formattedSize: '1.0 MB'
+    if (btnLogout) {
+        if (user.isLoggedIn) {
+            btnLogout.classList.remove('hidden');
+        } else {
+            btnLogout.classList.add('hidden');
+        }
+    }
+
+    // 2. Saved Profiles Quick Switcher Chips
+    const chipsContainer = document.getElementById('auth-profiles-chips');
+    const profilesSection = document.getElementById('auth-saved-profiles-section');
+    if (chipsContainer) {
+        chipsContainer.innerHTML = '';
+        const registry = AuthManager.getRegistry();
+        const names = Object.keys(registry);
+
+        // Guest chip
+        const guestChip = document.createElement('button');
+        guestChip.type = 'button';
+        guestChip.className = 'profile-switch-chip' + (!user.isLoggedIn ? ' active-chip' : '');
+        guestChip.innerHTML = `<span>⚡</span> <span>Guest (Auto-clears)</span>`;
+        guestChip.onclick = () => {
+            AuthManager.logout();
+            renderAuthModalContent();
         };
-        const isCached = StorageCacheManager.isGameCached(game.id);
+        chipsContainer.appendChild(guestChip);
 
-        const row = document.createElement('div');
-        row.className = 'storage-game-row';
-        row.innerHTML = `
-            <div class="sg-left">
-                <div class="sg-emoji">${(game.heroEmoji || game.emoji || '🎮').split(' ')[0]}</div>
-                <div class="sg-info">
-                    <div class="sg-title">${game.title}</div>
-                    <div class="sg-meta">
-                        <span>Package:</span>
-                        <span class="sg-size">${manifest.formattedSize}</span>
-                        <span class="meta-dot">·</span>
-                        <span>${game.tags ? game.tags[0] : 'Arcade'}</span>
-                    </div>
+        names.forEach(name => {
+            const acc = registry[name];
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            const isActive = user.isLoggedIn && user.username === name;
+            chip.className = 'profile-switch-chip' + (isActive ? ' active-chip' : '');
+            chip.innerHTML = `<span>${acc.avatar || '👾'}</span> <span>${name}</span> ${isActive ? '✓' : ''}`;
+            chip.onclick = () => {
+                AuthManager.switchUser(name);
+                renderAuthModalContent();
+            };
+            chipsContainer.appendChild(chip);
+        });
+
+        if (profilesSection) {
+            profilesSection.style.display = 'flex';
+        }
+    }
+
+    // 3. Active Game Saves Breakdown
+    const savesGrid = document.getElementById('auth-game-saves-grid');
+    const savesHint = document.getElementById('auth-saves-hint');
+    if (savesHint) {
+        savesHint.textContent = `Showing data for: ${user.username}`;
+    }
+
+    if (savesGrid) {
+        savesGrid.innerHTML = '';
+        GAMES_CATALOG.forEach(game => {
+            const card = document.createElement('div');
+            card.className = 'auth-game-card';
+            
+            // Format game specific summary
+            let summaryText = 'No save data yet';
+            if (game.id === 'wild-swings') {
+                const lvl = KrazyGameStorage.getItem(game.id, 'wild_swings_level', '1');
+                const best = KrazyGameStorage.getItem(game.id, 'wild_swings_best_endless', '0');
+                summaryText = `Level ${lvl} · Endless: ${best}m`;
+            } else if (game.id === 'elevator-doom') {
+                const coins = KrazyGameStorage.getItem(game.id, 'doom_banked_coins', '0');
+                const floor = KrazyGameStorage.getItem(game.id, 'doom_failed_floor', '1');
+                summaryText = `🪙 ${coins} Coins · Floor ${floor}`;
+            } else if (game.id === 'popup-game') {
+                const score = KrazyGameStorage.getItem(game.id, 'float_high_score', '0');
+                summaryText = `High Score: ${score} pts`;
+            } else if (game.id === 'fallen-one') {
+                const fighter = KrazyGameStorage.getItem(game.id, 'fallen_last_fighter', 'SOLAR');
+                summaryText = `Fighter: ${fighter} · Ultimate Ready`;
+            } else {
+                const score = KrazyGameStorage.getItem(game.id, `${game.id}_high_score`, null);
+                if (score !== null) summaryText = `High Score: ${score}`;
+            }
+
+            card.innerHTML = `
+                <div class="auth-gc-emoji">${(game.heroEmoji || game.emoji || '🎮').split(' ')[0]}</div>
+                <div class="auth-gc-info">
+                    <div class="auth-gc-title">${game.title}</div>
+                    <div class="auth-gc-val">${summaryText}</div>
                 </div>
-            </div>
-            <div class="sg-right">
-                ${isCached ? `
-                    <span class="sg-badge-cached"><span>💾</span> Cached (${manifest.formattedSize})</span>
-                    <button class="btn-sg-action delete-cache" data-game="${game.id}">Free Cache</button>
-                ` : `
-                    <span class="sg-badge-not-cached">Not Cached</span>
-                    <button class="btn-sg-action precache-btn" data-game="${game.id}">Pre-Cache</button>
-                `}
-            </div>
-        `;
-
-        const btnFree = row.querySelector('.delete-cache');
-        if (btnFree) {
-            btnFree.onclick = async () => {
-                btnFree.textContent = 'Freeing...';
-                await StorageCacheManager.deleteGameCache(game.id);
-                renderStorageModalContent();
-                showToast(`Freed ${manifest.formattedSize} storage for ${game.title}`, '🗑️');
-            };
-        }
-
-        const btnPre = row.querySelector('.precache-btn');
-        if (btnPre) {
-            btnPre.onclick = async () => {
-                btnPre.textContent = 'Caching...';
-                btnPre.disabled = true;
-                await StorageCacheManager.cacheGameAssets(game.id);
-                renderStorageModalContent();
-                showToast(`${game.title} cached to device storage (${manifest.formattedSize})!`, '💾');
-            };
-        }
-
-        listEl.appendChild(row);
-    });
+            `;
+            savesGrid.appendChild(card);
+        });
+    }
 }
 
 function setupAudienceModal() {
@@ -1738,9 +1935,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSearchControls();
     setupSuggestModal();
     updateBookmarkBadge();
-    StorageCacheManager.updateNavBadge();
+    AuthManager.init();
     setupEcoMode();
-    setupStorageManagerModal();
+    setupAuthModal();
     setupAudienceModal();
 
     // Wire Up Action Bar Buttons
