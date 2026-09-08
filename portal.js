@@ -334,13 +334,35 @@ class LiveAudienceEngine {
         return AUDIENCE_MODEL_DATA.diurnalBands.find(b => h >= b.hours[0] && h < b.hours[1]) || AUDIENCE_MODEL_DATA.diurnalBands[0];
     }
 
+    parseBasePlays(str) {
+        if (!str) return 25000;
+        if (typeof str === 'number') return str;
+        const s = String(str).trim().toUpperCase();
+        if (s.endsWith('M')) return Math.round(parseFloat(s) * 1000000);
+        if (s.endsWith('K')) return Math.round(parseFloat(s) * 1000);
+        return parseInt(s.replace(/[^0-9]/g, ''), 10) || 25000;
+    }
+
     init() {
         const factor = this.getDiurnalFactor();
+        this.plays = {};
+        this.tickCounter = 0;
+
         for (const [id, param] of Object.entries(AUDIENCE_MODEL_DATA.gameParams)) {
             const target = Math.round(param.base * factor);
             const variance = Math.round((Math.random() - 0.5) * 600);
             this.counts[id] = Math.max(1200, target + variance);
             this.trends[id] = 0;
+
+            // Load saved total plays or initialize from game catalogue base plays
+            const gameObj = GAMES_CATALOG.find(g => g.id === id);
+            const basePlays = this.parseBasePlays(gameObj ? gameObj.plays : '25.0K');
+            try {
+                const stored = localStorage.getItem(`kf_total_plays_${id}`);
+                this.plays[id] = stored ? Math.max(basePlays, parseInt(stored, 10)) : basePlays;
+            } catch (e) {
+                this.plays[id] = basePlays;
+            }
         }
         this.updateGlobal();
         this.startTicker();
@@ -356,6 +378,8 @@ class LiveAudienceEngine {
 
     tick() {
         const factor = this.getDiurnalFactor();
+        this.tickCounter = (this.tickCounter || 0) + 1;
+
         for (const [id, param] of Object.entries(AUDIENCE_MODEL_DATA.gameParams)) {
             const target = Math.round(param.base * factor);
             const current = this.counts[id] || target;
@@ -367,9 +391,40 @@ class LiveAudienceEngine {
             
             this.counts[id] = Math.max(850, current + delta);
             this.trends[id] = delta;
+
+            // Dynamic plays accumulation DIRECTLY PROPORTIONAL to amount of active concurrent plays
+            const activeAudience = this.counts[id];
+            const proportionalRate = 0.00032; // proportional play completion factor
+            const jitter = 0.75 + Math.random() * 0.5;
+            const deltaPlays = Math.max(1, Math.round(activeAudience * proportionalRate * jitter));
+            this.plays[id] = (this.plays[id] || 25000) + deltaPlays;
+
+            // Periodically persist plays every 5 ticks (~9 seconds)
+            if (this.tickCounter % 5 === 0) {
+                try {
+                    localStorage.setItem(`kf_total_plays_${id}`, this.plays[id]);
+                } catch (e) {}
+            }
         }
         this.updateGlobal();
         this.syncDOM();
+    }
+
+    recordGamePlay(id) {
+        if (!id) return;
+        if (!this.plays[id]) {
+            const g = GAMES_CATALOG.find(x => x.id === id);
+            this.plays[id] = this.parseBasePlays(g ? g.plays : '25.0K');
+        }
+        this.plays[id] += 1;
+        try {
+            localStorage.setItem(`kf_total_plays_${id}`, this.plays[id]);
+        } catch (e) {}
+        this.syncDOM();
+    }
+
+    getGamePlays(id) {
+        return this.plays[id] || 25000;
     }
 
     updateGlobal() {
@@ -395,11 +450,31 @@ class LiveAudienceEngine {
             setTimeout(() => navGlobal.classList.remove('live-flash'), 500);
         }
 
-        // 2. Update Active Game Player Counter
+        // 2. Update Active Game Player Counters (Playing now & Dynamic Plays)
         if (currentGame) {
             const playerLiveCount = document.getElementById('player-game-live-count');
             if (playerLiveCount) {
                 playerLiveCount.textContent = this.getGameCount(currentGame.id).toLocaleString();
+            }
+
+            const playerPlaysEl = document.getElementById('player-game-plays');
+            if (playerPlaysEl) {
+                const totalPlays = this.getGamePlays(currentGame.id);
+                const compactPlays = this.formatCompact(totalPlays);
+                const prev = playerPlaysEl.dataset.playsVal;
+
+                playerPlaysEl.innerHTML = `👥 <strong id="player-game-plays-val" class="plays-val">${compactPlays}</strong> Plays`;
+                playerPlaysEl.title = `${totalPlays.toLocaleString()} total plays (growing live proportional to active sessions)`;
+
+                if (prev && prev !== compactPlays) {
+                    const valEl = document.getElementById('player-game-plays-val');
+                    if (valEl) {
+                        valEl.classList.remove('plays-pulse');
+                        void valEl.offsetWidth;
+                        valEl.classList.add('plays-pulse');
+                    }
+                }
+                playerPlaysEl.dataset.playsVal = compactPlays;
             }
         }
 
@@ -407,6 +482,7 @@ class LiveAudienceEngine {
         for (const [id, count] of Object.entries(this.counts)) {
             const compact = this.formatCompact(count);
             const formatted = count.toLocaleString();
+            const compactPlays = this.formatCompact(this.plays[id] || 25000);
 
             // Card Top-Right Badge
             const cardBadges = document.querySelectorAll(`[data-game-live="${id}"] .live-card-val`);
@@ -414,10 +490,16 @@ class LiveAudienceEngine {
                 el.textContent = compact;
             });
 
-            // Card Sub-meta row
+            // Card Sub-meta row live
             const metaEls = document.querySelectorAll(`[data-game-meta-live="${id}"]`);
             metaEls.forEach(el => {
                 el.textContent = formatted;
+            });
+
+            // Card Sub-meta row dynamic plays
+            const playEls = document.querySelectorAll(`[data-game-meta-plays="${id}"]`);
+            playEls.forEach(el => {
+                el.textContent = compactPlays;
             });
 
             // Recommendation cards
@@ -580,6 +662,9 @@ const AuthManager = {
 
         // If a game is currently playing, sync with the newly authenticated credentials
         KrazyGameStorage.syncActiveGameIframe();
+        if (typeof updateReactionUI === 'function' && currentGame) {
+            updateReactionUI(currentGame.id);
+        }
     },
 
     logout() {
@@ -599,6 +684,9 @@ const AuthManager = {
         showToast('Switched to Guest mode. Data auto-clears on reload.', '⚡');
 
         KrazyGameStorage.syncActiveGameIframe();
+        if (typeof updateReactionUI === 'function' && currentGame) {
+            updateReactionUI(currentGame.id);
+        }
     },
 
     switchUser(username) {
@@ -633,6 +721,7 @@ const AuthManager = {
             const k = localStorage.key(i);
             if (k && (
                 k.startsWith('kf_guest_') || 
+                k.startsWith('kf_reaction_guest_') ||
                 k.startsWith('wild_swings_') || 
                 k.startsWith('doom_') || 
                 k.startsWith('float_') || 
@@ -951,8 +1040,14 @@ function openGamePlayer(gameId) {
     document.getElementById('player-game-icon').textContent = game.emoji.split(' ')[0] || '🎮';
     document.getElementById('player-game-title').textContent = game.title;
     document.getElementById('player-game-rating').textContent = game.rating;
-    document.getElementById('player-game-plays').textContent = `👥 ${game.plays} Plays`;
     document.getElementById('player-game-tag').textContent = game.tags[0] || 'Arcade';
+
+    // Dynamic Plays: Directly proportional to active audience + register play for this launch
+    if (window.audienceEngine) {
+        window.audienceEngine.recordGamePlay(game.id);
+    } else {
+        document.getElementById('player-game-plays').textContent = `👥 ${game.plays} Plays`;
+    }
 
     // Sync real-time live player count
     const playerLiveCount = document.getElementById('player-game-live-count');
@@ -960,11 +1055,8 @@ function openGamePlayer(gameId) {
         playerLiveCount.textContent = window.audienceEngine.getGameCount(game.id).toLocaleString();
     }
 
-    // Update Likes Count from storage
-    const storedLikes = getStoredLikes(game.id);
-    document.getElementById('game-likes-count').textContent = formatCompactNumber(game.likesCount + storedLikes.bonus);
-    const likeBtn = document.getElementById('btn-game-like');
-    if (likeBtn) likeBtn.classList.toggle('active', storedLikes.hasLiked);
+    // Update Like / Dislike reactions ("just for you")
+    updateReactionUI(game.id);
 
     // Update Bookmarks state
     const isBookmarked = isGameBookmarked(game.id);
@@ -1131,6 +1223,9 @@ function createGameCard(game) {
     const compactLive = window.audienceEngine ? window.audienceEngine.formatCompact(liveCount) : '15.0K';
     const formattedLive = liveCount.toLocaleString();
 
+    const totalPlays = window.audienceEngine ? window.audienceEngine.getGamePlays(game.id) : 25000;
+    const compactPlays = window.audienceEngine ? window.audienceEngine.formatCompact(totalPlays) : (game.plays || '25.0K');
+
     card.innerHTML = `
         <div class="card-thumb-wrap">
             <div class="thumb-artwork ${game.themeClass || 'theme-office'}">
@@ -1154,6 +1249,10 @@ function createGameCard(game) {
                 <span class="card-live-watching" title="Currently playing">
                     <span class="watching-dot"></span>
                     <strong class="live-meta-val" data-game-meta-live="${game.id}">${formattedLive}</strong> live
+                </span>
+                <span class="meta-dot">·</span>
+                <span class="card-plays-count" title="Total plays worldwide">
+                    👥 <strong data-game-meta-plays="${game.id}">${compactPlays}</strong>
                 </span>
                 <span class="meta-dot">·</span>
                 <span class="card-tag-pill">${game.tags[0] || 'Arcade'}</span>
@@ -1260,29 +1359,86 @@ function renderPortal() {
 }
 
 // ==========================================================
-// 3. INTERACTIVE PLAYER CONTROLS (Likes, Bookmarks, Comments)
+// 3. INTERACTIVE PLAYER CONTROLS (Likes, Dislikes, Bookmarks)
 // ==========================================================
 
-function getStoredLikes(gameId) {
+function getReactionStorageKey(gameId) {
+    const username = (typeof AuthManager !== 'undefined' && AuthManager.isLoggedIn()) 
+        ? AuthManager.getActiveUser().username 
+        : 'guest';
+    return `kf_reaction_${username}_${gameId}`;
+}
+
+function getUserReaction(gameId) {
     try {
-        const raw = localStorage.getItem(`krazy_likes_${gameId}`);
-        return raw ? JSON.parse(raw) : { hasLiked: false, bonus: 0 };
+        return localStorage.getItem(getReactionStorageKey(gameId)); // 'like', 'dislike', or null
     } catch (e) {
-        return { hasLiked: false, bonus: 0 };
+        return null;
     }
 }
 
-function toggleLike(gameId) {
-    if (!currentGame) return;
-    const stored = getStoredLikes(gameId);
-    stored.hasLiked = !stored.hasLiked;
-    stored.bonus = stored.hasLiked ? 1 : 0;
-    localStorage.setItem(`krazy_likes_${gameId}`, JSON.stringify(stored));
+function setUserReaction(gameId, reaction) {
+    try {
+        const key = getReactionStorageKey(gameId);
+        if (reaction) {
+            localStorage.setItem(key, reaction);
+        } else {
+            localStorage.removeItem(key);
+        }
+    } catch (e) {}
+}
 
+function updateReactionUI(gameId) {
+    if (!gameId) return;
+    const game = GAMES_CATALOG.find(g => g.id === gameId);
+    if (!game) return;
+
+    const reaction = getUserReaction(gameId);
     const likeBtn = document.getElementById('btn-game-like');
-    if (likeBtn) likeBtn.classList.toggle('active', stored.hasLiked);
-    document.getElementById('game-likes-count').textContent = formatCompactNumber(currentGame.likesCount + stored.bonus);
-    showToast(stored.hasLiked ? '👍 Thanks for rating this game!' : 'Vote removed.');
+    const dislikeBtn = document.getElementById('btn-game-dislike');
+    const likesCountEl = document.getElementById('game-likes-count');
+
+    const isLiked = reaction === 'like';
+    const isDisliked = reaction === 'dislike';
+
+    if (likeBtn) {
+        likeBtn.classList.toggle('liked', isLiked);
+        likeBtn.classList.toggle('active', isLiked);
+    }
+    if (dislikeBtn) {
+        dislikeBtn.classList.toggle('disliked', isDisliked);
+        dislikeBtn.classList.toggle('active', isDisliked);
+    }
+    if (likesCountEl) {
+        const bonus = isLiked ? 1 : 0;
+        likesCountEl.textContent = formatCompactNumber(game.likesCount + bonus);
+    }
+}
+
+function handleLikeClick() {
+    if (!currentGame) return;
+    const current = getUserReaction(currentGame.id);
+    if (current === 'like') {
+        setUserReaction(currentGame.id, null);
+        showToast('Vote removed.', '👍');
+    } else {
+        setUserReaction(currentGame.id, 'like');
+        showToast('👍 Thanks for rating! Marked as Liked (Green).', '💚');
+    }
+    updateReactionUI(currentGame.id);
+}
+
+function handleDislikeClick() {
+    if (!currentGame) return;
+    const current = getUserReaction(currentGame.id);
+    if (current === 'dislike') {
+        setUserReaction(currentGame.id, null);
+        showToast('Dislike removed.', '👎');
+    } else {
+        setUserReaction(currentGame.id, 'dislike');
+        showToast('👎 Marked as Disliked (Red) just for you.', '💔');
+    }
+    updateReactionUI(currentGame.id);
 }
 
 function getStoredBookmarks() {
@@ -1889,10 +2045,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Wire Up Action Bar Buttons
     const btnLike = document.getElementById('btn-game-like');
-    if (btnLike) btnLike.addEventListener('click', () => currentGame && toggleLike(currentGame.id));
+    if (btnLike) btnLike.addEventListener('click', handleLikeClick);
 
     const btnDislike = document.getElementById('btn-game-dislike');
-    if (btnDislike) btnDislike.addEventListener('click', () => showToast('Feedback recorded.'));
+    if (btnDislike) btnDislike.addEventListener('click', handleDislikeClick);
 
     const btnBookmark = document.getElementById('btn-game-bookmark');
     if (btnBookmark) btnBookmark.addEventListener('click', () => currentGame && toggleBookmark(currentGame.id));
