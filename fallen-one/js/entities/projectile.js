@@ -65,11 +65,8 @@ export class Projectile {
         const frame4 = Math.floor((this.animTimer / 4) % 4);
         const spinAngle = this.animTimer * 0.25;
 
-        if (this.type === 'ENERGY_WAVE') {
+        if (this.type === 'ENERGY_WAVE' || this.type === 'CRESCENT_WAVE') {
             // Aarav / Shadow Crescent Wave - 4-Frame Pulsing Blade
-            ctx.shadowBlur = 22;
-            ctx.shadowColor = this.color;
-
             // Outer energy pulse ring (4-frame expansion)
             const ringScale = 1.0 + frame4 * 0.08;
             ctx.save();
@@ -103,8 +100,6 @@ export class Projectile {
 
         } else if (this.type === 'ICE_PROJECTILE') {
             // Frost's 4-Frame Spinning Cryo Snowflake Shuriken
-            ctx.shadowBlur = 18;
-            ctx.shadowColor = '#38bdf8';
             ctx.save();
             ctx.rotate(spinAngle);
 
@@ -135,8 +130,6 @@ export class Projectile {
         } else if (this.type === 'VOLT_ORB') {
             // Volt's 4-Frame Pulsing Lightning Sphere
             const pulse = 16 + (frame4 % 2 === 0 ? 3 : -1);
-            ctx.shadowBlur = 24;
-            ctx.shadowColor = '#facc15';
 
             // High-voltage plasma sphere
             ctx.fillStyle = '#fef08a';
@@ -165,8 +158,6 @@ export class Projectile {
         } else {
             // Generic 4-frame pulsing energy orb
             const p = 14 + Math.sin(this.animTimer * 0.3) * 3;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = this.color;
             ctx.fillStyle = this.color;
             ctx.beginPath();
             ctx.arc(0, 0, p, 0, Math.PI * 2);

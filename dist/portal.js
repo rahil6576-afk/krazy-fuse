@@ -758,6 +758,16 @@ function closeGamePlayer() {
     window.history.pushState({}, 'Krazy Fuse', window.location.pathname);
     renderPortal();
 }
+window.closeGamePlayer = closeGamePlayer;
+
+// Listen for embedded game exit messages
+window.addEventListener('message', (event) => {
+    if (!event || !event.data) return;
+    const type = event.data.type || event.data.action || '';
+    if (type === 'EXIT_TO_PORTAL' || type === 'BACK_TO_GAMES' || type === 'closeGame' || type === 'backToGames') {
+        closeGamePlayer();
+    }
+});
 
 // "Play next" Recommendations Column
 function renderPlayNextSidebar(activeGame) {

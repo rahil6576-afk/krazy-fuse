@@ -143,8 +143,6 @@ export class ArenaManager {
         ctx.save();
         ctx.strokeStyle = this.currentArena.themeColor;
         ctx.lineWidth = 3;
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = this.currentArena.themeColor;
         ctx.beginPath();
         ctx.moveTo(ARENA_BOUNDS.minX, ARENA_BOUNDS.groundY);
         ctx.lineTo(ARENA_BOUNDS.maxX, ARENA_BOUNDS.groundY);
@@ -153,7 +151,6 @@ export class ArenaManager {
         // Floor Grid Lines
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
         ctx.lineWidth = 1;
-        ctx.shadowBlur = 0;
         for (let x = ARENA_BOUNDS.minX; x <= ARENA_BOUNDS.maxX; x += 120) {
             ctx.beginPath();
             ctx.moveTo(x, ARENA_BOUNDS.groundY);
@@ -182,9 +179,13 @@ export class ArenaManager {
                 ctx.fill();
                 ctx.restore();
             } else if (type === 'embers') {
+                // High-performance double-circle glow without expensive shadowBlur
+                ctx.fillStyle = 'rgba(249, 115, 22, 0.35)';
+                ctx.beginPath();
+                ctx.arc(amb.x, amb.y, amb.size * 1.8, 0, Math.PI * 2);
+                ctx.fill();
+
                 ctx.fillStyle = '#fb923c';
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = '#f97316';
                 ctx.beginPath();
                 ctx.arc(amb.x, amb.y, amb.size, 0, Math.PI * 2);
                 ctx.fill();

@@ -125,8 +125,9 @@ export class GameRenderer {
         if (sub) {
             ctx.font = '700 28px Outfit, sans-serif';
             ctx.fillStyle = '#ffffff';
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = '#00e5ff';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3;
+            ctx.strokeText(sub, 0, 52);
             ctx.fillText(sub, 0, 52);
         }
 

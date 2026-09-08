@@ -5,7 +5,7 @@ import { ARENA_BOUNDS } from '../core/constants.js';
 export class ParticleSystem {
     constructor() {
         this.particles = [];
-        this.maxParticles = 800;
+        this.maxParticles = 200;
         this.shockwaves = [];
         this.hitFlashes = [];
         this.groundFissures = [];
@@ -238,8 +238,6 @@ export class ParticleSystem {
             ctx.save();
             ctx.globalAlpha = Math.max(0, gf.life);
             ctx.strokeStyle = gf.color;
-            ctx.shadowBlur = 18;
-            ctx.shadowColor = gf.color;
 
             if (gf.type === 'MAGMA') {
                 ctx.fillStyle = 'rgba(234, 88, 12, 0.85)';
@@ -307,16 +305,14 @@ export class ParticleSystem {
             ctx.save();
             ctx.globalAlpha = Math.max(0, s.life);
             ctx.strokeStyle = s.color;
-            ctx.lineWidth = s.isHeavy ? 7 : 4;
-            ctx.shadowBlur = 22;
-            ctx.shadowColor = s.color;
+            ctx.lineWidth = s.isHeavy ? 6 : 3.5;
 
             ctx.beginPath();
             ctx.arc(s.x, s.y, s.radius, s.angleStart, s.angleEnd, !s.facingRight);
             ctx.stroke();
 
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = s.isHeavy ? 3.5 : 2;
+            ctx.lineWidth = s.isHeavy ? 2.5 : 1.5;
             ctx.beginPath();
             ctx.arc(s.x, s.y, s.radius, s.angleStart, s.angleEnd, !s.facingRight);
             ctx.stroke();
@@ -331,8 +327,6 @@ export class ParticleSystem {
             ctx.strokeStyle = sw.color;
             ctx.globalAlpha = sw.alpha;
             ctx.lineWidth = sw.lineWidth;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = sw.color;
             ctx.stroke();
             ctx.restore();
         }
@@ -342,8 +336,6 @@ export class ParticleSystem {
             ctx.save();
             ctx.globalAlpha = Math.max(0, p.life);
             ctx.fillStyle = p.color;
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = p.color;
 
             if (p.shape === 'spark') {
                 const angle = Math.atan2(p.vy, p.vx);

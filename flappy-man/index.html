@@ -15,8 +15,20 @@
                 document.addEventListener('DOMContentLoaded', () => document.body && document.body.classList.add('is-embedded'));
             }
             function exitToPortal() {
-                if (window.parent !== window) {
-                    window.parent.postMessage({ type: 'EXIT_TO_PORTAL' }, '*');
+                // 1. Immediately halt game engine physics and audio to free CPU/GPU memory
+                if (window.flappyGame && typeof window.flappyGame.destroy === 'function') {
+                    window.flappyGame.destroy();
+                    window.flappyGame = null;
+                }
+                // 2. Notify portal container to unload iframe
+                if (window.parent && window.parent !== window) {
+                    try {
+                        if (typeof window.parent.closeGamePlayer === 'function') {
+                            window.parent.closeGamePlayer();
+                            return;
+                        }
+                    } catch (e) {}
+                    window.parent.postMessage({ type: 'EXIT_TO_PORTAL', action: 'closeGame' }, '*');
                 } else {
                     window.location.href = '../index.html';
                 }
@@ -130,23 +142,27 @@
         }
 
         #gameWrapper {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 100vw;
-            max-height: 100vh;
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
             background: var(--sky-blue);
             box-shadow: none;
             border-radius: 0;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
         }
 
         @media (min-width: 900px) {
             #gameWrapper {
-                max-width: 100vw;
-                max-height: 100vh;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
                 border-radius: 0;
             }
         }
@@ -154,24 +170,72 @@
         /* Top Header Bar */
         .top-bar {
             position: absolute;
-            top: 20px;
+            top: 16px;
             left: 0;
             right: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
-            z-index: 30;
+            padding: 0 18px;
+            z-index: 40;
+            pointer-events: auto;
+        }
+
+        .btn-back-to-games {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 42px;
+            padding: 0 16px;
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(56, 189, 248, 0.45);
+            border-radius: 999px;
+            color: #f8fafc;
+            font-family: 'Outfit', 'Fredoka', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 12px rgba(56, 189, 248, 0.2);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .btn-back-to-games:hover {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.95), rgba(37, 99, 235, 0.95));
+            border-color: #38bdf8;
+            color: #ffffff;
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(2, 132, 199, 0.5), 0 0 18px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn-back-to-games:active {
+            transform: translateY(1px) scale(0.97);
+        }
+
+        .btn-back-to-games .back-arrow {
+            font-size: 1.25rem;
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .top-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-icon {
-            width: 46px;
-            height: 46px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: rgba(30, 41, 59, 0.6);
+            background: rgba(30, 41, 59, 0.7);
             border: 2px solid rgba(255, 255, 255, 0.35);
             color: #fff;
-            font-size: 1.4rem;
+            font-size: 1.25rem;
             font-weight: 900;
             display: flex;
             align-items: center;
@@ -185,7 +249,8 @@
 
         .btn-icon:hover {
             transform: scale(1.08);
-            background: rgba(30, 41, 59, 0.85);
+            background: rgba(30, 41, 59, 0.9);
+            border-color: #38bdf8;
         }
 
         .btn-icon:active {
@@ -195,7 +260,7 @@
         /* Main Big Score In-Game */
         .score-hud {
             position: absolute;
-            top: 12%;
+            top: 10%;
             left: 50%;
             transform: translateX(-50%);
             font-size: 4.5rem;
@@ -212,12 +277,13 @@
             letter-spacing: 2px;
         }
 
-        /* Canvas Stage */
+        /* Canvas Stage: Guarantees 100% Fullscreen in All Modes */
         #gameCanvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
             z-index: 10;
             cursor: pointer;
         }
@@ -857,23 +923,26 @@
         }
 
         body.portal-paused .portal-center-col {
-            padding: 76px 300px 24px 90px;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: center;
         }
 
         body.portal-paused #gameWrapper {
-            width: 480px !important;
-            max-width: 480px !important;
-            height: 480px !important;
-            max-height: 480px !important;
-            aspect-ratio: 1 / 1 !important;
-            border-radius: 18px !important;
-            border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 189, 248, 0.25) !important;
-            position: relative !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            aspect-ratio: auto !important;
+            border-radius: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            position: fixed !important;
+            inset: 0 !important;
             overflow: hidden !important;
             display: flex !important;
             align-items: center !important;
@@ -1326,9 +1395,16 @@
         <main class="portal-center-col">
           <div id="gameWrapper">
             <!-- Top Navigation -->
-            <header class="top-bar" style="justify-content: flex-end; padding-right: 20px; gap: 8px;">
-                <button class="btn-icon" id="btnPauseFlappy" title="Pause Game (Esc/P)" onclick="window.pauseFlappyGame()">⏸️</button>
-                <button class="btn-icon" id="btnMute" title="Toggle Sound">🔊</button>
+            <header class="top-bar">
+                <button class="btn-back-to-games" id="btnBackToGames" title="Back to Games Portal (Halts engine & frees memory)" onclick="exitToPortal()">
+                    <span class="back-arrow">←</span>
+                    <span class="back-label">BACK TO GAMES</span>
+                </button>
+                <div class="top-actions-right">
+                    <button class="btn-icon" id="btnPauseFlappy" title="Pause Game (Esc/P)" onclick="window.pauseFlappyGame()">⏸️</button>
+                    <button class="btn-icon" id="btnFullscreenFlappy" title="Toggle Fullscreen" onclick="window.toggleFullscreenFlappy()">⛶</button>
+                    <button class="btn-icon" id="btnMute" title="Toggle Sound">🔊</button>
+                </div>
             </header>
 
             <!-- Big Running Score -->
@@ -1413,9 +1489,9 @@
                         <button class="btn-action-secondary" id="btnRetryLevelClear" style="flex: 1;">
                             <span>🔄 REPLAY</span>
                         </button>
-                        <a href="../index.html" class="btn-action-secondary" style="flex: 1; text-align: center; text-decoration: none;" title="Back to Krazio Games">
-                            <span>🏠 HOME</span>
-                        </a>
+                        <button class="btn-action-secondary" onclick="exitToPortal()" style="flex: 1;" title="Back to Games Portal">
+                            <span>🚪 BACK TO GAMES</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1445,9 +1521,9 @@
                     <button class="btn-action-primary" id="btnPlayAgain">
                         <span>🔄 RETRY LEVEL</span>
                     </button>
-                    <a href="../index.html" class="btn-action-secondary" title="Back to Krazio Games">
-                        <span>🏠 HOME</span>
-                    </a>
+                    <button class="btn-action-secondary" onclick="exitToPortal()" title="Back to Games Portal">
+                        <span>🚪 BACK TO GAMES</span>
+                    </button>
                 </div>
             </div>
 
@@ -1467,9 +1543,9 @@
                   <button onclick="resumeFlappyGame(); if(window.flappyGame){ window.flappyGame.reset(); window.flappyGame.startGame(); }" style="justify-content: center; width: 100%; font-size: 0.85rem; padding: 8px 16px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer;">
                     <span>🔄 RESTART RUN</span>
                   </button>
-                  <a href="../index.html" style="justify-content: center; width: 100%; font-size: 0.85rem; padding: 8px 16px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; text-decoration: none; text-align: center; display: inline-block;">
-                    <span>🏠 HOME</span>
-                  </a>
+                  <button onclick="exitToPortal()" style="justify-content: center; width: 100%; font-size: 0.85rem; padding: 8px 16px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #cbd5e1; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <span>🚪 BACK TO GAMES</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1762,10 +1838,12 @@
                 this.canvas = document.getElementById('gameCanvas');
                 this.ctx = this.canvas.getContext('2d');
 
-                this.width = 440;
-                this.height = 760;
+                this.width = window.innerWidth || 1200;
+                this.height = window.innerHeight || 800;
                 this.groundHeight = 110;
 
+                this.isRunning = true;
+                this.rafId = null;
                 this.state = 'READY';
                 this.score = 0;
                 this.bestScore = parseInt(localStorage.getItem('flappyman_best') || '0', 10);
@@ -1778,7 +1856,7 @@
 
                 // Flappy Man Physics
                 this.man = {
-                    x: 100,
+                    x: 140,
                     y: 320,
                     w: 36,
                     h: 42,
@@ -1811,6 +1889,32 @@
                 this.lastTime = performance.now();
                 this.accumulator = 0;
                 this.loop();
+            }
+
+            destroy() {
+                this.isRunning = false;
+                if (this.rafId) {
+                    cancelAnimationFrame(this.rafId);
+                    this.rafId = null;
+                }
+                if (this.resizeObserver) {
+                    this.resizeObserver.disconnect();
+                    this.resizeObserver = null;
+                }
+                if (window.__countdownTimerFlappy) {
+                    clearInterval(window.__countdownTimerFlappy);
+                    window.__countdownTimerFlappy = null;
+                }
+                this.state = 'STOPPED';
+                this.pipes = [];
+                this.particles = [];
+                this.clouds = [];
+                try {
+                    if (window.__cdAudioCtxFlappy) {
+                        window.__cdAudioCtxFlappy.close().catch(() => {});
+                        window.__cdAudioCtxFlappy = null;
+                    }
+                } catch (e) {}
             }
 
             initClouds() {
@@ -1879,14 +1983,17 @@
             }
 
             resizeCanvas() {
-                const rect = this.canvas.parentElement ? this.canvas.parentElement.getBoundingClientRect() : null;
-                this.width = (rect && rect.width > 0) ? rect.width : (window.innerWidth || 1200);
-                this.height = (rect && rect.height > 0) ? rect.height : (window.innerHeight || 800);
-                const dpr = window.devicePixelRatio || 1;
-                this.canvas.width = Math.round(this.width * dpr);
-                this.canvas.height = Math.round(this.height * dpr);
-                this.canvas.style.width = `${this.width}px`;
-                this.canvas.style.height = `${this.height}px`;
+                // Always measure true viewport so game runs 100% full screen with no letterboxing or blue corners
+                const w = window.innerWidth || (document.documentElement ? document.documentElement.clientWidth : 1200) || 1200;
+                const h = window.innerHeight || (document.documentElement ? document.documentElement.clientHeight : 800) || 800;
+                this.width = w;
+                this.height = h;
+
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                this.canvas.width = Math.round(w * dpr);
+                this.canvas.height = Math.round(h * dpr);
+                this.canvas.style.width = '100%';
+                this.canvas.style.height = '100%';
 
                 this.man.x = Math.max(120, Math.min(this.width * 0.22, 260));
                 if (!this.clouds || this.clouds.length < Math.ceil(this.width / 260)) {
@@ -1896,6 +2003,11 @@
 
             setupEvents() {
                 window.addEventListener('resize', () => this.resizeCanvas());
+                window.addEventListener('orientationchange', () => setTimeout(() => this.resizeCanvas(), 50));
+                if (window.ResizeObserver) {
+                    this.resizeObserver = new ResizeObserver(() => this.resizeCanvas());
+                    this.resizeObserver.observe(document.body);
+                }
 
                 // 1. Theme Pill Buttons
                 const themeBtns = document.querySelectorAll('.theme-pill-btn');
@@ -2380,13 +2492,16 @@
 
                 if (this.selectedThemeKey === 'superman') {
                     // Superman in Metropolis Daylight
-                    // Daily Planet Sun
+                    // Daily Planet Sun (Smooth alpha halo without expensive shadowBlur)
                     ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(this.width * 0.82, 90, 48, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(250, 204, 21, 0.25)';
+                    ctx.fill();
+
                     ctx.beginPath();
                     ctx.arc(this.width * 0.82, 90, 36, 0, Math.PI * 2);
                     ctx.fillStyle = '#fef08a';
-                    ctx.shadowColor = '#facc15';
-                    ctx.shadowBlur = 24;
                     ctx.fill();
                     ctx.restore();
 
@@ -2428,13 +2543,16 @@
                     }
                 } else if (this.selectedThemeKey === 'ironman') {
                     // Iron Man in New York City (Stark Tower Skyline)
-                    // Sunset Glow
+                    // Sunset Glow (Zero-cost layered alpha)
                     ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(this.width * 0.78, 110, 60, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(234, 88, 12, 0.22)';
+                    ctx.fill();
+
                     ctx.beginPath();
                     ctx.arc(this.width * 0.78, 110, 45, 0, Math.PI * 2);
                     ctx.fillStyle = '#f97316';
-                    ctx.shadowColor = '#ea580c';
-                    ctx.shadowBlur = 30;
                     ctx.fill();
                     ctx.restore();
 
@@ -2465,13 +2583,16 @@
                     }
                 } else if (this.selectedThemeKey === 'batman') {
                     // Batman in Gotham Dark Night
-                    // Gotham Full Moon with Bat-signal halo
+                    // Gotham Full Moon with Bat-signal halo (Zero-cost layered alpha)
                     ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(this.width * 0.78, 85, 48, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(234, 179, 8, 0.2)';
+                    ctx.fill();
+
                     ctx.beginPath();
                     ctx.arc(this.width * 0.78, 85, 36, 0, Math.PI * 2);
                     ctx.fillStyle = '#f8fafc';
-                    ctx.shadowColor = '#eab308';
-                    ctx.shadowBlur = 25;
                     ctx.fill();
 
                     // Bat silhouettes in sky
@@ -2506,13 +2627,16 @@
                     }
                 } else {
                     // Hanumanji in Ravan's Golden Lanka
-                    // Fiery Golden Sun / Lanka Aura
+                    // Fiery Golden Sun / Lanka Aura (Zero-cost layered alpha)
                     ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(this.width * 0.75, 95, 56, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.22)';
+                    ctx.fill();
+
                     ctx.beginPath();
                     ctx.arc(this.width * 0.75, 95, 42, 0, Math.PI * 2);
                     ctx.fillStyle = '#f59e0b';
-                    ctx.shadowColor = '#ef4444';
-                    ctx.shadowBlur = 35;
                     ctx.fill();
                     ctx.restore();
 
@@ -3385,6 +3509,8 @@
             }
 
             loop(timestamp) {
+                if (!this.isRunning || this.state === 'STOPPED') return;
+
                 if (!this.lastTime) this.lastTime = timestamp || performance.now();
                 const now = timestamp || performance.now();
                 const delta = Math.min(now - this.lastTime, 100);
@@ -3392,16 +3518,26 @@
 
                 this.accumulator = (this.accumulator || 0) + delta;
                 const targetStep = 1000 / 60; // Locked 60 FPS update rate
+                let steps = 0;
 
-                while (this.accumulator >= targetStep) {
-                    if (this.state !== 'PAUSED') {
+                // Cap updates to at most 2 per render tick to prevent CPU lockup & accumulator death spiral
+                while (this.accumulator >= targetStep && steps < 2) {
+                    if (this.state !== 'PAUSED' && this.state !== 'STOPPED') {
                         this.update();
                     }
                     this.accumulator -= targetStep;
+                    steps++;
                 }
 
-                this.render();
-                requestAnimationFrame((t) => this.loop(t));
+                // Prevent lag spiral if browser tab is throttled
+                if (this.accumulator > targetStep * 2) {
+                    this.accumulator = 0;
+                }
+
+                if (this.state !== 'STOPPED' && this.isRunning) {
+                    this.render();
+                    this.rafId = requestAnimationFrame((t) => this.loop(t));
+                }
             }
         }
 
@@ -3479,6 +3615,20 @@
                 const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
                 if (req) req.call(el).catch(() => {});
             }
+        };
+
+        window.toggleFullscreenFlappy = function() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                const el = document.documentElement;
+                const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+                if (req) req.call(el).catch(() => {});
+            } else {
+                const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+                if (exit) exit.call(document).catch(() => {});
+            }
+            setTimeout(() => {
+                if (window.flappyGame) window.flappyGame.resizeCanvas();
+            }, 100);
         };
 
         window.pauseFlappyGame = function() {

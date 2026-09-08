@@ -196,6 +196,11 @@ export class GameEngine {
     returnToMainMenu() {
         this.resume();
         this.gameState = GAME_STATES.MAIN_MENU;
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
+        }
+        this.isRunning = false;
         this.menuManager.showScreen('mainMenu');
         musicEngine.stopTrack();
     }
@@ -240,11 +245,14 @@ export class GameEngine {
         this.trainingOverlay.hide();
         musicEngine.startTrack(arenaManager.currentArena.id);
 
-        if (!this.isRunning) {
-            this.isRunning = true;
-            this.lastFrameTime = performance.now();
-            requestAnimationFrame((t) => this.gameLoop(t));
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
         }
+        this.isRunning = true;
+        this.lastFrameTime = performance.now();
+        this.accumulator = 0;
+        this.rafId = requestAnimationFrame((t) => this.gameLoop(t));
     }
 
     startMatch(p1Config, p2Config, mode = GAME_MODES.LOCAL_VS) {
@@ -279,11 +287,14 @@ export class GameEngine {
 
         musicEngine.startTrack(arenaManager.currentArena.id);
 
-        if (!this.isRunning) {
-            this.isRunning = true;
-            this.lastFrameTime = performance.now();
-            requestAnimationFrame((t) => this.gameLoop(t));
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
         }
+        this.isRunning = true;
+        this.lastFrameTime = performance.now();
+        this.accumulator = 0;
+        this.rafId = requestAnimationFrame((t) => this.gameLoop(t));
     }
 
     gameLoop(timestamp) {
@@ -295,14 +306,22 @@ export class GameEngine {
         if (!this.isPaused) {
             this.accumulator = (this.accumulator || 0) + delta;
             const targetStep = 1000 / 60; // Locked 60 FPS update rate
+            let steps = 0;
 
-            while (this.accumulator >= targetStep) {
+            // Cap simulation updates to at most 2 per render frame to prevent CPU lockup & fan spin
+            while (this.accumulator >= targetStep && steps < 2) {
                 inputManager.update();
 
                 if (this.gameState === GAME_STATES.IN_GAME || this.gameState === GAME_STATES.TRAINING) {
                     this.updateCombat();
                 }
                 this.accumulator -= targetStep;
+                steps++;
+            }
+
+            // Prevent accumulator death spiral if browser tab lags
+            if (this.accumulator > targetStep * 2) {
+                this.accumulator = 0;
             }
         }
 
@@ -312,7 +331,7 @@ export class GameEngine {
         // Update HUD
         hud.update(this.p1, this.p2, matchManager, comboTracker, this.p3);
 
-        requestAnimationFrame((t) => this.gameLoop(t));
+        this.rafId = requestAnimationFrame((t) => this.gameLoop(t));
     }
 
     updateCombat() {

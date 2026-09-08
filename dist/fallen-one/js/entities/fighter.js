@@ -64,6 +64,7 @@ export class Fighter {
 
         // Training stats
         this.frameAdvantage = 0;
+        this.damageFlashTimer = 0;
     }
 
     resetForRound(p1X = 700, p2X = 1300) {
@@ -139,6 +140,11 @@ export class Fighter {
             this.displayHealth -= (this.displayHealth - this.health) * 0.08;
         }
 
+        // Decrement damage flash timer
+        if (this.damageFlashTimer > 0) {
+            this.damageFlashTimer--;
+        }
+
         // Face opponent when grounded and not attacking/stunned
         if (this.isGrounded && ![FIGHTER_STATES.ATTACK, FIGHTER_STATES.HURT, FIGHTER_STATES.KNOCKDOWN, FIGHTER_STATES.DASH_FWD, FIGHTER_STATES.DASH_BWD].includes(this.state)) {
             this.facingRight = this.x < opponent.x;
@@ -178,7 +184,7 @@ export class Fighter {
 
             case FIGHTER_STATES.DASH_FWD:
             case FIGHTER_STATES.DASH_BWD:
-                this.handleDashState();
+                this.handleDashState(opponent, input);
                 break;
 
             case FIGHTER_STATES.ATTACK:
@@ -364,11 +370,29 @@ export class Fighter {
         particleSystem.spawnDashDust(this.x, this.y, direction > 0);
     }
 
-    handleDashState() {
-        if (this.stateTimer >= 6) {
-            this.isInvincible = false;
+    handleDashState(opponent, input) {
+        // Invincible frames: 1–6
+        const invEnd = (this.config.dashInvincibleFrames && this.config.dashInvincibleFrames[1]) || 6;
+        this.isInvincible = this.stateTimer <= invEnd;
+
+        // Motion blur frames: 3–10
+        const blurStart = (this.config.dashMotionBlurFrames && this.config.dashMotionBlurFrames[0]) || 3;
+        const blurEnd = (this.config.dashMotionBlurFrames && this.config.dashMotionBlurFrames[1]) || 10;
+        this.hasMotionTrail = this.stateTimer >= blurStart && this.stateTimer <= blurEnd;
+
+        // Cancellable: Frame 12+
+        const cancelAt = this.config.dashCancelFrame || 12;
+        if (this.stateTimer >= cancelAt && input) {
+            if (input.justPressed && (input.justPressed.lightPunch || input.justPressed.heavyPunch || input.justPressed.lightKick || input.justPressed.heavyKick || input.justPressed.special || input.justPressed.ultimate || input.block || input.up)) {
+                this.state = FIGHTER_STATES.IDLE;
+                this.hasMotionTrail = false;
+                this.handleNeutralState(opponent, input);
+                return;
+            }
         }
-        if (this.stateTimer >= this.config.dashDuration) {
+
+        const maxDuration = this.config.dashDuration || 17;
+        if (this.stateTimer >= maxDuration) {
             this.state = FIGHTER_STATES.IDLE;
             this.hasMotionTrail = false;
             this.vx = 0;
@@ -435,6 +459,21 @@ export class Fighter {
                     const spawnY = this.y - 85;
                     this.projectiles.push(new Projectile(this, atk.projType, spawnX, spawnY, this.facingRight, atk));
                     soundEngine.playEnergyProjectile(this.charId);
+                } else if (atk.spawnsHeavyWave) {
+                    // Heavy Attack 20f Crescent Wave traveling forward independent of character
+                    const spawnX = this.x + (this.facingRight ? 50 : -50);
+                    const spawnY = this.y - 85;
+                    this.projectiles.push(new Projectile(this, 'CRESCENT_WAVE', spawnX, spawnY, this.facingRight, {
+                        projSpeed: 15,
+                        projLifetime: atk.waveTravelFrames || 20,
+                        color: this.themeColor || '#00e5ff',
+                        damage: 32,
+                        hitstun: 20,
+                        blockstun: 16,
+                        hitLevel: HIT_LEVELS.MID,
+                        pushback: 6
+                    }));
+                    soundEngine.playEnergyProjectile('AARAV');
                 } else if ([ATTACK_TYPES.SPECIAL_1, ATTACK_TYPES.SPECIAL_2, ATTACK_TYPES.SPECIAL_3, ATTACK_TYPES.RISING_KICK].includes(atk.type)) {
                     // Propagate Arena Elemental Wave across the floor toward the opponent
                     const fissType = this.charId === 'SOLAR' ? 'MAGMA' :
@@ -465,32 +504,56 @@ export class Fighter {
         }
         // 3. Recovery frames
         else if (this.attackPhase === 'RECOVERY') {
-            // Cancel window into next chain if hit registered
-            if (this.canCancel && input && atk.cancelsTo) {
-                for (const nextType of atk.cancelsTo) {
-                    if (nextType === ATTACK_TYPES.ULTIMATE && input.justPressed.ultimate && this.superMeter >= MAX_SUPER_METER) {
-                        this.executeAttack(nextType);
-                        return;
-                    }
-                    if (nextType === ATTACK_TYPES.SPECIAL_1 && input.justPressed.special) {
-                        this.executeAttack(nextType);
-                        return;
-                    }
-                    if (nextType === ATTACK_TYPES.HEAVY_PUNCH && input.justPressed.heavyPunch) {
-                        this.executeAttack(nextType);
-                        return;
-                    }
-                    if (nextType === ATTACK_TYPES.HEAVY_KICK && input.justPressed.heavyKick) {
-                        this.executeAttack(nextType);
-                        return;
-                    }
-                }
-            }
-
             if (this.attackFrame >= atk.recovery) {
                 this.state = this.isGrounded ? FIGHTER_STATES.IDLE : FIGHTER_STATES.FALL;
                 this.currentAttackData = null;
                 this.attackPhase = null;
+                return;
+            }
+        }
+
+        // Cancel window check: when hit connects or recovery reached, and elapsed frames >= cancelFrame
+        const cancelThreshold = atk.cancelFrame || (atk.startup + atk.active);
+        const canTriggerCancel = (this.canCancel || this.attackPhase === 'RECOVERY') && this.stateTimer >= cancelThreshold;
+
+        if (canTriggerCancel && input && atk.cancelsTo) {
+            for (const nextType of atk.cancelsTo) {
+                if (nextType === ATTACK_TYPES.ULTIMATE && input.justPressed?.ultimate && this.superMeter >= MAX_SUPER_METER) {
+                    this.executeAttack(nextType);
+                    return;
+                }
+                if (nextType === ATTACK_TYPES.SPECIAL_3 && input.down && input.justPressed?.special) {
+                    this.executeAttack(nextType);
+                    return;
+                }
+                if (nextType === ATTACK_TYPES.SPECIAL_1 && input.justPressed?.special) {
+                    this.executeAttack(nextType);
+                    return;
+                }
+                if (nextType === ATTACK_TYPES.SPECIAL_2 && input.down && input.justPressed?.lightKick) {
+                    this.executeAttack(nextType);
+                    return;
+                }
+                if (nextType === ATTACK_TYPES.RISING_KICK && input.down && input.justPressed?.heavyKick) {
+                    this.executeAttack(nextType);
+                    return;
+                }
+                if (nextType === ATTACK_TYPES.HEAVY_PUNCH && input.justPressed?.heavyPunch) {
+                    this.executeAttack(nextType);
+                    return;
+                }
+                if (nextType === ATTACK_TYPES.HEAVY_KICK && input.justPressed?.heavyKick) {
+                    this.executeAttack(nextType);
+                    return;
+                }
+                if (nextType === ATTACK_TYPES.LIGHT_PUNCH && input.justPressed?.lightPunch) {
+                    this.executeAttack(nextType);
+                    return;
+                }
+                if (nextType === ATTACK_TYPES.LIGHT_KICK && input.justPressed?.lightKick) {
+                    this.executeAttack(nextType);
+                    return;
+                }
             }
         }
     }
@@ -498,8 +561,22 @@ export class Fighter {
     handleBlockState(input) {
         if (!input || !input.block) {
             this.state = FIGHTER_STATES.IDLE;
+            this.isInvincible = false;
             return;
         }
+
+        // Aarav Invincible / absorb window: Frames 6–40
+        if (this.charId === 'AARAV') {
+            this.isInvincible = this.stateTimer >= 6 && this.stateTimer <= 40;
+        }
+
+        // Cancellable: Frame 38+
+        if (this.stateTimer >= 38 && input.justPressed && (input.justPressed.lightPunch || input.justPressed.heavyPunch || input.justPressed.dash || input.up)) {
+            this.state = FIGHTER_STATES.IDLE;
+            this.isInvincible = false;
+            return;
+        }
+
         if (this.stateTimer > PERFECT_BLOCK_WINDOW && this.state === FIGHTER_STATES.PERFECT_BLOCK) {
             this.state = FIGHTER_STATES.BLOCK;
         }
@@ -545,6 +622,7 @@ export class Fighter {
             this.state = FIGHTER_STATES.BLOCK;
             this.vx = (this.x < attacker.x ? -1 : 1) * (atk.pushback * 0.6);
             this.superMeter = Math.min(MAX_SUPER_METER, this.superMeter + 4);
+            this.damageFlashTimer = 3;
             return { blocked: true, perfect: false };
         }
 
@@ -553,6 +631,7 @@ export class Fighter {
         this.health = Math.max(0, this.health - finalDamage);
         this.hitstunFrames = atk.hitstun;
         this.state = FIGHTER_STATES.HURT;
+        this.damageFlashTimer = 6;
 
         // Camera Shake & Hitstop
         const isHeavy = atk.damage >= 80 || atk.isCinematicSuper;

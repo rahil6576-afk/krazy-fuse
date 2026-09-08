@@ -1,0 +1,415 @@
+{
+  "totalRows": 251136,
+  "genres": {
+    "Action": 31.845161999999963,
+    "Puzzle": 31.523500000000123,
+    "Shooter": 31.844998000000245,
+    "Sports": 31.844972000000254,
+    "Racing": 31.844970999999973,
+    "Strategy": 32.16649100000012,
+    "Simulation": 31.845071000000033,
+    "RPG": 31.845259000000105,
+    "Fighting": 31.84498399999992,
+    "Arcade": 31.8452920000001,
+    "Casual": 31.523222000000086,
+    "Adventure": 31.844944000000098
+  },
+  "daytimes": {
+    "Early morning (5-8)": 26.727302999999814,
+    "Morning (8-12)": 38.18208099999924,
+    "Afternoon (12-17)": 57.272527999998815,
+    "Evening (17-21)": 122.18202399999915,
+    "Night (21-24)": 103.09142800000004,
+    "Late night (0-5)": 34.36350200000008
+  },
+  "devices": {
+    "Android": 196.54768100000106,
+    "iPhone/iPad": 52.3269579999998,
+    "Windows PC": 54.166869999999534,
+    "Mac": 16.123587999999835,
+    "PlayStation": 29.417920999999886,
+    "Xbox": 16.123587999999835,
+    "Nintendo Switch": 9.475872999999911,
+    "Other": 7.636387000000033
+  },
+  "countries": {
+    "India": 98.91725599999155,
+    "United States": 54.40416299999987,
+    "United Kingdom": 14.837592000000013,
+    "Germany": 13.848378000000075,
+    "France": 12.859134000000031,
+    "Japan": 21.76165199999997,
+    "South Korea": 17.804960000000037,
+    "China": 64.29589700000007,
+    "Brazil": 24.729144999999992,
+    "Canada": 8.90238100000003,
+    "Australia": 7.913340999999985,
+    "Mexico": 12.859134000000031,
+    "Saudi Arabia": 6.92418200000004,
+    "UAE": 4.9458290000000105,
+    "Nigeria": 9.891640000000004,
+    "South Africa": 6.92418200000004
+  },
+  "genreDaytime": {
+    "Action___Early morning (5-8)": {
+      "weight": 2.2291419999999906,
+      "avgMinutesSum": 167.71406599999995,
+      "count": 3488
+    },
+    "Action___Morning (8-12)": {
+      "weight": 3.184562000000001,
+      "avgMinutesSum": 213.19545299999993,
+      "count": 3488
+    },
+    "Action___Afternoon (12-17)": {
+      "weight": 4.776742000000015,
+      "avgMinutesSum": 359.3876930000001,
+      "count": 3488
+    },
+    "Action___Evening (17-21)": {
+      "weight": 10.190468999999997,
+      "avgMinutesSum": 852.5171269999988,
+      "count": 3488
+    },
+    "Action___Night (21-24)": {
+      "weight": 8.598179000000014,
+      "avgMinutesSum": 791.1794190000016,
+      "count": 3488
+    },
+    "Action___Late night (0-5)": {
+      "weight": 2.8660679999999856,
+      "avgMinutesSum": 251.32757700000002,
+      "count": 3488
+    },
+    "Puzzle___Early morning (5-8)": {
+      "weight": 2.2066369999999953,
+      "avgMinutesSum": 105.35902000000003,
+      "count": 3488
+    },
+    "Puzzle___Morning (8-12)": {
+      "weight": 3.152369999999997,
+      "avgMinutesSum": 134.19800200000017,
+      "count": 3488
+    },
+    "Puzzle___Afternoon (12-17)": {
+      "weight": 4.728521000000024,
+      "avgMinutesSum": 225.77064000000004,
+      "count": 3488
+    },
+    "Puzzle___Evening (17-21)": {
+      "weight": 10.08751300000002,
+      "avgMinutesSum": 534.6725240000012,
+      "count": 3488
+    },
+    "Puzzle___Night (21-24)": {
+      "weight": 8.511369000000007,
+      "avgMinutesSum": 498.1261379999996,
+      "count": 3488
+    },
+    "Puzzle___Late night (0-5)": {
+      "weight": 2.837089999999986,
+      "avgMinutesSum": 157.8476719999995,
+      "count": 3488
+    },
+    "Shooter___Early morning (5-8)": {
+      "weight": 2.2291509999999963,
+      "avgMinutesSum": 200.0687860000002,
+      "count": 3488
+    },
+    "Shooter___Morning (8-12)": {
+      "weight": 3.184533999999994,
+      "avgMinutesSum": 253.93512400000023,
+      "count": 3488
+    },
+    "Shooter___Afternoon (12-17)": {
+      "weight": 4.776707999999996,
+      "avgMinutesSum": 428.71696900000023,
+      "count": 3488
+    },
+    "Shooter___Evening (17-21)": {
+      "weight": 10.19036599999998,
+      "avgMinutesSum": 1017.8479129999988,
+      "count": 3488
+    },
+    "Shooter___Night (21-24)": {
+      "weight": 8.598164999999979,
+      "avgMinutesSum": 944.6901940000015,
+      "count": 3488
+    },
+    "Shooter___Late night (0-5)": {
+      "weight": 2.866073999999995,
+      "avgMinutesSum": 300.47502699999984,
+      "count": 3488
+    },
+    "Sports___Early morning (5-8)": {
+      "weight": 2.229144999999996,
+      "avgMinutesSum": 162.0565279999999,
+      "count": 3488
+    },
+    "Sports___Morning (8-12)": {
+      "weight": 3.1844819999999903,
+      "avgMinutesSum": 205.59877900000015,
+      "count": 3488
+    },
+    "Sports___Afternoon (12-17)": {
+      "weight": 4.776756999999997,
+      "avgMinutesSum": 347.2637180000008,
+      "count": 3488
+    },
+    "Sports___Evening (17-21)": {
+      "weight": 10.190412999999984,
+      "avgMinutesSum": 824.1403260000027,
+      "count": 3488
+    },
+    "Sports___Night (21-24)": {
+      "weight": 8.598188,
+      "avgMinutesSum": 764.9878840000008,
+      "count": 3488
+    },
+    "Sports___Late night (0-5)": {
+      "weight": 2.865986999999991,
+      "avgMinutesSum": 243.4184240000001,
+      "count": 3488
+    },
+    "Racing___Early morning (5-8)": {
+      "weight": 2.2291369999999997,
+      "avgMinutesSum": 159.1582080000001,
+      "count": 3488
+    },
+    "Racing___Morning (8-12)": {
+      "weight": 3.184525999999993,
+      "avgMinutesSum": 201.8355760000002,
+      "count": 3488
+    },
+    "Racing___Afternoon (12-17)": {
+      "weight": 4.776717000000011,
+      "avgMinutesSum": 341.05370899999934,
+      "count": 3488
+    },
+    "Racing___Evening (17-21)": {
+      "weight": 10.190403000000021,
+      "avgMinutesSum": 809.2635499999996,
+      "count": 3488
+    },
+    "Racing___Night (21-24)": {
+      "weight": 8.598166999999998,
+      "avgMinutesSum": 751.1408400000022,
+      "count": 3488
+    },
+    "Racing___Late night (0-5)": {
+      "weight": 2.8660209999999875,
+      "avgMinutesSum": 239.00625699999995,
+      "count": 3488
+    },
+    "Strategy___Early morning (5-8)": {
+      "weight": 2.2516499999999926,
+      "avgMinutesSum": 175.44238399999983,
+      "count": 3488
+    },
+    "Strategy___Morning (8-12)": {
+      "weight": 3.2166910000000044,
+      "avgMinutesSum": 222.9319359999994,
+      "count": 3488
+    },
+    "Strategy___Afternoon (12-17)": {
+      "weight": 4.824953999999999,
+      "avgMinutesSum": 375.94611300000025,
+      "count": 3488
+    },
+    "Strategy___Evening (17-21)": {
+      "weight": 10.293324000000048,
+      "avgMinutesSum": 891.4983830000006,
+      "count": 3488
+    },
+    "Strategy___Night (21-24)": {
+      "weight": 8.684949000000016,
+      "avgMinutesSum": 827.6657240000003,
+      "count": 3488
+    },
+    "Strategy___Late night (0-5)": {
+      "weight": 2.894922999999991,
+      "avgMinutesSum": 262.78475799999984,
+      "count": 3488
+    },
+    "Simulation___Early morning (5-8)": {
+      "weight": 2.229142999999997,
+      "avgMinutesSum": 117.72174000000011,
+      "count": 3488
+    },
+    "Simulation___Morning (8-12)": {
+      "weight": 3.1845019999999975,
+      "avgMinutesSum": 149.25100400000053,
+      "count": 3488
+    },
+    "Simulation___Afternoon (12-17)": {
+      "weight": 4.776754999999995,
+      "avgMinutesSum": 252.2627630000007,
+      "count": 3488
+    },
+    "Simulation___Evening (17-21)": {
+      "weight": 10.19040200000001,
+      "avgMinutesSum": 595.7465230000017,
+      "count": 3488
+    },
+    "Simulation___Night (21-24)": {
+      "weight": 8.598228999999966,
+      "avgMinutesSum": 554.8805979999984,
+      "count": 3488
+    },
+    "Simulation___Late night (0-5)": {
+      "weight": 2.8660399999999875,
+      "avgMinutesSum": 176.34608999999998,
+      "count": 3488
+    },
+    "RPG___Early morning (5-8)": {
+      "weight": 2.2291649999999934,
+      "avgMinutesSum": 186.00072999999998,
+      "count": 3488
+    },
+    "RPG___Morning (8-12)": {
+      "weight": 3.1846179999999986,
+      "avgMinutesSum": 236.79787900000028,
+      "count": 3488
+    },
+    "RPG___Afternoon (12-17)": {
+      "weight": 4.776784000000016,
+      "avgMinutesSum": 398.5735349999997,
+      "count": 3488
+    },
+    "RPG___Evening (17-21)": {
+      "weight": 10.190451000000007,
+      "avgMinutesSum": 944.6404810000033,
+      "count": 3488
+    },
+    "RPG___Night (21-24)": {
+      "weight": 8.598167000000004,
+      "avgMinutesSum": 877.6420320000008,
+      "count": 3488
+    },
+    "RPG___Late night (0-5)": {
+      "weight": 2.866073999999988,
+      "avgMinutesSum": 279.19516300000083,
+      "count": 3488
+    },
+    "Fighting___Early morning (5-8)": {
+      "weight": 2.229166999999996,
+      "avgMinutesSum": 182.3845919999997,
+      "count": 3488
+    },
+    "Fighting___Morning (8-12)": {
+      "weight": 3.184529999999995,
+      "avgMinutesSum": 231.10681299999996,
+      "count": 3488
+    },
+    "Fighting___Afternoon (12-17)": {
+      "weight": 4.7767060000000106,
+      "avgMinutesSum": 390.81761299999977,
+      "count": 3488
+    },
+    "Fighting___Evening (17-21)": {
+      "weight": 10.190381000000018,
+      "avgMinutesSum": 926.4165089999983,
+      "count": 3488
+    },
+    "Fighting___Night (21-24)": {
+      "weight": 8.598176000000013,
+      "avgMinutesSum": 858.3149950000013,
+      "count": 3488
+    },
+    "Fighting___Late night (0-5)": {
+      "weight": 2.866023999999991,
+      "avgMinutesSum": 273.70198300000015,
+      "count": 3488
+    },
+    "Arcade___Early morning (5-8)": {
+      "weight": 2.2292179999999986,
+      "avgMinutesSum": 120.406222,
+      "count": 3488
+    },
+    "Arcade___Morning (8-12)": {
+      "weight": 3.184519999999996,
+      "avgMinutesSum": 152.6209220000002,
+      "count": 3488
+    },
+    "Arcade___Afternoon (12-17)": {
+      "weight": 4.776762999999991,
+      "avgMinutesSum": 258.00596099999996,
+      "count": 3488
+    },
+    "Arcade___Evening (17-21)": {
+      "weight": 10.19040900000001,
+      "avgMinutesSum": 609.4282400000005,
+      "count": 3488
+    },
+    "Arcade___Night (21-24)": {
+      "weight": 8.598295999999996,
+      "avgMinutesSum": 567.489815000001,
+      "count": 3488
+    },
+    "Arcade___Late night (0-5)": {
+      "weight": 2.8660859999999855,
+      "avgMinutesSum": 180.27439700000045,
+      "count": 3488
+    },
+    "Casual___Early morning (5-8)": {
+      "weight": 2.206574999999996,
+      "avgMinutesSum": 99.98984400000006,
+      "count": 3488
+    },
+    "Casual___Morning (8-12)": {
+      "weight": 3.1522799999999984,
+      "avgMinutesSum": 127.0159159999999,
+      "count": 3488
+    },
+    "Casual___Afternoon (12-17)": {
+      "weight": 4.728445000000023,
+      "avgMinutesSum": 214.26637500000035,
+      "count": 3488
+    },
+    "Casual___Evening (17-21)": {
+      "weight": 10.087473999999949,
+      "avgMinutesSum": 508.2036760000007,
+      "count": 3488
+    },
+    "Casual___Night (21-24)": {
+      "weight": 8.511334000000009,
+      "avgMinutesSum": 471.15321199999994,
+      "count": 3488
+    },
+    "Casual___Late night (0-5)": {
+      "weight": 2.8371139999999975,
+      "avgMinutesSum": 150.0064650000003,
+      "count": 3488
+    },
+    "Adventure___Early morning (5-8)": {
+      "weight": 2.2291729999999927,
+      "avgMinutesSum": 142.17488900000043,
+      "count": 3488
+    },
+    "Adventure___Morning (8-12)": {
+      "weight": 3.184465999999993,
+      "avgMinutesSum": 180.85984600000003,
+      "count": 3488
+    },
+    "Adventure___Afternoon (12-17)": {
+      "weight": 4.776675999999984,
+      "avgMinutesSum": 304.6522109999997,
+      "count": 3488
+    },
+    "Adventure___Evening (17-21)": {
+      "weight": 10.190419,
+      "avgMinutesSum": 721.491530000002,
+      "count": 3488
+    },
+    "Adventure___Night (21-24)": {
+      "weight": 8.598208999999997,
+      "avgMinutesSum": 670.1096069999995,
+      "count": 3488
+    },
+    "Adventure___Late night (0-5)": {
+      "weight": 2.866000999999989,
+      "avgMinutesSum": 213.14952600000004,
+      "count": 3488
+    }
+  }
+}
