@@ -8,6 +8,7 @@ import { soundEngine } from '../audio/soundEngine.js';
 import { particleSystem } from '../graphics/particleSystem.js';
 import { camera } from '../core/camera.js';
 import { Projectile } from './projectile.js';
+import { ultimateManager } from '../graphics/ultimateManager.js';
 
 export class Fighter {
     constructor(config, playerKey = 'P1', isAI = false) {
@@ -149,6 +150,9 @@ export class Fighter {
         if (this.isGrounded && ![FIGHTER_STATES.ATTACK, FIGHTER_STATES.HURT, FIGHTER_STATES.KNOCKDOWN, FIGHTER_STATES.DASH_FWD, FIGHTER_STATES.DASH_BWD].includes(this.state)) {
             this.facingRight = this.x < opponent.x;
         }
+
+        // Track current opponent for ultimate targeting & combat checks
+        this.currentOpponent = opponent;
 
         // 1. Process State Machine
         this.processState(opponent, input);
@@ -426,7 +430,11 @@ export class Fighter {
         if (atk.isCinematicSuper) {
             this.state = FIGHTER_STATES.SUPER_STARTUP;
             soundEngine.playSuperActivation();
-            camera.startSuperCinematic(this, 30);
+            camera.startSuperCinematic(this, 45);
+
+            if (atk.videoSrc || this.charId === 'SOLAR') {
+                ultimateManager.trigger(this, this.currentOpponent, this.playerKey);
+            }
             return;
         }
 

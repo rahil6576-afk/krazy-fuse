@@ -5,6 +5,7 @@ import { arenaManager } from './arenas.js';
 import { FighterSpriteRenderer } from './fighterSprites.js';
 import { particleSystem } from './particleSystem.js';
 import { camera } from '../core/camera.js';
+import { ultimateManager } from './ultimateManager.js';
 
 export class GameRenderer {
     constructor(canvas) {
@@ -55,7 +56,10 @@ export class GameRenderer {
         // Restore Camera Transformation
         camera.restoreTransform(ctx);
 
-        // 6. Render On-Screen Match Announcements (Round 1, Fight!, K.O.)
+        // 6. Render Full-Screen Ultimate Attack Cinematic
+        ultimateManager.render(ctx);
+
+        // 7. Render On-Screen Match Announcements (Round 1, Fight!, K.O.)
         this.renderMatchBanners(ctx, matchManager);
     }
 

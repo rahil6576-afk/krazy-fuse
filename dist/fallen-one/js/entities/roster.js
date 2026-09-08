@@ -101,10 +101,11 @@ export const ROSTER = [
                 type: ATTACK_TYPES.ULTIMATE,
                 name: 'ULTIMATE: Meteor Crash',
                 command: '↓ ↘ → + Punch / Super',
-                startup: 10, active: 18, recovery: 36,
-                damage: 310, hitstun: 55, blockstun: 28,
-                hitLevel: HIT_LEVELS.MID, pushback: 20, launchY: -18, launchX: 16, superCost: 100, isCinematicSuper: true,
-                hitbox: { offsetX: 30, offsetY: -85, width: 150, height: 130 }
+                startup: 18, active: 115, recovery: 32,
+                damage: 320, hitstun: 65, blockstun: 35,
+                hitLevel: HIT_LEVELS.MID, pushback: 22, launchY: -18, launchX: 18, superCost: 100, isCinematicSuper: true,
+                videoSrc: 'assets/characters/ezgif-8238dd93df229f75.webm',
+                hitbox: { offsetX: -120, offsetY: -180, width: 750, height: 260 }
             }
         }
     },

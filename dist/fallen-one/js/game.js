@@ -2,7 +2,7 @@
 
 import { 
     CANVAS_WIDTH, CANVAS_HEIGHT, GAME_STATES, GAME_MODES, 
-    AI_DIFFICULTIES, FIGHTER_STATES, ATTACK_TYPES, ROUNDS_TO_WIN 
+    AI_DIFFICULTIES, FIGHTER_STATES, ATTACK_TYPES, ROUNDS_TO_WIN, MAX_SUPER_METER, MAX_SPECIAL_ENERGY 
 } from './core/constants.js';
 import { ROSTER } from './entities/roster.js';
 import { inputManager } from './core/input.js';
@@ -22,6 +22,7 @@ import { musicEngine } from './audio/musicEngine.js';
 import { hud } from './ui/hud.js';
 import { MenuManager } from './ui/menuManager.js';
 import { TrainingOverlay } from './ui/trainingOverlay.js';
+import { ultimateManager } from './graphics/ultimateManager.js';
 
 export class GameEngine {
     constructor() {
@@ -279,6 +280,8 @@ export class GameEngine {
         particleSystem.reset();
         if (this.gameMode === GAME_MODES.TRAINING) {
             matchManager.startNewMatch(ROUNDS_TO_WIN, true);
+            this.p1.superMeter = MAX_SUPER_METER;
+            this.p1.specialEnergy = MAX_SPECIAL_ENERGY;
             this.trainingOverlay.show();
         } else {
             matchManager.startNewMatch(ROUNDS_TO_WIN, false);
@@ -403,6 +406,9 @@ export class GameEngine {
             this.checkProjectileCollisions(this.p1, this.p3, 'P1');
             this.checkProjectileCollisions(this.p3, this.p1, 'P2');
         }
+
+        // 7.5 Update Active Ultimate Attacks (WebM Cinematic & Contact Damage)
+        ultimateManager.update();
 
         // 8. Match & Round Progression
         if (this.gameMode !== GAME_MODES.TRAINING) {
@@ -587,6 +593,8 @@ export class GameEngine {
         this.p1.health = this.p1.maxHealth;
         this.p1.displayHealth = this.p1.health;
         this.p1.state = FIGHTER_STATES.IDLE;
+        this.p1.superMeter = MAX_SUPER_METER;
+        this.p1.specialEnergy = MAX_SPECIAL_ENERGY;
 
         this.p2.x = 860;
         this.p2.y = 0;
