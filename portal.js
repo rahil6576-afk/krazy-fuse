@@ -431,12 +431,6 @@ class LiveAudienceEngine {
 window.audienceEngine = new LiveAudienceEngine();
 
 
-// Initial Gamer Reviews & Tips Database
-const DEFAULT_COMMENTS = [
-    { author: 'NeonNinja99', avatar: '🥷', text: 'This game is dangerously addictive! Floor 40 is absolutely intense.' },
-    { author: 'ArcadeMaster', avatar: '🕹️', text: 'Pro tip: Time your dash right before the obstacle hits for invulnerability frames!' },
-    { author: 'CyberGamerX', avatar: '⚡', text: 'Super smooth frame rate and awesome soundtrack. 10/10!' }
-];
 
 // ==========================================================
 // GAME MANIFESTS & PHYSICAL STORAGE ALLOCATION REGISTRY
@@ -1009,8 +1003,7 @@ function openGamePlayer(gameId) {
         });
     }
 
-    // Update Comments & Play next
-    renderComments(game.id);
+    // Play next
     renderPlayNextSidebar(game);
 
     // Run high-performance loading screen with real device storage caching
@@ -1335,52 +1328,6 @@ function updateBookmarkBadge() {
     }
 }
 
-function getStoredComments(gameId) {
-    try {
-        const raw = localStorage.getItem(`krazy_comments_${gameId}`);
-        return raw ? JSON.parse(raw) : DEFAULT_COMMENTS;
-    } catch (e) {
-        return DEFAULT_COMMENTS;
-    }
-}
-
-function renderComments(gameId) {
-    const box = document.getElementById('comments-list-box');
-    const countEl = document.getElementById('game-comments-count');
-    if (!box) return;
-    const list = getStoredComments(gameId);
-    if (countEl) countEl.textContent = list.length;
-
-    box.innerHTML = list.map(c => `
-        <div class="comment-item">
-            <span class="comment-avatar">${c.avatar || '👾'}</span>
-            <div class="comment-body">
-                <span class="comment-author">${c.author}</span>
-                <span class="comment-text">${c.text}</span>
-            </div>
-        </div>
-    `).join('');
-}
-
-function postUserComment() {
-    if (!currentGame) return;
-    const input = document.getElementById('user-comment-input');
-    if (!input || !input.value.trim()) return;
-
-    const list = getStoredComments(currentGame.id);
-    const avatars = ['👾', '🚀', '🔥', '👑', '⚡', '🎮'];
-    const newComment = {
-        author: 'Player_' + Math.floor(1000 + Math.random() * 9000),
-        avatar: avatars[Math.floor(Math.random() * avatars.length)],
-        text: input.value.trim()
-    };
-
-    list.unshift(newComment);
-    localStorage.setItem(`krazy_comments_${currentGame.id}`, JSON.stringify(list));
-    input.value = '';
-    renderComments(currentGame.id);
-    showToast('💬 Review posted!');
-}
 
 // Toast Notification Engine
 let toastTimer = null;
@@ -1968,15 +1915,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const bcHome = document.getElementById('bc-home-btn');
     if (bcHome) bcHome.addEventListener('click', closeGamePlayer);
 
-    const btnPostComment = document.getElementById('btn-post-comment');
-    if (btnPostComment) btnPostComment.addEventListener('click', postUserComment);
-
-    const commentInput = document.getElementById('user-comment-input');
-    if (commentInput) {
-        commentInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') postUserComment();
-        });
-    }
 
     const btnRandom = document.getElementById('btn-nav-random');
     if (btnRandom) btnRandom.addEventListener('click', playRandomGame);

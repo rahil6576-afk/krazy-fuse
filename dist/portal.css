@@ -1883,7 +1883,7 @@ body {
 }
 
 /* Info & Controls Cards */
-.player-info-card, .player-comments-card {
+.player-info-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 14px;
@@ -1893,7 +1893,7 @@ body {
     gap: 14px;
 }
 
-[data-theme="day"] .player-info-card, [data-theme="day"] .player-comments-card {
+[data-theme="day"] .player-info-card {
     background: #ffffff;
 }
 
@@ -1966,66 +1966,6 @@ body {
     border-radius: 6px;
 }
 
-/* Comments Section */
-.comment-input-row {
-    display: flex;
-    gap: 10px;
-}
-
-.comment-input-field {
-    flex: 1;
-    background: #111318;
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    color: var(--text-main);
-    font-family: var(--font-body);
-    font-size: 0.88rem;
-    outline: none;
-}
-
-[data-theme="day"] .comment-input-field {
-    background: #f9fafb;
-}
-
-.comments-list-box {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 280px;
-    overflow-y: auto;
-}
-
-.comment-item {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
-    padding: 10px 12px;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-}
-
-.comment-avatar {
-    font-size: 1.4rem;
-}
-
-.comment-body {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.comment-author {
-    font-family: var(--font-heading);
-    font-size: 0.88rem;
-    color: var(--color-primary);
-}
-
-.comment-text {
-    font-family: var(--font-body);
-    font-size: 0.84rem;
-    color: var(--text-muted);
-}
 
 /* ==========================================================
    13. Right Sidebar ("Play next" & Recommendations)
