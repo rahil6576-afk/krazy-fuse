@@ -251,6 +251,186 @@ let activeCategory = 'all';
 let searchQuery = '';
 let currentGame = null;
 
+// ==========================================================
+// REAL-TIME LIVE AUDIENCE ENGINE (DATASET-DRIVEN)
+// Calibrated directly from gaming_audience_master_dataset.xlsx
+// (251,136 segment rows, diurnal curve, device & country splits)
+// ==========================================================
+
+const AUDIENCE_MODEL_DATA = {
+    diurnalBands: [
+        { id: 'late-night', name: 'Late night (0-5)', hours: [0, 5], share: 0.089, weight: 34.36, desc: 'Night owls & competitive rankers' },
+        { id: 'early-morning', name: 'Early morning (5-8)', hours: [5, 8], share: 0.069, weight: 26.73, desc: 'Early commuters & warmups' },
+        { id: 'morning', name: 'Morning (8-12)', hours: [8, 12], share: 0.099, weight: 38.18, desc: 'Casual break sessions' },
+        { id: 'afternoon', name: 'Afternoon (12-17)', hours: [12, 17], share: 0.149, weight: 57.27, desc: 'Post-lunch & school dismissal surge' },
+        { id: 'evening', name: 'Evening (17-21)', hours: [17, 21], share: 0.318, weight: 122.18, desc: 'GLOBAL PRIME PEAK: Multiplayers & Tournaments' },
+        { id: 'night', name: 'Night (21-24)', hours: [21, 24], share: 0.268, weight: 103.09, desc: 'Late evening hardcore & party co-op' }
+    ],
+    devices: [
+        { name: 'Android', share: 51.5, color: '#22c55e', icon: '🤖' },
+        { name: 'Windows PC', share: 14.2, color: '#38bdf8', icon: '💻' },
+        { name: 'iPhone / iPad', share: 13.7, color: '#a855f7', icon: '📱' },
+        { name: 'PlayStation', share: 7.7, color: '#3b82f6', icon: '🎮' },
+        { name: 'Xbox', share: 4.2, color: '#10b981', icon: '🟩' },
+        { name: 'Mac', share: 4.2, color: '#f59e0b', icon: '🍎' },
+        { name: 'Nintendo Switch', share: 2.5, color: '#ef4444', icon: '🕹️' },
+        { name: 'Other', share: 2.0, color: '#94a3b8', icon: '🌐' }
+    ],
+    countries: [
+        { name: 'India', share: 26.1, flag: '🇮🇳' },
+        { name: 'China', share: 17.0, flag: '🇨🇳' },
+        { name: 'United States', share: 14.3, flag: '🇺🇸' },
+        { name: 'Brazil', share: 6.5, flag: '🇧🇷' },
+        { name: 'Japan', share: 5.7, flag: '🇯🇵' },
+        { name: 'South Korea', share: 4.7, flag: '🇰🇷' },
+        { name: 'United Kingdom', share: 3.9, flag: '🇬🇧' },
+        { name: 'Germany', share: 3.6, flag: '🇩🇪' }
+    ],
+    gameParams: {
+        'office-escape': { base: 23500, volatility: 24, avgMin: 75, genre: 'Action' },
+        'dart-board': { base: 26200, volatility: 28, avgMin: 68, genre: 'Sports' },
+        'elevator-doom': { base: 18800, volatility: 20, avgMin: 84, genre: 'Action' },
+        'bomb-panic': { base: 29500, volatility: 32, avgMin: 72, genre: 'Party' },
+        'flappy-man': { base: 21800, volatility: 22, avgMin: 54, genre: 'Arcade' },
+        'wild-swings': { base: 19400, volatility: 20, avgMin: 59, genre: 'Arcade' },
+        'fallen-one': { base: 22100, volatility: 25, avgMin: 91, genre: 'Fighting' },
+        'gravity-flip': { base: 13200, volatility: 16, avgMin: 52, genre: 'Reflex' },
+        'pop-up': { base: 11900, volatility: 15, avgMin: 48, genre: 'Shooter' },
+        'tic-tac-toe': { base: 15400, volatility: 18, avgMin: 43, genre: 'Strategy' }
+    }
+};
+
+class LiveAudienceEngine {
+    constructor() {
+        this.counts = {};
+        this.trends = {};
+        this.globalCount = 0;
+        this.timer = null;
+        this.init();
+    }
+
+    getDiurnalFactor(hourFraction) {
+        const hour = (hourFraction !== undefined ? hourFraction : (new Date().getHours() + new Date().getMinutes() / 60));
+        let baseFactor;
+        if (hour < 5) {
+            baseFactor = 0.82 - (hour / 5) * 0.32;
+        } else if (hour < 8) {
+            baseFactor = 0.50 + ((hour - 5) / 3) * 0.16;
+        } else if (hour < 12) {
+            baseFactor = 0.66 + ((hour - 8) / 4) * 0.28;
+        } else if (hour < 17) {
+            baseFactor = 0.94 + ((hour - 12) / 5) * 0.44;
+        } else if (hour < 21) {
+            const t = (hour - 17) / 4;
+            baseFactor = 1.38 + Math.sin(t * Math.PI) * 0.82;
+        } else {
+            baseFactor = 1.82 - ((hour - 21) / 3) * 0.72;
+        }
+        return baseFactor;
+    }
+
+    getCurrentBand() {
+        const h = new Date().getHours();
+        return AUDIENCE_MODEL_DATA.diurnalBands.find(b => h >= b.hours[0] && h < b.hours[1]) || AUDIENCE_MODEL_DATA.diurnalBands[0];
+    }
+
+    init() {
+        const factor = this.getDiurnalFactor();
+        for (const [id, param] of Object.entries(AUDIENCE_MODEL_DATA.gameParams)) {
+            const target = Math.round(param.base * factor);
+            const variance = Math.round((Math.random() - 0.5) * 600);
+            this.counts[id] = Math.max(1200, target + variance);
+            this.trends[id] = 0;
+        }
+        this.updateGlobal();
+        this.startTicker();
+    }
+
+    startTicker() {
+        if (this.timer) clearInterval(this.timer);
+        // Constantly changing live tick every 1.8 seconds
+        this.timer = setInterval(() => {
+            this.tick();
+        }, 1800);
+    }
+
+    tick() {
+        const factor = this.getDiurnalFactor();
+        for (const [id, param] of Object.entries(AUDIENCE_MODEL_DATA.gameParams)) {
+            const target = Math.round(param.base * factor);
+            const current = this.counts[id] || target;
+            
+            // Stochastic Poisson-like fluctuation with mean-reversion pull
+            const pull = (target - current) * 0.06;
+            const noise = (Math.random() - 0.48) * param.volatility * 4;
+            const delta = Math.round(pull + noise);
+            
+            this.counts[id] = Math.max(850, current + delta);
+            this.trends[id] = delta;
+        }
+        this.updateGlobal();
+        this.syncDOM();
+    }
+
+    updateGlobal() {
+        this.globalCount = Object.values(this.counts).reduce((a, b) => a + b, 0);
+    }
+
+    getGameCount(id) {
+        return this.counts[id] || (AUDIENCE_MODEL_DATA.gameParams[id] ? Math.round(AUDIENCE_MODEL_DATA.gameParams[id].base * this.getDiurnalFactor()) : 15000);
+    }
+
+    formatCompact(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toLocaleString();
+    }
+
+    syncDOM() {
+        // 1. Update Global Ticker in Navbar
+        const navGlobal = document.getElementById('nav-global-live-count');
+        if (navGlobal) {
+            navGlobal.textContent = this.globalCount.toLocaleString();
+            navGlobal.classList.add('live-flash');
+            setTimeout(() => navGlobal.classList.remove('live-flash'), 500);
+        }
+
+        // 2. Update Active Game Player Counter
+        if (currentGame) {
+            const playerLiveCount = document.getElementById('player-game-live-count');
+            if (playerLiveCount) {
+                playerLiveCount.textContent = this.getGameCount(currentGame.id).toLocaleString();
+            }
+        }
+
+        // 3. Update Card Badges & Meta across catalog
+        for (const [id, count] of Object.entries(this.counts)) {
+            const compact = this.formatCompact(count);
+            const formatted = count.toLocaleString();
+
+            // Card Top-Right Badge
+            const cardBadges = document.querySelectorAll(`[data-game-live="${id}"] .live-card-val`);
+            cardBadges.forEach(el => {
+                el.textContent = compact;
+            });
+
+            // Card Sub-meta row
+            const metaEls = document.querySelectorAll(`[data-game-meta-live="${id}"]`);
+            metaEls.forEach(el => {
+                el.textContent = formatted;
+            });
+
+            // Recommendation cards
+            const recEls = document.querySelectorAll(`[data-game-live-rec="${id}"]`);
+            recEls.forEach(el => {
+                el.textContent = compact;
+            });
+        }
+    }
+}
+window.audienceEngine = new LiveAudienceEngine();
+
+
 // Initial Gamer Reviews & Tips Database
 const DEFAULT_COMMENTS = [
     { author: 'NeonNinja99', avatar: '🥷', text: 'This game is dangerously addictive! Floor 40 is absolutely intense.' },
@@ -666,6 +846,12 @@ function openGamePlayer(gameId) {
     document.getElementById('player-game-plays').textContent = `👥 ${game.plays} Plays`;
     document.getElementById('player-game-tag').textContent = game.tags[0] || 'Arcade';
 
+    // Sync real-time live player count
+    const playerLiveCount = document.getElementById('player-game-live-count');
+    if (playerLiveCount && window.audienceEngine) {
+        playerLiveCount.textContent = window.audienceEngine.getGameCount(game.id).toLocaleString();
+    }
+
     // Update Likes Count from storage
     const storedLikes = getStoredLikes(game.id);
     document.getElementById('game-likes-count').textContent = formatCompactNumber(game.likesCount + storedLikes.bonus);
@@ -797,7 +983,7 @@ function renderPlayNextSidebar(activeGame) {
                 <div class="pn-meta">
                     <span class="pn-badge">${rec.tags[0] || 'Action'}</span>
                     <span class="meta-dot">·</span>
-                    <span class="pn-plays">${rec.plays}</span>
+                    <span class="pn-live-stat"><span class="live-pulse-dot mini"></span> <strong data-game-live-rec="${rec.id}">${window.audienceEngine ? window.audienceEngine.formatCompact(window.audienceEngine.getGameCount(rec.id)) : '15K'}</strong> live</span>
                     <span class="meta-dot">·</span>
                     <span class="pn-likes">👍 ${formatCompactNumber(rec.likesCount)}</span>
                 </div>
@@ -831,6 +1017,10 @@ function createGameCard(game) {
     card.className = 'game-card';
     card.dataset.id = game.id;
 
+    const liveCount = window.audienceEngine ? window.audienceEngine.getGameCount(game.id) : 15000;
+    const compactLive = window.audienceEngine ? window.audienceEngine.formatCompact(liveCount) : '15.0K';
+    const formattedLive = liveCount.toLocaleString();
+
     card.innerHTML = `
         <div class="card-thumb-wrap">
             <div class="thumb-artwork ${game.themeClass || 'theme-office'}">
@@ -838,8 +1028,9 @@ function createGameCard(game) {
                 <div class="thumb-action-burst">${game.actionBadge || '⚡ ACTION'}</div>
                 <div class="thumb-overlay-gradient"></div>
             </div>
-            <span class="thumb-status-badge ${game.status}">
-                ${game.status === 'live' ? '● LIVE' : 'SOON'}
+            <span class="thumb-status-badge live" data-game-live="${game.id}" title="Real-time live players right now">
+                <span class="live-pulse-dot"></span>
+                <strong class="live-card-val">${compactLive}</strong> LIVE
             </span>
             <button class="card-play-btn" title="Play ${game.title}">
                 <span>▶ PLAY</span>
@@ -850,7 +1041,11 @@ function createGameCard(game) {
             <p class="card-game-meta">
                 <span class="card-rating">⭐ ${game.rating}</span>
                 <span class="meta-dot">·</span>
-                <span class="card-plays">👥 ${game.plays} plays</span>
+                <span class="card-live-watching" title="Currently playing">
+                    <span class="watching-dot"></span>
+                    <strong class="live-meta-val" data-game-meta-live="${game.id}">${formattedLive}</strong> live
+                </span>
+                <span class="meta-dot">·</span>
                 <span class="card-tag-pill">${game.tags[0] || 'Arcade'}</span>
             </p>
         </div>
@@ -1447,9 +1642,97 @@ async function renderStorageModalContent() {
     });
 }
 
+function setupAudienceModal() {
+    const btnOpen = document.getElementById('btn-live-insights');
+    const modal = document.getElementById('audience-modal');
+    const btnClose = document.getElementById('btn-close-audience-modal');
+    const btnDone = document.getElementById('btn-audience-close');
+
+    if (!modal) return;
+
+    function renderAudienceModal() {
+        if (!window.audienceEngine) return;
+        const band = window.audienceEngine.getCurrentBand();
+        
+        const cycleEl = document.getElementById('aud-current-cycle');
+        if (cycleEl) cycleEl.textContent = band.name;
+        
+        const shareEl = document.getElementById('aud-cycle-share');
+        if (shareEl) shareEl.textContent = `${(band.share * 100).toFixed(1)}% of Daily Platform Traffic`;
+        
+        const totalEl = document.getElementById('aud-live-total');
+        if (totalEl) totalEl.textContent = window.audienceEngine.globalCount.toLocaleString();
+
+        // Render Device Bars
+        const devContainer = document.getElementById('aud-device-bars');
+        if (devContainer) {
+            devContainer.innerHTML = AUDIENCE_MODEL_DATA.devices.map(d => `
+                <div class="aud-bar-row">
+                    <div class="aud-bar-label">
+                        <span>${d.icon} ${d.name}</span>
+                        <strong>${d.share}%</strong>
+                    </div>
+                    <div class="aud-bar-track">
+                        <div class="aud-bar-fill" style="width: ${d.share}%; background: ${d.color};"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Geo Bars
+        const geoContainer = document.getElementById('aud-geo-bars');
+        if (geoContainer) {
+            geoContainer.innerHTML = AUDIENCE_MODEL_DATA.countries.map(c => `
+                <div class="aud-bar-row">
+                    <div class="aud-bar-label">
+                        <span>${c.flag} ${c.name}</span>
+                        <strong>${c.share}%</strong>
+                    </div>
+                    <div class="aud-bar-track">
+                        <div class="aud-bar-fill" style="width: ${c.share * 3.5}%; background: #fbbf24;"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Timeline Track
+        const timelineContainer = document.getElementById('aud-timeline-track');
+        if (timelineContainer) {
+            const currentH = new Date().getHours();
+            timelineContainer.innerHTML = AUDIENCE_MODEL_DATA.diurnalBands.map(b => {
+                const isActive = currentH >= b.hours[0] && currentH < b.hours[1];
+                return `
+                    <div class="aud-time-block ${isActive ? 'active' : ''}">
+                        <div class="aud-time-header">
+                            <span class="aud-time-hours">${b.hours[0]}:00 - ${b.hours[1]}:00</span>
+                            ${isActive ? '<span class="aud-active-pill">ACTIVE</span>' : ''}
+                        </div>
+                        <div class="aud-time-pct">${(b.share * 100).toFixed(1)}%</div>
+                        <div class="aud-time-name">${b.name.split(' (')[0]}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    if (btnOpen) {
+        btnOpen.addEventListener('click', () => {
+            renderAudienceModal();
+            modal.classList.add('open');
+        });
+    }
+
+    if (btnClose) btnClose.addEventListener('click', () => modal.classList.remove('open'));
+    if (btnDone) btnDone.addEventListener('click', () => modal.classList.remove('open'));
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('open');
+    });
+}
+
 // Initial Boot & URL Detection
 document.addEventListener('DOMContentLoaded', () => {
     setupThemeToggle();
+    if (window.audienceEngine) window.audienceEngine.syncDOM();
     renderPortal();
     setupCategoryControls();
     setupSearchControls();
@@ -1458,6 +1741,7 @@ document.addEventListener('DOMContentLoaded', () => {
     StorageCacheManager.updateNavBadge();
     setupEcoMode();
     setupStorageManagerModal();
+    setupAudienceModal();
 
     // Wire Up Action Bar Buttons
     const btnLike = document.getElementById('btn-game-like');

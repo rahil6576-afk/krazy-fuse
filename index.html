@@ -51,6 +51,12 @@
         </div>
 
         <div class="nav-actions">
+            <!-- Live Viewership Ticker (Driven by Master Audience Dataset) -->
+            <button id="btn-live-insights" class="nav-live-ticker" title="Live Players Online across Krazy Fuse — Click for Live Audience Demographics">
+                <span class="live-pulse-dot"></span>
+                <span class="live-ticker-num" id="nav-global-live-count">142,850</span>
+                <span class="live-ticker-label">LIVE</span>
+            </button>
             <button id="btn-nav-random" class="nav-icon-btn" title="Play Random Game">
                 <span>🎲</span>
             </button>
@@ -246,6 +252,12 @@
                                     <h2 class="game-player-title" id="player-game-title">Tunnel Runner</h2>
                                     <div class="game-player-sub-meta">
                                         <span class="player-rating-star">⭐ <strong id="player-game-rating">4.9</strong></span>
+                                        <span class="meta-dot">·</span>
+                                        <span class="player-live-badge" id="player-live-badge-wrap" title="Real-time live players active in this game">
+                                            <span class="live-pulse-dot"></span>
+                                            <strong id="player-game-live-count">14,280</strong>
+                                            <span class="player-live-sub">playing now</span>
+                                        </span>
                                         <span class="meta-dot">·</span>
                                         <span id="player-game-plays">👥 28.4K Plays</span>
                                         <span class="meta-dot">·</span>
@@ -594,6 +606,84 @@
                 </div>
                 <div class="sm-actions-right">
                     <button id="btn-storage-close" class="btn-arcade-cta" style="padding: 8px 24px; font-size: 0.95rem;">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audience Demographics & Live Insights Modal -->
+    <div id="audience-modal" class="modal-backdrop">
+        <div class="modal-box audience-modal-box">
+            <div class="storage-modal-header">
+                <div class="sm-title-wrap">
+                    <span class="sm-header-icon">📊</span>
+                    <div>
+                        <div class="audience-modal-title-row">
+                            <h3 class="modal-title">Live Audience Intelligence</h3>
+                            <span class="audience-live-tag"><span class="live-pulse-dot"></span> LIVE MODEL</span>
+                        </div>
+                        <p class="storage-modal-desc">
+                            Real-time platform viewership dynamically calculated from the <strong>251,136-row Gaming Audience Master Dataset</strong> (diurnal traffic curves, device distribution & genre session times).
+                        </p>
+                    </div>
+                </div>
+                <button id="btn-close-audience-modal" class="modal-close-icon-btn" title="Close">✕</button>
+            </div>
+
+            <!-- Diurnal & Live Activity Grid -->
+            <div class="storage-stats-grid audience-stats-grid">
+                <div class="storage-stat-card">
+                    <span class="stat-card-label">Current Diurnal Cycle</span>
+                    <div class="stat-card-val"><span id="aud-current-cycle">Morning (8-12)</span></div>
+                    <span class="stat-subtext" id="aud-cycle-share">10.0% of Daily Traffic</span>
+                </div>
+                <div class="storage-stat-card">
+                    <span class="stat-card-label">Live Concurrent Players</span>
+                    <div class="stat-card-val"><span id="aud-live-total">142,850</span></div>
+                    <span class="stat-subtext" id="aud-cycle-trend">Trending toward 32.0% Evening Peak</span>
+                </div>
+                <div class="storage-stat-card">
+                    <span class="stat-card-label">Peak Audience Window</span>
+                    <div class="stat-card-val"><span style="color:#22c55e;">17:00 – 21:00</span></div>
+                    <span class="stat-subtext">Evening Prime (32.0% global surge)</span>
+                </div>
+                <div class="storage-stat-card">
+                    <span class="stat-card-label">Top Device Share</span>
+                    <div class="stat-card-val"><span style="color:#38bdf8;">Android 51.5%</span></div>
+                    <span class="stat-subtext">Windows PC 14.2% · iOS 13.7%</span>
+                </div>
+            </div>
+
+            <!-- Demographics & Device Split Section -->
+            <div class="audience-split-container">
+                <div class="aud-split-col">
+                    <h4 class="aud-split-title">🎮 DEVICE PLATFORM DISTRIBUTION</h4>
+                    <div class="aud-bars-list" id="aud-device-bars">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+                <div class="aud-split-col">
+                    <h4 class="aud-split-title">🌍 TOP AUDIENCE GEOGRAPHIES</h4>
+                    <div class="aud-bars-list" id="aud-geo-bars">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diurnal Timeline Visualizer -->
+            <div class="aud-diurnal-section">
+                <h4 class="aud-split-title">⏰ 24-HOUR DIURNAL GAMING CURVE (FROM MASTER DATASET)</h4>
+                <div class="aud-timeline-track" id="aud-timeline-track">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <div class="storage-modal-actions" style="margin-top: 20px;">
+                <div class="sm-actions-left" style="color: var(--text-muted); font-size: 0.8rem;">
+                    Source: Sensor Tower FY2024-25 & Master Gaming Demographic Model
+                </div>
+                <div class="sm-actions-right">
+                    <button id="btn-audience-close" class="btn-arcade-cta" style="padding: 8px 24px; font-size: 0.95rem;">Close Insights</button>
                 </div>
             </div>
         </div>

@@ -2675,3 +2675,360 @@ body.eco-mode .game-screen-wrapper {
     border-color: #ef4444;
 }
 
+/* ==========================================================
+   LIVE VIEWERSHIP ENGINE & AUDIENCE INTELLIGENCE STYLES
+   ========================================================== */
+
+/* Navbar Global Live Ticker */
+.nav-live-ticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 14px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(34, 197, 94, 0.4);
+    border-radius: 999px;
+    color: #f8fafc;
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 12px rgba(34, 197, 94, 0.15);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-live-ticker:hover {
+    background: rgba(22, 101, 52, 0.35);
+    border-color: #22c55e;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 18px rgba(34, 197, 94, 0.35);
+    transform: translateY(-1px);
+}
+
+.live-ticker-num {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #4ade80;
+    letter-spacing: 0.5px;
+    transition: color 0.2s ease;
+}
+
+.live-ticker-label {
+    background: #22c55e;
+    color: #052e16;
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Pulsing Green Live Dot */
+.live-pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #22c55e;
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+    animation: livePulseAnim 1.6s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.live-pulse-dot.mini {
+    width: 6px;
+    height: 6px;
+    box-shadow: 0 0 6px #22c55e;
+}
+
+@keyframes livePulseAnim {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 8px #22c55e;
+    }
+    50% {
+        opacity: 0.4;
+        transform: scale(0.78);
+        box-shadow: 0 0 3px #22c55e;
+    }
+}
+
+/* Card Top Right Live Badge */
+.thumb-status-badge.live {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    background: rgba(15, 23, 42, 0.88) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #4ade80 !important;
+    border: 1px solid rgba(34, 197, 94, 0.45) !important;
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.4px;
+    padding: 4px 8px !important;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), 0 0 10px rgba(34, 197, 94, 0.2);
+}
+
+.thumb-status-badge.live .live-card-val {
+    color: #ffffff;
+    font-weight: 900;
+}
+
+/* Card Sub-meta Row */
+.card-live-watching {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #4ade80;
+    font-weight: 600;
+}
+
+.card-live-watching .watching-dot {
+    width: 5px;
+    height: 5px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.card-live-watching .live-meta-val {
+    color: #f8fafc;
+    font-weight: 700;
+}
+
+/* Player Meta Live Badge */
+.player-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    border-radius: 999px;
+    padding: 2px 10px;
+    color: #4ade80;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.player-live-badge strong {
+    color: #ffffff;
+    font-family: var(--font-heading);
+}
+
+.player-live-sub {
+    color: #86efac;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* Recommendation Cards Live Pill */
+.pn-live-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #4ade80;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.pn-live-stat strong {
+    color: #ffffff;
+}
+
+/* Live Flash Animation on Ticker */
+.live-flash {
+    color: #86efac !important;
+    text-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+}
+
+/* ==========================================================
+   AUDIENCE DEMOGRAPHICS MODAL STYLING
+   ========================================================== */
+.audience-modal-box {
+    max-width: 780px !important;
+    width: 92vw !important;
+}
+
+.audience-modal-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.audience-live-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.45);
+    color: #4ade80;
+    font-family: var(--font-heading);
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.6px;
+}
+
+.audience-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+    margin-bottom: 20px;
+}
+
+.audience-split-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+@media (max-width: 680px) {
+    .audience-split-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.aud-split-col {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.aud-split-title {
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    color: #94a3b8;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+    font-weight: 800;
+}
+
+.aud-bars-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.aud-bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.aud-bar-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: #e2e8f0;
+}
+
+.aud-bar-label strong {
+    font-family: var(--font-heading);
+    color: #38bdf8;
+    font-size: 0.84rem;
+}
+
+.aud-bar-track {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.aud-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Diurnal Timeline Track */
+.aud-diurnal-section {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.aud-timeline-track {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+@media (max-width: 680px) {
+    .aud-timeline-track {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.aud-time-block {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.aud-time-block.active {
+    background: rgba(34, 197, 94, 0.14);
+    border-color: rgba(34, 197, 94, 0.5);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+    transform: translateY(-2px);
+}
+
+.aud-time-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.aud-time-hours {
+    font-size: 0.68rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.aud-active-pill {
+    background: #22c55e;
+    color: #052e16;
+    font-size: 0.55rem;
+    font-weight: 900;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+.aud-time-pct {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: #f8fafc;
+    margin-bottom: 2px;
+}
+
+.aud-time-block.active .aud-time-pct {
+    color: #4ade80;
+}
+
+.aud-time-name {
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
