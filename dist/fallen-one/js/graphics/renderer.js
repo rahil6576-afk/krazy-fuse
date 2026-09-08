@@ -43,6 +43,9 @@ export class GameRenderer {
         if (p2) FighterSpriteRenderer.drawFighter(ctx, p2);
         if (p3) FighterSpriteRenderer.drawFighter(ctx, p3);
 
+        // Render In-World Ultimate Attack (keyed and blended seamlessly into arena stage)
+        ultimateManager.renderWorld(ctx);
+
         // 4. Render Particle System (Hitsparks, Embers, Shockwaves, Ground Fissures)
         particleSystem.render(ctx);
 
@@ -56,8 +59,8 @@ export class GameRenderer {
         // Restore Camera Transformation
         camera.restoreTransform(ctx);
 
-        // 6. Render Full-Screen Ultimate Attack Cinematic
-        ultimateManager.render(ctx);
+        // 6. Render Screen-Space Cinematic Super Title Pill & Screen Flash
+        ultimateManager.renderScreenOverlay(ctx);
 
         // 7. Render On-Screen Match Announcements (Round 1, Fight!, K.O.)
         this.renderMatchBanners(ctx, matchManager);

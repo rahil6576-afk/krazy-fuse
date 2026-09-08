@@ -23,6 +23,12 @@ export class UltimateManager {
             console.warn('Ultimate video error:', e);
         });
 
+        // Offscreen Keying Canvas (640x360 for high-fidelity chroma-keying at <0.4ms)
+        this.offscreenCanvas = document.createElement('canvas');
+        this.offscreenCanvas.width = 640;
+        this.offscreenCanvas.height = 360;
+        this.offCtx = this.offscreenCanvas.getContext('2d', { willReadFrequently: true });
+
         this.isActive = false;
         this.attacker = null;
         this.defender = null;
@@ -32,6 +38,12 @@ export class UltimateManager {
         this.damageApplied = false;
         this.flashAlpha = 0;
         this.titleBanner = 'SOLAR — ULTIMATE: METEOR CRASH';
+
+        // Anchor offsets for in-world positioning (Solar stands ~240px from left, 310px down in the 640x360 frame)
+        this.anchorX = 240;
+        this.anchorY = 310;
+        this.renderW = 640;
+        this.renderH = 360;
     }
 
     trigger(attacker, defender, attackerKey = 'P1') {
@@ -41,7 +53,7 @@ export class UltimateManager {
         this.attackerKey = attackerKey || 'P1';
         this.frame = 0;
         this.damageApplied = false;
-        this.flashAlpha = 0.55;
+        this.flashAlpha = 0.40;
         this.titleBanner = attacker?.config?.name 
             ? `${attacker.config.name} — ${attacker.config.attacks?.[ATTACK_TYPES.ULTIMATE]?.name || 'ULTIMATE ATTACK'}`
             : 'SOLAR — ULTIMATE: METEOR CRASH';
@@ -69,6 +81,21 @@ export class UltimateManager {
         // Flash alpha decay
         if (this.flashAlpha > 0) {
             this.flashAlpha = Math.max(0, this.flashAlpha - 0.04);
+        }
+
+        // Elemental ground fissure eruptions advancing toward defender on active frames
+        if (this.frame === 18 && this.attacker) {
+            const targetX = this.defender ? this.defender.x : (this.attacker.facingRight ? this.attacker.x + 550 : this.attacker.x - 550);
+            particleSystem.spawnGroundFissure(this.attacker.x, targetX, this.attacker.y, 'MAGMA', '#ea580c');
+        } else if (this.frame === 48 && this.attacker) {
+            const targetX = this.defender ? this.defender.x : (this.attacker.facingRight ? this.attacker.x + 650 : this.attacker.x - 650);
+            particleSystem.spawnGroundFissure(this.attacker.x, targetX, this.attacker.y, 'MAGMA', '#f97316');
+        }
+
+        // Ambient magma embers erupting from stage during attack
+        if (this.frame >= 18 && this.frame <= 125 && this.frame % 6 === 0 && this.attacker) {
+            const spreadX = (Math.random() - 0.5) * 360;
+            particleSystem.spawnHitSpark(this.attacker.x + spreadX, this.attacker.y - Math.random() * 30, '#ea580c', 3, false);
         }
 
         // Contact & Hit Detection
@@ -175,49 +202,128 @@ export class UltimateManager {
         }
     }
 
-    render(ctx) {
+    // =========================================================================
+    // IN-WORLD ARENA RENDERING (Called within Camera Transform Pass)
+    // =========================================================================
+    renderWorld(ctx) {
+        if (!this.isActive || !this.attacker) return;
+
+        // Process real-time offscreen chroma/luma-keying on video frame
+        if (this.video && this.video.readyState >= 2) {
+            this.offCtx.drawImage(this.video, 0, 0, this.renderW, this.renderH);
+            const imgData = this.offCtx.getImageData(0, 0, this.renderW, this.renderH);
+            const d = imgData.data;
+            const len = d.length;
+
+            for (let i = 0; i < len; i += 4) {
+                const r = d[i];
+                const g = d[i + 1];
+                const b = d[i + 2];
+                const maxRGB = r > g ? (r > b ? r : b) : (g > b ? g : b);
+                const minRGB = r < g ? (r < b ? r : b) : (g < b ? g : b);
+                const diff = maxRGB - minRGB;
+
+                // White and near-white/light gray video background removal
+                if (minRGB > 215 && diff < 30) {
+                    d[i + 3] = 0;
+                } else if (minRGB > 175 && diff < 42) {
+                    const fade = (minRGB - 175) / 40;
+                    d[i + 3] = (d[i + 3] * (1 - fade)) | 0;
+                }
+            }
+            this.offCtx.putImageData(imgData, 0, 0);
+        }
+
+        ctx.save();
+
+        // 1. Stage Ground Magma Glow beneath Solar
+        const glowGrad = ctx.createRadialGradient(
+            this.attacker.x, this.attacker.y, 10,
+            this.attacker.x, this.attacker.y, 240
+        );
+        glowGrad.addColorStop(0, 'rgba(234, 88, 12, 0.45)');
+        glowGrad.addColorStop(0.5, 'rgba(249, 115, 22, 0.20)');
+        glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.ellipse(this.attacker.x, this.attacker.y, 240, 60, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Render In-World Keyed Video Animation anchored to Solar's coordinates
+        if (this.video && this.video.readyState >= 2) {
+            ctx.save();
+            if (this.attacker.facingRight) {
+                ctx.drawImage(
+                    this.offscreenCanvas,
+                    this.attacker.x - this.anchorX,
+                    this.attacker.y - this.anchorY,
+                    this.renderW,
+                    this.renderH
+                );
+            } else {
+                ctx.translate(this.attacker.x, this.attacker.y);
+                ctx.scale(-1, 1);
+                ctx.drawImage(
+                    this.offscreenCanvas,
+                    -this.anchorX,
+                    -this.anchorY,
+                    this.renderW,
+                    this.renderH
+                );
+            }
+            ctx.restore();
+        }
+
+        ctx.restore();
+    }
+
+    // =========================================================================
+    // SCREEN SPACE CINEMATIC OVERLAY (HUD Title Pill & Screen Flash)
+    // =========================================================================
+    renderScreenOverlay(ctx) {
         if (!this.isActive) return;
 
         ctx.save();
 
-        // 1. Render Video Frame (1280x720 matches canvas viewport)
-        if (this.video && this.video.readyState >= 2) {
-            ctx.drawImage(this.video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        }
-
-        // 2. Cinematic Black Letterbox Bars (42px) with Glowing Molten Edge Lines
-        ctx.fillStyle = '#0a0a0c';
-        ctx.fillRect(0, 0, CANVAS_WIDTH, 44);
-        ctx.fillRect(0, CANVAS_HEIGHT - 44, CANVAS_WIDTH, 44);
-
+        // 1. Sleek Console Super Move Title Pill (Top-Left HUD)
+        ctx.fillStyle = 'rgba(10, 10, 15, 0.82)';
         ctx.strokeStyle = '#ea580c';
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.moveTo(0, 44);
-        ctx.lineTo(CANVAS_WIDTH, 44);
-        ctx.moveTo(0, CANVAS_HEIGHT - 44);
-        ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT - 44);
+        ctx.roundRect(28, 18, 440, 36, 8);
+        ctx.fill();
         ctx.stroke();
 
-        // 3. Cinematic Super Move Title Banner
-        ctx.font = '900 22px "Outfit", sans-serif';
+        // Glowing molten dot
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.arc(44, 36, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = '900 16px "Outfit", sans-serif';
         ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
         ctx.fillStyle = '#ffffff';
         const parts = this.titleBanner.split(' — ');
-        ctx.fillText(parts[0], 28, 30);
+        ctx.fillText(parts[0], 58, 36);
         if (parts[1]) {
             ctx.fillStyle = '#f97316';
-            ctx.font = '800 17px "Outfit", sans-serif';
-            ctx.fillText(`— ${parts[1]}`, 28 + ctx.measureText(parts[0]).width + 12, 30);
+            ctx.font = '800 14px "Outfit", sans-serif';
+            ctx.fillText(`— ${parts[1]}`, 58 + ctx.measureText(parts[0]).width + 10, 36);
         }
 
-        // 4. White-hot / Orange screen flash on activation & impact
+        // 2. White-hot / Orange screen flash on activation & impact
         if (this.flashAlpha > 0) {
             ctx.fillStyle = `rgba(255, 200, 120, ${this.flashAlpha})`;
             ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         }
 
         ctx.restore();
+    }
+
+    // Backward-compatible alias
+    render(ctx) {
+        this.renderScreenOverlay(ctx);
     }
 }
 

@@ -2,6 +2,7 @@
 
 import { FIGHTER_STATES, ATTACK_TYPES } from '../core/constants.js';
 import { CHAMPION_SPRITES } from './championSpritesMap.js';
+import { ultimateManager } from './ultimateManager.js';
 
 // Aarav Sprite Sheet Mapping (on 1536x1024 clean transparent sheet with all 4 walk frames & new skill set)
 export const AARAV_SPRITE_FRAMES = {
@@ -89,7 +90,9 @@ export class FighterSpriteRenderer {
         }
 
         // 2. Render Character with 4-Frame Dynamic Movement / Action Blending
-        if (fighter.charId === 'AARAV') {
+        if (ultimateManager.isActive && ultimateManager.attacker === fighter) {
+            // Solar is dynamically animated in-world on the stage via ultimateManager
+        } else if (fighter.charId === 'AARAV') {
             this.drawAarav(ctx, fighter);
         } else if (CHAMPION_SPRITES[fighter.charId]) {
             this.drawChampion(ctx, fighter, fighter.charId);
@@ -1370,6 +1373,8 @@ export class FighterSpriteRenderer {
     // DYNAMIC CINEMATIC ULTIMATE ATTACK VIGNETTE & FOCUS
     // =========================================================================
     static drawUltimateAttackFX(ctx, f) {
+        if (ultimateManager.isActive && ultimateManager.attacker === f) return;
+
         const isUlt = (f.state === FIGHTER_STATES.ATTACK || f.state === FIGHTER_STATES.SUPER_STARTUP) &&
                       f.currentAttackData && f.currentAttackData.type === ATTACK_TYPES.ULTIMATE;
         if (!isUlt) return;
