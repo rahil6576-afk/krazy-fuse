@@ -1,8 +1,3 @@
--- ==============================================================================
--- KRAZY FUSE ARCADE — SUPABASE DATABASE SCHEMA & REALTIME SETUP
--- ==============================================================================
--- Run this SQL in your Supabase Project: Dashboard -> SQL Editor -> New query -> Run
--- ==============================================================================
 
 -- 1. GAME REACTIONS TABLE (Likes & Dislikes)
 CREATE TABLE IF NOT EXISTS public.game_reactions (
