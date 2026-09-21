@@ -19,6 +19,7 @@ const MIME_TYPES = {
     '.svg': 'image/svg+xml',
     '.ico': 'image/x-icon',
     '.mp3': 'audio/mpeg',
+    '.ogg': 'audio/ogg',
     '.wav': 'audio/wav',
     '.webm': 'video/webm',
     '.mp4': 'video/mp4',
@@ -55,31 +56,44 @@ const server = http.createServer((req, res) => {
 
         fs.readFile(filePath, (err, data) => {
             if (err) {
-                // If not found at direct path, try dist/
-                let distPath = path.join(PUBLIC_DIR, 'dist', cleanUrl);
-                fs.stat(distPath, (dStatErr, dStats) => {
-                    if (!dStatErr && dStats.isDirectory()) {
-                        if (!cleanUrl.endsWith('/')) {
-                            const query = req.url.includes('?') ? '?' + req.url.split('?')[1] : '';
-                            res.writeHead(301, { 'Location': cleanUrl + '/' + query });
-                            res.end();
-                            return;
-                        }
-                        distPath = path.join(distPath, 'index.html');
+                // If not found at direct path, try public/ then dist/
+                let publicPath = path.join(PUBLIC_DIR, 'public', cleanUrl);
+                fs.readFile(publicPath, (pubErr, pubData) => {
+                    if (!pubErr) {
+                        const ext = path.extname(publicPath).toLowerCase();
+                        res.writeHead(200, {
+                            'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
+                            'Access-Control-Allow-Origin': '*'
+                        });
+                        res.end(pubData);
+                        return;
                     }
 
-                    fs.readFile(distPath, (distErr, distData) => {
-                        if (distErr) {
-                            res.writeHead(404, { 'Content-Type': 'text/plain' });
-                            res.end('404 Not Found');
-                        } else {
-                            const ext = path.extname(distPath).toLowerCase();
-                            res.writeHead(200, {
-                                'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
-                                'Access-Control-Allow-Origin': '*'
-                            });
-                            res.end(distData);
+                    let distPath = path.join(PUBLIC_DIR, 'dist', cleanUrl);
+                    fs.stat(distPath, (dStatErr, dStats) => {
+                        if (!dStatErr && dStats.isDirectory()) {
+                            if (!cleanUrl.endsWith('/')) {
+                                const query = req.url.includes('?') ? '?' + req.url.split('?')[1] : '';
+                                res.writeHead(301, { 'Location': cleanUrl + '/' + query });
+                                res.end();
+                                return;
+                            }
+                            distPath = path.join(distPath, 'index.html');
                         }
+
+                        fs.readFile(distPath, (distErr, distData) => {
+                            if (distErr) {
+                                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                                res.end('404 Not Found');
+                            } else {
+                                const ext = path.extname(distPath).toLowerCase();
+                                res.writeHead(200, {
+                                    'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
+                                    'Access-Control-Allow-Origin': '*'
+                                });
+                                res.end(distData);
+                            }
+                        });
                     });
                 });
                 return;

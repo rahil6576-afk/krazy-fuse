@@ -27,6 +27,9 @@ const itemsToCopy = [
   'bomb-panic',
   'tic-tac-toe',
   'assets',
+  'public',
+  'src',
+  'audio',
   'game-manifests.json'
 ];
 

@@ -632,6 +632,113 @@
             padding: 0;
         }
 
+        /* Audio Settings Modal */
+        .zen-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 23, 21, 0.65);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 16px;
+        }
+
+        .zen-modal-card {
+            background: var(--washi-bg);
+            border: 2px solid var(--sumi-dark);
+            border-radius: 14px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+            width: 100%;
+            max-width: 360px;
+            padding: 20px 22px;
+            position: relative;
+            background-image: radial-gradient(#d4c8ab 0.75px, transparent 0.75px);
+            background-size: 14px 14px;
+        }
+
+        .zen-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            border-bottom: 1.5px solid var(--washi-border);
+            padding-bottom: 8px;
+        }
+
+        .zen-modal-title {
+            font-family: 'Shippori Mincho', serif;
+            font-weight: 900;
+            font-size: 1.05rem;
+            color: var(--sumi-black);
+            letter-spacing: 0.5px;
+        }
+
+        .zen-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--sumi-gray);
+            transition: color 0.2s;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .zen-modal-close:hover {
+            color: var(--hanko-red);
+        }
+
+        .zen-audio-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .audio-control-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .audio-control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--sumi-dark);
+        }
+
+        .zen-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #d4c8ab;
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        .zen-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--sumi-dark);
+            border: 2px solid #ffffff;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: transform 0.15s, background 0.15s;
+        }
+
+        .zen-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.18);
+            background: var(--hanko-red);
+        }
+
         /* Responsive Adjustments */
         @media (max-width: 480px) {
             .zen-title { font-size: 1.7rem; }
@@ -788,6 +895,7 @@
     <script>
         /**
          * Authentic Web Audio API Synthesizer for Sumi-e Zen Soundscapes
+         * Pure Web Audio: 100% self-contained, zero external audio files.
          */
         class SumiAudioEngine {
             constructor() {
@@ -801,7 +909,7 @@
                     if (AudioCtx) this.ctx = new AudioCtx();
                 }
                 if (this.ctx && this.ctx.state === 'suspended') {
-                    this.ctx.resume();
+                    this.ctx.resume().catch(() => {});
                 }
             }
 
@@ -811,69 +919,51 @@
                 return this.muted;
             }
 
-            // 1. Calligraphy Brush Stroke (Soft paper friction & ink whoosh)
-            playBrushStroke() {
-                if (this.muted) return;
-                this.init();
-                if (!this.ctx) return;
-                try {
-                    const now = this.ctx.currentTime;
-                    // Pink noise buffer for paper friction
-                    const bufferSize = this.ctx.sampleRate * 0.15;
-                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-                    const output = buffer.getChannelData(0);
-                    let b0 = 0, b1 = 0, b2 = 0;
-                    for (let i = 0; i < bufferSize; i++) {
-                        const white = Math.random() * 2 - 1;
-                        b0 = 0.99886 * b0 + white * 0.0555179;
-                        b1 = 0.99332 * b1 + white * 0.0750759;
-                        b2 = 0.96900 * b2 + white * 0.1538520;
-                        output[i] = (b0 + b1 + b2) * 0.25;
-                    }
-                    const noise = this.ctx.createBufferSource();
-                    noise.buffer = buffer;
-
-                    const filter = this.ctx.createBiquadFilter();
-                    filter.type = 'lowpass';
-                    filter.frequency.setValueAtTime(800, now);
-                    filter.frequency.exponentialRampToValueAtTime(300, now + 0.15);
-
-                    const gain = this.ctx.createGain();
-                    gain.gain.setValueAtTime(0.25, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-
-                    noise.connect(filter);
-                    filter.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    noise.start(now);
-                } catch(e) {}
+            toggle() {
+                return !this.toggleMute();
             }
 
-            // 2. Koto Pentatonic String Pluck (Turn mark feedback)
+            get enabled() {
+                return !this.muted;
+            }
+
+            // 1. Koto Pentatonic String Pluck (Turn mark: D4 for X, A4 for O)
             playKotoPluck(isPlayerX = true) {
                 if (this.muted) return;
                 this.init();
                 if (!this.ctx) return;
                 try {
                     const now = this.ctx.currentTime;
-                    const freq = isPlayerX ? 293.66 : 440; // D4 or A4 in Hirajoshi scale
-                    const osc = this.ctx.createOscillator();
+                    const freq = isPlayerX ? 293.66 : 440; // D4 or A4 in Hirajoshi pentatonic scale
+                    
+                    const osc1 = this.ctx.createOscillator();
+                    const osc2 = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, now);
-                    osc.frequency.exponentialRampToValueAtTime(freq * 0.98, now + 0.35);
 
-                    gain.gain.setValueAtTime(0.28, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc1.type = 'triangle';
+                    osc1.frequency.setValueAtTime(freq, now);
+                    osc1.frequency.exponentialRampToValueAtTime(freq * 0.99, now + 0.45);
 
-                    osc.connect(gain);
+                    // String harmonic overtone
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(freq * 2.008, now);
+                    osc2.frequency.exponentialRampToValueAtTime(freq * 2.0, now + 0.30);
+
+                    gain.gain.setValueAtTime(0.32, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+                    osc1.connect(gain);
+                    osc2.connect(gain);
                     gain.connect(this.ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.36);
+
+                    osc1.start(now);
+                    osc2.start(now);
+                    osc1.stop(now + 0.46);
+                    osc2.stop(now + 0.46);
                 } catch(e) {}
             }
 
-            // 3. Resonant Zen Bell / Singing Bowl (Victory Fanfare)
+            // 2. Resonant Zen Bell / Singing Bowl (Victory & Harmony)
             playZenBell() {
                 if (this.muted) return;
                 this.init();
@@ -898,7 +988,7 @@
                 } catch(e) {}
             }
 
-            // 4. Wooden Hyoshigi Clapper (Button click & round resets)
+            // 3. Wooden Hyoshigi Clapper (Buttons & resets)
             playClapper() {
                 if (this.muted) return;
                 this.init();
@@ -920,6 +1010,29 @@
                     osc.stop(now + 0.06);
                 } catch(e) {}
             }
+
+            // Backward-compat aliases
+            play(src) {
+                if (!src) { this.playKotoPluck(true); return; }
+                if (src.includes('brush-light') || src.includes('O')) {
+                    this.playKotoPluck(false);
+                } else if (src.includes('brush') || src.includes('splash')) {
+                    this.playKotoPluck(true);
+                } else if (src.includes('victory') || src.includes('zen-bell') || src.includes('draw')) {
+                    this.playZenBell();
+                } else {
+                    this.playClapper();
+                }
+            }
+            playBrushStroke(isPlayerX = true) { this.playKotoPluck(isPlayerX); }
+            playMusic() {}
+            stopMusic() {}
+            startZenAmbience() {}
+            stopAmbience() {}
+            setVolume() {}
+            setMusicVolume() {}
+            setAmbienceVolume() {}
+            setSfxVolume() {}
         }
 
         const audio = new SumiAudioEngine();
@@ -951,8 +1064,12 @@
         function initGame() {
             createBoard();
             updateUI();
+            try {
+                if (audio && typeof audio.setMusicVolume === 'function') audio.setMusicVolume(0);
+                if (audio && typeof audio.stopMusic === 'function') audio.stopMusic();
+            } catch(e) {}
             if (btnToggleSound) {
-                btnToggleSound.textContent = audio.muted ? '🔇' : '🔊';
+                btnToggleSound.textContent = audio.enabled === false ? '🔇' : '🔊';
             }
         }
 
@@ -982,7 +1099,11 @@
         }
 
         function handleCellClick(index) {
+            audio.init();
             if (!isGameActive || board[index] !== null || isBotThinking) return;
+
+            // Turn Move: Pure musical Koto instrument pluck (Player X: D4, Player O: A4)
+            audio.playKotoPluck(currentPlayer === 'X');
 
             makeMove(index, currentPlayer);
 
@@ -1004,10 +1125,14 @@
             if (gameMode === 'bot' && currentPlayer === 'O' && isGameActive) {
                 isBotThinking = true;
                 updateUI();
+
                 setTimeout(() => {
                     const botMove = getBotMove();
                     if (botMove !== null) {
+                        // AI Move: Pure musical Koto A4 instrument pluck
+                        audio.playKotoPluck(false);
                         makeMove(botMove, 'O');
+
                         const botWin = checkWin(board, gridSize, winStreakReq);
                         if (botWin) {
                             handleWin(botWin);
@@ -1019,7 +1144,7 @@
                     }
                     isBotThinking = false;
                     updateUI();
-                }, botDifficulty === 'easy' ? 300 : botDifficulty === 'medium' ? 450 : 550);
+                }, botDifficulty === 'easy' ? 400 : botDifficulty === 'medium' ? 550 : 700);
             }
         }
 
@@ -1027,9 +1152,6 @@
             board[index] = player;
             const cell = boardEl.children[index];
             cell.classList.add('taken');
-
-            audio.playBrushStroke();
-            audio.playKotoPluck(player === 'X');
 
             if (player === 'X') {
                 // Authentic Japanese Sumi Black Ink Paint Brush Cross (✕)
@@ -1141,7 +1263,12 @@
         function handleWin(winResult) {
             isGameActive = false;
             scores[winResult.winner]++;
-            audio.playZenBell();
+
+            if (gameMode === 'bot' && winResult.winner === 'O') {
+                audio.playKotoPluck(false);
+            } else {
+                audio.playZenBell();
+            }
 
             // Highlight Winning Cells
             winResult.line.forEach(idx => {
@@ -1164,7 +1291,7 @@
         function handleDraw() {
             isGameActive = false;
             scores.draws++;
-            audio.playClapper();
+            audio.playZenBell();
             statusTextEl.innerHTML = `⚖️ <strong>Zen Harmony!</strong> It is a peaceful Draw (引き分け)`;
             updateScoreUI();
         }

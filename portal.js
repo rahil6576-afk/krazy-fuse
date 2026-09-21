@@ -598,9 +598,10 @@ const AuthManager = {
         }
 
         if (!this.currentUser || !this.currentUser.isLoggedIn) {
+            const guestAvatar = localStorage.getItem('kf_saved_guest_avatar') || sessionStorage.getItem('kf_saved_guest_avatar') || '👾';
             this.currentUser = {
                 username: 'Guest',
-                avatar: '👾',
+                avatar: guestAvatar,
                 isLoggedIn: false,
                 provider: 'guest'
             };
@@ -730,9 +731,10 @@ const AuthManager = {
     },
 
     logout(syncSupabase = true) {
+        const guestAvatar = localStorage.getItem('kf_saved_guest_avatar') || sessionStorage.getItem('kf_saved_guest_avatar') || '👾';
         this.currentUser = {
             username: 'Guest',
-            avatar: '👾',
+            avatar: guestAvatar,
             isLoggedIn: false,
             provider: 'guest'
         };
@@ -754,6 +756,41 @@ const AuthManager = {
         if (typeof updateReactionUI === 'function' && currentGame) {
             updateReactionUI(currentGame.id);
         }
+    },
+
+    setAvatar(avatar) {
+        if (!avatar) return;
+        if (!this.currentUser) {
+            this.currentUser = { username: 'Guest', avatar: '👾', isLoggedIn: false, provider: 'guest' };
+        }
+        this.currentUser.avatar = avatar;
+
+        if (this.currentUser.isLoggedIn && this.currentUser.username !== 'Guest') {
+            const registry = this.getRegistry();
+            if (registry[this.currentUser.username]) {
+                registry[this.currentUser.username].avatar = avatar;
+                this.saveRegistry(registry);
+            }
+            sessionStorage.setItem(this.ACTIVE_USER_SESSION_KEY, JSON.stringify(this.currentUser));
+            localStorage.setItem(this.ACTIVE_USER_PERSIST_KEY, JSON.stringify(this.currentUser));
+        } else {
+            localStorage.setItem('kf_saved_guest_avatar', avatar);
+            sessionStorage.setItem('kf_saved_guest_avatar', avatar);
+        }
+
+        this.updateNavUI();
+        if (typeof renderAuthModalContent === 'function') {
+            renderAuthModalContent();
+        }
+
+        const navAvatar = document.getElementById('nav-user-avatar');
+        if (navAvatar) {
+            navAvatar.classList.remove('avatar-pop');
+            void navAvatar.offsetWidth;
+            navAvatar.classList.add('avatar-pop');
+        }
+
+        showToast(`Avatar updated to ${avatar}!`, avatar);
     },
 
     switchUser(username) {
@@ -828,6 +865,11 @@ const AuthManager = {
             statusEl.title = user.isLoggedIn 
                 ? `Logged in as ${user.username}${provText} (Saved per game)` 
                 : 'Guest Session (Auto-clears on website reload)';
+        }
+
+        const btnUserAuth = document.getElementById('btn-user-auth');
+        if (btnUserAuth) {
+            btnUserAuth.title = user.isLoggedIn ? `Profile: ${user.username}` : 'Gamer Account & Profiles';
         }
 
         if (bankBadge) {
@@ -1370,6 +1412,7 @@ function renderPortal() {
                 if (activeCategory === 'trending') matchesCategory = game.trending;
                 else if (activeCategory === 'new') matchesCategory = game.isNew;
                 else if (activeCategory === 'multiplayer') matchesCategory = game.multiplayer;
+                else if (activeCategory === 'bookmarks') matchesCategory = getStoredBookmarks().includes(game.id);
                 else if (activeCategory !== 'all') {
                     matchesCategory = game.category === activeCategory || game.tags.some(t => t.toLowerCase() === activeCategory.toLowerCase());
                 }
@@ -1388,6 +1431,7 @@ function renderPortal() {
                 else if (activeCategory === 'trending') titleEl.textContent = `🔥 POPULAR & TRENDING GAMES`;
                 else if (activeCategory === 'new') titleEl.textContent = `🆕 NEW ARCADE RELEASES`;
                 else if (activeCategory === 'multiplayer') titleEl.textContent = `🏆 MULTIPLAYER & PVP BATTLES`;
+                else if (activeCategory === 'bookmarks') titleEl.textContent = `🔖 SAVED BOOKMARKS`;
                 else titleEl.textContent = `⚡ ${activeCategory.toUpperCase()} GAMES`;
             }
 
@@ -2036,26 +2080,44 @@ function setupAuthModal() {
     const btnFacebook = document.getElementById('btn-auth-facebook');
     const btnGuestQuick = document.getElementById('btn-auth-guest-quick');
 
+    const btnToggleSwitch = document.getElementById('btn-toggle-switch-account');
+    const loginContainer = document.getElementById('auth-login-container');
+    const btnSideProfile = document.getElementById('btn-sidebar-profile');
+
     let selectedAvatar = '👾';
 
     if (!modal) return;
 
     function openModal() {
-        modal.classList.add('active');
+        modal.classList.add('active', 'open');
         renderAuthModalContent();
     }
 
     function closeModal() {
-        modal.classList.remove('active');
+        modal.classList.remove('active', 'open');
     }
 
+    window.openProfileModal = openModal;
+    window.closeProfileModal = closeModal;
+
     if (btnOpen) btnOpen.addEventListener('click', openModal);
+    if (btnSideProfile) btnSideProfile.addEventListener('click', openModal);
     if (btnClose) btnClose.addEventListener('click', closeModal);
     if (btnDone) btnDone.addEventListener('click', closeModal);
 
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
+
+    if (btnToggleSwitch && loginContainer) {
+        btnToggleSwitch.addEventListener('click', () => {
+            loginContainer.classList.toggle('collapsed');
+            const isCollapsed = loginContainer.classList.contains('collapsed');
+            btnToggleSwitch.innerHTML = isCollapsed
+                ? '<span>🔄 Switch or Link Another Account</span>'
+                : '<span>▲ Hide Account Switcher</span>';
+        });
+    }
 
     // 1. Quick Guest Mode
     if (btnGuestQuick) {
@@ -2121,11 +2183,17 @@ function setupAuthModal() {
         avatarPicker.addEventListener('click', (e) => {
             const btn = e.target.closest('.avatar-pick-btn');
             if (!btn) return;
+            const newAvatar = btn.getAttribute('data-avatar') || '👾';
+            selectedAvatar = newAvatar;
+
             avatarPicker.querySelectorAll('.avatar-pick-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            selectedAvatar = btn.getAttribute('data-avatar') || '👾';
+
             const preview = document.getElementById('modal-auth-avatar-preview');
             if (preview) preview.textContent = selectedAvatar;
+
+            // Immediately apply and persist avatar for active user or guest
+            AuthManager.setAvatar(selectedAvatar);
         });
     }
 
@@ -2198,6 +2266,7 @@ function renderAuthModalContent() {
     const currentUsername = document.getElementById('auth-current-username');
     const currentBadge = document.getElementById('auth-current-badge');
     const currentNotice = document.getElementById('auth-current-notice');
+    const previewAvatar = document.getElementById('modal-auth-avatar-preview');
     const btnLogout = document.getElementById('btn-auth-logout');
 
     if (currentAvatar) {
@@ -2207,6 +2276,28 @@ function renderAuthModalContent() {
             currentAvatar.textContent = user.avatar || '👾';
         }
     }
+
+    if (previewAvatar) {
+        if (user.avatar && (user.avatar.startsWith('http://') || user.avatar.startsWith('https://'))) {
+            previewAvatar.innerHTML = `<img src="${user.avatar}" alt="Avatar" class="user-avatar-img">`;
+        } else {
+            previewAvatar.textContent = user.avatar || '👾';
+        }
+    }
+
+    // Sync active state on avatar picker buttons
+    const pickerEl = document.getElementById('auth-avatar-picker');
+    if (pickerEl) {
+        const activeAv = user.avatar || '👾';
+        pickerEl.querySelectorAll('.avatar-pick-btn').forEach(b => {
+            if (b.getAttribute('data-avatar') === activeAv) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
+        });
+    }
+
     if (currentUsername) currentUsername.textContent = user.isLoggedIn ? user.username : 'Guest Player';
     
     if (currentBadge) {
@@ -2230,12 +2321,51 @@ function renderAuthModalContent() {
         }
     }
 
-    // 2. Saved Profiles Quick Switcher Chips
+    // 2. Profile Quick Stats Ribbon
+    const statCoins = document.getElementById('profile-stat-coins');
+    const statSaves = document.getElementById('profile-stat-saves');
+    const statSync = document.getElementById('profile-stat-sync');
+    const statTier = document.getElementById('profile-stat-tier');
+
+    const coins = AuthManager.getUserCoins(user.username);
+    if (statCoins) statCoins.textContent = `${coins.toLocaleString()} P`;
+
+    const registry = AuthManager.getRegistry();
+    const userReg = registry[user.username] || {};
+    const userGames = userReg.games || {};
+    const countSaved = Object.keys(userGames).length;
+    if (statSaves) statSaves.textContent = `${countSaved} Games`;
+
+    if (statSync) {
+        statSync.textContent = user.isLoggedIn ? (user.provider === 'google' ? 'Google Cloud' : 'Active') : 'Temporary';
+        statSync.style.color = user.isLoggedIn ? '#4ade80' : '#fbbf24';
+    }
+
+    if (statTier) {
+        if (user.provider === 'google') statTier.textContent = 'Verified (Google)';
+        else if (user.isLoggedIn) statTier.textContent = 'Registered Gamer';
+        else statTier.textContent = 'Guest Player';
+    }
+
+    // 3. Toggle button & container state based on login status
+    const btnToggleSwitch = document.getElementById('btn-toggle-switch-account');
+    const loginContainer = document.getElementById('auth-login-container');
+    if (btnToggleSwitch && loginContainer) {
+        if (user.isLoggedIn) {
+            btnToggleSwitch.classList.remove('hidden');
+            loginContainer.classList.add('collapsed');
+            btnToggleSwitch.innerHTML = '<span>🔄 Switch or Link Another Account</span>';
+        } else {
+            btnToggleSwitch.classList.add('hidden');
+            loginContainer.classList.remove('collapsed');
+        }
+    }
+
+    // 4. Saved Profiles Quick Switcher Chips
     const chipsContainer = document.getElementById('auth-profiles-chips');
     const profilesSection = document.getElementById('auth-saved-profiles-section');
     if (chipsContainer) {
         chipsContainer.innerHTML = '';
-        const registry = AuthManager.getRegistry();
         const names = Object.keys(registry);
 
         // Guest chip
@@ -2268,7 +2398,7 @@ function renderAuthModalContent() {
         }
     }
 
-    // 3. Active Game Saves Breakdown
+    // 5. Active Game Saves Breakdown
     const savesGrid = document.getElementById('auth-game-saves-grid');
     const savesHint = document.getElementById('auth-saves-hint');
     if (savesHint) {
@@ -2316,6 +2446,7 @@ function renderAuthModalContent() {
 
 function setupAudienceModal() {
     const btnOpen = document.getElementById('btn-live-insights');
+    const btnSideLive = document.getElementById('btn-sidebar-live');
     const modal = document.getElementById('audience-modal');
     const btnClose = document.getElementById('btn-close-audience-modal');
     const btnDone = document.getElementById('btn-audience-close');
@@ -2387,17 +2518,24 @@ function setupAudienceModal() {
         }
     }
 
-    if (btnOpen) {
-        btnOpen.addEventListener('click', () => {
-            renderAudienceModal();
-            modal.classList.add('open');
-        });
-    }
+    const openAudienceModal = () => {
+        renderAudienceModal();
+        modal.classList.add('active', 'open');
+    };
 
-    if (btnClose) btnClose.addEventListener('click', () => modal.classList.remove('open'));
-    if (btnDone) btnDone.addEventListener('click', () => modal.classList.remove('open'));
+    const closeAudienceModal = () => {
+        modal.classList.remove('active', 'open');
+    };
+
+    window.openAudienceModal = openAudienceModal;
+    window.closeAudienceModal = closeAudienceModal;
+
+    if (btnOpen) btnOpen.addEventListener('click', openAudienceModal);
+    if (btnSideLive) btnSideLive.addEventListener('click', openAudienceModal);
+    if (btnClose) btnClose.addEventListener('click', closeAudienceModal);
+    if (btnDone) btnDone.addEventListener('click', closeAudienceModal);
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.remove('open');
+        if (e.target === modal) closeAudienceModal();
     });
 }
 
@@ -2454,6 +2592,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPromoRandom = document.getElementById('btn-promo-random');
     if (btnPromoRandom) btnPromoRandom.addEventListener('click', playRandomGame);
 
+    const btnNavBookmarks = document.getElementById('btn-nav-bookmarks');
+    if (btnNavBookmarks) {
+        btnNavBookmarks.addEventListener('click', () => {
+            const list = getStoredBookmarks();
+            if (list.length === 0) {
+                showToast('No bookmarked games yet! Click 🔖 on any game card to save.', '🔖');
+            } else {
+                activeCategory = 'bookmarks';
+                if (document.body.getAttribute('data-view') === 'player') closeGamePlayer();
+                renderPortal();
+                showToast(`🔖 Displaying ${list.length} saved bookmarks!`, '⭐');
+            }
+        });
+    }
+
     const btnViewMore = document.getElementById('btn-view-more-purple');
     if (btnViewMore) btnViewMore.addEventListener('click', closeGamePlayer);
 
@@ -2484,6 +2637,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetGameId = gameParam || hashParam;
     if (targetGameId && GAMES_CATALOG.some(g => g.id === targetGameId)) {
         openGamePlayer(targetGameId);
+    } else if (window.location.hash.includes('profile') || urlParams.has('profile')) {
+        if (typeof window.openProfileModal === 'function') window.openProfileModal();
+    } else if (window.location.hash.includes('live') || urlParams.has('live')) {
+        if (typeof window.openAudienceModal === 'function') window.openAudienceModal();
     }
 
     // Handle Browser Back / Forward buttons
