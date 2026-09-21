@@ -40,6 +40,12 @@ const KrazySupabase = (function() {
 
         try {
             client = window.supabase.createClient(url, anonKey, {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    detectSessionInUrl: true,
+                    storage: window.localStorage
+                },
                 realtime: {
                     params: {
                         eventsPerSecond: 10
@@ -352,6 +358,92 @@ const KrazySupabase = (function() {
         }
     }
 
+    // ==========================================
+    // AUTHENTICATION (OAUTH & GUEST/ANONYMOUS)
+    // ==========================================
+    async function signInWithOAuth(provider, options = {}) {
+        if (!client) init();
+        if (!isConfigured()) {
+            return { error: new Error('Supabase is not configured yet. Please provide your Supabase URL & Anon Key.') };
+        }
+        try {
+            const cleanUrl = window.location.origin + window.location.pathname;
+            const redirectTo = options.redirectTo || cleanUrl;
+            const { data, error } = await client.auth.signInWithOAuth({
+                provider: provider,
+                options: {
+                    redirectTo: redirectTo,
+                    ...options
+                }
+            });
+            if (error) throw error;
+            return { data, error: null };
+        } catch (err) {
+            console.error(`❌ [KrazySupabase] signInWithOAuth failed for ${provider}:`, err);
+            return { data: null, error: err };
+        }
+    }
+
+    async function signInAnonymously() {
+        if (!client) init();
+        if (!isConfigured()) {
+            return { error: new Error('Supabase is not configured yet.') };
+        }
+        try {
+            if (typeof client.auth.signInAnonymously === 'function') {
+                const { data, error } = await client.auth.signInAnonymously();
+                if (error) throw error;
+                return { data, error: null };
+            }
+            return { data: null, error: new Error('Anonymous sign-in not supported by current Supabase JS version.') };
+        } catch (err) {
+            console.warn('⚠️ [KrazySupabase] signInAnonymously error:', err);
+            return { data: null, error: err };
+        }
+    }
+
+    async function signOut() {
+        if (isConfigured()) {
+            try {
+                await client.auth.signOut();
+            } catch (err) {
+                console.warn('⚠️ [KrazySupabase] signOut error:', err);
+            }
+        }
+        return { success: true };
+    }
+
+    async function getSession() {
+        if (!client) init();
+        if (!isConfigured()) return { data: { session: null }, error: null };
+        try {
+            return await client.auth.getSession();
+        } catch (err) {
+            return { data: { session: null }, error: err };
+        }
+    }
+
+    function onAuthStateChange(callback) {
+        if (!client) init();
+        if (!isConfigured()) return null;
+        try {
+            const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
+                if (typeof callback === 'function') {
+                    callback(event, session);
+                }
+            });
+            return subscription;
+        } catch (err) {
+            console.warn('⚠️ [KrazySupabase] onAuthStateChange error:', err);
+            return null;
+        }
+    }
+
+    function getClient() {
+        if (!client) init();
+        return client;
+    }
+
     return {
         init,
         isConfigured,
@@ -366,11 +458,21 @@ const KrazySupabase = (function() {
         fetchRecentPitches,
         getLocalPitches,
         onReactionChange,
-        onNewPitch
+        onNewPitch,
+        // Auth
+        getClient,
+        signInWithOAuth,
+        signInAnonymously,
+        signOut,
+        getSession,
+        onAuthStateChange
     };
 })();
 
-// Auto-initialize when window loads if SDK is available
+// Auto-initialize when window loads or immediately if SDK is ready
+if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+    KrazySupabase.init();
+}
 window.addEventListener('DOMContentLoaded', () => {
     KrazySupabase.init();
 });

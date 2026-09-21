@@ -589,7 +589,9 @@ const AuthManager = {
                     this.currentUser = {
                         username: parsed.username,
                         avatar: parsed.avatar || '👾',
-                        isLoggedIn: true
+                        isLoggedIn: true,
+                        provider: parsed.provider || 'local',
+                        email: parsed.email || ''
                     };
                 }
             } catch (e) {}
@@ -599,15 +601,69 @@ const AuthManager = {
             this.currentUser = {
                 username: 'Guest',
                 avatar: '👾',
-                isLoggedIn: false
+                isLoggedIn: false,
+                provider: 'guest'
             };
             // AUTO-CLEAR ON RELOAD FOR GUEST:
-            // "ONCE THE WEBSITE is reloaded the data should automatically clear"
             this.clearGuestData();
         }
 
         this.updateNavUI();
         this.bindUnloadAutoClear();
+        this.initSupabaseAuthListener();
+    },
+
+    initSupabaseAuthListener() {
+        if (typeof KrazySupabase === 'undefined') return;
+
+        // 1. Listen for auth changes (e.g. returning from OAuth redirect)
+        KrazySupabase.onAuthStateChange((event, session) => {
+            console.log('⚡ [KrazySupabase Auth]', event, session ? session.user?.email : 'No session');
+            if (session && session.user) {
+                this.syncSupabaseUser(session.user);
+            } else if (event === 'SIGNED_OUT') {
+                if (this.isLoggedIn() && this.currentUser.provider !== 'local') {
+                    this.logout(false);
+                }
+            }
+        });
+
+        // 2. Check initial session (e.g. OAuth callback token in URL)
+        KrazySupabase.getSession().then(({ data }) => {
+            if (data && data.session && data.session.user) {
+                this.syncSupabaseUser(data.session.user);
+            }
+        }).catch(err => {
+            console.warn('⚠️ [KrazySupabase Auth] Failed checking session:', err);
+        });
+    },
+
+    syncSupabaseUser(sbUser) {
+        if (!sbUser) return;
+        const meta = sbUser.user_metadata || {};
+        const rawName = meta.full_name || meta.name || meta.user_name || (sbUser.email ? sbUser.email.split('@')[0] : 'Gamer');
+        const cleanName = (rawName || 'Gamer').trim();
+        const avatarUrl = meta.avatar_url || meta.picture || null;
+        const provider = sbUser.app_metadata?.provider || 'google';
+
+        console.log(`✨ [AuthManager] Synced OAuth user: ${cleanName} via ${provider}`);
+        this.login(cleanName, '', avatarUrl || '👑', {
+            provider: provider,
+            email: sbUser.email || '',
+            isOAuth: true
+        });
+
+        // Clean up OAuth hash or code query params from browser URL
+        if (window.location.hash || window.location.search.includes('code=')) {
+            try {
+                const cleanHref = window.location.origin + window.location.pathname;
+                window.history.replaceState(null, document.title, cleanHref);
+            } catch (e) {}
+        }
+
+        if (typeof renderAuthModalContent === 'function') {
+            renderAuthModalContent();
+        }
     },
 
     bindUnloadAutoClear() {
@@ -623,10 +679,10 @@ const AuthManager = {
     },
 
     getActiveUser() {
-        return this.currentUser || { username: 'Guest', avatar: '👾', isLoggedIn: false };
+        return this.currentUser || { username: 'Guest', avatar: '👾', isLoggedIn: false, provider: 'guest' };
     },
 
-    login(username, pin = '', avatar = '👾') {
+    login(username, pin = '', avatar = '👾', meta = {}) {
         const cleanName = (username || '').trim();
         if (!cleanName || cleanName.toLowerCase() === 'guest') {
             this.logout();
@@ -639,26 +695,32 @@ const AuthManager = {
                 username: cleanName,
                 pin: pin,
                 avatar: avatar,
+                provider: meta.provider || 'local',
+                email: meta.email || '',
                 createdAt: Date.now(),
                 games: {}
             };
         } else {
             if (avatar) registry[cleanName].avatar = avatar;
             if (pin) registry[cleanName].pin = pin;
+            if (meta.provider) registry[cleanName].provider = meta.provider;
+            if (meta.email) registry[cleanName].email = meta.email;
         }
         this.saveRegistry(registry);
 
         this.currentUser = {
             username: cleanName,
             avatar: avatar || registry[cleanName].avatar || '👾',
-            isLoggedIn: true
+            isLoggedIn: true,
+            provider: meta.provider || registry[cleanName].provider || 'local',
+            email: meta.email || registry[cleanName].email || ''
         };
 
         sessionStorage.setItem(this.ACTIVE_USER_SESSION_KEY, JSON.stringify(this.currentUser));
         localStorage.setItem(this.ACTIVE_USER_PERSIST_KEY, JSON.stringify(this.currentUser));
 
         this.updateNavUI();
-        showToast(`Welcome, ${cleanName}! Game saves active for your profile.`, this.currentUser.avatar);
+        showToast(`Welcome, ${cleanName}! Game saves active for your profile.`, (this.currentUser.avatar && this.currentUser.avatar.startsWith('http')) ? '👑' : this.currentUser.avatar);
 
         // If a game is currently playing, sync with the newly authenticated credentials
         KrazyGameStorage.syncActiveGameIframe();
@@ -667,11 +729,12 @@ const AuthManager = {
         }
     },
 
-    logout() {
+    logout(syncSupabase = true) {
         this.currentUser = {
             username: 'Guest',
             avatar: '👾',
-            isLoggedIn: false
+            isLoggedIn: false,
+            provider: 'guest'
         };
 
         sessionStorage.removeItem(this.ACTIVE_USER_SESSION_KEY);
@@ -679,6 +742,10 @@ const AuthManager = {
 
         // Clean temporary session data
         this.clearGuestData();
+
+        if (syncSupabase && typeof KrazySupabase !== 'undefined') {
+            KrazySupabase.signOut();
+        }
 
         this.updateNavUI();
         showToast('Switched to Guest mode. Data auto-clears on reload.', '⚡');
@@ -747,12 +814,19 @@ const AuthManager = {
 
         const user = this.getActiveUser();
 
-        if (avatarEl) avatarEl.textContent = user.avatar;
+        if (avatarEl) {
+            if (user.avatar && (user.avatar.startsWith('http://') || user.avatar.startsWith('https://'))) {
+                avatarEl.innerHTML = `<img src="${user.avatar}" alt="Avatar" class="user-avatar-img">`;
+            } else {
+                avatarEl.textContent = user.avatar || '👾';
+            }
+        }
         if (nameEl) nameEl.textContent = user.isLoggedIn ? user.username : 'Guest';
         if (statusEl) {
             statusEl.className = 'auth-status-dot ' + (user.isLoggedIn ? 'online' : 'guest');
+            const provText = user.provider && user.provider !== 'local' && user.provider !== 'guest' ? ` via ${user.provider}` : '';
             statusEl.title = user.isLoggedIn 
-                ? `Logged in as ${user.username} (Saved per game)` 
+                ? `Logged in as ${user.username}${provText} (Saved per game)` 
                 : 'Guest Session (Auto-clears on website reload)';
         }
 
@@ -1956,6 +2030,12 @@ function setupAuthModal() {
     const pinInput = document.getElementById('auth-pin-input');
     const avatarPicker = document.getElementById('auth-avatar-picker');
 
+    // Social & Quick Guest Buttons
+    const btnGoogle = document.getElementById('btn-auth-google');
+    const btnInstagram = document.getElementById('btn-auth-instagram');
+    const btnFacebook = document.getElementById('btn-auth-facebook');
+    const btnGuestQuick = document.getElementById('btn-auth-guest-quick');
+
     let selectedAvatar = '👾';
 
     if (!modal) return;
@@ -1976,6 +2056,65 @@ function setupAuthModal() {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
+
+    // 1. Quick Guest Mode
+    if (btnGuestQuick) {
+        btnGuestQuick.addEventListener('click', () => {
+            AuthManager.logout();
+            renderAuthModalContent();
+            showToast('Switched to Quick Guest Session! Instant play active.', '⚡');
+        });
+    }
+
+    // 2. Google OAuth Sign-In
+    if (btnGoogle) {
+        btnGoogle.addEventListener('click', async () => {
+            if (typeof KrazySupabase !== 'undefined' && KrazySupabase.isConfigured()) {
+                showToast('Connecting to Google Sign-In...', '🚀');
+                const { error } = await KrazySupabase.signInWithOAuth('google');
+                if (error) {
+                    console.error('Google OAuth error:', error);
+                    showToast(`Google Sign-In: ${error.message || 'Ensure Google provider is enabled in Supabase'}`, '⚠️');
+                }
+            } else {
+                showToast('Supabase is not configured yet. Check credentials in supabase-config.js', '⚠️');
+            }
+        });
+    }
+
+    // 3. Instagram / Meta Sign-In
+    if (btnInstagram) {
+        btnInstagram.addEventListener('click', async () => {
+            if (typeof KrazySupabase !== 'undefined' && KrazySupabase.isConfigured()) {
+                showToast('Connecting to Instagram / Meta Sign-In...', '📷');
+                const { error } = await KrazySupabase.signInWithOAuth('facebook', {
+                    scopes: 'public_profile,email'
+                });
+                if (error) {
+                    console.error('Instagram OAuth error:', error);
+                    showToast(`Instagram Login: ${error.message || 'Ensure Meta provider is enabled in Supabase'}`, '⚠️');
+                }
+            } else {
+                showToast('Supabase is not configured yet. Check credentials in supabase-config.js', '⚠️');
+            }
+        });
+    }
+
+    // 4. Facebook OAuth Sign-In
+    if (btnFacebook) {
+        btnFacebook.addEventListener('click', async () => {
+            if (typeof KrazySupabase !== 'undefined' && KrazySupabase.isConfigured()) {
+                showToast('Connecting to Facebook Sign-In...', '🚀');
+                const { error } = await KrazySupabase.signInWithOAuth('facebook');
+                if (error) {
+                    console.error('Facebook OAuth error:', error);
+                    showToast(`Facebook Sign-In: ${error.message || 'Ensure Facebook provider is enabled in Supabase'}`, '⚠️');
+                }
+            } else {
+                showToast('Supabase is not configured yet. Check credentials in supabase-config.js', '⚠️');
+            }
+        });
+    }
 
     // Avatar selector
     if (avatarPicker) {
@@ -2000,7 +2139,7 @@ function setupAuthModal() {
                 if (usernameInput) usernameInput.focus();
                 return;
             }
-            AuthManager.login(name, pin, selectedAvatar);
+            AuthManager.login(name, pin, selectedAvatar, { provider: 'local' });
             renderAuthModalContent();
         });
     }
@@ -2061,18 +2200,26 @@ function renderAuthModalContent() {
     const currentNotice = document.getElementById('auth-current-notice');
     const btnLogout = document.getElementById('btn-auth-logout');
 
-    if (currentAvatar) currentAvatar.textContent = user.avatar;
+    if (currentAvatar) {
+        if (user.avatar && (user.avatar.startsWith('http://') || user.avatar.startsWith('https://'))) {
+            currentAvatar.innerHTML = `<img src="${user.avatar}" alt="Avatar" class="user-avatar-img">`;
+        } else {
+            currentAvatar.textContent = user.avatar || '👾';
+        }
+    }
     if (currentUsername) currentUsername.textContent = user.isLoggedIn ? user.username : 'Guest Player';
     
     if (currentBadge) {
         currentBadge.className = 'auth-badge-pill ' + (user.isLoggedIn ? 'online' : 'guest');
-        currentBadge.textContent = user.isLoggedIn ? '🟢 SAVES ACTIVE' : '⚡ GUEST SESSION';
+        const provBadge = user.provider && user.provider !== 'local' && user.provider !== 'guest' ? ` · ${user.provider.toUpperCase()}` : '';
+        currentBadge.textContent = user.isLoggedIn ? `🟢 SAVES ACTIVE${provBadge}` : '⚡ GUEST SESSION';
     }
 
     if (currentNotice) {
+        const provNotice = user.provider && user.provider !== 'local' && user.provider !== 'guest' ? ` (Signed in via ${user.provider})` : '';
         currentNotice.textContent = user.isLoggedIn
-            ? '✅ Cloud Saves Active — All game high scores, levels, and coins save to your profile.'
-            : '⚠️ Temporary Session — All game progress automatically clears when the website is reloaded.';
+            ? `✅ Cloud Saves Active${provNotice} — All game high scores, levels, and coins save to your profile.`
+            : '⚡ Temporary Guest Session — Instant play active. All game progress automatically clears when the website is reloaded.';
     }
 
     if (btnLogout) {

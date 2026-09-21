@@ -108,9 +108,10 @@ function startServer(port) {
         }
     });
 
-    server.listen(port, () => {
+    server.listen(port, '0.0.0.0', () => {
         const url = `http://localhost:${port}`;
         console.log(`\n⚡ Krazio Games Local Server is live at: ${url}`);
+        console.log(`   IPv4: http://127.0.0.1:${port}`);
         console.log(`🚀 Opening Google Chrome...\n`);
 
         // Open Chrome automatically AFTER the server is ready
