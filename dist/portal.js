@@ -1750,20 +1750,6 @@ function setupSuggestModal() {
     if (tabCompose) tabCompose.addEventListener('click', () => switchTab('compose'));
     if (tabFeed) tabFeed.addEventListener('click', () => switchTab('feed'));
 
-    if (statusBadge) {
-        statusBadge.addEventListener('click', () => {
-            closeModal();
-            openSupabaseModal();
-        });
-    }
-
-    if (btnOpenSettings) {
-        btnOpenSettings.addEventListener('click', () => {
-            closeModal();
-            openSupabaseModal();
-        });
-    }
-
     if (btnSubmit && input) {
         btnSubmit.addEventListener('click', async () => {
             const val = input.value.trim();
@@ -1877,100 +1863,10 @@ function escapeHtml(str) {
 }
 
 // ==========================================================
-// SUPABASE REALTIME CONFIGURATION MODAL CONTROLLER
+// SUPABASE REALTIME EVENT LISTENERS (BACKGROUND / CODING DRIVEN)
 // ==========================================================
-function openSupabaseModal() {
-    const modal = document.getElementById('supabase-modal');
-    if (!modal) return;
-    modal.classList.add('active');
-
-    const urlInput = document.getElementById('supabase-url-input');
-    const keyInput = document.getElementById('supabase-key-input');
-    const feedback = document.getElementById('supabase-test-feedback');
-    if (feedback) feedback.classList.add('hidden');
-
-    if (typeof KrazySupabase !== 'undefined') {
-        const cfg = KrazySupabase.getConfig();
-        if (urlInput) urlInput.value = cfg.url || '';
-        if (keyInput) keyInput.value = cfg.anonKey || '';
-    }
-}
-
-function closeSupabaseModal() {
-    const modal = document.getElementById('supabase-modal');
-    if (modal) modal.classList.remove('active');
-}
-
-function setupSupabaseModal() {
-    const modal = document.getElementById('supabase-modal');
-    const btnOpenNav = document.getElementById('btn-open-supabase-modal');
-    const btnClose = document.getElementById('btn-close-supabase-modal');
-    const btnCancel = document.getElementById('btn-supabase-cancel');
-    const btnSave = document.getElementById('btn-supabase-save');
-    const btnClear = document.getElementById('btn-supabase-clear');
-    const feedback = document.getElementById('supabase-test-feedback');
-    const urlInput = document.getElementById('supabase-url-input');
-    const keyInput = document.getElementById('supabase-key-input');
-
-    if (btnOpenNav) btnOpenNav.addEventListener('click', openSupabaseModal);
-    if (btnClose) btnClose.addEventListener('click', closeSupabaseModal);
-    if (btnCancel) btnCancel.addEventListener('click', closeSupabaseModal);
-    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeSupabaseModal(); });
-
-    if (btnSave) {
-        btnSave.addEventListener('click', () => {
-            const url = (urlInput?.value || '').trim();
-            const key = (keyInput?.value || '').trim();
-
-            if (!url || !key) {
-                if (feedback) {
-                    feedback.className = 'supabase-feedback-box error';
-                    feedback.textContent = '⚠️ Please enter both your Supabase Project URL and Anon Key.';
-                    feedback.classList.remove('hidden');
-                }
-                return;
-            }
-
-            if (typeof KrazySupabase !== 'undefined') {
-                const ok = KrazySupabase.saveCredentials(url, key);
-                if (ok) {
-                    if (feedback) {
-                        feedback.className = 'supabase-feedback-box success';
-                        feedback.textContent = '🟢 Connected to Supabase! Live sync active for likes and pitches.';
-                        feedback.classList.remove('hidden');
-                    }
-                    showToast('⚡ Supabase Live Connected!', '🟢');
-                    updateNavSupabaseStatus(true);
-                    setTimeout(() => closeSupabaseModal(), 1200);
-                } else {
-                    if (feedback) {
-                        feedback.className = 'supabase-feedback-box error';
-                        feedback.textContent = '❌ Could not initialize client. Verify your URL and Anon Key.';
-                        feedback.classList.remove('hidden');
-                    }
-                }
-            }
-        });
-    }
-
-    if (btnClear) {
-        btnClear.addEventListener('click', () => {
-            if (typeof KrazySupabase !== 'undefined') {
-                KrazySupabase.clearCredentials();
-            }
-            if (urlInput) urlInput.value = '';
-            if (keyInput) keyInput.value = '';
-            if (feedback) {
-                feedback.className = 'supabase-feedback-box error';
-                feedback.textContent = 'Switched to Local Offline mode.';
-                feedback.classList.remove('hidden');
-            }
-            showToast('⚡ Reset to local offline storage', 'ℹ️');
-            updateNavSupabaseStatus(false);
-        });
-    }
-
-    // Realtime event listeners
+function setupSupabaseRealtimeListeners() {
+    // Realtime event listeners for live broadcasts
     window.addEventListener('krazy:reaction_changed', (e) => {
         const payload = e.detail;
         if (!payload) return;
@@ -1999,21 +1895,6 @@ function setupSupabaseModal() {
             showToast(`💡 New game pitch from ${newPitch.username || 'someone'}!`, '✨');
         }
     });
-
-    if (typeof KrazySupabase !== 'undefined') {
-        updateNavSupabaseStatus(KrazySupabase.isConfigured());
-    }
-}
-
-function updateNavSupabaseStatus(isOnline) {
-    const navLabel = document.getElementById('nav-supabase-label');
-    const navBtn = document.getElementById('btn-open-supabase-modal');
-    if (navLabel) {
-        navLabel.textContent = isOnline ? '⚡ Live Online' : '⚡ Supabase Live';
-    }
-    if (navBtn) {
-        navBtn.classList.toggle('online', isOnline);
-    }
 }
 
 // Theme Toggle
@@ -2386,7 +2267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEcoMode();
     setupAuthModal();
     setupAudienceModal();
-    setupSupabaseModal();
+    setupSupabaseRealtimeListeners();
 
     // Wire Up Action Bar Buttons
     const btnLike = document.getElementById('btn-game-like');

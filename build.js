@@ -11,6 +11,7 @@ const itemsToCopy = [
   'index.html',
   'portal.css',
   'portal.js',
+  'supabase-config.js',
   'supabase-client.js',
   'supabase-schema.sql',
   'krazio-icon.svg',
