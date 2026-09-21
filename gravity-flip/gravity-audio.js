@@ -18,6 +18,14 @@ class GravityAudioEngine {
         if (this.ctx && this.ctx.state === 'suspended') {
             this.ctx.resume();
         }
+        if (this.ctx && !this.noiseBuffer) {
+            const bufferSize = Math.floor(this.ctx.sampleRate * 0.25);
+            this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+            const data = this.noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+        }
     }
 
     // Gravity Invert Swoop
@@ -95,15 +103,8 @@ class GravityAudioEngine {
         this.init();
 
         const now = this.ctx.currentTime;
-        const bufferSize = this.ctx.sampleRate * 0.18;
-        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-        }
-
         const noise = this.ctx.createBufferSource();
-        noise.buffer = buffer;
+        noise.buffer = this.noiseBuffer;
 
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'highpass';

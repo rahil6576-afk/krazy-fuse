@@ -198,6 +198,30 @@ canvas#gameCanvas {
     border-color: rgba(192, 132, 252, 0.4);
 }
 
+.hud-pill.speed-pill {
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.45);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(2, 132, 199, 0.18));
+    min-width: 112px;
+    justify-content: center;
+    letter-spacing: 0.5px;
+    transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.hud-pill.speed-pill .speed-val {
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    font-size: 1rem;
+}
+
+.hud-pill.speed-pill .speed-unit {
+    font-size: 0.65rem;
+    font-weight: 800;
+    opacity: 0.8;
+    letter-spacing: 0.8px;
+    margin-left: 1px;
+}
+
 .hud-pill.stamina-pill {
     min-width: 120px;
     display: flex;

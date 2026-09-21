@@ -55,8 +55,10 @@
             <button id="btn-live-insights" class="nav-live-ticker" title="Live Players Online across Krazy Fuse — Click for Live Audience Demographics">
                 <span class="live-pulse-dot"></span>
                 <span class="live-ticker-num" id="nav-global-live-count">142,850</span>
+                <span class="live-ticker-divider"></span>
                 <span class="live-ticker-label">LIVE</span>
             </button>
+            <div class="nav-vertical-divider"></div>
             <button id="btn-nav-random" class="nav-icon-btn" title="Play Random Game">
                 <span>🎲</span>
             </button>
@@ -64,12 +66,19 @@
                 <span>🔖</span>
                 <span id="nav-bookmarks-count" class="badge-count hidden">0</span>
             </button>
+            <div class="nav-vertical-divider"></div>
             <button id="btn-theme-toggle" class="btn-theme" title="Toggle Day/Night Theme">
                 <span>☀️ Day</span>
+            </button>
+            <div class="nav-vertical-divider"></div>
+            <button id="btn-open-supabase-modal" class="nav-btn btn-supabase-nav" title="Supabase Cloud Live Monitor & Settings">
+                <span class="status-dot-nav"></span>
+                <span id="nav-supabase-label">⚡ Supabase Live</span>
             </button>
             <button id="btn-open-suggest" class="nav-btn">
                 <span>💡 Pitch Idea</span>
             </button>
+            <div class="nav-vertical-divider"></div>
             <button id="btn-user-auth" class="nav-btn btn-auth-toggle" title="Gamer Account & Profiles">
                 <span id="nav-user-avatar" class="user-avatar-icon">👾</span>
                 <span id="nav-user-name" class="user-name-text">Guest</span>
@@ -505,20 +514,91 @@
         </div>
     </div>
 
-    <!-- Interactive Game Suggestion Modal -->
+    <!-- Interactive Game Suggestion Modal with Live Pitches Feed -->
     <div id="suggest-modal" class="modal-backdrop">
-        <div class="modal-box">
-            <h3 class="modal-title">💡 Pitch a Game to Krazy Fuse</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">What kind of hilarious or addictive game should we build next?</p>
+        <div class="modal-box pitch-modal-box">
+            <div class="pitch-modal-header">
+                <div class="pitch-modal-title-col">
+                    <h3 class="modal-title">💡 Pitch a Game to Krazy Fuse</h3>
+                    <p style="color: var(--text-muted); font-size: 0.88rem;">What wild, hilarious, or addictive web game should we build next?</p>
+                </div>
+                <button id="supabase-status-badge" class="supabase-status-pill offline" title="Click to configure Supabase live cloud monitoring">
+                    <span class="status-dot"></span>
+                    <span id="pitch-status-text">⚡ Local Offline</span>
+                </button>
+            </div>
 
-            <textarea id="idea-input" class="modal-input" rows="4" placeholder="e.g. A game where you play as an overly aggressive barista fighting off caffeinated zombies..."></textarea>
+            <!-- Pitch Modal View Tabs -->
+            <div class="pitch-tabs-row">
+                <button id="tab-btn-pitch-compose" class="pitch-tab-btn active">✍️ Submit Concept</button>
+                <button id="tab-btn-pitch-feed" class="pitch-tab-btn">🔥 Live Pitches Feed (<span id="saved-ideas-count">0</span>)</button>
+            </div>
 
-            <div id="stored-ideas-list" style="display: none; max-height: 180px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-top: 10px; font-size: 0.88rem;"></div>
+            <!-- Tab 1: Compose Pitch View -->
+            <div id="pitch-compose-view" class="pitch-view-panel">
+                <textarea id="idea-input" class="modal-input" rows="4" placeholder="e.g. A game where you play as an overly aggressive barista fighting off caffeinated zombies with espresso foam..."></textarea>
+                <div class="pitch-tips-row">
+                    <span>⚡ All pitches stream in real-time to the developer feed!</span>
+                </div>
+            </div>
 
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px;">
-                <button id="btn-toggle-saved" class="nav-btn" style="font-size: 0.82rem;">📋 Saved (<span id="saved-ideas-count">0</span>)</button>
-                <button id="btn-close-modal" class="nav-btn">Cancel</button>
-                <button id="btn-submit-idea" class="btn-arcade-cta" style="padding: 8px 20px; font-size: 1rem;">SUBMIT CONCEPT</button>
+            <!-- Tab 2: Live Community Feed View -->
+            <div id="stored-ideas-list" class="pitch-view-panel" style="display: none;">
+                <div class="pitch-feed-loading">Loading live community pitches...</div>
+            </div>
+
+            <div class="pitch-modal-footer">
+                <button id="btn-open-supabase-settings" class="nav-btn" style="font-size: 0.82rem;" title="Configure Supabase Cloud Settings">⚙️ Supabase Settings</button>
+                <div style="display: flex; gap: 10px;">
+                    <button id="btn-close-modal" class="nav-btn">Cancel</button>
+                    <button id="btn-submit-idea" class="btn-arcade-cta" style="padding: 8px 22px; font-size: 0.98rem;">SUBMIT CONCEPT 🚀</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Cloud Live Monitoring Setup Modal -->
+    <div id="supabase-modal" class="modal-backdrop">
+        <div class="modal-box supabase-config-box">
+            <div class="auth-modal-header">
+                <div class="auth-title-wrap">
+                    <span class="auth-header-icon">⚡</span>
+                    <div>
+                        <h3 class="modal-title">Supabase Live Cloud Setup</h3>
+                        <p class="auth-modal-desc">
+                            Connect your free Supabase database to monitor game likes, dislikes, and player pitches in real-time.
+                        </p>
+                    </div>
+                </div>
+                <button id="btn-close-supabase-modal" class="modal-close-icon-btn" title="Close">✕</button>
+            </div>
+
+            <div class="supabase-info-banner">
+                <div class="banner-badge">📋 SQL Schema Ready</div>
+                <p>Run the SQL commands from <code>supabase-schema.sql</code> in your Supabase <strong>SQL Editor</strong>, then paste your project credentials below.</p>
+            </div>
+
+            <div class="auth-form-section" style="margin-top: 15px;">
+                <div class="auth-inputs-grid" style="grid-template-columns: 1fr;">
+                    <div class="auth-input-group">
+                        <label for="supabase-url-input">Supabase Project URL</label>
+                        <input type="text" id="supabase-url-input" class="auth-text-input" placeholder="https://your-project-id.supabase.co" autocomplete="off">
+                    </div>
+                    <div class="auth-input-group">
+                        <label for="supabase-key-input">Supabase Anon Public Key</label>
+                        <input type="text" id="supabase-key-input" class="auth-text-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." autocomplete="off">
+                    </div>
+                </div>
+
+                <div id="supabase-test-feedback" class="supabase-feedback-box hidden"></div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <button id="btn-supabase-clear" class="nav-btn" style="color: #ff6b6b;" title="Reset back to local offline mode">Reset to Offline</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btn-supabase-cancel" class="nav-btn">Cancel</button>
+                        <button id="btn-supabase-save" class="btn-arcade-cta" style="padding: 8px 20px;">SAVE & CONNECT</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -724,7 +804,9 @@
         <p class="footer-desc">© 2026 Krazy Fuse • Fast, Playful & Chaotic Web Arcade • New games dropping regularly!</p>
     </footer>
 
-    <!-- Portal Scripts -->
+    <!-- Supabase Realtime & Portal Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
     <script src="portal.js"></script>
 </body>
 </html>

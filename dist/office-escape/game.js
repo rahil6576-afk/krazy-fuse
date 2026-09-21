@@ -751,15 +751,19 @@ class Player {
 
         if (this.invulnerableTimer > 0 && Math.floor(this.animFrame / 3) % 2 === 0) ctx.globalAlpha = 0.48;
 
-        // Shield / dash / buff aura
+        // Shield / dash / buff aura (Clean layered aura without shadowBlur)
         if (this.shield > 0 || this.isDashing || this.coffeeTimer > 0) {
             const aura = this.coffeeTimer > 0 ? '#ffb72e' : accent;
             ctx.save();
             ctx.strokeStyle = aura;
+            ctx.lineWidth = 4;
+            ctx.globalAlpha = 0.25;
+            ctx.beginPath();
+            ctx.arc(cx, py + 34, 37 + Math.sin(this.animFrame * 0.18) * 2, 0, Math.PI * 2);
+            ctx.stroke();
+
             ctx.lineWidth = 2;
-            ctx.globalAlpha = 0.72;
-            ctx.shadowColor = aura;
-            ctx.shadowBlur = 16;
+            ctx.globalAlpha = 0.85;
             ctx.setLineDash(this.shield > 0 ? [6, 5] : []);
             ctx.beginPath();
             ctx.arc(cx, py + 34, 35 + Math.sin(this.animFrame * 0.18) * 2, 0, Math.PI * 2);
@@ -982,35 +986,37 @@ class Player {
 // Particle System
 let particles = [];
 
-function createDust(x, y, count = 4) {
-    for (let i = 0; i < count; i++) {
+function createDust(x, y, count = 2) {
+    if (particles.length > 50) particles.splice(0, particles.length - 50);
+    const num = Math.min(count, 3);
+    for (let i = 0; i < num; i++) {
         particles.push({
             x: x + (Math.random() - 0.5) * 16,
             y: y + (Math.random() - 0.5) * 4,
             vx: -gameSpeed * 0.4 - Math.random() * 2,
             vy: -Math.random() * 1.5,
-            size: 3 + Math.random() * 3,
+            size: 2.5 + Math.random() * 2.5,
             color: 'rgba(203, 213, 225, 0.5)',
-            life: 14
-        });
-    }
-}
-
-function createSlideSparks(x, y) {
-    for (let i = 0; i < 2; i++) {
-        particles.push({
-            x: x,
-            y: y - 2,
-            vx: -gameSpeed * 0.8 - Math.random() * 3,
-            vy: -Math.random() * 2,
-            size: 2 + Math.random() * 2,
-            color: Math.random() > 0.5 ? '#f59e0b' : '#38bdf8',
             life: 12
         });
     }
 }
 
+function createSlideSparks(x, y) {
+    if (particles.length > 50) particles.splice(0, particles.length - 50);
+    particles.push({
+        x: x,
+        y: y - 2,
+        vx: -gameSpeed * 0.8 - Math.random() * 3,
+        vy: -Math.random() * 2,
+        size: 2 + Math.random() * 2,
+        color: Math.random() > 0.5 ? '#f59e0b' : '#38bdf8',
+        life: 10
+    });
+}
+
 function createJumpRings(x, y) {
+    if (particles.length > 50) particles.splice(0, particles.length - 50);
     particles.push({
         type: 'ring',
         x: x,
@@ -1023,6 +1029,7 @@ function createJumpRings(x, y) {
 }
 
 function createGhostTrail(player) {
+    if (particles.length > 50) particles.splice(0, particles.length - 50);
     particles.push({
         type: 'ghost',
         x: player.x,
@@ -1035,18 +1042,19 @@ function createGhostTrail(player) {
 }
 
 function createBlastConfetti(x, y) {
+    if (particles.length > 50) particles.splice(0, particles.length - 50);
     const colors = ['#f43f5e', '#38bdf8', '#fbbf24', '#34d399', '#a855f7'];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 10; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const spd = 2 + Math.random() * 6;
+        const spd = 2 + Math.random() * 5;
         particles.push({
             x: x,
             y: y,
             vx: Math.cos(angle) * spd,
             vy: Math.sin(angle) * spd,
-            size: 3 + Math.random() * 4,
+            size: 2.5 + Math.random() * 3,
             color: colors[Math.floor(Math.random() * colors.length)],
-            life: 20
+            life: 16
         });
     }
 }
@@ -1270,7 +1278,7 @@ class BackgroundManager {
         for(let i=-1;i<11;i++){const x=i*105+far,h=bh[(i+10)%bh.length]; ctx.fillStyle='#091321'; ctx.fillRect(x,280-h,78,h); ctx.fillStyle='#b9c7d9'; ctx.globalAlpha=.07; for(let r=0;r<5;r++)for(let c=0;c<3;c++)ctx.fillRect(x+12+c*20,255-h+r*25,7,9); ctx.globalAlpha=.38;} ctx.restore();
         ctx.fillStyle='rgba(29,43,61,.92)'; ctx.fillRect(0,112,1000,390); ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(0,112,1000,2);
         for(let i=-1;i<8;i++){const x=i*170+mid,y=142,w=142,h=190; ctx.save(); ctx.fillStyle='rgba(7,18,31,.72)'; ctx.strokeStyle='rgba(157,185,211,.24)'; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(x,y,w,h,8); ctx.fill(); ctx.stroke(); ctx.fillStyle='rgba(40,70,94,.45)'; ctx.fillRect(x+10,y+105,42,75); ctx.fillRect(x+58,y+76,28,104); ctx.fillRect(x+91,y+116,40,64); ctx.fillStyle=accent; ctx.globalAlpha=.13; for(let r=0;r<3;r++){ctx.fillRect(x+18,y+34+r*35,7,10);ctx.fillRect(x+36,y+34+r*35,7,10);ctx.fillRect(x+101,y+40+r*35,7,10);} ctx.globalAlpha=1; const rf=ctx.createLinearGradient(x,y,x+w,y+h); rf.addColorStop(0,'rgba(255,255,255,.10)'); rf.addColorStop(.18,'rgba(255,255,255,.015)'); rf.addColorStop(.48,'rgba(255,255,255,0)'); rf.addColorStop(1,'rgba(0,0,0,.10)'); ctx.fillStyle=rf; ctx.fill(); ctx.restore();}
-        for(let i=-1;i<6;i++){const x=i*220+mid*.7,y=346+(i&1)*14; ctx.save(); ctx.shadowColor='rgba(0,0,0,.25)'; ctx.shadowBlur=12; ctx.fillStyle='rgba(46,62,82,.88)'; ctx.beginPath(); ctx.roundRect(x,y,176,108,9); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#101a2b'; ctx.beginPath(); ctx.roundRect(x+16,y+25,62,44,5); ctx.fill(); ctx.beginPath(); ctx.roundRect(x+91,y+25,62,44,5); ctx.fill(); ctx.fillStyle='rgba(56,189,248,.18)'; ctx.fillRect(x+25,y+35,44,2); ctx.fillRect(x+100,y+35,44,2); ctx.fillStyle='rgba(255,255,255,.09)'; ctx.fillRect(x+11,y+80,154,6); ctx.fillStyle='rgba(8,15,27,.7)'; ctx.fillRect(x+25,y+90,6,28); ctx.fillRect(x+145,y+90,6,28); ctx.restore();}
+        for(let i=-1;i<6;i++){const x=i*220+mid*.7,y=346+(i&1)*14; ctx.save(); ctx.fillStyle='rgba(46,62,82,.88)'; ctx.beginPath(); ctx.roundRect(x,y,176,108,9); ctx.fill(); ctx.fillStyle='#101a2b'; ctx.beginPath(); ctx.roundRect(x+16,y+25,62,44,5); ctx.fill(); ctx.beginPath(); ctx.roundRect(x+91,y+25,62,44,5); ctx.fill(); ctx.fillStyle='rgba(56,189,248,.18)'; ctx.fillRect(x+25,y+35,44,2); ctx.fillRect(x+100,y+35,44,2); ctx.fillStyle='rgba(255,255,255,.09)'; ctx.fillRect(x+11,y+80,154,6); ctx.fillStyle='rgba(8,15,27,.7)'; ctx.fillRect(x+25,y+90,6,28); ctx.fillRect(x+145,y+90,6,28); ctx.restore();}
         for(let i=-1;i<8;i++){const x=i*185+near; const g=ctx.createLinearGradient(x,110,x+14,500); g.addColorStop(0,'rgba(105,128,151,.22)'); g.addColorStop(.5,'rgba(11,22,36,.28)'); g.addColorStop(1,'rgba(105,128,151,.10)'); ctx.fillStyle=g; ctx.fillRect(x,112,14,388); ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(x+2,126,2,360);}
     }
 
@@ -1410,14 +1418,20 @@ class Obstacle {
         ctx.restore();
 
         const hazard = (color='#ff5722') => {
+            ctx.save();
             ctx.strokeStyle = color;
-            ctx.lineWidth = 3;
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 18 * pulse;
+            ctx.lineWidth = 5;
+            ctx.globalAlpha = 0.25;
             ctx.beginPath();
-            ctx.roundRect(x - 3, y - 3, w + 6, h + 6, 7);
+            ctx.roundRect(x - 4, y - 4, w + 8, h + 8, 8);
             ctx.stroke();
-            ctx.shadowBlur = 0;
+
+            ctx.lineWidth = 2.5;
+            ctx.globalAlpha = 0.95;
+            ctx.beginPath();
+            ctx.roundRect(x - 2, y - 2, w + 4, h + 4, 6);
+            ctx.stroke();
+            ctx.restore();
         };
         const stripe = (sx, sy, sw, sh, color='#f9c74f') => {
             ctx.save(); ctx.beginPath(); ctx.rect(sx, sy, sw, sh); ctx.clip();
@@ -1488,7 +1502,6 @@ class Obstacle {
             case 'TASK_BOULDER': {
                 ctx.save();
                 ctx.translate(x+w/2,y+h/2); ctx.rotate(this.rot);
-                ctx.shadowColor='#ff3b4d'; ctx.shadowBlur=22*pulse;
                 // Steel warning crate
                 const g=ctx.createLinearGradient(-w/2,-h/2,w/2,h/2); g.addColorStop(0,'#4a2027');g.addColorStop(.5,'#b43c32');g.addColorStop(1,'#4d1b23');
                 ctx.fillStyle=g; ctx.strokeStyle='#ff6b5a'; ctx.lineWidth=3;
@@ -1542,12 +1555,13 @@ class Obstacle {
 
                 // Glowing Camera / Sensor Visor
                 ctx.fillStyle = '#f43f5e';
-                ctx.shadowColor = '#f43f5e';
-                ctx.shadowBlur = 12;
                 ctx.beginPath();
                 ctx.ellipse(x + w / 2, hoverY + h / 2 + 2, 9, 6, 0, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(x + w / 2, hoverY + h / 2 + 2, 2.5, 0, Math.PI * 2);
+                ctx.fill();
 
                 // Bright "SLIDE ⬇" Warning Badge above the drone
                 ctx.fillStyle = '#fbbf24';
@@ -1621,11 +1635,9 @@ class Item {
         ctx.arc(cx, cy, 18 + Math.sin(this.anim * 2) * 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // High-contrast neon pickup rendering
-        ctx.shadowBlur = 16;
+        // High-contrast neon pickup rendering (fast vector styling without shadowBlur)
         switch (this.type) {
             case 'COIN': {
-                ctx.shadowColor = '#fbbf24';
                 const squash = 0.35 + Math.abs(Math.cos(this.anim * 1.5)) * 0.65;
                 ctx.fillStyle = '#fbbf24';
                 ctx.strokeStyle = '#fff7ae';
@@ -1640,7 +1652,6 @@ class Item {
                 break;
             }
             case 'COFFEE': {
-                ctx.shadowColor = '#f59e0b';
                 // Cup + handle.
                 ctx.fillStyle = '#f8fafc';
                 ctx.strokeStyle = '#cbd5e1';
@@ -1656,7 +1667,6 @@ class Item {
                 break;
             }
             case 'HEADPHONES': {
-                ctx.shadowColor = '#38bdf8';
                 ctx.strokeStyle = '#38bdf8';
                 ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.arc(cx, cy + 2, 12, Math.PI, Math.PI * 2); ctx.stroke();
@@ -1668,7 +1678,6 @@ class Item {
                 break;
             }
             case 'PTO': {
-                ctx.shadowColor = '#34d399';
                 ctx.fillStyle = '#ecfdf5';
                 ctx.strokeStyle = '#34d399';
                 ctx.lineWidth = 1.5;
@@ -1679,7 +1688,6 @@ class Item {
                 break;
             }
             case 'OOO': {
-                ctx.shadowColor = '#a855f7';
                 ctx.fillStyle = '#faf5ff';
                 ctx.strokeStyle = '#a855f7';
                 ctx.lineWidth = 1.5;
@@ -2039,7 +2047,6 @@ function updateGame() {
                     const rem = penalty - runCoins;
                     runCoins = 0;
                     totalCoins = Math.max(0, totalCoins - rem);
-                    storage.set('coins', totalCoins);
                 }
                 createScorePopup(player.x, player.y - 20, `SHIELD BROKE! -${penalty} P`, '#ff4757');
             } else if (player.hasExtraLife) {
@@ -2194,12 +2201,15 @@ const _hudElements = {
     zone: null,
     staminaFill: null,
     staminaVal: null,
-    powerupBar: null
+    powerupBar: null,
+    speedVal: null,
+    speedPill: null
 };
 
 let _lastHudUpdateFrame = 0;
 let _lastStamPct = -1;
 let _lastPowerupKey = '';
+let _lastKmh = -1;
 
 function updateHUD(biome) {
     if (!_hudElements.time) {
@@ -2209,11 +2219,33 @@ function updateHUD(biome) {
         _hudElements.staminaFill = document.getElementById('stamina-fill');
         _hudElements.staminaVal = document.getElementById('hud-stamina-val');
         _hudElements.powerupBar = document.getElementById('active-powerup-bar');
+        _hudElements.speedVal = document.getElementById('hud-speed-val');
+        _hudElements.speedPill = document.getElementById('hud-speed-pill');
     }
 
     if (_hudElements.time) _hudElements.time.textContent = survivalTime.toFixed(1) + 's';
     if (_hudElements.coins) _hudElements.coins.textContent = (totalCoins + runCoins) + ' P';
     if (_hudElements.zone) _hudElements.zone.textContent = biome.name;
+
+    // Real-Time Speedometer (KM/H)
+    const currentSpeed = (typeof window.smoothSpeed !== 'undefined') ? window.smoothSpeed : gameSpeed;
+    const kmh = Math.max(16, Math.round(currentSpeed * 3.6));
+    if (_hudElements.speedVal && kmh !== _lastKmh) {
+        _lastKmh = kmh;
+        _hudElements.speedVal.textContent = kmh;
+        if (_hudElements.speedPill) {
+            if (kmh >= 45) {
+                _hudElements.speedPill.style.borderColor = '#f43f5e';
+                _hudElements.speedPill.style.color = '#ff6b81';
+            } else if (kmh >= 32) {
+                _hudElements.speedPill.style.borderColor = '#fbbf24';
+                _hudElements.speedPill.style.color = '#fde047';
+            } else {
+                _hudElements.speedPill.style.borderColor = 'rgba(56, 189, 248, 0.45)';
+                _hudElements.speedPill.style.color = '#38bdf8';
+            }
+        }
+    }
 
     const stamPct = Math.max(0, Math.min(100, Math.round(player.stamina / player.maxStamina * 100)));
     if (_hudElements.staminaFill && stamPct !== _lastStamPct) {

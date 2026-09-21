@@ -14,8 +14,16 @@ class SoundManager {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             this.ctx = new AudioContext();
         }
-        if (this.ctx.state === 'suspended') {
+        if (this.ctx && this.ctx.state === 'suspended') {
             this.ctx.resume();
+        }
+        if (this.ctx && !this.slideNoiseBuffer) {
+            const bufferSize = Math.floor(this.ctx.sampleRate * 0.25);
+            this.slideNoiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+            const data = this.slideNoiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
         }
     }
 
@@ -99,14 +107,8 @@ class SoundManager {
         this.init();
         if (this.isMuted || !this.ctx) return;
         try {
-            const bufferSize = Math.floor(this.ctx.sampleRate * 0.2);
-            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = Math.random() * 2 - 1;
-            }
             const noise = this.ctx.createBufferSource();
-            noise.buffer = buffer;
+            noise.buffer = this.slideNoiseBuffer;
 
             const filter = this.ctx.createBiquadFilter();
             filter.type = 'bandpass';

@@ -102,12 +102,36 @@ body {
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--card-border);
     gap: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) rgba(255, 255, 255, 0.08);
+}
+
+.navbar::-webkit-scrollbar {
+    height: 6px;
+}
+
+.navbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 999px;
+}
+
+.navbar::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 999px;
+    box-shadow: 0 0 8px rgba(255, 204, 0, 0.6);
+}
+
+.navbar::-webkit-scrollbar-thumb:hover {
+    background: #ffe066;
 }
 
 .nav-left {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 20px;
+    flex-shrink: 0;
 }
 
 /* Tilted Playful Arcade Logo */
@@ -199,6 +223,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .nav-shortcut-btn {
@@ -213,6 +238,7 @@ body {
     cursor: pointer;
     transition: all 0.15s ease;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .nav-shortcut-btn:hover {
@@ -225,11 +251,20 @@ body {
     background: rgba(255, 204, 0, 0.12);
 }
 
+.nav-center {
+    flex-shrink: 0;
+}
+
 /* Nav Actions */
 .nav-actions {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-shrink: 0;
+}
+
+.nav-actions > * {
+    flex-shrink: 0;
 }
 
 .nav-search-wrap {
@@ -2866,6 +2901,32 @@ body.eco-mode .game-screen-wrapper {
     transition: color 0.2s ease;
 }
 
+.live-ticker-divider {
+    width: 1.5px;
+    height: 15px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 1px;
+    margin: 0 1px;
+    flex-shrink: 0;
+}
+
+[data-theme="day"] .live-ticker-divider {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.nav-vertical-divider {
+    width: 1px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 1px;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+[data-theme="day"] .nav-vertical-divider {
+    background: rgba(0, 0, 0, 0.12);
+}
+
 .live-ticker-label {
     background: #22c55e;
     color: #052e16;
@@ -3179,6 +3240,228 @@ body.eco-mode .game-screen-wrapper {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* ==========================================================
+   SUPABASE LIVE SYNC & REALTIME MONITORING STYLES
+   ========================================================== */
+.btn-supabase-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #34d399;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-supabase-nav:hover {
+    background: rgba(16, 185, 129, 0.22);
+    border-color: #34d399;
+    transform: translateY(-1px);
+}
+.status-dot-nav {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    animation: navPulse 2s infinite ease-in-out;
+}
+@keyframes navPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+.supabase-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.supabase-status-pill.online {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.4);
+}
+.supabase-status-pill.offline {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.4);
+}
+.supabase-status-pill .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* Pitch Modal Enhancements */
+.pitch-modal-box {
+    max-width: 580px;
+    width: 95%;
+}
+.pitch-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.pitch-tabs-row {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 14px;
+    padding-bottom: 4px;
+}
+.pitch-tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+.pitch-tab-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+.pitch-tab-btn.active {
+    color: #fff;
+    background: rgba(99, 102, 241, 0.25);
+    border: 1px solid rgba(99, 102, 241, 0.5);
+}
+.pitch-tips-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+.pitch-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+}
+
+/* Live Community Feed */
+#stored-ideas-list {
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px;
+}
+.pitch-item-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: fadeInPitch 0.3s ease-out;
+}
+@keyframes fadeInPitch {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.pitch-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+}
+.pitch-item-user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+.pitch-item-time {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+.pitch-item-text {
+    color: #cbd5e1;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    word-break: break-word;
+}
+.pitch-status-tag {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(99, 102, 241, 0.2);
+    color: #818cf8;
+}
+
+/* Supabase Config Modal */
+.supabase-config-box {
+    max-width: 520px;
+    width: 95%;
+}
+.supabase-info-banner {
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: #c7d2fe;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+.banner-badge {
+    display: inline-block;
+    font-weight: 800;
+    color: #818cf8;
+    margin-bottom: 4px;
+}
+.supabase-feedback-box {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    margin-top: 12px;
+}
+.supabase-feedback-box.success {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid #10b981;
+    color: #34d399;
+}
+.supabase-feedback-box.error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid #ef4444;
+    color: #f87171;
+}
+
+/* Reaction Bump animation */
+.reaction-pulse {
+    animation: reactionBump 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes reactionBump {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.35); filter: brightness(1.3); }
+    100% { transform: scale(1); }
 }
 
 

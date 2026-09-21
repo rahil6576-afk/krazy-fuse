@@ -1,0 +1,376 @@
+/**
+ * Krazy Fuse Arcade — Supabase Realtime Client Service
+ * Handles live synchronization for Likes, Dislikes, and Game Pitches with offline fallback.
+ */
+
+const KrazySupabase = (function() {
+    const STORAGE_URL_KEY = 'kf_supabase_url';
+    const STORAGE_ANON_KEY = 'kf_supabase_anon_key';
+    const STORAGE_LOCAL_PITCHES_KEY = 'kf_local_saved_pitches';
+    const STORAGE_LOCAL_REACTIONS_KEY = 'kf_local_reactions_counts';
+
+    let client = null;
+    let realtimeChannel = null;
+    let isConnected = false;
+    let reactionListeners = [];
+    let pitchListeners = [];
+
+    function getConfig() {
+        const winConfig = window.KRAZY_SUPABASE_CONFIG || {};
+        const url = (localStorage.getItem(STORAGE_URL_KEY) || winConfig.url || '').trim();
+        const anonKey = (localStorage.getItem(STORAGE_ANON_KEY) || winConfig.anonKey || '').trim();
+        return { url, anonKey };
+    }
+
+    function init() {
+        const { url, anonKey } = getConfig();
+        if (!url || !anonKey) {
+            console.info('⚡ [KrazySupabase] Running in local offline mode. Provide Supabase URL & Anon Key to activate live cloud sync.');
+            isConnected = false;
+            updateConnectionUI();
+            return false;
+        }
+
+        if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
+            console.warn('⚠️ [KrazySupabase] Supabase JS SDK not loaded yet.');
+            isConnected = false;
+            updateConnectionUI();
+            return false;
+        }
+
+        try {
+            client = window.supabase.createClient(url, anonKey, {
+                realtime: {
+                    params: {
+                        eventsPerSecond: 10
+                    }
+                }
+            });
+            isConnected = true;
+            console.log('🟢 [KrazySupabase] Client initialized successfully with cloud backend.');
+            updateConnectionUI();
+            setupRealtimeSubscriptions();
+            return true;
+        } catch (err) {
+            console.error('❌ [KrazySupabase] Initialization failed:', err);
+            isConnected = false;
+            updateConnectionUI();
+            return false;
+        }
+    }
+
+    function isConfigured() {
+        return !!(client && isConnected);
+    }
+
+    function saveCredentials(url, anonKey) {
+        if (url) localStorage.setItem(STORAGE_URL_KEY, url.trim());
+        if (anonKey) localStorage.setItem(STORAGE_ANON_KEY, anonKey.trim());
+        return init();
+    }
+
+    function clearCredentials() {
+        localStorage.removeItem(STORAGE_URL_KEY);
+        localStorage.removeItem(STORAGE_ANON_KEY);
+        if (realtimeChannel && client) {
+            client.removeChannel(realtimeChannel);
+        }
+        client = null;
+        isConnected = false;
+        updateConnectionUI();
+    }
+
+    function updateConnectionUI() {
+        const badge = document.getElementById('supabase-status-badge');
+        if (!badge) return;
+
+        if (isConnected) {
+            badge.className = 'supabase-status-pill online';
+            badge.innerHTML = '<span class="status-dot"></span><span>⚡ Live Supabase Connected</span>';
+            badge.title = 'Real-time live monitoring active for likes & game pitches.';
+        } else {
+            badge.className = 'supabase-status-pill offline';
+            badge.innerHTML = '<span class="status-dot"></span><span>⚡ Local Fallback (Click to Connect Supabase)</span>';
+            badge.title = 'Click to connect your Supabase project URL & Anon key for live cloud monitoring.';
+        }
+    }
+
+    // ==========================================
+    // REALTIME SUBSCRIPTIONS
+    // ==========================================
+    function setupRealtimeSubscriptions() {
+        if (!client) return;
+
+        try {
+            if (realtimeChannel) {
+                client.removeChannel(realtimeChannel);
+            }
+
+            realtimeChannel = client.channel('krazy_fuse_live_sync')
+                // Listen to reaction changes (likes / dislikes)
+                .on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: 'game_reactions' },
+                    (payload) => {
+                        console.log('⚡ [Realtime] Reaction event received:', payload);
+                        notifyReactionListeners(payload);
+                        window.dispatchEvent(new CustomEvent('krazy:reaction_changed', { detail: payload }));
+                    }
+                )
+                // Listen to new game pitch suggestions
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'game_pitches' },
+                    (payload) => {
+                        console.log('💡 [Realtime] New pitch received:', payload);
+                        notifyPitchListeners(payload.new);
+                        window.dispatchEvent(new CustomEvent('krazy:new_pitch', { detail: payload.new }));
+                    }
+                )
+                .subscribe((status) => {
+                    console.log('📡 [KrazySupabase Realtime Status]:', status);
+                });
+        } catch (e) {
+            console.warn('Realtime subscription setup warning:', e);
+        }
+    }
+
+    function onReactionChange(callback) {
+        if (typeof callback === 'function') reactionListeners.push(callback);
+    }
+
+    function onNewPitch(callback) {
+        if (typeof callback === 'function') pitchListeners.push(callback);
+    }
+
+    function notifyReactionListeners(payload) {
+        reactionListeners.forEach(cb => {
+            try { cb(payload); } catch (e) { console.error(e); }
+        });
+    }
+
+    function notifyPitchListeners(newPitch) {
+        pitchListeners.forEach(cb => {
+            try { cb(newPitch); } catch (e) { console.error(e); }
+        });
+    }
+
+    // ==========================================
+    // REACTIONS API (Likes & Dislikes)
+    // ==========================================
+    async function saveReaction(gameId, userIdentifier, reaction) {
+        // reaction: 'like' | 'dislike' | null (to remove)
+        if (!isConfigured()) {
+            return saveLocalReaction(gameId, userIdentifier, reaction);
+        }
+
+        try {
+            if (!reaction) {
+                const { error } = await client
+                    .from('game_reactions')
+                    .delete()
+                    .match({ game_id: gameId, user_identifier: userIdentifier });
+
+                if (error) throw error;
+                return { success: true, removed: true };
+            }
+
+            const { data, error } = await client
+                .from('game_reactions')
+                .upsert({
+                    game_id: gameId,
+                    user_identifier: userIdentifier,
+                    reaction: reaction,
+                    updated_at: new Date().toISOString()
+                }, {
+                    onConflict: 'game_id,user_identifier'
+                })
+                .select();
+
+            if (error) throw error;
+            return { success: true, data };
+        } catch (err) {
+            console.error('❌ Error saving reaction to Supabase, saving locally:', err);
+            return saveLocalReaction(gameId, userIdentifier, reaction);
+        }
+    }
+
+    async function getGameReactionCounts(gameId) {
+        if (!isConfigured()) {
+            return getLocalReactionCounts(gameId);
+        }
+
+        try {
+            const { count: likes, error: errLikes } = await client
+                .from('game_reactions')
+                .select('*', { count: 'exact', head: true })
+                .eq('game_id', gameId)
+                .eq('reaction', 'like');
+
+            const { count: dislikes, error: errDislikes } = await client
+                .from('game_reactions')
+                .select('*', { count: 'exact', head: true })
+                .eq('game_id', gameId)
+                .eq('reaction', 'dislike');
+
+            if (errLikes || errDislikes) {
+                return getLocalReactionCounts(gameId);
+            }
+
+            return { likes: likes || 0, dislikes: dislikes || 0 };
+        } catch (err) {
+            return getLocalReactionCounts(gameId);
+        }
+    }
+
+    async function getAllReactionCounts() {
+        if (!isConfigured()) {
+            return getLocalAllReactionCounts();
+        }
+
+        try {
+            const { data, error } = await client
+                .from('game_reactions')
+                .select('game_id, reaction');
+
+            if (error || !data) return getLocalAllReactionCounts();
+
+            const map = {};
+            data.forEach(row => {
+                if (!map[row.game_id]) map[row.game_id] = { likes: 0, dislikes: 0 };
+                if (row.reaction === 'like') map[row.game_id].likes++;
+                if (row.reaction === 'dislike') map[row.game_id].dislikes++;
+            });
+            return map;
+        } catch (e) {
+            return getLocalAllReactionCounts();
+        }
+    }
+
+    // Local Reaction Fallbacks
+    function saveLocalReaction(gameId, userIdentifier, reaction) {
+        try {
+            const key = `kf_reaction_${userIdentifier}_${gameId}`;
+            if (reaction) {
+                localStorage.setItem(key, reaction);
+            } else {
+                localStorage.removeItem(key);
+            }
+            return { success: true, local: true };
+        } catch (e) {
+            return { success: false, error: e };
+        }
+    }
+
+    function getLocalReactionCounts(gameId) {
+        return { likes: 0, dislikes: 0 };
+    }
+
+    function getLocalAllReactionCounts() {
+        return {};
+    }
+
+    // ==========================================
+    // PITCHES API (Game Concept Submissions)
+    // ==========================================
+    async function submitPitch(username, avatar, pitchText) {
+        const cleanText = (pitchText || '').trim();
+        if (!cleanText) return { success: false, error: 'Empty pitch' };
+
+        const payload = {
+            id: 'pitch_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+            username: username || 'Guest Gamer',
+            avatar: avatar || '👾',
+            pitch_text: cleanText,
+            status: 'reviewing',
+            created_at: new Date().toISOString()
+        };
+
+        // Always save locally so the user can see their own pitches history
+        saveLocalPitch(payload);
+
+        if (!isConfigured()) {
+            notifyPitchListeners(payload);
+            return { success: true, localOnly: true, data: payload };
+        }
+
+        try {
+            const { data, error } = await client
+                .from('game_pitches')
+                .insert([{
+                    username: payload.username,
+                    avatar: payload.avatar,
+                    pitch_text: payload.pitch_text,
+                    status: payload.status
+                }])
+                .select();
+
+            if (error) throw error;
+            return { success: true, data: data ? data[0] : payload };
+        } catch (err) {
+            console.error('❌ Failed to save pitch to Supabase, stored locally:', err);
+            notifyPitchListeners(payload);
+            return { success: true, localOnly: true, data: payload };
+        }
+    }
+
+    async function fetchRecentPitches(limit = 40) {
+        if (!isConfigured()) {
+            return getLocalPitches();
+        }
+
+        try {
+            const { data, error } = await client
+                .from('game_pitches')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(limit);
+
+            if (error || !data || data.length === 0) {
+                return getLocalPitches();
+            }
+            return data;
+        } catch (e) {
+            return getLocalPitches();
+        }
+    }
+
+    function saveLocalPitch(pitchObj) {
+        try {
+            const list = getLocalPitches();
+            list.unshift(pitchObj);
+            localStorage.setItem(STORAGE_LOCAL_PITCHES_KEY, JSON.stringify(list.slice(0, 100)));
+        } catch (e) {}
+    }
+
+    function getLocalPitches() {
+        try {
+            const raw = localStorage.getItem(STORAGE_LOCAL_PITCHES_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    return {
+        init,
+        isConfigured,
+        getConfig,
+        saveCredentials,
+        clearCredentials,
+        updateConnectionUI,
+        saveReaction,
+        getGameReactionCounts,
+        getAllReactionCounts,
+        submitPitch,
+        fetchRecentPitches,
+        getLocalPitches,
+        onReactionChange,
+        onNewPitch
+    };
+})();
+
+// Auto-initialize when window loads if SDK is available
+window.addEventListener('DOMContentLoaded', () => {
+    KrazySupabase.init();
+});

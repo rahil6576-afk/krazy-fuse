@@ -251,7 +251,7 @@ class CaveGravityRunner {
         if (this.player.shield) {
             this.player.shield = false;
             this.player.invulnerableTimer = 60;
-            this.shakeTimer = 20;
+            this.shakeTimer = 12;
             this.createRockExplosion(this.player.x, this.player.y, '#38bdf8');
             this.addFloatingText('CHRONO SHIELD SAVED YOU! 🛡️', this.player.x, this.player.y - 25, '#38bdf8', 18);
             window.gravityAudio.playShieldBreak();
@@ -260,7 +260,7 @@ class CaveGravityRunner {
         }
 
         this.gameState = STATE.GAMEOVER;
-        this.shakeTimer = 35;
+        this.shakeTimer = 16;
         this.createRockExplosion(this.player.x, this.player.y, '#f43f5e');
         window.gravityAudio.playDeath();
         window.gravityAudio.stopBGM();
@@ -416,7 +416,7 @@ class CaveGravityRunner {
                 if (this.player.shield) {
                     this.player.shield = false;
                     this.player.invulnerableTimer = 60;
-                    this.shakeTimer = 20;
+                    this.shakeTimer = 12;
                     this.createRockExplosion(obs.x + obs.w / 2, obs.y + obs.h / 2, '#38bdf8');
                     this.addFloatingText('CHRONO SHIELD SAVED YOU! 🛡️', this.player.x, this.player.y - 25, '#38bdf8', 18);
                     window.gravityAudio.playShieldBreak();
@@ -666,41 +666,44 @@ class CaveGravityRunner {
 
     createRockDust(x, y) {
         const theme = CAVE_THEMES[(this.level - 1) % CAVE_THEMES.length];
-        for (let i = 0; i < 12; i++) {
+        if (this.particles.length > 40) this.particles.splice(0, this.particles.length - 40);
+        for (let i = 0; i < 6; i++) {
             this.particles.push({
                 x, y,
-                vx: (Math.random() - 0.5) * 6,
-                vy: (Math.random() - 0.5) * 4,
-                life: 22,
+                vx: (Math.random() - 0.5) * 5,
+                vy: (Math.random() - 0.5) * 3,
+                life: 18,
                 color: theme.rockHighlight,
-                size: Math.random() * 3 + 1.5
+                size: Math.random() * 2.5 + 1.5
             });
         }
     }
 
     createGemSparkles(x, y) {
         const theme = CAVE_THEMES[(this.level - 1) % CAVE_THEMES.length];
-        for (let i = 0; i < 10; i++) {
+        if (this.particles.length > 40) this.particles.splice(0, this.particles.length - 40);
+        for (let i = 0; i < 6; i++) {
             this.particles.push({
                 x, y,
-                vx: (Math.random() - 0.5) * 6,
-                vy: (Math.random() - 0.5) * 6,
-                life: 20,
+                vx: (Math.random() - 0.5) * 5,
+                vy: (Math.random() - 0.5) * 5,
+                life: 16,
                 color: theme.crystalColor,
-                size: 3
+                size: 2.5
             });
         }
     }
 
     createRockExplosion(x, y, color) {
-        for (let i = 0; i < 32; i++) {
+        if (this.particles.length > 40) this.particles.splice(0, this.particles.length - 40);
+        for (let i = 0; i < 16; i++) {
             this.particles.push({
                 x, y,
-                vx: (Math.random() - 0.5) * 12,
-                vy: (Math.random() - 0.5) * 12,
-                life: 38,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.5) * 10,
+                life: 28,
                 color,
-                size: Math.random() * 5 + 2
+                size: Math.random() * 4 + 2
             });
         }
     }
@@ -742,10 +745,11 @@ class CaveGravityRunner {
         const theme = CAVE_THEMES[(this.level - 1) % CAVE_THEMES.length];
         this.ctx.save();
 
-        // Screen Shake
+        // Screen Shake (smooth damped translation)
         if (this.shakeTimer > 0) {
             this.shakeTimer--;
-            this.ctx.translate((Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8);
+            const mag = Math.min(5, this.shakeTimer * 0.35);
+            this.ctx.translate((Math.random() - 0.5) * mag, (Math.random() - 0.5) * mag);
         }
 
         // 1. Cavern Background Gradient
@@ -800,16 +804,21 @@ class CaveGravityRunner {
         // 6. Draw Textured Cave Ceiling Strata & Floor Bedrock
         this.drawCaveStrata(theme);
 
-        // 7. Draw Collectible Raw Gemstones & Relics
+        // 7. Draw Collectible Raw Gemstones & Relics (Fast 2D vector halo without shadowBlur)
         this.collectibles.forEach(col => {
             this.ctx.save();
             if (col.type === 'GEM') {
-                this.ctx.fillStyle = theme.crystalColor;
-                this.ctx.shadowColor = theme.crystalColor;
-                this.ctx.shadowBlur = 12;
-
                 const cx = col.x + col.w/2;
                 const cy = col.y + col.h/2;
+
+                // Soft outer crystal halo
+                this.ctx.fillStyle = theme.crystalColor;
+                this.ctx.globalAlpha = 0.28;
+                this.ctx.beginPath();
+                this.ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.globalAlpha = 1.0;
+
                 this.ctx.beginPath();
                 this.ctx.moveTo(cx, cy - 11);
                 this.ctx.lineTo(cx + 9, cy - 3);
@@ -844,11 +853,9 @@ class CaveGravityRunner {
             this.drawCharacter(theme);
         }
 
-        // 10. Draw Particles
+        // 10. Draw Particles (Optimized fast batch rendering)
         this.particles.forEach(p => {
             this.ctx.fillStyle = p.color;
-            this.ctx.shadowColor = p.color;
-            this.ctx.shadowBlur = 8;
             this.ctx.beginPath();
             this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             this.ctx.fill();
@@ -859,8 +866,6 @@ class CaveGravityRunner {
             this.ctx.fillStyle = ft.color;
             this.ctx.font = `bold ${ft.size}px Outfit`;
             this.ctx.textAlign = 'center';
-            this.ctx.shadowColor = ft.color;
-            this.ctx.shadowBlur = 10;
             this.ctx.fillText(ft.text, ft.x, ft.y);
         });
 
@@ -926,8 +931,6 @@ class CaveGravityRunner {
             this.ctx.rotate(obs.rot || 0);
 
             this.ctx.fillStyle = '#ef4444';
-            this.ctx.shadowColor = '#ef4444';
-            this.ctx.shadowBlur = 12;
             this.ctx.beginPath();
             const teeth = 8;
             for (let i = 0; i < teeth * 2; i++) {
@@ -956,10 +959,16 @@ class CaveGravityRunner {
             this.ctx.fillStyle = grad;
             this.ctx.fillRect(x, y, w, h);
         } else if (obs.type === 'LASER_BARRIER') {
-            this.ctx.strokeStyle = '#38bdf8';
-            this.ctx.shadowColor = '#38bdf8';
-            this.ctx.shadowBlur = 15;
-            this.ctx.lineWidth = 6;
+            // Layered laser beam: soft outer glow + core beam without shadowBlur
+            this.ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+            this.ctx.lineWidth = 14;
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + w / 2, y);
+            this.ctx.lineTo(x + w / 2, y + h);
+            this.ctx.stroke();
+
+            this.ctx.strokeStyle = '#e0f2fe';
+            this.ctx.lineWidth = 4;
             this.ctx.beginPath();
             this.ctx.moveTo(x + w / 2, y);
             this.ctx.lineTo(x + w / 2, y + h);
@@ -990,18 +999,21 @@ class CaveGravityRunner {
         this.ctx.closePath();
         this.ctx.fill();
 
-        // Shield Bubble
+        // Shield Bubble (Layered aura without shadowBlur)
         if (p.shield) {
+            this.ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+            this.ctx.lineWidth = 6;
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, 28, 0, Math.PI * 2);
+            this.ctx.stroke();
+
             this.ctx.strokeStyle = '#38bdf8';
-            this.ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
-            this.ctx.shadowColor = '#38bdf8';
-            this.ctx.shadowBlur = 16;
-            this.ctx.lineWidth = 3;
+            this.ctx.fillStyle = 'rgba(56, 189, 248, 0.22)';
+            this.ctx.lineWidth = 2.5;
             this.ctx.beginPath();
             this.ctx.arc(0, 0, 28, 0, Math.PI * 2);
             this.ctx.fill();
             this.ctx.stroke();
-            this.ctx.shadowBlur = 0;
         }
 
         // Animated Scarf Physics Trail
@@ -1044,10 +1056,7 @@ class CaveGravityRunner {
         this.ctx.fillRect(2, -18, 5, 4);
 
         this.ctx.fillStyle = '#ffffff';
-        this.ctx.shadowColor = '#ffffff';
-        this.ctx.shadowBlur = 10;
         this.ctx.fillRect(5, -17, 3, 3);
-        this.ctx.shadowBlur = 0;
 
         // Animated Running Legs
         const legPhase = p.runCycle;

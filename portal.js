@@ -1362,11 +1362,23 @@ function renderPortal() {
 // 3. INTERACTIVE PLAYER CONTROLS (Likes, Dislikes, Bookmarks)
 // ==========================================================
 
+const liveReactionsCache = {};
+
+function getKrazyClientIdentifier() {
+    if (typeof AuthManager !== 'undefined' && AuthManager.isLoggedIn()) {
+        return AuthManager.getActiveUser().username;
+    }
+    let anonId = localStorage.getItem('kf_client_anon_id');
+    if (!anonId) {
+        anonId = 'anon_' + Math.random().toString(36).substring(2, 11);
+        localStorage.setItem('kf_client_anon_id', anonId);
+    }
+    return anonId;
+}
+
 function getReactionStorageKey(gameId) {
-    const username = (typeof AuthManager !== 'undefined' && AuthManager.isLoggedIn()) 
-        ? AuthManager.getActiveUser().username 
-        : 'guest';
-    return `kf_reaction_${username}_${gameId}`;
+    const ident = getKrazyClientIdentifier();
+    return `kf_reaction_${ident}_${gameId}`;
 }
 
 function getUserReaction(gameId) {
@@ -1388,7 +1400,15 @@ function setUserReaction(gameId, reaction) {
     } catch (e) {}
 }
 
-function updateReactionUI(gameId) {
+async function fetchLiveReactions(gameId) {
+    if (typeof KrazySupabase !== 'undefined' && KrazySupabase.isConfigured()) {
+        const counts = await KrazySupabase.getGameReactionCounts(gameId);
+        liveReactionsCache[gameId] = counts;
+        updateReactionUI(gameId, false);
+    }
+}
+
+function updateReactionUI(gameId, shouldPulse = false) {
     if (!gameId) return;
     const game = GAMES_CATALOG.find(g => g.id === gameId);
     if (!game) return;
@@ -1404,41 +1424,83 @@ function updateReactionUI(gameId) {
     if (likeBtn) {
         likeBtn.classList.toggle('liked', isLiked);
         likeBtn.classList.toggle('active', isLiked);
+        if (shouldPulse) {
+            likeBtn.classList.remove('reaction-pulse');
+            void likeBtn.offsetWidth;
+            likeBtn.classList.add('reaction-pulse');
+        }
     }
     if (dislikeBtn) {
         dislikeBtn.classList.toggle('disliked', isDisliked);
         dislikeBtn.classList.toggle('active', isDisliked);
+        if (shouldPulse) {
+            dislikeBtn.classList.remove('reaction-pulse');
+            void dislikeBtn.offsetWidth;
+            dislikeBtn.classList.add('reaction-pulse');
+        }
     }
+
     if (likesCountEl) {
-        const bonus = isLiked ? 1 : 0;
-        likesCountEl.textContent = formatCompactNumber(game.likesCount + bonus);
+        const liveCounts = liveReactionsCache[gameId];
+        const isCloudActive = typeof KrazySupabase !== 'undefined' && KrazySupabase.isConfigured();
+        const baseLikes = game.likesCount || 1000;
+        
+        let totalLikes;
+        if (isCloudActive && liveCounts) {
+            totalLikes = baseLikes + liveCounts.likes;
+        } else {
+            const bonus = isLiked ? 1 : 0;
+            totalLikes = baseLikes + bonus;
+        }
+
+        likesCountEl.textContent = formatCompactNumber(totalLikes);
     }
 }
 
-function handleLikeClick() {
+async function handleLikeClick() {
     if (!currentGame) return;
     const current = getUserReaction(currentGame.id);
+    const ident = getKrazyClientIdentifier();
+    let newReaction = null;
+
     if (current === 'like') {
         setUserReaction(currentGame.id, null);
         showToast('Vote removed.', '👍');
     } else {
+        newReaction = 'like';
         setUserReaction(currentGame.id, 'like');
-        showToast('👍 Thanks for rating! Marked as Liked (Green).', '💚');
+        showToast('👍 Marked as Liked! Live synced.', '💚');
     }
-    updateReactionUI(currentGame.id);
+
+    updateReactionUI(currentGame.id, true);
+
+    if (typeof KrazySupabase !== 'undefined') {
+        await KrazySupabase.saveReaction(currentGame.id, ident, newReaction);
+        fetchLiveReactions(currentGame.id);
+    }
 }
 
-function handleDislikeClick() {
+async function handleDislikeClick() {
     if (!currentGame) return;
     const current = getUserReaction(currentGame.id);
+    const ident = getKrazyClientIdentifier();
+    let newReaction = null;
+
     if (current === 'dislike') {
         setUserReaction(currentGame.id, null);
         showToast('Dislike removed.', '👎');
     } else {
+        newReaction = 'dislike';
         setUserReaction(currentGame.id, 'dislike');
-        showToast('👎 Marked as Disliked (Red) just for you.', '💔');
+        showToast('👎 Marked as Disliked! Live synced.', '💔');
     }
-    updateReactionUI(currentGame.id);
+
+    updateReactionUI(currentGame.id, true);
+
+    if (typeof KrazySupabase !== 'undefined') {
+        await KrazySupabase.saveReaction(currentGame.id, ident, newReaction);
+        fetchLiveReactions(currentGame.id);
+    }
 }
 
 function getStoredBookmarks() {
@@ -1643,14 +1705,40 @@ function setupSuggestModal() {
     const btnClose = document.getElementById('btn-close-modal');
     const btnSubmit = document.getElementById('btn-submit-idea');
     const input = document.getElementById('idea-input');
-    const btnToggleSaved = document.getElementById('btn-toggle-saved');
-    const btnViewStored = document.getElementById('btn-view-stored');
-    const storedList = document.getElementById('stored-ideas-list');
+    const tabCompose = document.getElementById('tab-btn-pitch-compose');
+    const tabFeed = document.getElementById('tab-btn-pitch-feed');
+    const composeView = document.getElementById('pitch-compose-view');
+    const feedView = document.getElementById('stored-ideas-list');
+    const countBadge = document.getElementById('saved-ideas-count');
+    const statusBadge = document.getElementById('supabase-status-badge');
+    const btnOpenSettings = document.getElementById('btn-open-supabase-settings');
 
-    const openModal = () => { if (modal) modal.classList.add('active'); };
+    const switchTab = (tab) => {
+        if (tab === 'compose') {
+            if (tabCompose) tabCompose.classList.add('active');
+            if (tabFeed) tabFeed.classList.remove('active');
+            if (composeView) composeView.style.display = 'block';
+            if (feedView) feedView.style.display = 'none';
+            if (btnSubmit) btnSubmit.style.display = 'inline-block';
+        } else {
+            if (tabCompose) tabCompose.classList.remove('active');
+            if (tabFeed) tabFeed.classList.add('active');
+            if (composeView) composeView.style.display = 'none';
+            if (feedView) feedView.style.display = 'flex';
+            if (btnSubmit) btnSubmit.style.display = 'none';
+            loadAndRenderPitches();
+        }
+    };
+
+    const openModal = () => {
+        if (modal) modal.classList.add('active');
+        switchTab('compose');
+        updatePitchesCount();
+        if (typeof KrazySupabase !== 'undefined') KrazySupabase.updateConnectionUI();
+    };
+
     const closeModal = () => {
         if (modal) modal.classList.remove('active');
-        if (storedList) storedList.style.display = 'none';
         if (input) input.value = '';
     };
 
@@ -1659,16 +1747,272 @@ function setupSuggestModal() {
     if (btnClose) btnClose.addEventListener('click', closeModal);
     if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
+    if (tabCompose) tabCompose.addEventListener('click', () => switchTab('compose'));
+    if (tabFeed) tabFeed.addEventListener('click', () => switchTab('feed'));
+
+    if (statusBadge) {
+        statusBadge.addEventListener('click', () => {
+            closeModal();
+            openSupabaseModal();
+        });
+    }
+
+    if (btnOpenSettings) {
+        btnOpenSettings.addEventListener('click', () => {
+            closeModal();
+            openSupabaseModal();
+        });
+    }
+
     if (btnSubmit && input) {
-        btnSubmit.addEventListener('click', () => {
+        btnSubmit.addEventListener('click', async () => {
             const val = input.value.trim();
-            if (val) {
-                showToast('🚀 Idea submitted to Krazy Fuse team!');
-                closeModal();
-            } else {
+            if (!val) {
                 alert('Please type a game concept first!');
+                return;
+            }
+
+            const user = (typeof AuthManager !== 'undefined') ? AuthManager.getActiveUser() : { username: 'Guest Gamer', avatar: '👾' };
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'TRANSMITTING...';
+
+            if (typeof KrazySupabase !== 'undefined') {
+                await KrazySupabase.submitPitch(user.username, user.avatar, val);
+            }
+
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = 'SUBMIT CONCEPT 🚀';
+
+            input.value = '';
+            showToast('🚀 Pitch submitted! Visible live in community feed.', '💡');
+            switchTab('feed');
+            updatePitchesCount();
+        });
+    }
+
+    updatePitchesCount();
+}
+
+async function updatePitchesCount() {
+    const badge = document.getElementById('saved-ideas-count');
+    if (!badge) return;
+    if (typeof KrazySupabase !== 'undefined') {
+        const pitches = await KrazySupabase.fetchRecentPitches(50);
+        badge.textContent = pitches.length;
+    }
+}
+
+async function loadAndRenderPitches() {
+    const container = document.getElementById('stored-ideas-list');
+    if (!container) return;
+
+    container.innerHTML = '<div class="pitch-feed-loading" style="text-align: center; padding: 20px; color: var(--text-muted);">📡 Loading live community pitches...</div>';
+
+    if (typeof KrazySupabase === 'undefined') {
+        container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">Supabase service not loaded.</div>';
+        return;
+    }
+
+    const pitches = await KrazySupabase.fetchRecentPitches(50);
+    const countBadge = document.getElementById('saved-ideas-count');
+    if (countBadge) countBadge.textContent = pitches.length;
+
+    if (!pitches || pitches.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                <div style="font-size: 2.2rem; margin-bottom: 8px;">💡</div>
+                <h4 style="color: var(--text-main); margin-bottom: 4px;">No Pitches Yet</h4>
+                <p>Be the first player to pitch an awesome game idea!</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = '';
+    pitches.forEach(pitch => {
+        container.appendChild(createPitchCardElement(pitch));
+    });
+}
+
+function createPitchCardElement(pitch) {
+    const card = document.createElement('div');
+    card.className = 'pitch-item-card';
+
+    const timeStr = pitch.created_at ? formatRelativeTime(new Date(pitch.created_at)) : 'Just now';
+
+    card.innerHTML = `
+        <div class="pitch-item-top">
+            <div class="pitch-item-user">
+                <span style="font-size: 1.1rem;">${pitch.avatar || '👾'}</span>
+                <span>${escapeHtml(pitch.username || 'Guest')}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="pitch-status-tag">${escapeHtml(pitch.status || 'reviewing')}</span>
+                <span class="pitch-item-time">${timeStr}</span>
+            </div>
+        </div>
+        <div class="pitch-item-text">${escapeHtml(pitch.pitch_text)}</div>
+    `;
+    return card;
+}
+
+function formatRelativeTime(date) {
+    if (!date || isNaN(date.getTime())) return 'Just now';
+    const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (diffSec < 60) return 'Just now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    return `${Math.floor(diffHr / 24)}d ago`;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+// ==========================================================
+// SUPABASE REALTIME CONFIGURATION MODAL CONTROLLER
+// ==========================================================
+function openSupabaseModal() {
+    const modal = document.getElementById('supabase-modal');
+    if (!modal) return;
+    modal.classList.add('active');
+
+    const urlInput = document.getElementById('supabase-url-input');
+    const keyInput = document.getElementById('supabase-key-input');
+    const feedback = document.getElementById('supabase-test-feedback');
+    if (feedback) feedback.classList.add('hidden');
+
+    if (typeof KrazySupabase !== 'undefined') {
+        const cfg = KrazySupabase.getConfig();
+        if (urlInput) urlInput.value = cfg.url || '';
+        if (keyInput) keyInput.value = cfg.anonKey || '';
+    }
+}
+
+function closeSupabaseModal() {
+    const modal = document.getElementById('supabase-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+function setupSupabaseModal() {
+    const modal = document.getElementById('supabase-modal');
+    const btnOpenNav = document.getElementById('btn-open-supabase-modal');
+    const btnClose = document.getElementById('btn-close-supabase-modal');
+    const btnCancel = document.getElementById('btn-supabase-cancel');
+    const btnSave = document.getElementById('btn-supabase-save');
+    const btnClear = document.getElementById('btn-supabase-clear');
+    const feedback = document.getElementById('supabase-test-feedback');
+    const urlInput = document.getElementById('supabase-url-input');
+    const keyInput = document.getElementById('supabase-key-input');
+
+    if (btnOpenNav) btnOpenNav.addEventListener('click', openSupabaseModal);
+    if (btnClose) btnClose.addEventListener('click', closeSupabaseModal);
+    if (btnCancel) btnCancel.addEventListener('click', closeSupabaseModal);
+    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeSupabaseModal(); });
+
+    if (btnSave) {
+        btnSave.addEventListener('click', () => {
+            const url = (urlInput?.value || '').trim();
+            const key = (keyInput?.value || '').trim();
+
+            if (!url || !key) {
+                if (feedback) {
+                    feedback.className = 'supabase-feedback-box error';
+                    feedback.textContent = '⚠️ Please enter both your Supabase Project URL and Anon Key.';
+                    feedback.classList.remove('hidden');
+                }
+                return;
+            }
+
+            if (typeof KrazySupabase !== 'undefined') {
+                const ok = KrazySupabase.saveCredentials(url, key);
+                if (ok) {
+                    if (feedback) {
+                        feedback.className = 'supabase-feedback-box success';
+                        feedback.textContent = '🟢 Connected to Supabase! Live sync active for likes and pitches.';
+                        feedback.classList.remove('hidden');
+                    }
+                    showToast('⚡ Supabase Live Connected!', '🟢');
+                    updateNavSupabaseStatus(true);
+                    setTimeout(() => closeSupabaseModal(), 1200);
+                } else {
+                    if (feedback) {
+                        feedback.className = 'supabase-feedback-box error';
+                        feedback.textContent = '❌ Could not initialize client. Verify your URL and Anon Key.';
+                        feedback.classList.remove('hidden');
+                    }
+                }
             }
         });
+    }
+
+    if (btnClear) {
+        btnClear.addEventListener('click', () => {
+            if (typeof KrazySupabase !== 'undefined') {
+                KrazySupabase.clearCredentials();
+            }
+            if (urlInput) urlInput.value = '';
+            if (keyInput) keyInput.value = '';
+            if (feedback) {
+                feedback.className = 'supabase-feedback-box error';
+                feedback.textContent = 'Switched to Local Offline mode.';
+                feedback.classList.remove('hidden');
+            }
+            showToast('⚡ Reset to local offline storage', 'ℹ️');
+            updateNavSupabaseStatus(false);
+        });
+    }
+
+    // Realtime event listeners
+    window.addEventListener('krazy:reaction_changed', (e) => {
+        const payload = e.detail;
+        if (!payload) return;
+        const gameId = payload.new?.game_id || payload.old?.game_id;
+        if (gameId) {
+            delete liveReactionsCache[gameId];
+            fetchLiveReactions(gameId);
+            if (currentGame && currentGame.id === gameId) {
+                updateReactionUI(gameId, true);
+                showToast(`⚡ Live vote updated for ${currentGame.title}!`, '👍');
+            }
+        }
+    });
+
+    window.addEventListener('krazy:new_pitch', (e) => {
+        const newPitch = e.detail;
+        if (!newPitch) return;
+        const feed = document.getElementById('stored-ideas-list');
+        if (feed && feed.style.display !== 'none') {
+            const card = createPitchCardElement(newPitch);
+            feed.insertBefore(card, feed.firstChild);
+        }
+        updatePitchesCount();
+        const suggestModal = document.getElementById('suggest-modal');
+        if (!suggestModal || !suggestModal.classList.contains('active')) {
+            showToast(`💡 New game pitch from ${newPitch.username || 'someone'}!`, '✨');
+        }
+    });
+
+    if (typeof KrazySupabase !== 'undefined') {
+        updateNavSupabaseStatus(KrazySupabase.isConfigured());
+    }
+}
+
+function updateNavSupabaseStatus(isOnline) {
+    const navLabel = document.getElementById('nav-supabase-label');
+    const navBtn = document.getElementById('btn-open-supabase-modal');
+    if (navLabel) {
+        navLabel.textContent = isOnline ? '⚡ Live Online' : '⚡ Supabase Live';
+    }
+    if (navBtn) {
+        navBtn.classList.toggle('online', isOnline);
     }
 }
 
@@ -2042,6 +2386,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEcoMode();
     setupAuthModal();
     setupAudienceModal();
+    setupSupabaseModal();
 
     // Wire Up Action Bar Buttons
     const btnLike = document.getElementById('btn-game-like');
@@ -2090,6 +2435,17 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSidebarToggle.addEventListener('click', () => {
             sidebarRail.classList.toggle('expanded');
         });
+    }
+
+    // Enable smooth mouse wheel horizontal scrolling across the top navbar
+    const topNavbar = document.querySelector('.navbar');
+    if (topNavbar) {
+        topNavbar.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0 && topNavbar.scrollWidth > topNavbar.clientWidth) {
+                topNavbar.scrollLeft += e.deltaY;
+                e.preventDefault();
+            }
+        }, { passive: false });
     }
 
     // Check URL parameters for direct game launch (e.g. ?game=office-escape or #play=dart-board)
