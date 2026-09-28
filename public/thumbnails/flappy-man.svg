@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Twilight Sunset Sky Gradient -->
+    <linearGradient id="fm-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="35%" stop-color="#1e1b4b"/>
+      <stop offset="65%" stop-color="#4c1d95"/>
+      <stop offset="85%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+
+    <!-- Pipe Gradient -->
+    <linearGradient id="pipe-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#14532d"/>
+      <stop offset="25%" stop-color="#22c55e"/>
+      <stop offset="60%" stop-color="#4ade80"/>
+      <stop offset="85%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+
+    <linearGradient id="cape-grad" x1="0%" y1="0%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+
+    <linearGradient id="suit-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+
+    <!-- Halftone Dot Pattern -->
+    <pattern id="halftone" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="3" fill="#ffffff" opacity="0.08"/>
+    </pattern>
+
+    <filter id="glow-fm" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="shadow-fm">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Sky Background -->
+  <rect width="1280" height="720" fill="url(#fm-sky)"/>
+  <rect width="1280" height="720" fill="url(#halftone)"/>
+
+  <!-- Distant City Skyline Silhouettes -->
+  <g fill="#0b0f19" opacity="0.6">
+    <rect x="60" y="440" width="80" height="280"/>
+    <rect x="160" y="380" width="110" height="340"/>
+    <rect x="290" y="420" width="70" height="300"/>
+    <polygon points="325,370 290,420 360,420"/>
+    <rect x="380" y="350" width="130" height="370"/>
+    <rect x="530" y="460" width="90" height="260"/>
+    <rect x="640" y="400" width="120" height="320"/>
+    <rect x="780" y="360" width="90" height="360"/>
+    <polygon points="825,310 780,360 870,360"/>
+    <rect x="890" y="430" width="140" height="290"/>
+    <rect x="1050" y="390" width="100" height="330"/>
+    <rect x="1170" y="450" width="110" height="270"/>
+  </g>
+
+  <!-- Obstacle Pipes (Top & Bottom) -->
+  <!-- Left Pipe Pair -->
+  <g transform="translate(180, 0)" filter="url(#shadow-fm)">
+    <!-- Top Pipe -->
+    <rect x="0" y="0" width="120" height="220" fill="url(#pipe-grad)" stroke="#052e16" stroke-width="5"/>
+    <rect x="-15" y="200" width="150" height="50" rx="6" fill="url(#pipe-grad)" stroke="#052e16" stroke-width="5"/>
+    <!-- Bottom Pipe -->
+    <rect x="0" y="490" width="120" height="230" fill="url(#pipe-grad)" stroke="#052e16" stroke-width="5"/>
+    <rect x="-15" y="460" width="150" height="50" rx="6" fill="url(#pipe-grad)" stroke="#052e16" stroke-width="5"/>
+  </g>
+
+  <!-- Right Pipe Pair -->
+  <g transform="translate(980, 0)" filter="url(#shadow-fm)">
+    <!-- Top Pipe -->
+    <rect x="0" y="0" width="120" height="150" fill="url(#pipe-grad)" stroke="#052e16" stroke-width="5"/>
+    <rect x="-15" y="130" width="150" height="50" rx="6" fill="url(#pipe-grad)" stroke="#052e16" stroke-width="5"/>
+    <!-- Bottom Pipe -->
+    <rect x="0" y="420" width="120" height="300" fill="url(#pipe-grad)" stroke="#052e16" stroke-width="5"/>
+    <rect x="-15" y="390" width="150" height="50" rx="6" fill="url(#pipe-grad)" stroke="#052e16" stroke-width="5"/>
+  </g>
+
+  <!-- Comic Action Speed Lines behind hero -->
+  <g stroke="#fde047" stroke-width="4" stroke-linecap="round" opacity="0.8">
+    <line x1="220" y1="360" x2="480" y2="340"/>
+    <line x1="260" y1="380" x2="520" y2="360" stroke-width="6"/>
+    <line x1="310" y1="410" x2="550" y2="380"/>
+    <line x1="180" y1="330" x2="440" y2="320"/>
+  </g>
+
+  <!-- Center Flying Superhero Character -->
+  <g transform="translate(600, 340) rotate(-12)" filter="url(#shadow-fm)">
+    <!-- Sonic Boom Shockwave Rings -->
+    <ellipse cx="-120" cy="15" rx="35" ry="60" fill="none" stroke="#facc15" stroke-width="4" opacity="0.6" filter="url(#glow-fm)"/>
+    <ellipse cx="-190" cy="20" rx="45" ry="80" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.4"/>
+
+    <!-- Billowing Red Cape -->
+    <path d="M -40,-15 C -140,-50 -200,-10 -260,-40 C -220,30 -160,20 -100,55 C -60,45 -50,15 -40,-15 Z"
+          fill="url(#cape-grad)" stroke="#7f1d1d" stroke-width="4"/>
+    <path d="M -50,-5 C -130,-30 -180,0 -240,-20" fill="none" stroke="#fca5a5" stroke-width="3" opacity="0.6"/>
+
+    <!-- Body / Torso (Aerodynamic Superman Pose) -->
+    <!-- Extended Flight Legs & Boots -->
+    <path d="M -80,10 L -160,35 L -170,25 L -85, -2 Z" fill="#0369a1" stroke="#082f49" stroke-width="4"/>
+    <path d="M -135,25 L -185,42 L -190,30 L -140, 18 Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="4"/>
+
+    <!-- Torso -->
+    <path d="M -70,-22 L 30,-32 L 45,15 L -60,18 Z" fill="url(#suit-grad)" stroke="#082f49" stroke-width="5"/>
+
+    <!-- Golden Chest Shield Emblem -->
+    <polygon points="5,-20 28,-18 20,4 0,4" fill="#facc15" stroke="#b45309" stroke-width="3"/>
+
+    <!-- Extended Hero Arms (Punching Through Air) -->
+    <!-- Left Arm -->
+    <path d="M 20,-28 L 110,-45 L 130,-32 L 35,-12 Z" fill="url(#suit-grad)" stroke="#082f49" stroke-width="5"/>
+    <!-- Clenched Fist -->
+    <ellipse cx="130" cy="-38" rx="15" ry="12" fill="#fed7aa" stroke="#9a3412" stroke-width="4"/>
+
+    <!-- Superhero Head with Mask / Cowl -->
+    <circle cx="45" cy="-22" r="22" fill="#fed7aa" stroke="#9a3412" stroke-width="4"/>
+    <path d="M 32,-38 C 50,-46 65,-36 68,-22 C 60,-24 45,-26 32,-38 Z" fill="#1e293b"/>
+    <!-- Focused Eye Streak -->
+    <line x1="50" y1="-22" x2="62" y2="-22" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+    <!-- Hero Hair Swoosh -->
+    <path d="M 28,-36 C 35,-52 58,-48 55,-38 Z" fill="#0f172a"/>
+  </g>
+
+  <!-- Comic Pop Starburst Effect -->
+  <g transform="translate(480, 200)">
+    <polygon points="0,-35 10,-10 35,0 10,10 0,35 -10,10 -35,0 -10,-10" fill="#facc15" filter="url(#glow-fm)"/>
+    <circle cx="0" cy="0" r="8" fill="#ffffff"/>
+  </g>
+
+  <!-- Top Title Pill Badge -->
+  <g transform="translate(640, 65)">
+    <rect x="-240" y="-32" width="480" height="64" rx="32" fill="#0f172a" stroke="#22c55e" stroke-width="4" opacity="0.95"/>
+    <text x="0" y="9" font-family="'Impact', 'Arial Black', sans-serif" font-size="34" fill="#ffffff" text-anchor="middle" letter-spacing="2">
+      FLAPPY MAN <tspan fill="#facc15">⚡ SUPER FLIGHT</tspan>
+    </text>
+  </g>
+</svg>

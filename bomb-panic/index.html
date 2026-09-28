@@ -2872,34 +2872,185 @@
                         ctx.stroke();
                     }
 
-                    // Body Capsule Circle
+                    // === Cartoon Potato Character (Matches Thumbnail) ===
+                    const r = p.radius;
+                    const moving = Math.hypot(p.vx, p.vy) > 0.1;
+                    const legSwing = moving ? Math.sin(p.animCycle) * 6 : 0;
+                    const eyeShiftX = Math.cos(p.facingAngle) * 2.5;
+                    const eyeShiftY = Math.sin(p.facingAngle) * 2;
+                    const isPanicking = p.hasBomb || (this.airborneBombs && this.airborneBombs.length > 0);
+
+                    // 1. Running Feet
+                    ctx.save();
+                    ctx.fillStyle = '#0f172a';
+                    ctx.strokeStyle = '#020617';
+                    ctx.lineWidth = 2.5;
+
+                    // Left foot
                     ctx.beginPath();
-                    ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
+                    ctx.ellipse(-8, r * 0.95 + legSwing, 6, 4.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Right foot
+                    ctx.beginPath();
+                    ctx.ellipse(8, r * 0.95 - legSwing, 6, 4.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // 2. Potato Bean Body
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.roundRect(-r * 0.85, -r * 1.15, r * 1.7, r * 2.15, r * 0.85);
                     ctx.fillStyle = p.color;
                     ctx.shadowColor = p.color;
                     ctx.shadowBlur = p.isPlayer ? 16 : 4;
                     ctx.fill();
-                    ctx.lineWidth = 2.5;
-                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 3.5;
+                    ctx.strokeStyle = '#0f172a';
                     ctx.stroke();
 
-                    // Character Emoji Face
-                    ctx.font = '22px Outfit, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(p.emoji, 0, 1);
+                    // Soft specular highlight on potato head
+                    ctx.beginPath();
+                    ctx.ellipse(-r * 0.35, -r * 0.75, r * 0.3, r * 0.2, -0.4, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+                    ctx.fill();
+                    ctx.restore();
+
+                    // 3. Hands / Arms
+                    ctx.save();
+                    ctx.fillStyle = p.color;
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 3;
+                    if (p.hasBomb) {
+                        // Reaching up holding the bomb over head
+                        ctx.beginPath();
+                        ctx.arc(-r * 0.75, -r * 0.8, 5, 0, Math.PI * 2);
+                        ctx.fill(); ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(r * 0.75, -r * 0.8, 5, 0, Math.PI * 2);
+                        ctx.fill(); ctx.stroke();
+                    } else {
+                        // Pumping arms while running
+                        const armSwing = moving ? Math.cos(p.animCycle) * 5 : 0;
+                        ctx.beginPath();
+                        ctx.arc(-r * 0.85, 2 - armSwing, 4.5, 0, Math.PI * 2);
+                        ctx.fill(); ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(r * 0.85, 2 + armSwing, 4.5, 0, Math.PI * 2);
+                        ctx.fill(); ctx.stroke();
+                    }
+                    ctx.restore();
+
+                    // 4. Cartoon Panic Eyes (Exact match to thumbnail)
+                    ctx.save();
+                    const jitter = p.hasBomb ? (Math.random() - 0.5) * 1.5 : 0;
+                    
+                    // Left Eye Sclera
+                    ctx.beginPath();
+                    ctx.ellipse(-6.5, -7 + jitter, 5.5, 7.5, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.stroke();
+
+                    // Left Pupil
+                    ctx.beginPath();
+                    ctx.arc(-6.5 + eyeShiftX * 0.8, -7 + eyeShiftY * 0.8 + jitter, p.hasBomb ? 2.2 : 2.8, 0, Math.PI * 2);
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fill();
+
+                    // Right Eye Sclera
+                    ctx.beginPath();
+                    ctx.ellipse(6.5, -7 + jitter, 5.5, 7.5, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.stroke();
+
+                    // Right Pupil
+                    ctx.beginPath();
+                    ctx.arc(6.5 + eyeShiftX * 0.8, -7 + eyeShiftY * 0.8 + jitter, p.hasBomb ? 2.2 : 2.8, 0, Math.PI * 2);
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fill();
+                    ctx.restore();
+
+                    // 5. Cartoon Expressive Mouth
+                    ctx.save();
+                    if (isPanicking) {
+                        // Wide screaming panic mouth with red inside (like thumbnail)
+                        ctx.beginPath();
+                        ctx.ellipse(0, 7, 5.5, 7.5, 0, 0, Math.PI * 2);
+                        ctx.fillStyle = '#e11d48';
+                        ctx.fill();
+                        ctx.lineWidth = 2.5;
+                        ctx.strokeStyle = '#0f172a';
+                        ctx.stroke();
+
+                        // Cute white teeth bar
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(-3.5, 1.5, 7, 2.5);
+                    } else {
+                        // Confident battle smile
+                        ctx.beginPath();
+                        ctx.arc(0, 5, 5, 0.2, Math.PI - 0.2);
+                        ctx.lineWidth = 2.5;
+                        ctx.strokeStyle = '#0f172a';
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+
+                    // 6. Cartoon Sweat Drop (Flies when holding bomb / panicking)
+                    if (isPanicking) {
+                        const sweatBob = Math.sin(Date.now() * 0.015) * 3;
+                        ctx.save();
+                        ctx.fillStyle = '#38bdf8';
+                        ctx.strokeStyle = '#0284c7';
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.moveTo(r * 0.75, -r * 0.95 + sweatBob);
+                        ctx.bezierCurveTo(r * 0.95, -r * 1.1 + sweatBob, r * 1.05, -r * 0.85 + sweatBob, r * 0.85, -r * 0.75 + sweatBob);
+                        ctx.bezierCurveTo(r * 0.65, -r * 0.65 + sweatBob, r * 0.65, -r * 0.9 + sweatBob, r * 0.75, -r * 0.95 + sweatBob);
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+
+                    // 7. Character Accents & Accessories
+                    ctx.save();
+                    if (p.id === 'p1') {
+                        // YOU: Cool golden gamer headband
+                        ctx.fillStyle = '#f59e0b';
+                        ctx.fillRect(-r * 0.85, -r * 0.9, r * 1.7, 4);
+                    } else if (p.id === 'bot6') {
+                        // King Pin: Little golden crown
+                        ctx.font = '12px Outfit';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('👑', 0, -r * 1.25);
+                    } else if (p.id === 'bot1') {
+                        // Blaze: Little devil horns
+                        ctx.fillStyle = '#b91c1c';
+                        ctx.beginPath();
+                        ctx.moveTo(-r * 0.6, -r * 1.1); ctx.lineTo(-r * 0.8, -r * 1.35); ctx.lineTo(-r * 0.4, -r * 1.15);
+                        ctx.moveTo(r * 0.6, -r * 1.1); ctx.lineTo(r * 0.8, -r * 1.35); ctx.lineTo(r * 0.4, -r * 1.15);
+                        ctx.fill();
+                    }
+                    ctx.restore();
 
                     // Name Tag
                     ctx.font = p.isPlayer ? '900 12px Outfit' : '800 11px Outfit';
                     ctx.fillStyle = p.isPlayer ? '#fbc531' : '#fff';
-                    ctx.fillText(p.name, 0, -p.radius - 8);
+                    ctx.fillText(p.name, 0, -p.radius - 12);
 
                     // Held Bomb Animated on Head
                     if (p.hasBomb) {
                         const bombBounce = Math.sin(Date.now() * 0.02) * 5;
                         const bombEmoji = p.bombType === 'TURBO' ? '⚡💣' : (p.bombType === 'CRYO' ? '❄️💣' : '💣');
                         ctx.font = '24px Outfit';
-                        ctx.fillText(bombEmoji, 0, -p.radius - 24 + bombBounce);
+                        ctx.fillText(bombEmoji, 0, -p.radius - 26 + bombBounce);
                     }
 
                     // Bark Speech Bubble
@@ -2908,10 +3059,10 @@
                         const tw = ctx.measureText(p.bark).width + 14;
                         ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
                         ctx.beginPath();
-                        ctx.roundRect(-tw/2, -p.radius - 48, tw, 18, 6);
+                        ctx.roundRect(-tw/2, -p.radius - 52, tw, 18, 6);
                         ctx.fill();
                         ctx.fillStyle = '#ff4757';
-                        ctx.fillText(p.bark, 0, -p.radius - 35);
+                        ctx.fillText(p.bark, 0, -p.radius - 39);
                     }
 
                     ctx.restore();

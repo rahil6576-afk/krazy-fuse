@@ -4,6 +4,7 @@ const GAMES_CATALOG = [
         id: 'office-escape',
         title: 'Office Escape: Corporate Run',
         category: 'runner',
+        thumbnail: '/thumbnails/bento/office-escape.webp',
         tags: ['Runner', 'Satire', 'Action', 'Arcade'],
         desc: 'Sprint through meeting rooms, dodge calendar syncs, and leap over laptops before workday sanity hits 0!',
         fullDesc: 'Office Escape is a hilarious fast-paced survival runner set in a high-pressure corporate tower. Dodge overbearing managers, slide under urgent emails, collect sanity coffee cups, and customize your office attire across daytime and nighttime shifts!',
@@ -30,6 +31,7 @@ const GAMES_CATALOG = [
         id: 'dart-board',
         title: 'Dart Master: 301 / 501 Arena',
         category: 'pvp',
+        thumbnail: '/thumbnails/bento/dart-board.webp',
         tags: ['PvP', 'Multiplayer', 'AI Bot', 'Sports'],
         desc: 'Realistic London dartboard arcade! Challenge smart AI bots, Pass & Play with friends, or battle online.',
         fullDesc: 'Step up to the oche in classic English pub venues! Play traditional 301, 501, or Around The Clock with true 3D dart flight physics, authentic double-out finishes, and intelligent AI bots across 4 difficulty tiers.',
@@ -52,60 +54,34 @@ const GAMES_CATALOG = [
         ]
     },
     {
-        id: 'elevator-doom',
-        title: 'Elevator of Doom: Floor 99',
-        category: 'action',
-        tags: ['Roguelite', 'Survival', 'Combat', 'Action'],
-        desc: 'Strategic roguelite elevator survival! Slay enemies, gather loot, buy safe-room perks, and decide: Do you go higher?',
-        fullDesc: 'Conquer the unstable elevator shaft floor by floor! Choose between Safe Routes, Crucible Chambers, and High-Stakes Gambles. Unlock weapons, stack passive perks, survive the 5-Tier Doom Meter, and decide whether to bank your run coins or push your luck to Floor 99.',
-        emoji: '🛗💀',
-        heroEmoji: '🛗🚨',
-        status: 'live',
-        rating: '4.9',
-        plays: '38.6K',
-        likesCount: 2950,
-        link: '/elevator-doom/index.html',
-        trending: true,
-        isNew: true,
-        multiplayer: false,
-        themeClass: 'theme-elevator',
-        actionBadge: '🚨 FLOOR 99 ROGUELITE',
-        controls: [
-            { key: 'A / D / ← / →', label: 'Move' },
-            { key: 'W / Space', label: 'Jump' },
-            { key: 'Space / Click', label: 'Attack Weapon' },
-            { key: 'Shift / Q / E', label: 'Active Ability' }
-        ]
-    },
-    {
-        id: 'bomb-panic',
-        title: 'Bomb Panic: Hot Potato',
+        id: 'tic-tac-toe',
+        title: 'Sumi-e Tac Toe: Zen Brush & AI',
         category: 'pvp',
-        tags: ['Party', 'PvP', 'Multiplayer', 'Survival'],
-        desc: 'One player gets a ticking bomb! PASS → RUN → THROW → SURVIVE before the fuse hits 0!',
-        fullDesc: 'Extreme multiplayer hot potato! When the bomb is in your hands, the clock is ticking down to a massive explosion. Sprint after other players, pass the bomb with pinpoint tackles, and be the last runner standing.',
-        emoji: '💣💥',
-        heroEmoji: '💣🔥',
+        thumbnail: '/thumbnails/bento/tic-tac-toe.webp',
+        tags: ['PvP', 'Multiplayer', 'AI Bot', 'Strategy', 'Zen'],
+        desc: 'Traditional Japanese ink-wash Sumi-e Tic Tac Toe with calligraphy brush strokes, Ensō circle marks, Hanko seals, and Zen Master AI!',
+        fullDesc: 'Experience the timeless beauty of Japanese ink wash painting (水墨画). Wield calligraphic brush marks (Sumi X & Ensō O) against the contemplative Zen Master AI across classic 3x3, 4x4, and 5x5 boards with authentic acoustic soundscapes.',
+        emoji: '墨⭕',
+        heroEmoji: '🖌️墨⭕',
         status: 'live',
         rating: '5.0',
-        plays: '62.4K',
-        likesCount: 5120,
-        link: '/bomb-panic/index.html',
-        trending: true,
+        plays: '31.2K',
+        likesCount: 2580,
+        link: '/tic-tac-toe/index.html',
+        trending: false,
         isNew: true,
         multiplayer: true,
-        themeClass: 'theme-bomb',
-        actionBadge: '💣 PASS OR BOOM',
+        themeClass: 'theme-tictactoe',
+        actionBadge: '🧘 ZEN MASTER AI',
         controls: [
-            { key: 'WASD / Arrows', label: 'Run & Dodge' },
-            { key: 'Space / E', label: 'Tackle / Pass Bomb' },
-            { key: 'Shift', label: 'Sprint Surge' }
+            { key: 'Mouse Click / Touch', label: 'Draw Ink Mark on Board' }
         ]
     },
     {
         id: 'flappy-man',
         title: 'Flappy Man: Superhero Flight',
         category: 'arcade',
+        thumbnail: '/thumbnails/bento/flappy-man.webp',
         tags: ['Arcade', 'Flappy', 'Superhero', 'Reflex'],
         desc: 'Unlock Superman, Iron Man, Batman & Hanumanji! Dodge neon pipes across 5 escalating biomes.',
         fullDesc: 'Take flight as iconic superhero legends! Fly through challenging obstacle courses with dynamic particle trails, superhero sound effects, and unlockable heroes with custom flight mechanics.',
@@ -130,6 +106,7 @@ const GAMES_CATALOG = [
         id: 'wild-swings',
         title: 'Wild Swings: Hook & Flight',
         category: 'arcade',
+        thumbnail: '/thumbnails/bento/wild-swings.webp',
         tags: ['Physics', 'Swinging', 'Reflex', 'Skill'],
         desc: 'Stickman Hook style physics arcade! Web sling as Spider-Man over NYC across 20 acrobatic courses.',
         fullDesc: 'Master momentum, gravity, and pendulum physics! Shoot grapple hooks into anchor points, build kinetic speed, perform 360-degree aerial loops, and catapult through the checkered finish ring.',
@@ -151,35 +128,10 @@ const GAMES_CATALOG = [
         ]
     },
     {
-        id: 'fallen-one',
-        title: 'Cyber Clash: PvP Arena',
-        category: 'pvp',
-        tags: ['Fighting', 'PvP', 'Action', 'Combat'],
-        desc: 'Fast-paced 2D competitive martial arts PvP fighting game with combos, specials, parries & 10-Floor Tower!',
-        fullDesc: 'A competitive 2D arcade fighter with snappy animations and fighting game depth. Execute light and heavy punches, sweep kicks, fire projectiles, parry enemy strikes, and conquer the 10-Floor Champion Tower!',
-        emoji: '⚔️🔥',
-        heroEmoji: '🥋💥',
-        status: 'live',
-        rating: '5.0',
-        plays: '35.9K',
-        likesCount: 3110,
-        link: '/fallen-one/index.html',
-        trending: false,
-        isNew: false,
-        multiplayer: true,
-        themeClass: 'theme-fallen',
-        actionBadge: '⚔️ COMBO FIGHTER',
-        controls: [
-            { key: 'A / D', label: 'Move Left / Right' },
-            { key: 'W / S', label: 'Jump / Crouch' },
-            { key: 'J / K', label: 'Punch / Kick' },
-            { key: 'L / Space', label: 'Special Attack / Block' }
-        ]
-    },
-    {
         id: 'gravity-flip',
         title: 'Gravity Flip: Cavern Runner',
         category: 'reflex',
+        thumbnail: '/thumbnails/bento/gravity-flip.webp',
         tags: ['Reflex', 'Runner', 'Cavern', 'Arcade'],
         desc: 'Explore treacherous subterranean caves! Invert gravity between floor and ceiling to dodge stalactites.',
         fullDesc: 'Defy the laws of physics inside deep glowing cavern networks! Tap to instantly flip your gravity orientation upside-down, timing each jump between collapsing platforms and laser barriers.',
@@ -201,13 +153,14 @@ const GAMES_CATALOG = [
     },
     {
         id: 'pop-up',
-        title: 'Pop Up: Balloon Blitz',
+        title: 'Pop Up Blitz',
         category: 'arcade',
+        thumbnail: '/thumbnails/bento/pop-up.webp',
         tags: ['Shooter', 'Arcade', 'Reflex', 'Puzzle'],
-        desc: 'Aim cannon blades & pop endless streams of chaotic floating balloons across 20 vibrant levels!',
-        fullDesc: 'Aim, shoot, and pop! Launch spinning blade projectiles into colorful bouncy balloons, trigger chain reactions, and pop every target before timer expiry.',
-        emoji: '🎈💥',
-        heroEmoji: '🎈🎯',
+        desc: 'Aim cannon blades & pop endless streams of chaotic floating targets across 20 vibrant levels!',
+        fullDesc: 'Aim, shoot, and pop! Launch spinning blade projectiles into colorful bouncy targets, trigger chain reactions, and pop every target before timer expiry.',
+        emoji: '🎯💥',
+        heroEmoji: '⚡🎯',
         status: 'live',
         rating: '4.8',
         plays: '23.4K',
@@ -217,32 +170,89 @@ const GAMES_CATALOG = [
         isNew: true,
         multiplayer: false,
         themeClass: 'theme-popup',
-        actionBadge: '🎈 20 LEVELS',
+        actionBadge: '⚡ 20 LEVELS',
         controls: [
             { key: 'Mouse Aim + Click', label: 'Shoot Blade Cannon' }
         ]
     },
     {
-        id: 'tic-tac-toe',
-        title: 'Sumi-e Tac Toe: Zen Brush & AI',
+        id: 'bomb-panic',
+        title: 'Bomb Panic: Hot Potato',
         category: 'pvp',
-        tags: ['PvP', 'Multiplayer', 'AI Bot', 'Strategy', 'Zen'],
-        desc: 'Traditional Japanese ink-wash Sumi-e Tic Tac Toe with calligraphy brush strokes, Ensō circle marks, Hanko seals, and Zen Master AI!',
-        fullDesc: 'Experience the timeless beauty of Japanese ink wash painting (水墨画). Wield calligraphic brush marks (Sumi X & Ensō O) against the contemplative Zen Master AI across classic 3x3, 4x4, and 5x5 boards with authentic acoustic soundscapes.',
-        emoji: '墨⭕',
-        heroEmoji: '🖌️墨⭕',
+        thumbnail: '/thumbnails/bento/bomb-panic.webp',
+        tags: ['Party', 'PvP', 'Multiplayer', 'Survival'],
+        desc: 'One player gets a ticking bomb! PASS → RUN → THROW → SURVIVE before the fuse hits 0!',
+        fullDesc: 'Extreme multiplayer hot potato! When the bomb is in your hands, the clock is ticking down to a massive explosion. Sprint after other players, pass the bomb with pinpoint tackles, and be the last runner standing.',
+        emoji: '💣💥',
+        heroEmoji: '💣🔥',
         status: 'live',
         rating: '5.0',
-        plays: '31.2K',
-        likesCount: 2580,
-        link: '/tic-tac-toe/index.html',
-        trending: false,
+        plays: '62.4K',
+        likesCount: 5120,
+        link: '/bomb-panic/index.html',
+        trending: true,
         isNew: true,
         multiplayer: true,
-        themeClass: 'theme-tictactoe',
-        actionBadge: '🧘 ZEN MASTER AI',
+        themeClass: 'theme-bomb',
+        actionBadge: '💣 PASS OR BOOM',
         controls: [
-            { key: 'Mouse Click / Touch', label: 'Draw Ink Mark on Board' }
+            { key: 'WASD / Arrows', label: 'Run & Dodge' },
+            { key: 'Space / E', label: 'Tackle / Pass Bomb' },
+            { key: 'Shift', label: 'Sprint Surge' }
+        ]
+    },
+    {
+        id: 'elevator-doom',
+        title: 'Elevator of Doom: Floor 99',
+        category: 'action',
+        thumbnail: '/thumbnails/bento/elevator-doom.webp',
+        tags: ['Roguelite', 'Survival', 'Combat', 'Action'],
+        desc: 'Strategic roguelite elevator survival! Slay enemies, gather loot, buy safe-room perks, and decide: Do you go higher?',
+        fullDesc: 'Conquer the unstable elevator shaft floor by floor! Choose between Safe Routes, Crucible Chambers, and High-Stakes Gambles. Unlock weapons, stack passive perks, survive the 5-Tier Doom Meter, and decide whether to bank your run coins or push your luck to Floor 99.',
+        emoji: '🛗💀',
+        heroEmoji: '🛗🚨',
+        status: 'live',
+        rating: '4.9',
+        plays: '38.6K',
+        likesCount: 2950,
+        link: '/elevator-doom/index.html',
+        trending: true,
+        isNew: true,
+        multiplayer: false,
+        themeClass: 'theme-elevator',
+        actionBadge: '🚨 FLOOR 99 ROGUELITE',
+        controls: [
+            { key: 'A / D / ← / →', label: 'Move' },
+            { key: 'W / Space', label: 'Jump' },
+            { key: 'Space / Click', label: 'Attack Weapon' },
+            { key: 'Shift / Q / E', label: 'Active Ability' }
+        ]
+    },
+    {
+        id: 'fallen-one',
+        title: 'Cyber Clash: PvP Arena',
+        category: 'pvp',
+        thumbnail: '/thumbnails/bento/fallen-one.webp',
+        tags: ['Fighting', 'PvP', 'Action', 'Combat'],
+        desc: 'Fast-paced 2D competitive martial arts PvP fighting game with combos, specials, parries & 10-Floor Tower!',
+        fullDesc: 'A competitive 2D arcade fighter with snappy animations and fighting game depth. Execute light and heavy punches, sweep kicks, fire projectiles, parry enemy strikes, and conquer the 10-Floor Champion Tower!',
+        emoji: '⚔️🔥',
+        heroEmoji: '🥋💥',
+        status: 'live',
+        rating: '5.0',
+        plays: '35.9K',
+        likesCount: 3110,
+        link: '/fallen-one/index.html',
+        trending: false,
+        isNew: false,
+        multiplayer: true,
+        themeClass: 'theme-fallen',
+        actionBadge: '⚔️ COMBO FIGHTER',
+        controls: [
+            { key: 'A / D', label: 'Move Left / Right' },
+            { key: 'W / S', label: 'Jump / Crouch' },
+            { key: 'J / K', label: 'Punch / Kick' },
+            { key: 'L / Space', label: 'Special Attack / Block' }
         ]
     }
 ];
@@ -443,7 +453,7 @@ class LiveAudienceEngine {
 
     syncDOM() {
         // 1. Update Global Ticker in Navbar
-        const navGlobal = document.getElementById('nav-global-live-count');
+        const navGlobal = document.getElementById('nav-global-live-count') || document.getElementById('nav-live-players');
         if (navGlobal) {
             navGlobal.textContent = this.globalCount.toLocaleString();
             navGlobal.classList.add('live-flash');
@@ -582,13 +592,18 @@ const AuthManager = {
             savedUser = localStorage.getItem(this.ACTIVE_USER_PERSIST_KEY);
         }
 
+        const globalPreferredAvatar = localStorage.getItem('kf_preferred_avatar') || '👾';
+
         if (savedUser) {
             try {
                 const parsed = JSON.parse(savedUser);
                 if (parsed && parsed.username && parsed.username !== 'Guest') {
+                    const registry = this.getRegistry();
+                    const regUser = registry[parsed.username] || {};
+                    const persistedAvatar = regUser.avatar || parsed.avatar || globalPreferredAvatar;
                     this.currentUser = {
                         username: parsed.username,
-                        avatar: parsed.avatar || '👾',
+                        avatar: persistedAvatar,
                         isLoggedIn: true,
                         provider: parsed.provider || 'local',
                         email: parsed.email || ''
@@ -598,7 +613,7 @@ const AuthManager = {
         }
 
         if (!this.currentUser || !this.currentUser.isLoggedIn) {
-            const guestAvatar = localStorage.getItem('kf_saved_guest_avatar') || sessionStorage.getItem('kf_saved_guest_avatar') || '👾';
+            const guestAvatar = localStorage.getItem('kf_preferred_avatar') || localStorage.getItem('kf_saved_guest_avatar') || sessionStorage.getItem('kf_saved_guest_avatar') || '👾';
             this.currentUser = {
                 username: 'Guest',
                 avatar: guestAvatar,
@@ -647,8 +662,17 @@ const AuthManager = {
         const avatarUrl = meta.avatar_url || meta.picture || null;
         const provider = sbUser.app_metadata?.provider || 'google';
 
+        // Check if user already exists in registry to preserve their avatar!
+        const registry = this.getRegistry();
+        const existingKey = Object.keys(registry).find(k => k.toLowerCase() === cleanName.toLowerCase());
+        const existingAvatar = existingKey && registry[existingKey]?.avatar ? registry[existingKey].avatar : null;
+        const preferredAvatar = localStorage.getItem('kf_preferred_avatar');
+
+        // Keep their chosen avatar unless they don't have one
+        const finalAvatar = existingAvatar || preferredAvatar || avatarUrl || '👾';
+
         console.log(`✨ [AuthManager] Synced OAuth user: ${cleanName} via ${provider}`);
-        this.login(cleanName, '', avatarUrl || '👑', {
+        this.login(cleanName, '', finalAvatar, {
             provider: provider,
             email: sbUser.email || '',
             isOAuth: true
@@ -683,40 +707,212 @@ const AuthManager = {
         return this.currentUser || { username: 'Guest', avatar: '👾', isLoggedIn: false, provider: 'guest' };
     },
 
+    isUsernameTaken(username, excludeCurrentName = '') {
+        if (!username) return false;
+        const clean = username.trim().toLowerCase();
+        if (!clean) return false;
+
+        const reserved = ['guest', 'guest player', 'admin', 'administrator', 'system', 'krazy', 'krazyfuze', 'support'];
+        if (reserved.includes(clean)) {
+            return true;
+        }
+
+        const currentClean = (excludeCurrentName || '').trim().toLowerCase();
+
+        const registry = this.getRegistry();
+        for (const regKey of Object.keys(registry)) {
+            const regClean = regKey.trim().toLowerCase();
+            if (regClean === clean) {
+                if (currentClean && regClean === currentClean) {
+                    continue;
+                }
+                return true;
+            }
+        }
+
+        if (this.currentUser && this.currentUser.username && this.currentUser.isLoggedIn) {
+            const activeClean = this.currentUser.username.trim().toLowerCase();
+            if (activeClean === clean && activeClean !== currentClean) {
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+    changeUsername(oldName, newName) {
+        if (!this.isLoggedIn()) {
+            return { success: false, error: 'You must be signed in to change your in-game name!' };
+        }
+
+        const cleanNew = (newName || '').trim();
+        const cleanOld = (oldName || this.currentUser.username || '').trim();
+
+        if (!cleanNew) {
+            return { success: false, error: 'Please enter a valid in-game name!' };
+        }
+
+        if (cleanNew.length < 2) {
+            return { success: false, error: 'In-game name must be at least 2 characters long!' };
+        }
+
+        if (cleanNew.length > 20) {
+            return { success: false, error: 'In-game name cannot exceed 20 characters!' };
+        }
+
+        const tagRegex = /^[a-zA-Z0-9_\- .]+$/;
+        if (!tagRegex.test(cleanNew)) {
+            return { success: false, error: 'In-game name can only contain letters, numbers, spaces, dots, underscores, and hyphens!' };
+        }
+
+        if (cleanNew.toLowerCase() === 'guest' || cleanNew.toLowerCase() === 'guest player') {
+            return { success: false, error: 'The name "Guest" is reserved. Please pick a unique in-game name!' };
+        }
+
+        // Check if taken by another account
+        if (this.isUsernameTaken(cleanNew, cleanOld)) {
+            return { success: false, error: `⚠️ The name "${cleanNew}" is already taken! Every player must have a unique name.` };
+        }
+
+        if (cleanNew === cleanOld) {
+            return { success: false, error: 'New name is identical to your current name.' };
+        }
+
+        // Migrate registry
+        const registry = this.getRegistry();
+        let userRecord = registry[cleanOld];
+        if (!userRecord) {
+            const matchKey = Object.keys(registry).find(k => k.toLowerCase() === cleanOld.toLowerCase());
+            if (matchKey) {
+                userRecord = registry[matchKey];
+                delete registry[matchKey];
+            } else {
+                userRecord = {
+                    username: cleanNew,
+                    avatar: this.currentUser.avatar || '👾',
+                    provider: this.currentUser.provider || 'local',
+                    createdAt: Date.now(),
+                    games: {}
+                };
+            }
+        } else {
+            delete registry[cleanOld];
+        }
+
+        userRecord.username = cleanNew;
+        userRecord.updatedAt = Date.now();
+        registry[cleanNew] = userRecord;
+        this.saveRegistry(registry);
+
+        // Migrate all localStorage keys for this user's games (kf_u_OldName_g_gameId -> kf_u_NewName_g_gameId)
+        const oldPrefix = `kf_u_${cleanOld}_g_`;
+        const newPrefix = `kf_u_${cleanNew}_g_`;
+        const keysToMigrate = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith(oldPrefix)) {
+                keysToMigrate.push(k);
+            }
+        }
+        keysToMigrate.forEach(k => {
+            const val = localStorage.getItem(k);
+            const targetKey = k.replace(oldPrefix, newPrefix);
+            localStorage.setItem(targetKey, val);
+            localStorage.removeItem(k);
+        });
+
+        // Migrate coins
+        const oldCoinKey = `kf_coins_${cleanOld}`;
+        const newCoinKey = `kf_coins_${cleanNew}`;
+        if (localStorage.getItem(oldCoinKey) !== null) {
+            localStorage.setItem(newCoinKey, localStorage.getItem(oldCoinKey));
+            localStorage.removeItem(oldCoinKey);
+        }
+
+        // Update active user state
+        this.currentUser.username = cleanNew;
+        sessionStorage.setItem(this.ACTIVE_USER_SESSION_KEY, JSON.stringify(this.currentUser));
+        localStorage.setItem(this.ACTIVE_USER_PERSIST_KEY, JSON.stringify(this.currentUser));
+
+        // Update UI
+        this.updateNavUI();
+        if (typeof renderAuthModalContent === 'function') {
+            renderAuthModalContent();
+        }
+
+        KrazyGameStorage.syncActiveGameIframe();
+        showToast(`In-game name successfully changed to "${cleanNew}"!`, this.currentUser.avatar || '✨');
+
+        return { success: true, newName: cleanNew };
+    },
+
     login(username, pin = '', avatar = '👾', meta = {}) {
-        const cleanName = (username || '').trim();
+        let cleanName = (username || '').trim();
         if (!cleanName || cleanName.toLowerCase() === 'guest') {
             this.logout();
-            return;
+            return { success: false, error: 'Cannot log in as guest.' };
         }
 
         const registry = this.getRegistry();
-        if (!registry[cleanName]) {
+        const existingKey = Object.keys(registry).find(k => k.toLowerCase() === cleanName.toLowerCase());
+
+        let chosenAvatar = avatar;
+
+        if (existingKey) {
+            const existingAcc = registry[existingKey];
+            // If existing account has PIN set and user entered wrong PIN:
+            if (existingAcc.pin && pin && existingAcc.pin !== pin) {
+                return { success: false, error: `⚠️ The username "${cleanName}" is already taken! If this is your account, please enter the correct PIN.` };
+            }
+            // If existing account has PIN set and user did not enter a PIN:
+            if (existingAcc.pin && !pin) {
+                return { success: false, error: `⚠️ The username "${cleanName}" is already registered. Please enter your 4-digit PIN to sign in.` };
+            }
+
+            cleanName = existingKey; // preserve original casing
+            
+            // PRESERVE user's chosen avatar: never overwrite on login unless account has no avatar
+            if (existingAcc.avatar) {
+                chosenAvatar = existingAcc.avatar;
+            } else {
+                chosenAvatar = avatar || localStorage.getItem('kf_preferred_avatar') || '👾';
+                existingAcc.avatar = chosenAvatar;
+            }
+
+            if (pin && !existingAcc.pin) existingAcc.pin = pin;
+            if (meta.provider) existingAcc.provider = meta.provider;
+            if (meta.email) existingAcc.email = meta.email;
+            registry[existingKey] = existingAcc;
+        } else {
+            // Check if name is reserved or taken
+            if (this.isUsernameTaken(cleanName)) {
+                return { success: false, error: `⚠️ The username "${cleanName}" is already taken! Please choose a unique gamer tag.` };
+            }
+
+            chosenAvatar = avatar || localStorage.getItem('kf_preferred_avatar') || '👾';
+
             registry[cleanName] = {
                 username: cleanName,
                 pin: pin,
-                avatar: avatar,
+                avatar: chosenAvatar,
                 provider: meta.provider || 'local',
                 email: meta.email || '',
                 createdAt: Date.now(),
                 games: {}
             };
-        } else {
-            if (avatar) registry[cleanName].avatar = avatar;
-            if (pin) registry[cleanName].pin = pin;
-            if (meta.provider) registry[cleanName].provider = meta.provider;
-            if (meta.email) registry[cleanName].email = meta.email;
         }
         this.saveRegistry(registry);
 
         this.currentUser = {
             username: cleanName,
-            avatar: avatar || registry[cleanName].avatar || '👾',
+            avatar: chosenAvatar,
             isLoggedIn: true,
-            provider: meta.provider || registry[cleanName].provider || 'local',
-            email: meta.email || registry[cleanName].email || ''
+            provider: meta.provider || (existingKey && registry[existingKey]?.provider) || 'local',
+            email: meta.email || (existingKey && registry[existingKey]?.email) || ''
         };
 
+        // Persist preferred avatar globally so it's remembered everywhere
+        localStorage.setItem('kf_preferred_avatar', chosenAvatar);
         sessionStorage.setItem(this.ACTIVE_USER_SESSION_KEY, JSON.stringify(this.currentUser));
         localStorage.setItem(this.ACTIVE_USER_PERSIST_KEY, JSON.stringify(this.currentUser));
 
@@ -728,10 +924,16 @@ const AuthManager = {
         if (typeof updateReactionUI === 'function' && currentGame) {
             updateReactionUI(currentGame.id);
         }
+
+        return { success: true, username: cleanName };
     },
 
     logout(syncSupabase = true) {
-        const guestAvatar = localStorage.getItem('kf_saved_guest_avatar') || sessionStorage.getItem('kf_saved_guest_avatar') || '👾';
+        const guestAvatar = localStorage.getItem('kf_preferred_avatar') || 
+                            localStorage.getItem('kf_saved_guest_avatar') || 
+                            sessionStorage.getItem('kf_saved_guest_avatar') || 
+                            (this.currentUser && this.currentUser.avatar) || 
+                            '👾';
         this.currentUser = {
             username: 'Guest',
             avatar: guestAvatar,
@@ -761,9 +963,12 @@ const AuthManager = {
     setAvatar(avatar) {
         if (!avatar) return;
         if (!this.currentUser) {
-            this.currentUser = { username: 'Guest', avatar: '👾', isLoggedIn: false, provider: 'guest' };
+            this.currentUser = { username: 'Guest', avatar: avatar, isLoggedIn: false, provider: 'guest' };
         }
         this.currentUser.avatar = avatar;
+        localStorage.setItem('kf_preferred_avatar', avatar);
+        localStorage.setItem('kf_saved_guest_avatar', avatar);
+        sessionStorage.setItem('kf_saved_guest_avatar', avatar);
 
         if (this.currentUser.isLoggedIn && this.currentUser.username !== 'Guest') {
             const registry = this.getRegistry();
@@ -773,9 +978,6 @@ const AuthManager = {
             }
             sessionStorage.setItem(this.ACTIVE_USER_SESSION_KEY, JSON.stringify(this.currentUser));
             localStorage.setItem(this.ACTIVE_USER_PERSIST_KEY, JSON.stringify(this.currentUser));
-        } else {
-            localStorage.setItem('kf_saved_guest_avatar', avatar);
-            sessionStorage.setItem('kf_saved_guest_avatar', avatar);
         }
 
         this.updateNavUI();
@@ -844,21 +1046,39 @@ const AuthManager = {
     },
 
     updateNavUI() {
+        const loginCta = document.getElementById('nav-btn-login-cta');
+        const userPill = document.getElementById('nav-user-pill');
         const avatarEl = document.getElementById('nav-user-avatar');
-        const nameEl = document.getElementById('nav-user-name');
+        const nameEl = document.getElementById('nav-username') || document.getElementById('nav-user-name');
         const statusEl = document.getElementById('nav-auth-status');
         const bankBadge = document.getElementById('portal-top-bank');
 
         const user = this.getActiveUser();
 
+        if (user.isLoggedIn) {
+            if (loginCta) loginCta.classList.add('hidden');
+            if (userPill) userPill.classList.remove('hidden');
+        } else {
+            if (loginCta) loginCta.classList.remove('hidden');
+            if (userPill) userPill.classList.add('hidden');
+        }
+
         if (avatarEl) {
-            if (user.avatar && (user.avatar.startsWith('http://') || user.avatar.startsWith('https://'))) {
-                avatarEl.innerHTML = `<img src="${user.avatar}" alt="Avatar" class="user-avatar-img">`;
+            if (user.avatar && (user.avatar.startsWith('http://') || user.avatar.startsWith('https://') || user.avatar.startsWith('data:'))) {
+                if (avatarEl.tagName === 'IMG') {
+                    avatarEl.src = user.avatar;
+                } else {
+                    avatarEl.innerHTML = `<img src="${user.avatar}" alt="Avatar" class="user-avatar-img">`;
+                }
             } else {
-                avatarEl.textContent = user.avatar || '👾';
+                if (avatarEl.tagName === 'IMG') {
+                    avatarEl.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%231e293b"/><text x="50" y="65" font-size="50" text-anchor="middle">${encodeURIComponent(user.avatar || '👾')}</text></svg>`;
+                } else {
+                    avatarEl.textContent = user.avatar || '👾';
+                }
             }
         }
-        if (nameEl) nameEl.textContent = user.isLoggedIn ? user.username : 'Guest';
+        if (nameEl) nameEl.textContent = user.isLoggedIn ? user.username : 'Login';
         if (statusEl) {
             statusEl.className = 'auth-status-dot ' + (user.isLoggedIn ? 'online' : 'guest');
             const provText = user.provider && user.provider !== 'local' && user.provider !== 'guest' ? ` via ${user.provider}` : '';
@@ -1146,6 +1366,12 @@ function openGamePlayer(gameId) {
     // Scroll to top of player
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    // Restore or apply preferred display aspect mode
+    try {
+        const savedIdx = parseInt(localStorage.getItem('kf_display_aspect_idx') || '0', 10);
+        applyAspectRatioMode(isNaN(savedIdx) ? 0 : savedIdx);
+    } catch (e) {}
+
     // Update Player Breadcrumbs
     const bcCategory = document.getElementById('player-bc-category');
     const bcTitle = document.getElementById('player-bc-title');
@@ -1255,6 +1481,9 @@ function closeGamePlayer() {
     if (playerView) playerView.classList.add('hidden');
     if (catalogView) catalogView.classList.remove('hidden');
 
+    const playerGrid = document.querySelector('.player-layout-grid');
+    if (playerGrid) playerGrid.classList.remove('theater-mode');
+
     const iframe = document.getElementById('active-game-iframe');
     if (iframe) iframe.src = 'about:blank'; // Unload game to completely free RAM and audio
 
@@ -1294,6 +1523,7 @@ function renderPlayNextSidebar(activeGame) {
         card.className = 'play-next-card';
         card.innerHTML = `
             <div class="pn-thumb ${rec.themeClass || 'theme-office'}">
+                <img src="${rec.thumbnail || `/thumbnails/${rec.id}.svg`}" alt="${rec.title}" class="pn-thumb-img" onerror="this.style.display='none'">
                 <span class="pn-emoji">${rec.heroEmoji || rec.emoji}</span>
             </div>
             <div class="pn-info">
@@ -1334,45 +1564,22 @@ function createGameCard(game) {
     const card = document.createElement('div');
     card.className = 'game-card';
     card.dataset.id = game.id;
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('title', `Play ${game.title}`);
 
-    const liveCount = window.audienceEngine ? window.audienceEngine.getGameCount(game.id) : 15000;
-    const compactLive = window.audienceEngine ? window.audienceEngine.formatCompact(liveCount) : '15.0K';
-    const formattedLive = liveCount.toLocaleString();
-
-    const totalPlays = window.audienceEngine ? window.audienceEngine.getGamePlays(game.id) : 25000;
-    const compactPlays = window.audienceEngine ? window.audienceEngine.formatCompact(totalPlays) : (game.plays || '25.0K');
+    const thumbUrl = game.thumbnail || `/thumbnails/${game.id}.svg`;
 
     card.innerHTML = `
         <div class="card-thumb-wrap">
-            <div class="thumb-artwork ${game.themeClass || 'theme-office'}">
+            <img src="${thumbUrl}" alt="${game.title} Cover" class="card-thumb-img" loading="lazy" onerror="this.style.display='none'">
+            <div class="thumb-artwork ${game.themeClass || 'theme-office'}" style="position: absolute; inset: 0; z-index: 0;">
                 <div class="thumb-emoji-hero">${game.heroEmoji || game.emoji}</div>
-                <div class="thumb-action-burst">${game.actionBadge || '⚡ ACTION'}</div>
-                <div class="thumb-overlay-gradient"></div>
             </div>
-            <span class="thumb-status-badge live" data-game-live="${game.id}" title="Real-time live players right now">
-                <span class="live-pulse-dot"></span>
-                <strong class="live-card-val">${compactLive}</strong> LIVE
-            </span>
-            <button class="card-play-btn" title="Play ${game.title}">
-                <span>▶ PLAY</span>
-            </button>
-        </div>
-        <div class="card-info">
-            <h3 class="card-game-title">${game.title}</h3>
-            <p class="card-game-meta">
-                <span class="card-rating">⭐ ${game.rating}</span>
-                <span class="meta-dot">·</span>
-                <span class="card-live-watching" title="Currently playing">
-                    <span class="watching-dot"></span>
-                    <strong class="live-meta-val" data-game-meta-live="${game.id}">${formattedLive}</strong> live
-                </span>
-                <span class="meta-dot">·</span>
-                <span class="card-plays-count" title="Total plays worldwide">
-                    👥 <strong data-game-meta-plays="${game.id}">${compactPlays}</strong>
-                </span>
-                <span class="meta-dot">·</span>
-                <span class="card-tag-pill">${game.tags[0] || 'Arcade'}</span>
-            </p>
+            <div class="card-hover-overlay">
+                <span class="card-hover-title">${game.title}</span>
+                <span class="card-hover-play">▶ PLAY</span>
+            </div>
         </div>
     `;
 
@@ -1385,33 +1592,27 @@ function createGameCard(game) {
 
 function renderPortal() {
     const filterSection = document.getElementById('filtered-section');
-    const secTrending = document.getElementById('section-trending');
-    const secNew = document.getElementById('section-new');
-    const secMultiplayer = document.getElementById('section-multiplayer');
-    const secAll = document.getElementById('section-all');
-
+    const bentoSection = document.getElementById('bento-arcade-section');
     const filteredGrid = document.getElementById('filtered-grid');
-    const trendingGrid = document.getElementById('trending-grid');
-    const newGrid = document.getElementById('new-grid');
-    const multiplayerGrid = document.getElementById('multiplayer-grid');
-    const allGamesGrid = document.getElementById('all-games-grid');
 
     const hasFilter = activeCategory !== 'all' || searchQuery.length > 0;
 
     if (hasFilter) {
         if (filterSection) filterSection.classList.remove('hidden');
-        if (secTrending) secTrending.classList.add('hidden');
-        if (secNew) secNew.classList.add('hidden');
-        if (secMultiplayer) secMultiplayer.classList.add('hidden');
-        if (secAll) secAll.classList.add('hidden');
+        if (bentoSection) bentoSection.classList.add('hidden');
 
         if (filteredGrid) {
             filteredGrid.innerHTML = '';
             const matched = GAMES_CATALOG.filter(game => {
                 let matchesCategory = true;
-                if (activeCategory === 'trending') matchesCategory = game.trending;
+                if (activeCategory === 'trending' || activeCategory === 'popular') matchesCategory = game.trending;
                 else if (activeCategory === 'new') matchesCategory = game.isNew;
                 else if (activeCategory === 'multiplayer') matchesCategory = game.multiplayer;
+                else if (activeCategory === 'runners') matchesCategory = game.category === 'runner' || game.tags.some(t => t.toLowerCase() === 'runner');
+                else if (activeCategory === 'action') matchesCategory = game.category === 'action' || game.tags.some(t => t.toLowerCase() === 'action');
+                else if (activeCategory === 'darts') matchesCategory = game.id === 'dart-board' || game.category === 'pvp';
+                else if (activeCategory === 'arcade') matchesCategory = game.category === 'arcade' || game.tags.some(t => t.toLowerCase() === 'arcade');
+                else if (activeCategory === 'reflex') matchesCategory = game.category === 'reflex' || game.tags.some(t => t.toLowerCase() === 'reflex');
                 else if (activeCategory === 'bookmarks') matchesCategory = getStoredBookmarks().includes(game.id);
                 else if (activeCategory !== 'all') {
                     matchesCategory = game.category === activeCategory || game.tags.some(t => t.toLowerCase() === activeCategory.toLowerCase());
@@ -1428,9 +1629,14 @@ function renderPortal() {
             if (countEl) countEl.textContent = `${matched.length} games`;
             if (titleEl) {
                 if (searchQuery) titleEl.textContent = `🔍 SEARCH RESULTS FOR "${searchQuery.toUpperCase()}"`;
-                else if (activeCategory === 'trending') titleEl.textContent = `🔥 POPULAR & TRENDING GAMES`;
+                else if (activeCategory === 'trending' || activeCategory === 'popular') titleEl.textContent = `🔥 POPULAR & TRENDING GAMES`;
                 else if (activeCategory === 'new') titleEl.textContent = `🆕 NEW ARCADE RELEASES`;
                 else if (activeCategory === 'multiplayer') titleEl.textContent = `🏆 MULTIPLAYER & PVP BATTLES`;
+                else if (activeCategory === 'runners') titleEl.textContent = `🏃 ENDLESS RUNNERS`;
+                else if (activeCategory === 'darts') titleEl.textContent = `🎯 DARTS & PUB SPORTS`;
+                else if (activeCategory === 'action') titleEl.textContent = `⚔️ ACTION & COMBAT`;
+                else if (activeCategory === 'arcade') titleEl.textContent = `🕹️ CLASSIC ARCADE GAMES`;
+                else if (activeCategory === 'reflex') titleEl.textContent = `⚡ REFLEX & TIMING`;
                 else if (activeCategory === 'bookmarks') titleEl.textContent = `🔖 SAVED BOOKMARKS`;
                 else titleEl.textContent = `⚡ ${activeCategory.toUpperCase()} GAMES`;
             }
@@ -1449,30 +1655,27 @@ function renderPortal() {
         }
     } else {
         if (filterSection) filterSection.classList.add('hidden');
-        if (secTrending) secTrending.classList.remove('hidden');
-        if (secNew) secNew.classList.remove('hidden');
-        if (secMultiplayer) secMultiplayer.classList.remove('hidden');
-        if (secAll) secAll.classList.remove('hidden');
+        if (bentoSection) bentoSection.classList.remove('hidden');
 
-        if (trendingGrid) {
-            trendingGrid.innerHTML = '';
-            GAMES_CATALOG.filter(g => g.trending).forEach(game => trendingGrid.appendChild(createGameCard(game)));
-        }
-
-        if (newGrid) {
-            newGrid.innerHTML = '';
-            GAMES_CATALOG.filter(g => g.isNew).forEach(game => newGrid.appendChild(createGameCard(game)));
-        }
-
-        if (multiplayerGrid) {
-            multiplayerGrid.innerHTML = '';
-            GAMES_CATALOG.filter(g => g.multiplayer).forEach(game => multiplayerGrid.appendChild(createGameCard(game)));
-        }
-
-        if (allGamesGrid) {
-            allGamesGrid.innerHTML = '';
-            GAMES_CATALOG.forEach(game => allGamesGrid.appendChild(createGameCard(game)));
-        }
+        // Wire up Bento Grid clicks
+        document.querySelectorAll('.bento-card').forEach(card => {
+            if (!card.dataset.wired) {
+                card.dataset.wired = 'true';
+                card.setAttribute('role', 'button');
+                card.setAttribute('tabindex', '0');
+                card.addEventListener('click', () => {
+                    const gameId = card.dataset.id;
+                    if (gameId) openGamePlayer(gameId);
+                });
+                card.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const gameId = card.dataset.id;
+                        if (gameId) openGamePlayer(gameId);
+                    }
+                });
+            }
+        });
     }
 }
 
@@ -1713,25 +1916,52 @@ function togglePlayerFullscreen() {
     }
 }
 
-// Viewport Aspect Ratio Toggle
-const ASPECT_MODES = ['aspect-16-9', 'aspect-ultrawide', 'aspect-fit'];
+// Viewport Aspect Ratio & Display Width Toggle
+// Modes:
+// 0: Standard 16:9 Wide (comfortable wide screen)
+// 1: Theater Full Width (expands across full arena width, looks like fullscreen mode)
+// 2: 21:9 Ultrawide Cinema (cinematic panoramic)
+// 3: 4:3 Classic Fit (maximum vertical room)
+const ASPECT_MODES = ['aspect-16-9', 'aspect-theater', 'aspect-ultrawide', 'aspect-fit'];
 let currentAspectIdx = 0;
-function cycleAspectRatio() {
+
+function applyAspectRatioMode(idx) {
     const wrapper = document.getElementById('game-screen-wrapper');
+    const playerGrid = document.querySelector('.player-layout-grid');
+    const btnAspect = document.getElementById('btn-game-aspect');
     if (!wrapper) return;
 
-    wrapper.classList.remove('aspect-ultrawide', 'aspect-fit');
-    currentAspectIdx = (currentAspectIdx + 1) % 3;
+    wrapper.classList.remove('aspect-theater', 'aspect-ultrawide', 'aspect-fit');
+    if (playerGrid) playerGrid.classList.remove('theater-mode');
 
-    if (currentAspectIdx === 1) {
+    currentAspectIdx = ((idx % ASPECT_MODES.length) + ASPECT_MODES.length) % ASPECT_MODES.length;
+    const mode = ASPECT_MODES[currentAspectIdx];
+
+    if (mode === 'aspect-theater') {
+        wrapper.classList.add('aspect-theater');
+        if (playerGrid) playerGrid.classList.add('theater-mode');
+        if (btnAspect) btnAspect.title = 'Display Mode: Theater Full-Width (Click to change)';
+        showToast('Display Width: Theater Full-Width (Fullscreen View)', '🎬');
+    } else if (mode === 'aspect-ultrawide') {
         wrapper.classList.add('aspect-ultrawide');
-        showToast('Aspect Ratio: 21:9 Ultrawide', '📱');
-    } else if (currentAspectIdx === 2) {
+        if (btnAspect) btnAspect.title = 'Display Mode: 21:9 Ultrawide Cinema (Click to change)';
+        showToast('Aspect Ratio: 21:9 Ultrawide Cinema', '🖥️');
+    } else if (mode === 'aspect-fit') {
         wrapper.classList.add('aspect-fit');
-        showToast('Aspect Ratio: 4:3 Classic Fit', '📱');
+        if (btnAspect) btnAspect.title = 'Display Mode: 4:3 Classic Fit (Click to change)';
+        showToast('Aspect Ratio: 4:3 Classic Fit (Full Height)', '📱');
     } else {
-        showToast('Aspect Ratio: 16:9 Standard Wide', '📱');
+        if (btnAspect) btnAspect.title = 'Display Mode: 16:9 Standard Wide (Click to change)';
+        showToast('Aspect Ratio: 16:9 Standard Wide', '📺');
     }
+
+    try {
+        localStorage.setItem('kf_display_aspect_idx', currentAspectIdx.toString());
+    } catch (e) {}
+}
+
+function cycleAspectRatio() {
+    applyAspectRatioMode(currentAspectIdx + 1);
 }
 
 // Mute Toggle
@@ -1751,13 +1981,21 @@ function setupCategoryControls() {
     const pills = document.querySelectorAll('.category-pill');
     const navShortcuts = document.querySelectorAll('.nav-shortcut-btn');
     const railBtns = document.querySelectorAll('.sidebar-icon-btn[data-category]');
+    const sidebarNavItems = document.querySelectorAll('.sidebar-nav-item[data-filter]');
+    const sectionLinks = document.querySelectorAll('.section-title-link[data-filter]');
 
     const updateActiveCategory = (cat) => {
+        if (cat === 'random') {
+            playRandomGame();
+            return;
+        }
+
         activeCategory = cat;
 
         pills.forEach(p => p.classList.toggle('active', p.dataset.category === cat));
         navShortcuts.forEach(n => n.classList.toggle('active', n.dataset.category === cat));
         railBtns.forEach(r => r.classList.toggle('active', r.dataset.category === cat));
+        sidebarNavItems.forEach(s => s.classList.toggle('active', s.dataset.filter === cat));
 
         // If inside player view, close it to view category catalog
         if (document.body.getAttribute('data-view') === 'player') {
@@ -1766,6 +2004,18 @@ function setupCategoryControls() {
 
         renderPortal();
     };
+
+    sidebarNavItems.forEach(item => {
+        item.addEventListener('click', () => updateActiveCategory(item.dataset.filter || 'all'));
+    });
+
+    sectionLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            updateActiveCategory(link.dataset.filter || 'all');
+            window.scrollTo({ top: 280, behavior: 'smooth' });
+        });
+    });
 
     pills.forEach(pill => {
         pill.addEventListener('click', () => updateActiveCategory(pill.dataset.category || 'all'));
@@ -1781,7 +2031,7 @@ function setupCategoryControls() {
 }
 
 function setupSearchControls() {
-    const heroInput = document.getElementById('search-games-input');
+    const heroInput = document.getElementById('hero-search-input') || document.getElementById('search-games-input');
     const navInput = document.getElementById('nav-search-input');
     const btnSearchGo = document.getElementById('btn-search-go');
     const btnClearNav = document.getElementById('nav-search-clear');
@@ -1805,6 +2055,7 @@ function setupSearchControls() {
     if (btnSearchGo) {
         btnSearchGo.addEventListener('click', () => {
             if (heroInput) onSearchChange(heroInput.value);
+            else if (navInput) onSearchChange(navInput.value);
         });
     }
 }
@@ -1820,6 +2071,9 @@ function setupSuggestModal() {
     const modal = document.getElementById('suggest-modal');
     const btnOpen = document.getElementById('btn-open-suggest');
     const btnOpen2 = document.getElementById('btn-open-suggest-2');
+    const btnNavPitch = document.getElementById('nav-btn-pitch-modal');
+    const btnBannerPitch = document.getElementById('btn-banner-pitch');
+    const btnBannerPublish = document.getElementById('btn-banner-publish');
     const btnClose = document.getElementById('btn-close-modal');
     const btnSubmit = document.getElementById('btn-submit-idea');
     const input = document.getElementById('idea-input');
@@ -1862,6 +2116,9 @@ function setupSuggestModal() {
 
     if (btnOpen) btnOpen.addEventListener('click', openModal);
     if (btnOpen2) btnOpen2.addEventListener('click', openModal);
+    if (btnNavPitch) btnNavPitch.addEventListener('click', openModal);
+    if (btnBannerPitch) btnBannerPitch.addEventListener('click', openModal);
+    if (btnBannerPublish) btnBannerPublish.addEventListener('click', openModal);
     if (btnClose) btnClose.addEventListener('click', closeModal);
     if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
@@ -2035,7 +2292,13 @@ function applyTheme(theme) {
     const btn = document.getElementById('btn-theme-toggle');
     document.documentElement.setAttribute('data-theme', theme);
     if (btn) {
-        btn.innerHTML = theme === 'day' ? '<span>🌙 Night</span>' : '<span>☀️ Day</span>';
+        if (theme === 'day') {
+            btn.innerHTML = `<svg class="nav-action-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a6a4ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+            btn.title = "Switch to Dark Mode";
+        } else {
+            btn.innerHTML = `<svg class="nav-action-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a6a4ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"></circle><line x1="12" y1="2" x2="12" y2="4.5"></line><line x1="12" y1="19.5" x2="12" y2="22"></line><line x1="4.22" y1="4.22" x2="6" y2="6"></line><line x1="18" y1="18" x2="19.78" y2="19.78"></line><line x1="2" y1="12" x2="4.5" y2="12"></line><line x1="19.5" y1="12" x2="22" y2="12"></line><line x1="4.22" y1="19.78" x2="6" y2="18"></line><line x1="18" y1="6" x2="19.78" y2="4.22"></line></svg>`;
+            btn.title = "Switch to Light Mode";
+        }
     }
 }
 
@@ -2076,8 +2339,7 @@ function setupAuthModal() {
 
     // Social & Quick Guest Buttons
     const btnGoogle = document.getElementById('btn-auth-google');
-    const btnInstagram = document.getElementById('btn-auth-instagram');
-    const btnFacebook = document.getElementById('btn-auth-facebook');
+    const btnApple = document.getElementById('btn-auth-apple');
     const btnGuestQuick = document.getElementById('btn-auth-guest-quick');
 
     const btnToggleSwitch = document.getElementById('btn-toggle-switch-account');
@@ -2100,7 +2362,12 @@ function setupAuthModal() {
     window.openProfileModal = openModal;
     window.closeProfileModal = closeModal;
 
+    const btnLoginCta = document.getElementById('nav-btn-login-cta');
+    const navUserPill = document.getElementById('nav-user-pill');
+
     if (btnOpen) btnOpen.addEventListener('click', openModal);
+    if (btnLoginCta) btnLoginCta.addEventListener('click', openModal);
+    if (navUserPill) navUserPill.addEventListener('click', openModal);
     if (btnSideProfile) btnSideProfile.addEventListener('click', openModal);
     if (btnClose) btnClose.addEventListener('click', closeModal);
     if (btnDone) btnDone.addEventListener('click', closeModal);
@@ -2136,7 +2403,14 @@ function setupAuthModal() {
                 const { error } = await KrazySupabase.signInWithOAuth('google');
                 if (error) {
                     console.error('Google OAuth error:', error);
-                    showToast(`Google Sign-In: ${error.message || 'Ensure Google provider is enabled in Supabase'}`, '⚠️');
+                    const msg = (error.message || '').toLowerCase();
+                    if (error.isProviderDisabled || msg.includes('not enabled') || msg.includes('unsupported')) {
+                        if (typeof window.showOAuthProviderHelp === 'function') {
+                            window.showOAuthProviderHelp('google', 'Google Sign-In Setup');
+                        }
+                    } else {
+                        showToast(`Google Sign-In: ${error.message || 'Ensure Google provider is enabled in Supabase'}`, '⚠️');
+                    }
                 }
             } else {
                 showToast('Supabase is not configured yet. Check credentials in supabase-config.js', '⚠️');
@@ -2144,33 +2418,22 @@ function setupAuthModal() {
         });
     }
 
-    // 3. Instagram / Meta Sign-In
-    if (btnInstagram) {
-        btnInstagram.addEventListener('click', async () => {
+    // 3. Apple OAuth Sign-In
+    if (btnApple) {
+        btnApple.addEventListener('click', async () => {
             if (typeof KrazySupabase !== 'undefined' && KrazySupabase.isConfigured()) {
-                showToast('Connecting to Instagram / Meta Sign-In...', '📷');
-                const { error } = await KrazySupabase.signInWithOAuth('facebook', {
-                    scopes: 'public_profile,email'
-                });
+                showToast('Connecting to Apple Sign-In...', '');
+                const { error } = await KrazySupabase.signInWithOAuth('apple');
                 if (error) {
-                    console.error('Instagram OAuth error:', error);
-                    showToast(`Instagram Login: ${error.message || 'Ensure Meta provider is enabled in Supabase'}`, '⚠️');
-                }
-            } else {
-                showToast('Supabase is not configured yet. Check credentials in supabase-config.js', '⚠️');
-            }
-        });
-    }
-
-    // 4. Facebook OAuth Sign-In
-    if (btnFacebook) {
-        btnFacebook.addEventListener('click', async () => {
-            if (typeof KrazySupabase !== 'undefined' && KrazySupabase.isConfigured()) {
-                showToast('Connecting to Facebook Sign-In...', '🚀');
-                const { error } = await KrazySupabase.signInWithOAuth('facebook');
-                if (error) {
-                    console.error('Facebook OAuth error:', error);
-                    showToast(`Facebook Sign-In: ${error.message || 'Ensure Facebook provider is enabled in Supabase'}`, '⚠️');
+                    console.error('Apple OAuth error:', error);
+                    const msg = (error.message || '').toLowerCase();
+                    if (error.isProviderDisabled || msg.includes('not enabled') || msg.includes('unsupported') || msg.includes('could not be found')) {
+                        if (typeof window.showOAuthProviderHelp === 'function') {
+                            window.showOAuthProviderHelp('apple', 'Apple Sign-In Setup');
+                        }
+                    } else {
+                        showToast(`Apple Sign-In: ${error.message || 'Ensure Apple provider is enabled in Supabase'}`, '⚠️');
+                    }
                 }
             } else {
                 showToast('Supabase is not configured yet. Check credentials in supabase-config.js', '⚠️');
@@ -2197,6 +2460,106 @@ function setupAuthModal() {
         });
     }
 
+    // In-Game Name Change Handlers
+    const btnEditUsername = document.getElementById('btn-edit-username');
+    const editPanel = document.getElementById('auth-username-edit-panel');
+    const inputChangeUsername = document.getElementById('input-change-username');
+    const btnSaveUsername = document.getElementById('btn-save-username');
+    const btnCancelUsername = document.getElementById('btn-cancel-username');
+    const usernameErrorMsg = document.getElementById('username-error-msg');
+
+    function closeNameEditPanel() {
+        if (editPanel) editPanel.classList.add('hidden');
+        if (usernameErrorMsg) {
+            usernameErrorMsg.classList.add('hidden');
+            usernameErrorMsg.textContent = '';
+        }
+        if (inputChangeUsername) {
+            inputChangeUsername.classList.remove('input-error');
+        }
+    }
+
+    if (btnEditUsername && editPanel) {
+        btnEditUsername.addEventListener('click', () => {
+            const user = AuthManager.getActiveUser();
+            if (!user.isLoggedIn) return;
+            editPanel.classList.remove('hidden');
+            if (inputChangeUsername) {
+                inputChangeUsername.value = user.username;
+                inputChangeUsername.focus();
+                inputChangeUsername.select();
+            }
+            if (usernameErrorMsg) {
+                usernameErrorMsg.classList.add('hidden');
+                usernameErrorMsg.textContent = '';
+            }
+        });
+    }
+
+    if (btnCancelUsername) {
+        btnCancelUsername.addEventListener('click', closeNameEditPanel);
+    }
+
+    function handleSaveNewUsername() {
+        if (!inputChangeUsername) return;
+        const newName = inputChangeUsername.value.trim();
+        const currentName = AuthManager.getActiveUser().username;
+
+        if (usernameErrorMsg) {
+            usernameErrorMsg.classList.add('hidden');
+            usernameErrorMsg.textContent = '';
+        }
+        inputChangeUsername.classList.remove('input-error');
+
+        const res = AuthManager.changeUsername(currentName, newName);
+        if (!res.success) {
+            if (usernameErrorMsg) {
+                usernameErrorMsg.textContent = res.error;
+                usernameErrorMsg.classList.remove('hidden');
+            }
+            inputChangeUsername.classList.add('input-error');
+            inputChangeUsername.focus();
+            showToast(res.error, '⚠️');
+            return;
+        }
+
+        closeNameEditPanel();
+        renderAuthModalContent();
+    }
+
+    if (btnSaveUsername) {
+        btnSaveUsername.addEventListener('click', handleSaveNewUsername);
+    }
+
+    if (inputChangeUsername) {
+        inputChangeUsername.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSaveNewUsername();
+            } else if (e.key === 'Escape') {
+                closeNameEditPanel();
+            }
+        });
+
+        inputChangeUsername.addEventListener('input', () => {
+            const val = inputChangeUsername.value.trim();
+            const current = AuthManager.getActiveUser().username;
+            if (val && val.toLowerCase() !== current.toLowerCase() && AuthManager.isUsernameTaken(val, current)) {
+                if (usernameErrorMsg) {
+                    usernameErrorMsg.textContent = `⚠️ The name "${val}" is already taken! Every player must have a unique name.`;
+                    usernameErrorMsg.classList.remove('hidden');
+                }
+                inputChangeUsername.classList.add('input-error');
+            } else {
+                if (usernameErrorMsg) {
+                    usernameErrorMsg.classList.add('hidden');
+                    usernameErrorMsg.textContent = '';
+                }
+                inputChangeUsername.classList.remove('input-error');
+            }
+        });
+    }
+
     // Login submit
     if (btnLogin) {
         btnLogin.addEventListener('click', () => {
@@ -2207,7 +2570,21 @@ function setupAuthModal() {
                 if (usernameInput) usernameInput.focus();
                 return;
             }
-            AuthManager.login(name, pin, selectedAvatar, { provider: 'local' });
+            // Check if returning user already has a saved avatar to preserve it
+            const registry = AuthManager.getRegistry();
+            const existingKey = Object.keys(registry).find(k => k.toLowerCase() === name.toLowerCase());
+            const userAvatar = (existingKey && registry[existingKey]?.avatar) 
+                ? registry[existingKey].avatar 
+                : (localStorage.getItem('kf_preferred_avatar') || selectedAvatar);
+
+            const res = AuthManager.login(name, pin, userAvatar, { provider: 'local' });
+            if (res && res.success === false) {
+                showToast(res.error, '⚠️');
+                alert(res.error);
+                if (usernameInput) usernameInput.focus();
+                return;
+            }
+            closeNameEditPanel();
             renderAuthModalContent();
         });
     }
@@ -2215,6 +2592,7 @@ function setupAuthModal() {
     // Switch to Guest
     if (btnGuest) {
         btnGuest.addEventListener('click', () => {
+            closeNameEditPanel();
             AuthManager.logout();
             renderAuthModalContent();
         });
@@ -2223,39 +2601,12 @@ function setupAuthModal() {
     // Log out
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
+            closeNameEditPanel();
             AuthManager.logout();
             renderAuthModalContent();
         });
     }
 
-    // Reset current data
-    if (btnClearCurrent) {
-        btnClearCurrent.addEventListener('click', () => {
-            const user = AuthManager.getActiveUser();
-            if (confirm(`Reset and clear all saved game progress for ${user.username}?`)) {
-                if (user.isLoggedIn) {
-                    const registry = AuthManager.getRegistry();
-                    if (registry[user.username]) {
-                        registry[user.username].games = {};
-                        AuthManager.saveRegistry(registry);
-                    }
-                    const prefix = `kf_u_${user.username}_g_`;
-                    const toRemove = [];
-                    for (let i = 0; i < localStorage.length; i++) {
-                        const k = localStorage.key(i);
-                        if (k && k.startsWith(prefix)) toRemove.push(k);
-                    }
-                    toRemove.forEach(k => localStorage.removeItem(k));
-                } else {
-                    AuthManager.clearGuestData();
-                }
-                renderAuthModalContent();
-                AuthManager.updateNavUI();
-                KrazyGameStorage.syncActiveGameIframe();
-                showToast(`Game progress cleared for ${user.username}!`, '🗑️');
-            }
-        });
-    }
 }
 
 function renderAuthModalContent() {
@@ -2264,7 +2615,6 @@ function renderAuthModalContent() {
     // 1. Current Status Card
     const currentAvatar = document.getElementById('auth-current-avatar');
     const currentUsername = document.getElementById('auth-current-username');
-    const currentBadge = document.getElementById('auth-current-badge');
     const currentNotice = document.getElementById('auth-current-notice');
     const previewAvatar = document.getElementById('modal-auth-avatar-preview');
     const btnLogout = document.getElementById('btn-auth-logout');
@@ -2300,10 +2650,13 @@ function renderAuthModalContent() {
 
     if (currentUsername) currentUsername.textContent = user.isLoggedIn ? user.username : 'Guest Player';
     
-    if (currentBadge) {
-        currentBadge.className = 'auth-badge-pill ' + (user.isLoggedIn ? 'online' : 'guest');
-        const provBadge = user.provider && user.provider !== 'local' && user.provider !== 'guest' ? ` · ${user.provider.toUpperCase()}` : '';
-        currentBadge.textContent = user.isLoggedIn ? `🟢 SAVES ACTIVE${provBadge}` : '⚡ GUEST SESSION';
+    const btnEditUsername = document.getElementById('btn-edit-username');
+    if (btnEditUsername) {
+        if (user.isLoggedIn) {
+            btnEditUsername.classList.remove('hidden');
+        } else {
+            btnEditUsername.classList.add('hidden');
+        }
     }
 
     if (currentNotice) {
@@ -2358,43 +2711,6 @@ function renderAuthModalContent() {
         } else {
             btnToggleSwitch.classList.add('hidden');
             loginContainer.classList.remove('collapsed');
-        }
-    }
-
-    // 4. Saved Profiles Quick Switcher Chips
-    const chipsContainer = document.getElementById('auth-profiles-chips');
-    const profilesSection = document.getElementById('auth-saved-profiles-section');
-    if (chipsContainer) {
-        chipsContainer.innerHTML = '';
-        const names = Object.keys(registry);
-
-        // Guest chip
-        const guestChip = document.createElement('button');
-        guestChip.type = 'button';
-        guestChip.className = 'profile-switch-chip' + (!user.isLoggedIn ? ' active-chip' : '');
-        guestChip.innerHTML = `<span>⚡</span> <span>Guest (Auto-clears)</span>`;
-        guestChip.onclick = () => {
-            AuthManager.logout();
-            renderAuthModalContent();
-        };
-        chipsContainer.appendChild(guestChip);
-
-        names.forEach(name => {
-            const acc = registry[name];
-            const chip = document.createElement('button');
-            chip.type = 'button';
-            const isActive = user.isLoggedIn && user.username === name;
-            chip.className = 'profile-switch-chip' + (isActive ? ' active-chip' : '');
-            chip.innerHTML = `<span>${acc.avatar || '👾'}</span> <span>${name}</span> ${isActive ? '✓' : ''}`;
-            chip.onclick = () => {
-                AuthManager.switchUser(name);
-                renderAuthModalContent();
-            };
-            chipsContainer.appendChild(chip);
-        });
-
-        if (profilesSection) {
-            profilesSection.style.display = 'flex';
         }
     }
 
@@ -2539,6 +2855,225 @@ function setupAudienceModal() {
     });
 }
 
+function setupOAuthHelpModal() {
+    const modal = document.getElementById('oauth-help-modal');
+    const btnClose = document.getElementById('btn-close-oauth-help');
+    const btnDone = document.getElementById('btn-done-oauth-help');
+    const btnCopy = document.getElementById('btn-copy-oauth-uri');
+    const uriDisplay = document.getElementById('oauth-redirect-uri-display');
+    const dashboardLink = document.getElementById('btn-open-supabase-dashboard');
+    const projectRefCode = document.getElementById('oauth-project-ref-code');
+
+    const btnFallbackGoogle = document.getElementById('btn-oauth-fallback-google');
+    const btnFallbackGuest = document.getElementById('btn-oauth-fallback-guest');
+    const btnFallbackTag = document.getElementById('btn-oauth-fallback-tag');
+
+    if (!modal) return;
+
+    const config = (typeof KrazySupabase !== 'undefined' && KrazySupabase.getConfig) ? KrazySupabase.getConfig() : {};
+    const url = config.url || 'https://jjovwmzigxwyncjjnabb.supabase.co';
+    const match = url.match(/https:\/\/([a-z0-9_-]+)\.supabase\.co/i);
+    const projectRef = match ? match[1] : 'jjovwmzigxwyncjjnabb';
+    const callbackUrl = `${url.replace(/\/$/, '')}/auth/v1/callback`;
+
+    if (uriDisplay) uriDisplay.textContent = callbackUrl;
+    if (projectRefCode) projectRefCode.textContent = projectRef;
+    if (dashboardLink) dashboardLink.href = `https://supabase.com/dashboard/project/${projectRef}/auth/providers`;
+
+    function closeModal() {
+        modal.classList.remove('active', 'open');
+    }
+
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    if (btnDone) btnDone.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    if (btnCopy) {
+        btnCopy.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(callbackUrl);
+                btnCopy.textContent = '✅ Copied!';
+                showToast('Supabase Redirect URI copied to clipboard!', '📋');
+                setTimeout(() => { btnCopy.textContent = '📋 Copy'; }, 2500);
+            } catch (e) {
+                showToast(callbackUrl, '📋');
+            }
+        });
+    }
+
+    if (btnFallbackGoogle) {
+        btnFallbackGoogle.addEventListener('click', () => {
+            closeModal();
+            const btnGoogle = document.getElementById('btn-auth-google');
+            if (btnGoogle) btnGoogle.click();
+        });
+    }
+
+    if (btnFallbackGuest) {
+        btnFallbackGuest.addEventListener('click', () => {
+            closeModal();
+            const btnGuest = document.getElementById('btn-auth-guest-quick');
+            if (btnGuest) btnGuest.click();
+        });
+    }
+
+    if (btnFallbackTag) {
+        btnFallbackTag.addEventListener('click', () => {
+            closeModal();
+            const usernameInput = document.getElementById('auth-username-input');
+            if (usernameInput) {
+                usernameInput.focus();
+                usernameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
+
+    window.showOAuthProviderHelp = function(providerType, customTitle) {
+        const titleEl = document.getElementById('oauth-help-title');
+        const descEl = document.getElementById('oauth-help-desc');
+        const iconEl = document.getElementById('oauth-help-icon');
+        const reasonEl = document.getElementById('oauth-help-reason');
+
+        if (providerType === 'apple') {
+            if (titleEl) titleEl.textContent = 'Apple Sign-In Setup';
+            if (iconEl) iconEl.textContent = '';
+            if (descEl) descEl.textContent = 'Apple sign-in requires enabling the Apple provider in your Supabase project dashboard.';
+            if (reasonEl) reasonEl.innerHTML = `Your Supabase backend (<code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #38bdf8;">${projectRef}</code>) has not turned on the Apple OAuth provider yet. Toggle it ON in your Supabase Auth dashboard.`;
+        } else if (providerType === 'google') {
+            if (titleEl) titleEl.textContent = 'Google Sign-In Setup';
+            if (iconEl) iconEl.textContent = '🌐';
+            if (descEl) descEl.textContent = 'Google sign-in requires enabling the Google provider in your Supabase project dashboard.';
+            if (reasonEl) reasonEl.innerHTML = `Your Supabase backend (<code style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #38bdf8;">${projectRef}</code>) has not turned on the Google OAuth provider yet. Toggle it ON in your Supabase Auth dashboard.`;
+        } else {
+            if (titleEl) titleEl.textContent = customTitle || 'Social Sign-In Setup';
+            if (iconEl) iconEl.textContent = '⚠️';
+        }
+
+        modal.classList.add('active', 'open');
+    };
+}
+
+// ==========================================================
+// Interactive Short Game Preview Engine on Hover
+// ==========================================================
+let activePreviewCleanup = null;
+
+function setupBentoCardHoverPreviews() {
+    const cards = document.querySelectorAll('.bento-card');
+    cards.forEach(card => {
+        const gameId = card.getAttribute('data-id');
+        const wrap = card.querySelector('.bento-preview-wrap');
+        if (!wrap || !gameId) return;
+
+        card.addEventListener('mouseenter', () => {
+            if (activePreviewCleanup) {
+                activePreviewCleanup();
+                activePreviewCleanup = null;
+            }
+            activePreviewCleanup = launchGamePreview(gameId, wrap);
+        });
+
+        card.addEventListener('mouseleave', () => {
+            if (activePreviewCleanup) {
+                activePreviewCleanup();
+                activePreviewCleanup = null;
+            }
+            wrap.innerHTML = '';
+        });
+    });
+}
+
+const GAME_AUTHENTIC_PREVIEWS = {
+    'office-escape': 'thumbnails/previews/office-escape.mp4',
+    'dart-board': 'thumbnails/previews/dart-board.webm',
+    'tic-tac-toe': 'thumbnails/previews/tic-tac-toe.webm',
+    'flappy-man': 'thumbnails/previews/flappy-man.webm',
+    'wild-swings': 'thumbnails/previews/wild-swings.webm',
+    'gravity-flip': 'thumbnails/previews/gravity-flip.webm',
+    'pop-up': 'thumbnails/previews/pop-up.webm',
+    'bomb-panic': 'thumbnails/previews/bomb-panic.webm',
+    'elevator-doom': 'thumbnails/previews/elevator-doom.webm',
+    'fallen-one': 'thumbnails/previews/fallen-one.webm'
+};
+
+function launchGamePreview(gameId, wrap) {
+    wrap.innerHTML = '';
+    let isCleanedUp = false;
+
+    const previewSrc = GAME_AUTHENTIC_PREVIEWS[gameId];
+    if (previewSrc) {
+        const vid = document.createElement('video');
+        vid.src = previewSrc;
+        vid.autoplay = true;
+        vid.loop = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.preload = 'auto';
+        vid.style.width = '100%';
+        vid.style.height = '100%';
+        vid.style.objectFit = 'cover';
+        vid.style.borderRadius = '17px';
+        vid.style.display = 'block';
+
+        // Graceful fallback to real game iframe if video cannot be loaded
+        vid.onerror = () => {
+            if (isCleanedUp) return;
+            wrap.innerHTML = '';
+            const game = GAMES_CATALOG.find(g => g.id === gameId);
+            if (game && game.link) {
+                const iframe = document.createElement('iframe');
+                iframe.src = game.link.replace(/^\//, '') + '?preview=1';
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                iframe.style.pointerEvents = 'none';
+                iframe.style.borderRadius = '17px';
+                wrap.appendChild(iframe);
+            }
+        };
+
+        const playPromise = vid.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {});
+        }
+
+        wrap.appendChild(vid);
+
+        return () => {
+            isCleanedUp = true;
+            try {
+                vid.pause();
+                vid.removeAttribute('src');
+                vid.load();
+            } catch (_) {}
+            wrap.innerHTML = '';
+        };
+    } else {
+        // Direct game iframe fallback
+        const game = GAMES_CATALOG.find(g => g.id === gameId);
+        if (game && game.link) {
+            const iframe = document.createElement('iframe');
+            iframe.src = game.link.replace(/^\//, '') + '?preview=1';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.style.pointerEvents = 'none';
+            iframe.style.borderRadius = '17px';
+            wrap.appendChild(iframe);
+            return () => {
+                iframe.src = 'about:blank';
+                wrap.innerHTML = '';
+            };
+        }
+    }
+
+    return () => {
+        wrap.innerHTML = '';
+    };
+}
+
 // Initial Boot & URL Detection
 document.addEventListener('DOMContentLoaded', () => {
     setupThemeToggle();
@@ -2547,10 +3082,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setupCategoryControls();
     setupSearchControls();
     setupSuggestModal();
+    setupBentoCardHoverPreviews();
     updateBookmarkBadge();
     AuthManager.init();
     setupEcoMode();
     setupAuthModal();
+    setupOAuthHelpModal();
     setupAudienceModal();
     setupSupabaseRealtimeListeners();
 
@@ -2610,11 +3147,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnViewMore = document.getElementById('btn-view-more-purple');
     if (btnViewMore) btnViewMore.addEventListener('click', closeGamePlayer);
 
-    const btnSidebarToggle = document.getElementById('btn-sidebar-toggle');
-    const sidebarRail = document.getElementById('sidebar-rail');
+    const btnSidebarToggle = document.getElementById('sidebar-toggle') || document.getElementById('btn-sidebar-toggle');
+    const sidebarRail = document.getElementById('portal-sidebar') || document.getElementById('sidebar-rail');
     if (btnSidebarToggle && sidebarRail) {
         btnSidebarToggle.addEventListener('click', () => {
-            sidebarRail.classList.toggle('expanded');
+            const isExpanded = sidebarRail.classList.toggle('expanded');
+            sidebarRail.classList.toggle('sidebar-open', isExpanded);
+            btnSidebarToggle.classList.toggle('collapsed', !isExpanded);
+            btnSidebarToggle.setAttribute('title', isExpanded ? 'Collapse to Icons' : 'Expand Sidebar');
         });
     }
 

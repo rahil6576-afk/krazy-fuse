@@ -3,73 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Krazy Fuse 🎮⚡ — Live to Play Web Arcade</title>
+    <title>Krazio Fuze 🎮⚡ — Live to Play Web Arcade</title>
     <!-- Favicon -->
-    <link rel="icon" href="krazio-icon.svg" type="image/svg+xml">
-    <!-- Google Fonts: Lilita One (Headings/Logo/Play) + Rubik (UI/Nav/Meta) -->
+    <link rel="icon" href="krazio-mascot.svg" type="image/svg+xml">
+    <!-- Google Fonts: Nunito Sans (Login & Auth), Outfit (Brand/Headings/UI) + Rubik (Numbers/Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,600;1,6..12,700&family=Outfit:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="portal.css">
 </head>
 <body data-view="catalog">
 
-    <!-- Top Navigation Bar -->
-    <header class="navbar">
+    <!-- Top Navigation Bar (Task Bar matching user screenshot) -->
+    <header class="navbar" id="main-navbar">
         <div class="nav-left">
-            <button id="btn-sidebar-toggle" class="nav-icon-btn" title="Toggle Navigation Menu">
-                <span class="hamburger-icon">☰</span>
+            <button id="btn-sidebar-toggle" class="nav-icon-btn" title="Toggle Navigation Menu" aria-label="Toggle navigation menu">
+                <svg class="nav-hamburger-svg" width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect class="hamburger-bar" x="0" y="1" width="16" height="2.5" rx="1.25" fill="currentColor"/>
+                    <rect class="hamburger-bar" x="0" y="7.75" width="10" height="2.5" rx="1.25" fill="currentColor"/>
+                    <path d="M19 4.5 L14.5 9 L19 13.5" stroke="#0084FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect class="hamburger-bar" x="0" y="14.5" width="16" height="2.5" rx="1.25" fill="currentColor"/>
+                </svg>
             </button>
 
-            <a href="index.html" class="logo-container" id="brand-logo-link" title="Krazy Fuse — Live to Play">
-                <img src="krazio-icon.svg" alt="Krazy Fuse Emblem" class="brand-icon-img">
+            <a href="index.html" class="logo-container" id="brand-logo-link" title="Krazy Fuze — Live to Play">
+                <img src="krazio-mascot.svg" alt="Krazy Fuze Emblem" class="brand-mascot-img">
                 <div class="brand-title-wrap">
-                    <span class="brand-main-krazy">Krazy</span>
-                    <div class="brand-fuse-column">
-                        <span class="brand-main-fuse">Fuse</span>
-                        <span class="brand-sub-title">live to play</span>
-                    </div>
+                    <span class="brand-main-krazio">KRAZY</span>
+                    <span class="brand-main-fuze">FUZE</span>
                 </div>
             </a>
         </div>
 
         <div class="nav-center">
             <div class="nav-search-wrap">
-                <span class="nav-search-icon">🔍</span>
-                <input type="text" id="nav-search-input" class="nav-search-input" placeholder="Search games and categories...">
+                <svg class="nav-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7d7b97" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="nav-search-input" class="nav-search-input" placeholder="Search games and categories" autocomplete="off" spellcheck="false">
                 <button id="nav-search-clear" class="nav-search-clear hidden" title="Clear search">✕</button>
             </div>
         </div>
 
         <div class="nav-actions">
-            <!-- Live Viewership Ticker (Driven by Master Audience Dataset) -->
-            <button id="btn-live-insights" class="nav-live-ticker" title="Live Players Online across Krazy Fuse — Click for Live Audience Demographics">
-                <span class="live-pulse-dot"></span>
-                <span class="live-ticker-num" id="nav-global-live-count">142,850</span>
-                <span class="live-ticker-divider"></span>
-                <span class="live-ticker-label">LIVE</span>
+            <!-- Live Players Ticker Pill -->
+            <button id="btn-live-insights" class="nav-live-pill" title="Live Players Online across Krazy Fuze — Click for Audience Demographics">
+                <span class="live-dot-white"></span>
+                <span class="live-pill-text">Live</span>
+                <span class="live-ticker-badge" id="nav-global-live-count">188,898</span>
             </button>
-            <div class="nav-vertical-divider"></div>
-            <button id="btn-nav-random" class="nav-icon-btn" title="Play Random Game">
-                <span>🎲</span>
+
+            <!-- Theme Toggle Circular Button -->
+            <button id="btn-theme-toggle" class="nav-circle-btn" title="Toggle Day/Night Theme" aria-label="Toggle Theme">
+                <svg class="nav-action-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a6a4ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4.5"></circle>
+                    <line x1="12" y1="2" x2="12" y2="4.5"></line>
+                    <line x1="12" y1="19.5" x2="12" y2="22"></line>
+                    <line x1="4.22" y1="4.22" x2="6" y2="6"></line>
+                    <line x1="18" y1="18" x2="19.78" y2="19.78"></line>
+                    <line x1="2" y1="12" x2="4.5" y2="12"></line>
+                    <line x1="19.5" y1="12" x2="22" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="6" y2="18"></line>
+                    <line x1="18" y1="6" x2="19.78" y2="4.22"></line>
+                </svg>
             </button>
-            <button id="btn-nav-bookmarks" class="nav-icon-btn" title="Saved Bookmarks">
-                <span>🔖</span>
-                <span id="nav-bookmarks-count" class="badge-count hidden">0</span>
-            </button>
-            <div class="nav-vertical-divider"></div>
-            <button id="btn-theme-toggle" class="btn-theme" title="Toggle Day/Night Theme">
-                <span>☀️ Day</span>
-            </button>
-            <div class="nav-vertical-divider"></div>
-            <button id="btn-open-suggest" class="nav-btn">
-                <span>💡 Pitch Idea</span>
-            </button>
-            <div class="nav-vertical-divider"></div>
-            <button id="btn-user-auth" class="nav-btn btn-auth-toggle" title="Gamer Account & Profiles">
-                <span id="nav-user-avatar" class="user-avatar-icon">👾</span>
-                <span id="nav-user-name" class="user-name-text">Guest</span>
-                <span id="nav-auth-status" class="auth-status-dot guest" title="Guest Session - Cleared on Reload"></span>
+
+            <!-- User Auth / Login Pill Button -->
+            <button id="btn-user-auth" class="nav-login-cta-btn" title="Gamer Account &amp; Profiles">
+                <svg class="nav-user-svg" width="16" height="16" viewBox="0 0 24 24" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                </svg>
+                <span id="nav-user-name" class="user-name-text">Login</span>
+                <span id="nav-auth-status" class="auth-status-dot guest hidden"></span>
             </button>
         </div>
     </header>
@@ -77,58 +83,48 @@
     <!-- Master App Shell (Sidebar + Main Viewport Area) -->
     <div class="app-layout">
 
-        <!-- Left Vertical Icon Sidebar Rail -->
-        <aside class="sidebar-rail" id="sidebar-rail">
-            <div class="sidebar-icons-list">
-                <button class="sidebar-icon-btn active" data-category="all" title="Home Arcade">
-                    <span class="rail-icon">🏠</span>
-                    <span class="rail-label">Home</span>
+        <!-- Left Vertical Navigation Sidebar (Landing Page Card Style) -->
+        <aside class="sidebar-rail expanded sidebar-open" id="sidebar-rail">
+            <div class="sidebar-menu-card">
+                <button class="sidebar-nav-item active" data-category="all" title="Home Arcade">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
+                    <span class="sb-label">Home</span>
                 </button>
-                <button class="sidebar-icon-btn" data-category="trending" title="Popular & Trending">
-                    <span class="rail-icon">🔥</span>
-                    <span class="rail-label">Popular</span>
+                <button class="sidebar-nav-item" data-category="trending" title="Popular &amp; Trending">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 2C10.5 4.5 10 7.5 11 10C8.5 7.5 7.5 11 7 13.5C6.5 16 8 22 13 22C17.5 22 19 18 19 15C19 10.5 15.5 6 12 2Z"/></svg></span>
+                    <span class="sb-label">Popular</span>
                 </button>
-                <button class="sidebar-icon-btn" data-category="new" title="New Releases">
-                    <span class="rail-icon">🆕</span>
-                    <span class="rail-label">New</span>
+                <button class="sidebar-nav-item" data-category="new" title="New Releases">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 2L13.8 8.2L20 10L13.8 11.8L12 18L10.2 11.8L4 10L10.2 8.2L12 2Z"/><path d="M19 15L19.7 17.3L22 18L19.7 18.7L19 21L18.3 18.7L16 18L18.3 17.3L19 15Z"/></svg></span>
+                    <span class="sb-label">New</span>
                 </button>
-                <button class="sidebar-icon-btn" data-category="multiplayer" title="Multiplayer & PvP">
-                    <span class="rail-icon">👥</span>
-                    <span class="rail-label">Multiplayer</span>
+                <button class="sidebar-nav-item" data-category="multiplayer" title="Multiplayer &amp; PvP">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></span>
+                    <span class="sb-label">Multiplayer</span>
                 </button>
-                <div class="rail-divider"></div>
-                <button class="sidebar-icon-btn" data-category="action" title="Action & Combat">
-                    <span class="rail-icon">⚡</span>
-                    <span class="rail-label">Action</span>
+                <button class="sidebar-nav-item" data-category="action" title="Action &amp; Combat">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></span>
+                    <span class="sb-label">Action</span>
                 </button>
-                <button class="sidebar-icon-btn" data-category="runner" title="Runners & Escape">
-                    <span class="rail-icon">🏃</span>
-                    <span class="rail-label">Runners</span>
+                <button class="sidebar-nav-item" data-category="runner" title="Runners &amp; Escape">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
+                    <span class="sb-label">Runners</span>
                 </button>
-                <button class="sidebar-icon-btn" data-category="pvp" title="Darts & Targets">
-                    <span class="rail-icon">🎯</span>
-                    <span class="rail-label">Darts</span>
+                <button class="sidebar-nav-item" data-category="pvp" title="Darts &amp; Targets">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
+                    <span class="sb-label">Darts</span>
                 </button>
-                <button class="sidebar-icon-btn" data-category="arcade" title="Arcade & Physics">
-                    <span class="rail-icon">🕹️</span>
-                    <span class="rail-label">Arcade</span>
+                <button class="sidebar-nav-item" data-category="arcade" title="Arcade &amp; Physics">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><circle cx="12" cy="7" r="2.5"/><path d="M12 9.5V13" stroke="#0084FF" stroke-width="1.8"/><ellipse cx="12" cy="14" rx="7" ry="2.5" fill="none" stroke="#0084FF" stroke-width="1.8"/><path d="M7 17c1.2 1.2 8.8 1.2 10 0" stroke="#0084FF" stroke-width="1.8" fill="none"/></svg></span>
+                    <span class="sb-label">Arcade</span>
                 </button>
-                <button class="sidebar-icon-btn" data-category="reflex" title="Gravity & Reflex">
-                    <span class="rail-icon">🔄</span>
-                    <span class="rail-label">Reflex</span>
+                <button class="sidebar-nav-item" data-category="reflex" title="Gravity &amp; Reflex">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
+                    <span class="sb-label">Reflex</span>
                 </button>
-                <div class="rail-divider"></div>
-                <button class="sidebar-icon-btn" id="btn-sidebar-live" title="Live Players & Demographics">
-                    <span class="rail-icon">📊</span>
-                    <span class="rail-label">Live Stats</span>
-                </button>
-                <button class="sidebar-icon-btn" id="btn-sidebar-profile" title="Gamer Profile & Cloud Saves">
-                    <span class="rail-icon">👾</span>
-                    <span class="rail-label">Profile</span>
-                </button>
-                <button class="sidebar-icon-btn" id="btn-sidebar-random" title="Surprise Me!">
-                    <span class="rail-icon">🎲</span>
-                    <span class="rail-label">Random</span>
+                <button class="sidebar-nav-item" id="btn-sidebar-random" title="Surprise Me!">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
+                    <span class="sb-label">Random</span>
                 </button>
             </div>
         </aside>
@@ -390,40 +386,18 @@
                 
                 <!-- Arcade Hero Section -->
                 <section class="arcade-hero">
-                    <!-- Subtle Background Game Glyphs -->
-                    <div class="hero-bg-glyphs" aria-hidden="true">
-                        <span class="glyph glyph-1">✦</span>
-                        <span class="glyph glyph-2">●</span>
-                        <span class="glyph glyph-3">🎮</span>
-                        <span class="glyph glyph-4">⚡</span>
-                        <span class="glyph glyph-5">✦</span>
-                        <span class="glyph glyph-6">●</span>
-                    </div>
-
                     <div class="hero-content-wrap">
-                        <div class="hero-brand-badge">
-                            <span class="hero-badge-fire">🔥</span>
-                            <span>PLAY SOMETHING AWESOME</span>
+                        <div class="hero-mascot-wrap">
+                            <img src="krazio-mascot.svg" alt="Krazio Fuze Mascot" class="hero-mascot-img">
                         </div>
-                        <h1 class="hero-big-title">KRAZY FUSE</h1>
+                        <h1 class="hero-big-title">KRAZIO FUZE</h1>
                         <p class="hero-subtitle">Fast, chaotic, instant-play browser games with zero downloads.</p>
 
-                        <!-- Big Center Search Bar -->
+                        <!-- Big Center Search Bar with Find Game Button -->
                         <div class="hero-search-box">
                             <span class="hero-search-icon">🔍</span>
                             <input type="text" id="search-games-input" class="hero-search-input" placeholder="Search 12+ krazy arcade games...">
-                            <button class="hero-search-btn" id="btn-search-go"><span>FIND GAME</span></button>
-                        </div>
-
-                        <!-- Filter Category Tabs -->
-                        <div class="category-tabs-row" id="category-tabs">
-                            <button class="category-pill active" data-category="all">🎮 All Games</button>
-                            <button class="category-pill" data-category="trending">🔥 Trending</button>
-                            <button class="category-pill" data-category="new">🆕 New & Hot</button>
-                            <button class="category-pill" data-category="multiplayer">👥 Multiplayer</button>
-                            <button class="category-pill" data-category="runner">🏃 Runners</button>
-                            <button class="category-pill" data-category="arcade">🎈 Arcade</button>
-                            <button class="category-pill" data-category="pvp">⚔️ PvP Combat</button>
+                            <button class="hero-search-btn" id="btn-search-go">Find Game</button>
                         </div>
                     </div>
                 </section>
@@ -440,111 +414,175 @@
                             <div id="filtered-grid" class="games-grid"></div>
                         </section>
 
-                        <!-- Standard Section 1: Trending Now -->
-                        <section id="section-trending" class="game-section">
-                            <div class="section-header-row">
-                                <div class="section-title-wrap">
-                                    <span class="section-emoji">🔥</span>
-                                    <h2 class="section-title">TRENDING NOW</h2>
+                        <!-- Bento Arcade Grid (Our 10 Real Playable Games) -->
+                        <section id="bento-arcade-section" class="bento-arcade-section">
+                            <div class="bento-arcade-grid">
+                                
+                                <!-- 1. Office Escape: Corporate Run (2x2 Flagship Card - Top Left) -->
+                                <div class="bento-card bento-span-2x2" data-id="office-escape" title="Play Office Escape: Corporate Run">
+                                    <img src="thumbnails/bento/office-escape.webp" alt="Office Escape: Corporate Run" loading="eager">
+                                    <div class="bento-preview-wrap" data-preview="office-escape"></div>
+                                    <div class="bento-hover-glow"></div>
+                                    <div class="bento-card-info">
+                                        <div class="bento-card-title-col">
+                                            <span class="bento-card-badge">⚡ SPRINT &amp; DODGE</span>
+                                            <h3 class="bento-card-title">Office Escape</h3>
+                                        </div>
+                                        <div class="bento-card-meta-col">
+                                            <span class="bento-card-rating">★ 4.9</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="section-tag-sub">Most played this week</span>
-                            </div>
-                            <div id="trending-grid" class="games-grid"></div>
-                        </section>
 
-                        <!-- Standard Section 2: New & Hot Games -->
-                        <section id="section-new" class="game-section">
-                            <div class="section-header-row">
-                                <div class="section-title-wrap">
-                                    <span class="section-emoji">🆕</span>
-                                    <h2 class="section-title">NEW RELEASES</h2>
+                                <!-- 2. Dart Master: 301 / 501 Arena (1x1 Card - Top Row 1 Col 3) -->
+                                <div class="bento-card bento-span-1x1" data-id="dart-board" title="Play Dart Master: 301 / 501 Arena">
+                                    <img src="thumbnails/bento/dart-board.webp" alt="Dart Master 301/501" loading="eager">
+                                    <div class="bento-preview-wrap" data-preview="dart-board"></div>
+                                    <div class="bento-hover-glow"></div>
+                                    <div class="bento-card-info">
+                                        <div class="bento-card-title-col">
+                                            <span class="bento-card-badge">🎯 BULLSEYE 1v1</span>
+                                            <h3 class="bento-card-title">Dart Master</h3>
+                                        </div>
+                                        <div class="bento-card-meta-col">
+                                            <span class="bento-card-rating">★ 5.0</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="section-tag-sub">Fresh drops & updates</span>
-                            </div>
-                            <div id="new-grid" class="games-grid"></div>
-                        </section>
 
-                        <!-- Standard Section 3: Multiplayer & 1v1 -->
-                        <section id="section-multiplayer" class="game-section">
-                            <div class="section-header-row">
-                                <div class="section-title-wrap">
-                                    <span class="section-emoji">👥</span>
-                                    <h2 class="section-title">MULTIPLAYER & PVP</h2>
+                                <!-- 3. Sumi-e Tac Toe (1x1 Card - Swapped to Top Row 1 Col 4) -->
+                                <div class="bento-card bento-span-1x1" data-id="tic-tac-toe" title="Play Sumi-e Tac Toe: Zen Brush &amp; AI">
+                                    <img src="thumbnails/bento/tic-tac-toe.webp" alt="Sumi-e Tac Toe: Zen Brush & AI" loading="eager">
+                                    <div class="bento-preview-wrap" data-preview="tic-tac-toe"></div>
+                                    <div class="bento-hover-glow"></div>
+                                    <div class="bento-card-info">
+                                        <div class="bento-card-title-col">
+                                            <span class="bento-card-badge">🧘 ZEN MASTER AI</span>
+                                            <h3 class="bento-card-title">Sumi-e Tac Toe</h3>
+                                        </div>
+                                        <div class="bento-card-meta-col">
+                                            <span class="bento-card-rating">★ 5.0</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="section-tag-sub">Play with friends & smart bots</span>
-                            </div>
-                            <div id="multiplayer-grid" class="games-grid"></div>
-                        </section>
 
-                        <!-- Standard Section 4: All Games Catalog -->
-                        <section id="section-all" class="game-section">
-                            <div class="section-header-row">
-                                <div class="section-title-wrap">
-                                    <span class="section-emoji">🎮</span>
-                                    <h2 class="section-title">ALL KRAZY GAMES</h2>
+                                <!-- 4. Flappy Man (1x1 Card - Swapped to Top Row 2 Col 3) -->
+                                <div class="bento-card bento-span-1x1" data-id="flappy-man" title="Play Flappy Man: Superhero Flight">
+                                    <img src="thumbnails/bento/flappy-man.webp" alt="Flappy Man: Superhero Flight" loading="eager">
+                                    <div class="bento-preview-wrap" data-preview="flappy-man"></div>
+                                    <div class="bento-hover-glow"></div>
+                                    <div class="bento-card-info">
+                                        <div class="bento-card-title-col">
+                                            <span class="bento-card-badge">🌟 5 HERO SKINS</span>
+                                            <h3 class="bento-card-title">Flappy Man</h3>
+                                        </div>
+                                        <div class="bento-card-meta-col">
+                                            <span class="bento-card-rating">★ 4.9</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="section-tag-sub">Complete instant-play arcade</span>
+
+                                <!-- 5. Wild Swings: Hook & Flight (1x1 Card - Top Row 2 Col 4) -->
+                                <div class="bento-card bento-span-1x1" data-id="wild-swings" title="Play Wild Swings: Hook &amp; Flight">
+                                    <img src="thumbnails/bento/wild-swings.webp" alt="Wild Swings: Hook & Flight" loading="eager">
+                                    <div class="bento-preview-wrap" data-preview="wild-swings"></div>
+                                    <div class="bento-hover-glow"></div>
+                                    <div class="bento-card-info">
+                                        <div class="bento-card-title-col">
+                                            <span class="bento-card-badge">🕸️ 20 LEVELS</span>
+                                            <h3 class="bento-card-title">Wild Swings</h3>
+                                        </div>
+                                        <div class="bento-card-meta-col">
+                                            <span class="bento-card-rating">★ 5.0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 6. Gravity Flip: Cavern Runner (1x1 Card - Bottom Row 3 Col 1) -->
+                                <div class="bento-card bento-span-1x1" data-id="gravity-flip" title="Play Gravity Flip: Cavern Runner">
+                                    <img src="thumbnails/bento/gravity-flip.webp" alt="Gravity Flip: Cavern Runner" loading="lazy">
+                                    <div class="bento-preview-wrap" data-preview="gravity-flip"></div>
+                                    <div class="bento-hover-glow"></div>
+                                    <div class="bento-card-info">
+                                        <div class="bento-card-title-col">
+                                            <span class="bento-card-badge">🔄 FLIP GRAVITY</span>
+                                            <h3 class="bento-card-title">Gravity Flip</h3>
+                                        </div>
+                                        <div class="bento-card-meta-col">
+                                            <span class="bento-card-rating">★ 4.9</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 7. Pop Up Blitz (1x1 Card - Bottom Row 3 Col 2) -->
+                                <div class="bento-card bento-span-1x1" data-id="pop-up" title="Play Pop Up Blitz">
+                                    <img src="thumbnails/bento/pop-up.webp" alt="Pop Up Blitz" loading="lazy">
+                                    <div class="bento-preview-wrap" data-preview="pop-up"></div>
+                                    <div class="bento-hover-glow"></div>
+                                    <div class="bento-card-info">
+                                        <div class="bento-card-title-col">
+                                            <span class="bento-card-badge">⚡ 20 LEVELS</span>
+                                            <h3 class="bento-card-title">Pop Up Blitz</h3>
+                                        </div>
+                                        <div class="bento-card-meta-col">
+                                            <span class="bento-card-rating">★ 4.8</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 8. Bomb Panic: Hot Potato (1x1 Card - Swapped to Bottom Row 4 Col 1) -->
+                                <div class="bento-card bento-span-1x1" data-id="bomb-panic" title="Play Bomb Panic: Hot Potato">
+                                    <img src="thumbnails/bento/bomb-panic.webp" alt="Bomb Panic: Hot Potato" loading="lazy">
+                                    <div class="bento-preview-wrap" data-preview="bomb-panic"></div>
+                                    <div class="bento-hover-glow"></div>
+                                    <div class="bento-card-info">
+                                        <div class="bento-card-title-col">
+                                            <span class="bento-card-badge">💣 HOT POTATO</span>
+                                            <h3 class="bento-card-title">Bomb Panic</h3>
+                                        </div>
+                                        <div class="bento-card-meta-col">
+                                            <span class="bento-card-rating">★ 5.0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 9. Elevator of Doom (1x1 Card - Swapped to Bottom Row 4 Col 2) -->
+                                <div class="bento-card bento-span-1x1" data-id="elevator-doom" title="Play Elevator of Doom: Floor 99">
+                                    <img src="thumbnails/bento/elevator-doom.webp" alt="Elevator of Doom: Floor 99" loading="lazy">
+                                    <div class="bento-preview-wrap" data-preview="elevator-doom"></div>
+                                    <div class="bento-hover-glow"></div>
+                                    <div class="bento-card-info">
+                                        <div class="bento-card-title-col">
+                                            <span class="bento-card-badge">🚨 ROGUELITE</span>
+                                            <h3 class="bento-card-title">Elevator of Doom</h3>
+                                        </div>
+                                        <div class="bento-card-meta-col">
+                                            <span class="bento-card-rating">★ 4.9</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 10. Cyber Clash / Fallen One (2x2 Flagship Card - Bottom Right) -->
+                                <div class="bento-card bento-span-2x2" data-id="fallen-one" title="Play Cyber Clash: PvP Arena">
+                                    <img src="thumbnails/bento/fallen-one.webp" alt="Cyber Clash: PvP Arena" loading="lazy">
+                                    <div class="bento-preview-wrap" data-preview="fallen-one"></div>
+                                    <div class="bento-hover-glow"></div>
+                                    <div class="bento-card-info">
+                                        <div class="bento-card-title-col">
+                                            <span class="bento-card-badge">⚔️ 2D PVP FIGHTER</span>
+                                            <h3 class="bento-card-title">Cyber Clash</h3>
+                                        </div>
+                                        <div class="bento-card-meta-col">
+                                            <span class="bento-card-rating">★ 5.0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
-                            <div id="all-games-grid" class="games-grid"></div>
                         </section>
                     </div>
-
-                    <!-- Suggest a Game Banner -->
-                    <section class="suggest-banner">
-                        <div class="suggest-info">
-                            <h3>💡 Have a Krazy Game Idea?</h3>
-                            <p>We are constantly building and adding new indie web games. Pitch your kraziest game concept!</p>
-                        </div>
-                        <div class="suggest-actions">
-                            <button id="btn-view-stored" class="nav-btn" title="View previously submitted ideas">
-                                <span>📋 View Pitches</span>
-                            </button>
-                            <button id="btn-open-suggest-2" class="btn-arcade-cta">
-                                <span>🚀 PITCH YOUR IDEA</span>
-                            </button>
-                        </div>
-                    </section>
                 </main>
             </section>
-        </div>
-    </div>
-
-    <!-- Interactive Game Suggestion Modal with Live Pitches Feed -->
-    <div id="suggest-modal" class="modal-backdrop">
-        <div class="modal-box pitch-modal-box">
-            <div class="pitch-modal-header">
-                <div class="pitch-modal-title-col">
-                    <h3 class="modal-title">💡 Pitch a Game to Krazy Fuse</h3>
-                    <p style="color: var(--text-muted); font-size: 0.88rem;">What wild, hilarious, or addictive web game should we build next?</p>
-                </div>
-            </div>
-
-            <!-- Pitch Modal View Tabs -->
-            <div class="pitch-tabs-row">
-                <button id="tab-btn-pitch-compose" class="pitch-tab-btn active">✍️ Submit Concept</button>
-                <button id="tab-btn-pitch-feed" class="pitch-tab-btn">🔥 Community Pitches (<span id="saved-ideas-count">0</span>)</button>
-            </div>
-
-            <!-- Tab 1: Compose Pitch View -->
-            <div id="pitch-compose-view" class="pitch-view-panel">
-                <textarea id="idea-input" class="modal-input" rows="4" placeholder="e.g. A game where you play as an overly aggressive barista fighting off caffeinated zombies with espresso foam..."></textarea>
-                <div class="pitch-tips-row">
-                    <span>⚡ Share your kraziest concept with the developers!</span>
-                </div>
-            </div>
-
-            <!-- Tab 2: Live Community Feed View -->
-            <div id="stored-ideas-list" class="pitch-view-panel" style="display: none;">
-                <div class="pitch-feed-loading">Loading community pitches...</div>
-            </div>
-
-            <div class="pitch-modal-footer">
-                <div></div>
-                <div style="display: flex; gap: 10px;">
-                    <button id="btn-close-modal" class="nav-btn">Cancel</button>
-                    <button id="btn-submit-idea" class="btn-arcade-cta" style="padding: 8px 22px; font-size: 0.98rem;">SUBMIT CONCEPT 🚀</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -572,15 +610,39 @@
                     <div class="auth-current-info">
                         <div class="auth-current-name-row">
                             <h4 id="auth-current-username">Guest Player</h4>
-                            <span class="auth-badge-pill guest" id="auth-current-badge">⚡ GUEST SESSION</span>
+                            <button type="button" id="btn-edit-username" class="btn-edit-name-trigger hidden" title="Change in-game name">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                <span>Change Name</span>
+                            </button>
                         </div>
+
+                        <!-- Change In-Game Name Inline Panel -->
+                        <div id="auth-username-edit-panel" class="auth-name-edit-panel hidden">
+                            <div class="name-edit-input-wrap">
+                                <input type="text" id="input-change-username" class="auth-name-edit-input" maxlength="20" placeholder="New gamer tag..." autocomplete="off" spellcheck="false">
+                                <button type="button" id="btn-save-username" class="btn-name-save">Save</button>
+                                <button type="button" id="btn-cancel-username" class="btn-name-cancel">Cancel</button>
+                            </div>
+                            <div id="username-error-msg" class="name-edit-error-msg hidden"></div>
+                        </div>
+
                         <p class="auth-current-sub" id="auth-current-notice">
                             ⚠️ Temporary Session — All game progress automatically clears when the website is reloaded.
                         </p>
                     </div>
                 </div>
                 <div class="auth-status-right">
-                    <button id="btn-auth-logout" class="nav-btn btn-auth-logout hidden" title="Log out to guest mode">🚪 Log Out</button>
+                    <button id="btn-auth-logout" class="btn-auth-logout hidden" title="Log out to guest mode">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Log Out</span>
+                    </button>
                 </div>
             </div>
 
@@ -648,20 +710,12 @@
                             <span class="btn-social-label">Google</span>
                         </button>
 
-                        <!-- Instagram Sign In Button -->
-                        <button type="button" id="btn-auth-instagram" class="btn-auth-social btn-instagram" title="Sign in with Instagram / Meta">
-                            <svg class="social-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        <!-- Apple Sign In Button -->
+                        <button type="button" id="btn-auth-apple" class="btn-auth-social btn-apple" title="Sign in with Apple">
+                            <svg class="social-icon-svg" viewBox="0 0 170 170" width="20" height="20" fill="currentColor">
+                                <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.74 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.6-7.85-11.7-14.44-6.3-10.08-11.08-21.75-14.34-35.01-3.26-13.26-4.9-25.17-4.9-35.73 0-14.36 3.6-26.06 10.8-35.1 7.2-9.04 16.27-13.68 27.21-13.91 4.8 0 10.14 1.21 16.03 3.64 5.9 2.42 9.87 3.69 11.91 3.8 2.37-.12 6.59-1.47 12.65-4.05 6.07-2.58 11.28-3.75 15.65-3.52 11.87.68 21.43 5.34 28.69 13.98-10.36 6.3-15.42 15.11-15.18 26.43.23 8.91 3.66 16.32 10.28 22.23 6.63 5.91 14.51 9.29 23.65 10.14-2.18 6.64-4.8 13.1-7.86 19.38zM119.22 33.02c0-7.23 2.66-13.97 7.97-20.21 5.31-6.24 11.83-10.38 19.57-12.43.68 2.6 1.02 5.09 1.02 7.48 0 7.23-2.78 14.07-8.34 20.52-5.56 6.45-12.3 10.42-20.22 11.91-.46-2.4-.69-4.82-.69-7.27z"/>
                             </svg>
-                            <span class="btn-social-label">Instagram</span>
-                        </button>
-
-                        <!-- Facebook Sign In Button -->
-                        <button type="button" id="btn-auth-facebook" class="btn-auth-social btn-facebook" title="Sign in with your Facebook account">
-                            <svg class="social-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                            </svg>
-                            <span class="btn-social-label">Facebook</span>
+                            <span class="btn-social-label">Apple</span>
                         </button>
 
                         <!-- Instant Guest Sign In Button -->
@@ -698,14 +752,6 @@
                 </div>
             </div>
 
-            <!-- Saved Profiles Quick Switcher -->
-            <div class="auth-saved-profiles-section" id="auth-saved-profiles-section">
-                <h4 class="auth-section-title">SAVED PROFILES ON THIS DEVICE</h4>
-                <div class="auth-profiles-chips" id="auth-profiles-chips">
-                    <!-- Populated dynamically -->
-                </div>
-            </div>
-
             <!-- Active User Game Data Summary -->
             <div class="auth-game-saves-section">
                 <div class="auth-saves-header">
@@ -718,10 +764,88 @@
             </div>
 
             <div class="auth-modal-footer">
-                <button id="btn-auth-clear-current" class="nav-btn btn-danger-storage" title="Clear current session game data">
-                    🗑️ Reset Current Session Data
-                </button>
-                <button id="btn-auth-modal-close" class="btn-arcade-cta" style="padding: 8px 24px; font-size: 0.95rem;">Done</button>
+                <button id="btn-auth-modal-close" class="btn-arcade-cta" style="padding: 8px 28px; font-size: 0.95rem;">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OAuth Provider Setup & Troubleshooting Guidance Modal -->
+    <div id="oauth-help-modal" class="modal-backdrop">
+        <div class="modal-box auth-modal-box" style="max-width: 580px; border-color: rgba(99, 102, 241, 0.45); box-shadow: 0 0 35px rgba(99, 102, 241, 0.25);">
+            <div class="auth-modal-header">
+                <div class="auth-title-wrap">
+                    <span class="auth-header-icon" id="oauth-help-icon">⚠️</span>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <h3 class="modal-title" id="oauth-help-title" style="margin: 0; font-size: 1.35rem;">Social Sign-In Setup</h3>
+                            <span class="auth-badge-pill" id="oauth-help-badge" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171;">Provider Disabled in Supabase</span>
+                        </div>
+                        <p class="auth-modal-desc" id="oauth-help-desc" style="margin-top: 6px;">
+                            Facebook & Instagram sign-in require enabling the provider in your Supabase project dashboard.
+                        </p>
+                    </div>
+                </div>
+                <button id="btn-close-oauth-help" class="modal-close-icon-btn" title="Close">✕</button>
+            </div>
+
+            <!-- Diagnostics Card -->
+            <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.45;">
+                    <span style="font-size: 1.25rem; flex-shrink: 0;">💡</span>
+                    <div>
+                        <strong style="color: #f8fafc;">Why this happens:</strong>
+                        <div id="oauth-help-reason" style="margin-top: 3px;">
+                            Your Supabase backend (<code id="oauth-project-ref-code" style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #38bdf8;">jjovwmzigxwyncjjnabb</code>) has not turned on the Facebook/Meta OAuth provider yet. Instagram authentication on the web uses Meta/Facebook Login.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Steps to Enable in Supabase -->
+                <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #94a3b8; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-weight: 700; color: #e2e8f0; display: flex; align-items: center; gap: 6px;">
+                        <span>⚙️ Quick Setup (Takes 2 minutes):</span>
+                    </div>
+                    <ol style="margin: 0; padding-left: 20px; line-height: 1.55;">
+                        <li>Open your Supabase Dashboard: <strong>Authentication → Providers → Facebook</strong>.</li>
+                        <li>Toggle <strong>"Enable Facebook provider"</strong> to <strong>ON</strong>.</li>
+                        <li>Enter your Meta <strong>Client ID (App ID)</strong> and <strong>Client Secret</strong> from Meta for Developers.</li>
+                        <li>In your Meta App Settings, set the <strong>Valid OAuth Redirect URI</strong> to:</li>
+                    </ol>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 6px; padding: 6px 10px;">
+                        <code id="oauth-redirect-uri-display" style="font-size: 0.75rem; color: #a5b4fc; flex: 1; word-break: break-all; font-family: monospace;">https://jjovwmzigxwyncjjnabb.supabase.co/auth/v1/callback</code>
+                        <button type="button" id="btn-copy-oauth-uri" class="nav-btn" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(99, 102, 241, 0.5); flex-shrink: 0;" title="Copy Redirect URI">📋 Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instant Alternatives Section -->
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <span style="font-size: 0.75rem; font-weight: 800; color: #64748b; letter-spacing: 0.8px;">OR PLAY RIGHT NOW WITH:</span>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <button type="button" id="btn-oauth-fallback-google" class="btn-auth-social btn-google" style="padding: 10px; font-size: 0.85rem;" title="Sign in with Google">
+                        <svg class="social-icon-svg" viewBox="0 0 24 24" width="18" height="18">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Google (Active)</span>
+                    </button>
+                    <button type="button" id="btn-oauth-fallback-guest" class="btn-auth-social btn-guest-quick" style="padding: 10px; font-size: 0.85rem;" title="Play as Guest">
+                        <span>⚡ Guest Play</span>
+                    </button>
+                    <button type="button" id="btn-oauth-fallback-tag" class="btn-arcade-cta" style="padding: 10px; font-size: 0.85rem;" title="Gamer Tag Login">
+                        <span>🎮 Gamer Tag</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer Action Buttons -->
+            <div class="auth-modal-footer" style="padding-top: 10px; justify-content: space-between;">
+                <a id="btn-open-supabase-dashboard" href="https://supabase.com/dashboard/project/jjovwmzigxwyncjjnabb/auth/providers" target="_blank" rel="noopener noreferrer" class="btn-arcade-cta" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;">
+                    <span>⚡ Open Supabase Providers Dashboard ↗</span>
+                </a>
+                <button type="button" id="btn-done-oauth-help" class="nav-btn" style="padding: 10px 20px;">Done</button>
             </div>
         </div>
     </div>
@@ -810,21 +934,26 @@
         <span id="toast-message">Game link copied to clipboard!</span>
     </div>
 
-    <!-- Footer -->
+    <!-- Footer (Landing Page Style: 3-column layout) -->
     <footer class="footer">
-        <div class="footer-brand">
-            <div class="logo-container" style="justify-content: center; pointer-events: none;">
-                <img src="krazio-icon.svg" alt="Krazy Fuse Emblem" class="brand-icon-img" style="width: 32px; height: 32px;">
-                <div class="brand-title-wrap">
-                    <span class="brand-main-krazy" style="font-size: 1.35rem;">Krazy</span>
-                    <div class="brand-fuse-column">
-                        <span class="brand-main-fuse" style="font-size: 1.35rem;">Fuse</span>
-                        <span class="brand-sub-title" style="font-size: 0.58rem;">live to play</span>
+        <div class="footer-inner">
+            <div class="footer-left">
+                <div class="footer-brand-wrap">
+                    <img src="krazio-mascot.svg" alt="Krazio Fuze Logo" class="footer-mascot-img">
+                    <div class="footer-brand-text">
+                        <span class="footer-brand-main">KRAZY FUZE</span>
+                        <span class="footer-brand-sub">Live to Play</span>
                     </div>
                 </div>
             </div>
+            <div class="footer-center">
+                <p class="footer-copyright">© 2026 Krazy Fuse • Fast, Playful & Chaotic Web Arcade • New games dropping regularly!</p>
+            </div>
+            <div class="footer-right">
+                <a href="#privacy" class="footer-legal-link">Privacy Policy</a>
+                <a href="#terms" class="footer-legal-link">Terms & Conditions</a>
+            </div>
         </div>
-        <p class="footer-desc">© 2026 Krazy Fuse • Fast, Playful & Chaotic Web Arcade • New games dropping regularly!</p>
     </footer>
 
     <!-- Supabase Realtime & Portal Scripts -->

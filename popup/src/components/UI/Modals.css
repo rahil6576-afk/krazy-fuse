@@ -8,16 +8,20 @@
   align-items: center;
   justify-content: center;
   animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  padding: 16px;
+  padding: clamp(8px, 1.8vh, 18px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-card {
   background: linear-gradient(135deg, rgba(26, 29, 66, 0.96), rgba(12, 14, 34, 0.96));
   border: 1.5px solid rgba(255, 255, 255, 0.16);
-  border-radius: 26px;
-  padding: 34px;
+  border-radius: clamp(16px, 2.5vh, 26px);
+  padding: clamp(14px, 2.6vh, 32px) clamp(14px, 2.8vw, 34px);
   max-width: 480px;
   width: 100%;
+  max-height: calc(100% - 12px);
+  overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(157, 78, 221, 0.35);
   text-align: center;
   position: relative;
@@ -26,7 +30,7 @@
 }
 
 .modal-card.start-card {
-  max-width: 520px;
+  max-width: 500px;
   box-shadow: 0 20px 70px rgba(0, 0, 0, 0.8), 0 0 50px rgba(0, 180, 216, 0.35);
   border-color: rgba(0, 180, 216, 0.3);
 }
@@ -53,34 +57,34 @@
    START SCREEN LOGO & HOW TO PLAY
    ========================================================================== */
 .start-logo-wrap {
-  margin-bottom: 28px;
+  margin-bottom: clamp(10px, 2.2vh, 24px);
 }
 
 .start-balloon-badge {
-  font-size: 3.5rem;
-  margin-bottom: 8px;
+  font-size: clamp(2rem, 5vh, 3.4rem);
+  margin-bottom: clamp(2px, 0.6vh, 8px);
   filter: drop-shadow(0 0 20px #00b4d8);
   animation: balloonBob 2s ease-in-out infinite alternate;
 }
 
 @keyframes balloonBob {
   0% { transform: translateY(0) rotate(-4deg); }
-  100% { transform: translateY(-10px) rotate(4deg); }
+  100% { transform: translateY(-8px) rotate(4deg); }
 }
 
 .game-main-title {
-  font-size: 2.8rem;
+  font-size: clamp(1.8rem, 4.2vh, 2.7rem);
   font-weight: 900;
   letter-spacing: 2px;
   background: linear-gradient(135deg, #ffffff 0%, #ffb703 50%, #ff0055 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin: 0 0 6px 0;
+  margin: 0 0 clamp(2px, 0.5vh, 6px) 0;
   filter: drop-shadow(0 0 15px rgba(255, 183, 3, 0.5));
 }
 
 .game-main-tagline {
-  font-size: 1.05rem;
+  font-size: clamp(0.82rem, 1.8vh, 1.05rem);
   color: #a0a5c1;
   font-weight: 600;
 }
@@ -92,10 +96,10 @@
   background: rgba(18, 20, 52, 0.85);
   border: 1.5px solid rgba(0, 180, 216, 0.4);
   border-radius: 14px;
-  padding: 8px 16px;
+  padding: clamp(6px, 1.2vh, 8px) clamp(12px, 2vw, 16px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: all 0.25s ease;
-  min-height: 48px;
+  min-height: clamp(38px, 4.8vh, 48px);
 }
 
 .name-button-wrapper:hover,
@@ -107,7 +111,7 @@
 }
 
 .name-button-icon {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2vh, 1.25rem);
   filter: drop-shadow(0 0 6px #00b4d8);
 }
 
@@ -116,7 +120,7 @@
   background: transparent;
   border: none;
   color: #ffffff;
-  font-size: 1.05rem;
+  font-size: clamp(0.92rem, 1.8vh, 1.05rem);
   font-weight: 800;
   outline: none;
   font-family: inherit;
@@ -130,8 +134,8 @@
 }
 
 .play-btn {
-  font-size: 1.2rem !important;
-  padding: 16px 28px !important;
+  font-size: clamp(1.02rem, 2vh, 1.2rem) !important;
+  padding: clamp(10px, 1.8vh, 16px) clamp(16px, 2vw, 28px) !important;
   letter-spacing: 1px;
 }
 
@@ -287,23 +291,23 @@
 .modal-button-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: clamp(6px, 1.2vh, 10px);
 }
 
 .modal-primary-btn {
   background: linear-gradient(135deg, #ffb703, #fb8500);
   color: #0c0d23;
   font-weight: 900;
-  font-size: 1.05rem;
+  font-size: clamp(0.92rem, 1.8vh, 1.05rem);
   letter-spacing: 0.5px;
   border: none;
   border-radius: 14px;
-  padding: 14px 24px;
+  padding: clamp(10px, 1.6vh, 14px) clamp(16px, 2vw, 24px);
   cursor: pointer;
   box-shadow: 0 6px 20px rgba(255, 183, 3, 0.4);
   transition: all 0.2s ease;
   width: 100%;
-  min-height: 48px;
+  min-height: clamp(38px, 4.8vh, 48px);
 }
 
 .modal-primary-btn:hover {
@@ -322,14 +326,14 @@
   background: rgba(255, 255, 255, 0.08);
   color: #e2e8f0;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: clamp(0.82rem, 1.6vh, 0.95rem);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 14px;
-  padding: 12px 20px;
+  padding: clamp(8px, 1.4vh, 12px) clamp(14px, 2vw, 20px);
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
-  min-height: 44px;
+  min-height: clamp(36px, 4.4vh, 44px);
 }
 
 .modal-secondary-btn:hover {

@@ -367,8 +367,37 @@ const KrazySupabase = (function() {
             return { error: new Error('Supabase is not configured yet. Please provide your Supabase URL & Anon Key.') };
         }
         try {
+            const { url, anonKey } = getConfig();
             const cleanUrl = window.location.origin + window.location.pathname;
             const redirectTo = options.redirectTo || cleanUrl;
+
+            // Pre-flight check: Verify if provider is enabled in Supabase backend
+            // Prevents redirecting the browser to an unhandled 400 error page if provider is disabled in dashboard.
+            if (url && anonKey) {
+                try {
+                    const probeUrl = `${url}/auth/v1/authorize?provider=${encodeURIComponent(provider)}&redirect_to=${encodeURIComponent(redirectTo)}`;
+                    const probeRes = await fetch(probeUrl, {
+                        method: 'GET',
+                        headers: { 'apikey': anonKey }
+                    });
+
+                    if (!probeRes.ok) {
+                        const errJson = await probeRes.json().catch(() => ({}));
+                        const errMsg = errJson.msg || errJson.error_description || errJson.message || `Provider ${provider} is not enabled`;
+                        const isNotEnabled = errMsg.toLowerCase().includes('not enabled') ||
+                                             errMsg.toLowerCase().includes('could not be found') ||
+                                             errMsg.toLowerCase().includes('unsupported');
+                        const customErr = new Error(errMsg);
+                        customErr.isProviderDisabled = isNotEnabled;
+                        customErr.provider = provider;
+                        customErr.status = probeRes.status;
+                        return { data: null, error: customErr };
+                    }
+                } catch (probeErr) {
+                    // In case of network check failure, fall through to client SDK
+                }
+            }
+
             const { data, error } = await client.auth.signInWithOAuth({
                 provider: provider,
                 options: {
@@ -377,6 +406,9 @@ const KrazySupabase = (function() {
                 }
             });
             if (error) throw error;
+            if (data && data.url) {
+                window.location.assign(data.url);
+            }
             return { data, error: null };
         } catch (err) {
             console.error(`❌ [KrazySupabase] signInWithOAuth failed for ${provider}:`, err);

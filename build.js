@@ -16,6 +16,7 @@ const itemsToCopy = [
   'supabase-schema.sql',
   'krazio-icon.svg',
   'krazio-logo.svg',
+  'krazio-mascot.svg',
   'office-escape',
   'elevator-doom',
   'popup-game',
@@ -28,6 +29,7 @@ const itemsToCopy = [
   'tic-tac-toe',
   'assets',
   'public',
+  'thumbnails',
   'src',
   'audio',
   'game-manifests.json'
