@@ -210,28 +210,32 @@ export class UltimateManager {
 
         // Process real-time offscreen chroma/luma-keying on video frame
         if (this.video && this.video.readyState >= 2) {
-            this.offCtx.drawImage(this.video, 0, 0, this.renderW, this.renderH);
-            const imgData = this.offCtx.getImageData(0, 0, this.renderW, this.renderH);
-            const d = imgData.data;
-            const len = d.length;
+            try {
+                this.offCtx.drawImage(this.video, 0, 0, this.renderW, this.renderH);
+                const imgData = this.offCtx.getImageData(0, 0, this.renderW, this.renderH);
+                const d = imgData.data;
+                const len = d.length;
 
-            for (let i = 0; i < len; i += 4) {
-                const r = d[i];
-                const g = d[i + 1];
-                const b = d[i + 2];
-                const maxRGB = r > g ? (r > b ? r : b) : (g > b ? g : b);
-                const minRGB = r < g ? (r < b ? r : b) : (g < b ? g : b);
-                const diff = maxRGB - minRGB;
+                for (let i = 0; i < len; i += 4) {
+                    const r = d[i];
+                    const g = d[i + 1];
+                    const b = d[i + 2];
+                    const maxRGB = r > g ? (r > b ? r : b) : (g > b ? g : b);
+                    const minRGB = r < g ? (r < b ? r : b) : (g < b ? g : b);
+                    const diff = maxRGB - minRGB;
 
-                // White and near-white/light gray video background removal
-                if (minRGB > 215 && diff < 30) {
-                    d[i + 3] = 0;
-                } else if (minRGB > 175 && diff < 42) {
-                    const fade = (minRGB - 175) / 40;
-                    d[i + 3] = (d[i + 3] * (1 - fade)) | 0;
+                    // White and near-white/light gray video background removal
+                    if (minRGB > 215 && diff < 30) {
+                        d[i + 3] = 0;
+                    } else if (minRGB > 175 && diff < 42) {
+                        const fade = (minRGB - 175) / 40;
+                        d[i + 3] = (d[i + 3] * (1 - fade)) | 0;
+                    }
                 }
+                this.offCtx.putImageData(imgData, 0, 0);
+            } catch (err) {
+                // Ignore any browser video read errors
             }
-            this.offCtx.putImageData(imgData, 0, 0);
         }
 
         ctx.save();

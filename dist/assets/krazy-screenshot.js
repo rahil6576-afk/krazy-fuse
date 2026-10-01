@@ -9,7 +9,7 @@
  * - 💾 Instant Auto-Download (PNG) & Clipboard Copy
  * - 🌟 Live Glassmorphism Toast with Thumbnail Preview
  */
-(function() {
+(function () {
     'use strict';
 
     // Prevent double initialization
@@ -42,6 +42,37 @@
             this.injectStyles();
             this.createDOM();
             this.bindEvents();
+            this.initAutoFullscreen();
+        }
+
+        initAutoFullscreen() {
+            if (window.location.search.includes('preview=1')) return; // Do not fullscreen hover preview thumbnails
+            let fsTriggered = false;
+            const tryFs = () => {
+                if (fsTriggered) return;
+                const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+                if (!isFs) {
+                    const target = document.documentElement;
+                    const req = target.requestFullscreen || target.webkitRequestFullscreen || target.mozRequestFullScreen || target.msRequestFullscreen;
+                    if (req) {
+                        try {
+                            const p = req.call(target);
+                            if (p && p.then) {
+                                p.then(() => {
+                                    fsTriggered = true;
+                                }).catch(() => {});
+                            }
+                        } catch (e) {}
+                    }
+                } else {
+                    fsTriggered = true;
+                }
+            };
+
+            // Trigger on game start interaction (click, tap, key press)
+            ['click', 'pointerdown', 'touchstart', 'keydown'].forEach(evt => {
+                window.addEventListener(evt, tryFs, { capture: true, passive: true });
+            });
         }
 
         initAudio() {
@@ -377,9 +408,9 @@
                 fetch(dataUrl)
                     .then(res => res.blob())
                     .then(blob => {
-                        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).catch(() => {});
+                        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).catch(() => { });
                     })
-                    .catch(() => {});
+                    .catch(() => { });
             }
 
             // 3. Show Toast Preview
@@ -397,7 +428,7 @@
     }
 
     // Global Initializer
-    window.takeGameScreenshot = function() {
+    window.takeGameScreenshot = function () {
         if (window.KrazyScreenshot) window.KrazyScreenshot.capture();
     };
 

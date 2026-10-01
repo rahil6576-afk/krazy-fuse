@@ -27,6 +27,7 @@ const itemsToCopy = [
   'flappy-man',
   'bomb-panic',
   'tic-tac-toe',
+  'chess',
   'assets',
   'public',
   'thumbnails',

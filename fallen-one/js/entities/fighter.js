@@ -1,14 +1,15 @@
 // js/entities/fighter.js - Core Fighter Base Class & Combat State Engine
 
-import { 
-    ARENA_BOUNDS, FIGHTER_STATES, ATTACK_TYPES, 
-    MAX_SUPER_METER, MAX_SPECIAL_ENERGY, PERFECT_BLOCK_WINDOW 
+import {
+    ARENA_BOUNDS, FIGHTER_STATES, ATTACK_TYPES, HIT_LEVELS,
+    MAX_SUPER_METER, MAX_SPECIAL_ENERGY, PERFECT_BLOCK_WINDOW
 } from '../core/constants.js';
 import { soundEngine } from '../audio/soundEngine.js';
 import { particleSystem } from '../graphics/particleSystem.js';
 import { camera } from '../core/camera.js';
 import { Projectile } from './projectile.js';
 import { ultimateManager } from '../graphics/ultimateManager.js';
+import { getAttackRange, getCombatStyle } from '../graphics/combatStyle.js';
 
 export class Fighter {
     constructor(config, playerKey = 'P1', isAI = false) {
@@ -115,7 +116,7 @@ export class Fighter {
     }
 
     getActiveHitbox() {
-        if (this.state !== FIGHTER_STATES.ATTACK || this.attackPhase !== 'ACTIVE' || !this.currentAttackData) {
+        if (this.state !== FIGHTER_STATES.ATTACK || this.attackPhase !== 'ACTIVE' || !this.currentAttackData || this.currentAttackData.hasHit) {
             return null;
         }
         const box = this.currentAttackData.hitbox;
@@ -130,7 +131,9 @@ export class Fighter {
         };
     }
 
-    update(opponent, input) {
+    update(opponent, input = {}) {
+        input = input || {};
+        input.justPressed = input.justPressed || {};
         // Regenerate special energy over time
         if (this.specialEnergy < MAX_SPECIAL_ENERGY) {
             this.specialEnergy = Math.min(MAX_SPECIAL_ENERGY, this.specialEnergy + 0.15);
@@ -217,6 +220,10 @@ export class Fighter {
                 break;
 
             case FIGHTER_STATES.KNOCKDOWN:
+                if (this.health <= 0) {
+                    this.stateTimer = Math.min(30, this.stateTimer);
+                    break;
+                }
                 if (this.stateTimer >= 35) {
                     this.state = FIGHTER_STATES.GETUP;
                     this.stateTimer = 0;
@@ -235,15 +242,16 @@ export class Fighter {
 
     handleNeutralState(opponent, input) {
         if (!input) return;
+        const jp = input.justPressed || {};
 
         // Check Super / Ultimate input
-        if (input.justPressed.ultimate && this.superMeter >= MAX_SUPER_METER) {
+        if (jp.ultimate && this.superMeter >= MAX_SUPER_METER) {
             this.executeAttack(ATTACK_TYPES.ULTIMATE);
             return;
         }
 
         // Check Specials
-        if (input.justPressed.special) {
+        if (jp.special) {
             if (input.down && this.config.attacks[ATTACK_TYPES.SPECIAL_3] && this.specialEnergy >= (this.config.attacks[ATTACK_TYPES.SPECIAL_3]?.energyCost || 25)) {
                 this.executeAttack(ATTACK_TYPES.SPECIAL_3); // Ground Burst
                 return;
@@ -293,6 +301,7 @@ export class Fighter {
         if (input.up && this.isGrounded) {
             this.vy = -this.config.jumpForce;
             this.isGrounded = false;
+            particleSystem.spawnMovementBurst(this.x, this.y, this.charId, 'jump');
             this.state = FIGHTER_STATES.JUMP;
             this.stateTimer = 0;
             soundEngine.playWhoosh(1.2);
@@ -371,7 +380,7 @@ export class Fighter {
         this.hasMotionTrail = true;
         this.isInvincible = true; // First 6 frames of dodge are invincible
         soundEngine.playDash();
-        particleSystem.spawnDashDust(this.x, this.y, direction > 0);
+        particleSystem.spawnDashDust(this.x, this.y, direction > 0, this.charId);
     }
 
     handleDashState(opponent, input) {
@@ -415,10 +424,12 @@ export class Fighter {
             this.specialEnergy = Math.max(0, this.specialEnergy - atk.energyCost);
         }
 
-        this.currentAttackData = { ...atk, hasHit: false };
+        this.currentAttackData = { ...getAttackRange(this.charId, attackType, atk), hasHit: false };
+        this.combatStyle = getCombatStyle(this.charId);
         this.state = FIGHTER_STATES.ATTACK;
         this.stateTimer = 0;
         this.attackFrame = 0;
+        this.animationEventFrame = -1;
         this.attackPhase = 'STARTUP';
         this.canCancel = false;
         this.armorHitsRemaining = atk.armor || 0;
@@ -460,12 +471,16 @@ export class Fighter {
             if (this.attackFrame >= atk.startup) {
                 this.attackPhase = 'ACTIVE';
                 this.attackFrame = 0;
+                this.animationEventFrame = -1;
+                particleSystem.spawnAttackRelease(this, opponent);
 
                 // Handle projectile spawn
                 if (atk.isProjectile) {
                     const spawnX = this.x + (this.facingRight ? 45 : -45);
                     const spawnY = this.y - 85;
-                    this.projectiles.push(new Projectile(this, atk.projType, spawnX, spawnY, this.facingRight, atk));
+                    const projectileRange = (this.combatStyle?.ranges?.SPECIAL_2?.offsetX || 450) + (this.combatStyle?.ranges?.SPECIAL_2?.width || 100);
+                    const projectileAttack = { ...atk, projLifetime: Math.max(30, Math.ceil(projectileRange / Math.max(1, atk.projSpeed || 15))) };
+                    this.projectiles.push(new Projectile(this, atk.projType, spawnX, spawnY, this.facingRight, projectileAttack));
                     soundEngine.playEnergyProjectile(this.charId);
                 } else if (atk.spawnsHeavyWave) {
                     // Heavy Attack 20f Crescent Wave traveling forward independent of character
@@ -485,10 +500,10 @@ export class Fighter {
                 } else if ([ATTACK_TYPES.SPECIAL_1, ATTACK_TYPES.SPECIAL_2, ATTACK_TYPES.SPECIAL_3, ATTACK_TYPES.RISING_KICK].includes(atk.type)) {
                     // Propagate Arena Elemental Wave across the floor toward the opponent
                     const fissType = this.charId === 'SOLAR' ? 'MAGMA' :
-                                     this.charId === 'FROST' ? 'FROST' :
-                                     this.charId === 'TERRA' ? 'TERRA' :
-                                     this.charId === 'VOLT' ? 'VOLT' :
-                                     this.charId === 'SHADOW' ? 'SHADOW' : 'ASTRAL';
+                        this.charId === 'FROST' ? 'FROST' :
+                            this.charId === 'TERRA' ? 'TERRA' :
+                                this.charId === 'VOLT' ? 'VOLT' :
+                                    this.charId === 'SHADOW' ? 'SHADOW' : 'ASTRAL';
                     const targetX = opponent ? opponent.x : (this.facingRight ? this.x + 350 : this.x - 350);
                     particleSystem.spawnGroundFissure(this.x, targetX, this.y, fissType, this.themeColor);
                 } else if (atk.type === ATTACK_TYPES.ULTIMATE) {
@@ -638,8 +653,17 @@ export class Fighter {
         const finalDamage = atk.damage * (hitResult.isCounter ? 1.25 : 1.0);
         this.health = Math.max(0, this.health - finalDamage);
         this.hitstunFrames = atk.hitstun;
-        this.state = FIGHTER_STATES.HURT;
         this.damageFlashTimer = 6;
+
+        if (this.health <= 0) {
+            this.state = FIGHTER_STATES.KNOCKDOWN;
+            this.stateTimer = 0;
+            this.vy = -6;
+            this.vx = (this.x < attacker.x ? -1 : 1) * 7;
+            this.isGrounded = false;
+        } else {
+            this.state = FIGHTER_STATES.HURT;
+        }
 
         // Camera Shake & Hitstop
         const isHeavy = atk.damage >= 80 || atk.isCinematicSuper;
@@ -695,6 +719,7 @@ export class Fighter {
                     this.stateTimer = 0;
                     camera.addTrauma(0.15);
                 } else if (this.state === FIGHTER_STATES.JUMP) {
+                    particleSystem.spawnMovementBurst(this.x, this.y, this.charId, 'land');
                     this.state = FIGHTER_STATES.IDLE;
                     this.stateTimer = 0;
                 }

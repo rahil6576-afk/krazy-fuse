@@ -100,7 +100,51 @@ export class ParticleSystem {
         });
     }
 
-    spawnDashDust(x, y, facingRight) {
+
+    spawnAttackRelease(fighter, opponent) {
+        const style = fighter.combatStyle || { archetype: 'precision' };
+        const color = fighter.themeColor || '#00e5ff';
+        const dir = fighter.facingRight ? 1 : -1;
+        const x = fighter.x + dir * 42;
+        const y = fighter.y - 82;
+        const type = fighter.currentAttackData?.type || '';
+        const heavy = type.includes('HEAVY') || type === 'RISING_KICK' || type.includes('SPECIAL');
+        const count = heavy ? 10 : 5;
+
+        for (let i = 0; i < count; i++) {
+            if (this.particles.length >= this.maxParticles) break;
+            const spread = (Math.random() - 0.5) * (heavy ? 1.2 : 0.8);
+            const speed = heavy ? 3 + Math.random() * 5 : 2 + Math.random() * 3;
+            this.particles.push({
+                x: x + (Math.random() - 0.5) * 10, y: y + (Math.random() - 0.5) * 18,
+                vx: dir * speed, vy: spread * speed, life: 1, decay: 0.08 + Math.random() * 0.05,
+                size: heavy ? 3 + Math.random() * 3 : 2 + Math.random() * 2, color, shape: 'spark'
+            });
+        }
+
+        if (heavy || style.archetype === 'assassin' || style.archetype === 'rushdown') {
+            this.shockwaves.push({ x, y, radius: 8, maxRadius: heavy ? 52 : 35, growth: heavy ? 6 : 4, color, alpha: 0.8, lineWidth: heavy ? 3.5 : 2 });
+        }
+
+        if (style.archetype === 'heavy' || style.archetype === 'tank') {
+            this.spawnGroundFissure(fighter.x, fighter.x + dir * (style.archetype === 'tank' ? 160 : 120), fighter.y, style.archetype === 'tank' ? 'TERRA' : 'MAGMA', color);
+        }
+    }
+
+    spawnMovementBurst(x, y, charId, kind = 'jump') {
+        const colors = { SOLAR: '#ff6b2c', FROST: '#38bdf8', VOLT: '#facc15', SHADOW: '#a855f7', TERRA: '#22c55e', AARAV: '#00e5ff' };
+        const color = colors[charId] || '#ffffff';
+        const count = kind === 'land' ? 12 : 7;
+        for (let i = 0; i < count; i++) {
+            if (this.particles.length >= this.maxParticles) break;
+            const a = Math.PI + Math.random() * Math.PI;
+            const speed = 1.5 + Math.random() * 3;
+            this.particles.push({ x, y: y - 2, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed * 0.5, life: 1, decay: 0.08, size: 2 + Math.random() * 3, color, shape: 'circle' });
+        }
+        if (kind === 'land') this.shockwaves.push({ x, y, radius: 8, maxRadius: 55, growth: 4, color, alpha: 0.55, lineWidth: 2.5 });
+    }
+
+    spawnDashDust(x, y, facingRight, charId = 'AARAV') {
         for (let i = 0; i < 8; i++) {
             this.particles.push({
                 x: x + (facingRight ? -18 : 18),
@@ -110,8 +154,27 @@ export class ParticleSystem {
                 life: 1.0,
                 decay: 0.06,
                 size: 3 + Math.random() * 4,
-                color: 'rgba(255, 255, 255, 0.4)',
+                color: ({ SOLAR: '#ff6b2c', FROST: '#38bdf8', VOLT: '#facc15', SHADOW: '#a855f7', TERRA: '#22c55e', AARAV: '#00e5ff' }[charId] || 'rgba(255,255,255,0.4)'),
                 shape: 'circle'
+            });
+        }
+    }
+
+    spawnEnergyTrail(x, y, color = '#00e5ff', count = 4) {
+        for (let i = 0; i < count; i++) {
+            if (this.particles.length >= this.maxParticles) break;
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 0.5 + Math.random() * 2.0;
+            this.particles.push({
+                x: x + (Math.random() - 0.5) * 12,
+                y: y + (Math.random() - 0.5) * 12,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 1.0,
+                decay: 0.08 + Math.random() * 0.04,
+                size: 2.5 + Math.random() * 2.5,
+                color: color,
+                shape: Math.random() > 0.4 ? 'spark' : 'circle'
             });
         }
     }

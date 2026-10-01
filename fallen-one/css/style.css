@@ -144,12 +144,41 @@ body {
     z-index: 12;
 }
 
-#btn-nav-home { position: static; width: 13%; height: 100%; }
-#btn-nav-characters { position: static; width: 20%; height: 100%; }
-#btn-nav-modes { position: static; width: 13%; height: 100%; }
-#btn-nav-manual { position: static; width: 15%; height: 100%; }
-#btn-nav-leaderboard { position: static; width: 22%; height: 100%; }
-#btn-nav-news { position: static; width: 13%; height: 100%; }
+#btn-nav-home {
+    position: static;
+    width: 13%;
+    height: 100%;
+}
+
+#btn-nav-characters {
+    position: static;
+    width: 20%;
+    height: 100%;
+}
+
+#btn-nav-modes {
+    position: static;
+    width: 13%;
+    height: 100%;
+}
+
+#btn-nav-manual {
+    position: static;
+    width: 15%;
+    height: 100%;
+}
+
+#btn-nav-leaderboard {
+    position: static;
+    width: 22%;
+    height: 100%;
+}
+
+#btn-nav-news {
+    position: static;
+    width: 13%;
+    height: 100%;
+}
 
 .fo-hotspot-nav .fo-hotspot-btn:hover {
     border-bottom: 3px solid #f97316;
@@ -166,6 +195,7 @@ body {
     height: 4.5%;
     border-radius: 6px;
 }
+
 .fo-top-setting-btn:hover {
     border-color: #f97316;
     background: rgba(249, 115, 22, 0.2);
@@ -179,6 +209,7 @@ body {
     height: 4.5%;
     border-radius: 6px;
 }
+
 .fo-top-profile-btn:hover {
     border-color: #38bdf8;
     background: rgba(56, 189, 248, 0.2);
@@ -194,6 +225,7 @@ body {
     height: 12.8%;
     border-radius: 12px;
 }
+
 .fo-hotspot-tower-left:hover {
     border-color: #ef4444;
     background: rgba(239, 68, 68, 0.16);
@@ -202,11 +234,33 @@ body {
 }
 
 /* News Feed Links */
-.fo-news-link-1 { left: 4.2%; top: 73.2%; width: 28.2%; height: 6.0%; border-radius: 6px; }
-.fo-news-link-2 { left: 4.2%; top: 79.8%; width: 28.2%; height: 6.0%; border-radius: 6px; }
-.fo-news-link-3 { left: 4.2%; top: 86.4%; width: 28.2%; height: 6.0%; border-radius: 6px; }
+.fo-news-link-1 {
+    left: 4.2%;
+    top: 73.2%;
+    width: 28.2%;
+    height: 6.0%;
+    border-radius: 6px;
+}
 
-.fo-news-link-1:hover, .fo-news-link-2:hover, .fo-news-link-3:hover {
+.fo-news-link-2 {
+    left: 4.2%;
+    top: 79.8%;
+    width: 28.2%;
+    height: 6.0%;
+    border-radius: 6px;
+}
+
+.fo-news-link-3 {
+    left: 4.2%;
+    top: 86.4%;
+    width: 28.2%;
+    height: 6.0%;
+    border-radius: 6px;
+}
+
+.fo-news-link-1:hover,
+.fo-news-link-2:hover,
+.fo-news-link-3:hover {
     border-color: rgba(249, 115, 22, 0.6);
     background: rgba(249, 115, 22, 0.14);
     box-shadow: 0 0 15px rgba(249, 115, 22, 0.45);
@@ -220,6 +274,7 @@ body {
     height: 10.4%;
     border-radius: 12px;
 }
+
 .fo-mode-hotspot-1:hover {
     border-color: #ef4444;
     background: rgba(239, 68, 68, 0.16);
@@ -234,6 +289,7 @@ body {
     height: 10.4%;
     border-radius: 12px;
 }
+
 .fo-mode-hotspot-2:hover {
     border-color: #a855f7;
     background: rgba(168, 85, 247, 0.16);
@@ -248,6 +304,7 @@ body {
     height: 10.4%;
     border-radius: 12px;
 }
+
 .fo-mode-hotspot-3:hover {
     border-color: #10b981;
     background: rgba(16, 185, 129, 0.16);
@@ -262,6 +319,7 @@ body {
     height: 10.4%;
     border-radius: 12px;
 }
+
 .fo-mode-hotspot-4:hover {
     border-color: #00e5ff;
     background: rgba(0, 229, 255, 0.16);
@@ -282,7 +340,7 @@ body {
     width: 25.5%;
     height: 12.5%;
     background: radial-gradient(ellipse at 50% 50%, rgba(18, 10, 8, 0.99) 0%, rgba(11, 6, 6, 0.97) 65%, rgba(6, 3, 4, 0.95) 100%),
-                linear-gradient(135deg, rgba(28, 11, 9, 0.85) 0%, rgba(9, 4, 5, 0.98) 100%);
+        linear-gradient(135deg, rgba(28, 11, 9, 0.85) 0%, rgba(9, 4, 5, 0.98) 100%);
     box-shadow: 0 0 35px 15px rgba(8, 4, 5, 0.98);
     border-radius: 14px;
 }
@@ -305,6 +363,7 @@ body {
     height: 4.8%;
     border-radius: 6px;
 }
+
 .fo-bot-exit:hover {
     border-color: #ef4444;
     background: rgba(239, 68, 68, 0.25);
@@ -314,7 +373,8 @@ body {
 /* ==========================================================================
    CHARACTER SELECT SCREEN (DARK FANTASY ARCADE)
    ========================================================================== */
-#char-select-screen, #stage-select-screen {
+#char-select-screen,
+#stage-select-screen {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -756,8 +816,13 @@ body {
     transition: width 0.35s ease;
 }
 
-.p1-hud .health-buffer { left: 0; }
-.p2-hud .health-buffer { right: 0; }
+.p1-hud .health-buffer {
+    left: 0;
+}
+
+.p2-hud .health-buffer {
+    right: 0;
+}
 
 .health-fill {
     position: absolute;
@@ -768,8 +833,13 @@ body {
     transition: width 0.1s linear;
 }
 
-.p1-hud .health-fill { left: 0; }
-.p2-hud .health-fill { right: 0; }
+.p1-hud .health-fill {
+    left: 0;
+}
+
+.p2-hud .health-fill {
+    right: 0;
+}
 
 /* Special Energy Bar */
 .energy-bar-container {
@@ -793,7 +863,9 @@ body {
     box-shadow: 0 0 8px #38bdf8;
 }
 
-.p2-hud .energy-fill { margin-left: auto; }
+.p2-hud .energy-fill {
+    margin-left: auto;
+}
 
 /* Center Timer */
 .hud-center-timer {
@@ -908,8 +980,15 @@ body {
 }
 
 @keyframes superPulse {
-    from { opacity: 0.8; filter: brightness(1); }
-    to { opacity: 1; filter: brightness(1.4); }
+    from {
+        opacity: 0.8;
+        filter: brightness(1);
+    }
+
+    to {
+        opacity: 1;
+        filter: brightness(1.4);
+    }
 }
 
 /* Combo Popups */
@@ -927,8 +1006,15 @@ body {
     transform: scale(1.1);
 }
 
-#p1-combo-box { left: 40px; text-align: left; }
-#p2-combo-box { right: 40px; text-align: right; }
+#p1-combo-box {
+    left: 40px;
+    text-align: left;
+}
+
+#p2-combo-box {
+    right: 40px;
+    text-align: right;
+}
 
 .combo-hits {
     font-family: var(--font-heading);
@@ -1508,7 +1594,8 @@ body {
     z-index: 15;
 }
 
-@media (max-width: 1024px), (pointer: coarse) {
+@media (max-width: 1024px),
+(pointer: coarse) {
     #mobile-touch-hud {
         display: flex;
     }
@@ -1777,7 +1864,8 @@ body.portal-paused .portal-topbar {
     transition: 0.2s;
 }
 
-.nav-pill:hover, .nav-pill.active {
+.nav-pill:hover,
+.nav-pill.active {
     background: rgba(56, 189, 248, 0.15);
     border-color: #38bdf8;
     color: #38bdf8;
@@ -1865,10 +1953,18 @@ body.portal-paused .portal-sidebar {
     transition: 0.2s;
 }
 
-.side-btn span { font-size: 1.2rem; }
-.side-btn small { font-size: 0.6rem; font-weight: 700; margin-top: 2px; }
+.side-btn span {
+    font-size: 1.2rem;
+}
 
-.side-btn:hover, .side-btn.active {
+.side-btn small {
+    font-size: 0.6rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.side-btn:hover,
+.side-btn.active {
     background: rgba(56, 189, 248, 0.15);
     border-color: #38bdf8;
     color: #38bdf8;
@@ -1989,7 +2085,8 @@ body.portal-paused .game-meta-bar {
     gap: 4px;
 }
 
-.meta-btn:hover, .meta-btn.active {
+.meta-btn:hover,
+.meta-btn.active {
     background: rgba(56, 189, 248, 0.15);
     border-color: #38bdf8;
     color: #38bdf8;
@@ -2141,9 +2238,11 @@ body.portal-paused .pause-modal-card {
     opacity: 0;
     transition: opacity 0.2s ease;
 }
+
 .resume-countdown-overlay.active {
     opacity: 1;
 }
+
 .resume-countdown-number {
     font-family: 'Outfit', sans-serif;
     font-size: 8rem;
@@ -2155,6 +2254,7 @@ body.portal-paused .pause-modal-card {
     opacity: 0;
     animation: countdownPop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
+
 .resume-countdown-sub {
     font-family: 'Outfit', sans-serif;
     font-size: 1.2rem;
@@ -2163,13 +2263,29 @@ body.portal-paused .pause-modal-card {
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.95);
     margin-top: 14px;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
 }
+
 @keyframes countdownPop {
-    0% { transform: scale(1.6); opacity: 0; }
-    20% { transform: scale(1); opacity: 1; }
-    80% { transform: scale(0.95); opacity: 1; }
-    100% { transform: scale(0.8); opacity: 0; }
+    0% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+
+    20% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    80% {
+        transform: scale(0.95);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
 }
 
 body.portal-paused #krazio-floating-back {

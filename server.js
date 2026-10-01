@@ -33,7 +33,7 @@ const server = http.createServer((req, res) => {
     let cleanUrl = req.url.split('?')[0].split('#')[0];
     try {
         cleanUrl = decodeURIComponent(cleanUrl);
-    } catch (e) {}
+    } catch (e) { }
 
     let filePath = path.join(PUBLIC_DIR, cleanUrl);
 

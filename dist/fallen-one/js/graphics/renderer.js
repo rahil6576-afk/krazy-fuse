@@ -18,52 +18,64 @@ export class GameRenderer {
     render(p1, p2, matchManager, comboTracker, p3 = null) {
         const ctx = this.ctx;
 
+        // Reset canvas matrix to prevent transform corruption
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
         // Clear Viewport
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         // Apply Dynamic Camera Zoom & Screen Shake
         camera.applyTransform(ctx);
 
-        // 1. Render Parallax Stage Background & Ambiance
-        arenaManager.renderBackground(ctx);
+        try {
+            // 1. Render Parallax Stage Background & Ambiance
+            arenaManager.renderBackground(ctx);
 
-        // 2. Render Projectiles
-        if (p1 && p1.projectiles) {
-            p1.projectiles.forEach(p => p.render(ctx));
+            // 2. Render Projectiles
+            if (p1 && p1.projectiles) {
+                p1.projectiles.forEach(p => p.render(ctx));
+            }
+            if (p2 && p2.projectiles) {
+                p2.projectiles.forEach(p => p.render(ctx));
+            }
+            if (p3 && p3.projectiles) {
+                p3.projectiles.forEach(p => p.render(ctx));
+            }
+
+            // 3. Render Fighters
+            if (p1) FighterSpriteRenderer.drawFighter(ctx, p1);
+            if (p2) FighterSpriteRenderer.drawFighter(ctx, p2);
+            if (p3) FighterSpriteRenderer.drawFighter(ctx, p3);
+
+            // Render In-World Ultimate Attack (keyed and blended seamlessly into arena stage)
+            ultimateManager.renderWorld(ctx);
+
+            // 4. Render Particle System (Hitsparks, Embers, Shockwaves, Ground Fissures)
+            particleSystem.render(ctx);
+
+            // 5. Debug Hitboxes / Hurtboxes (Training Mode)
+            if (this.showHitboxes) {
+                this.renderHitboxes(ctx, p1);
+                this.renderHitboxes(ctx, p2);
+                if (p3) this.renderHitboxes(ctx, p3);
+            }
+        } catch (err) {
+            console.error('Render error:', err);
+        } finally {
+            // Restore Camera Transformation
+            camera.restoreTransform(ctx);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
         }
-        if (p2 && p2.projectiles) {
-            p2.projectiles.forEach(p => p.render(ctx));
-        }
-        if (p3 && p3.projectiles) {
-            p3.projectiles.forEach(p => p.render(ctx));
-        }
-
-        // 3. Render Fighters
-        if (p1) FighterSpriteRenderer.drawFighter(ctx, p1);
-        if (p2) FighterSpriteRenderer.drawFighter(ctx, p2);
-        if (p3) FighterSpriteRenderer.drawFighter(ctx, p3);
-
-        // Render In-World Ultimate Attack (keyed and blended seamlessly into arena stage)
-        ultimateManager.renderWorld(ctx);
-
-        // 4. Render Particle System (Hitsparks, Embers, Shockwaves, Ground Fissures)
-        particleSystem.render(ctx);
-
-        // 5. Debug Hitboxes / Hurtboxes (Training Mode)
-        if (this.showHitboxes) {
-            this.renderHitboxes(ctx, p1);
-            this.renderHitboxes(ctx, p2);
-            if (p3) this.renderHitboxes(ctx, p3);
-        }
-
-        // Restore Camera Transformation
-        camera.restoreTransform(ctx);
 
         // 6. Render Screen-Space Cinematic Super Title Pill & Screen Flash
-        ultimateManager.renderScreenOverlay(ctx);
+        try {
+            ultimateManager.renderScreenOverlay(ctx);
+        } catch (e) {}
 
         // 7. Render On-Screen Match Announcements (Round 1, Fight!, K.O.)
-        this.renderMatchBanners(ctx, matchManager);
+        try {
+            this.renderMatchBanners(ctx, matchManager);
+        } catch (e) {}
     }
 
     renderHitboxes(ctx, fighter) {

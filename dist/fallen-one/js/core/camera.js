@@ -105,6 +105,15 @@ export class Camera {
 
     applyTransform(ctx) {
         ctx.save();
+        if (!isFinite(this.x) || !isFinite(this.y) || !isFinite(this.zoom)) {
+            this.x = (ARENA_BOUNDS.minX + ARENA_BOUNDS.maxX) / 2;
+            this.y = ARENA_BOUNDS.groundY - 140;
+            this.zoom = 1.0;
+        }
+        if (!isFinite(this.shakeX)) this.shakeX = 0;
+        if (!isFinite(this.shakeY)) this.shakeY = 0;
+        if (!isFinite(this.shakeAngle)) this.shakeAngle = 0;
+
         ctx.translate(CANVAS_WIDTH / 2 + this.shakeX, CANVAS_HEIGHT / 2 + this.shakeY);
         ctx.rotate(this.shakeAngle);
         ctx.scale(this.zoom, this.zoom);

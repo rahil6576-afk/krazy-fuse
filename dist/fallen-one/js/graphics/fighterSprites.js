@@ -3,6 +3,7 @@
 import { FIGHTER_STATES, ATTACK_TYPES } from '../core/constants.js';
 import { CHAMPION_SPRITES } from './championSpritesMap.js';
 import { ultimateManager } from './ultimateManager.js';
+import { getAttackMotion, getCombatStyle } from './combatStyle.js';
 
 // Aarav Sprite Sheet Mapping (on 1536x1024 clean transparent sheet with all 4 walk frames & new skill set)
 export const AARAV_SPRITE_FRAMES = {
@@ -90,7 +91,7 @@ export class FighterSpriteRenderer {
         }
 
         // 2. Render Character with 4-Frame Dynamic Movement / Action Blending
-        if (ultimateManager.isActive && ultimateManager.attacker === fighter) {
+        if (ultimateManager.isActive && ultimateManager.attacker === fighter && fighter.charId === 'SOLAR' && ultimateManager.video && ultimateManager.video.readyState >= 2) {
             // Solar is dynamically animated in-world on the stage via ultimateManager
         } else if (fighter.charId === 'AARAV') {
             this.drawAarav(ctx, fighter);
@@ -100,7 +101,10 @@ export class FighterSpriteRenderer {
             this.drawAarav(ctx, fighter);
         }
 
-        // 3. Render Dynamic In-Engine Special Attack Auras
+        // 3. Render dynamic attack-specific body accents
+        this.drawAttackMotionFX(ctx, fighter);
+
+        // 4. Render Dynamic In-Engine Special Attack Auras
         this.drawSpecialAttackFX(ctx, fighter);
 
         // 4. Render Dynamic Cinematic Ultimate Attack Vignette & Lighting
@@ -1202,9 +1206,29 @@ export class FighterSpriteRenderer {
             ctx.save();
             ctx.imageSmoothingEnabled = false;
 
-            ctx.translate(anim.offsetX, anim.offsetY);
-            ctx.rotate(anim.rotation);
-            ctx.scale(anim.scaleX, anim.scaleY);
+            // Attack-specific body mechanics layered over the sprite-sheet pose.
+            const motion = getAttackMotion(f);
+            const charId = f.charId || 'AARAV';
+            const style = getCombatStyle(charId);
+            const moveScale = style.movement || {};
+            let mx = anim.offsetX, my = anim.offsetY, msx = anim.scaleX, msy = anim.scaleY, mr = anim.rotation;
+            if (f.state === FIGHTER_STATES.ATTACK || f.state === FIGHTER_STATES.SUPER_STARTUP) {
+                mx += motion.x;
+                my += motion.y;
+                msx *= motion.sx;
+                msy *= motion.sy;
+                mr += motion.rot;
+            }
+            if (f.state === FIGHTER_STATES.IDLE) {
+                msx *= moveScale.idle || 1;
+                msy *= moveScale.idle || 1;
+            } else if (f.state === FIGHTER_STATES.WALK_FWD || f.state === FIGHTER_STATES.WALK_BWD) {
+                msx *= moveScale.walk || 1;
+                msy *= moveScale.walk || 1;
+            }
+            ctx.translate(mx, my);
+            ctx.rotate(mr);
+            ctx.scale(msx, msy);
 
             // Draw character sprite cleanly without expensive canvas gaussian blur
             ctx.drawImage(
@@ -1238,6 +1262,8 @@ export class FighterSpriteRenderer {
             }
 
             ctx.restore();
+        } else {
+            this.drawFighterFallback(ctx, f, '#00e5ff');
         }
     }
 
@@ -1316,9 +1342,28 @@ export class FighterSpriteRenderer {
             ctx.save();
             ctx.imageSmoothingEnabled = false;
 
-            ctx.translate(anim.offsetX, anim.offsetY);
-            ctx.rotate(anim.rotation);
-            ctx.scale(anim.scaleX, anim.scaleY);
+            // Attack-specific body mechanics layered over the sprite-sheet pose.
+            const motion = getAttackMotion(f);
+            const style = getCombatStyle(charId);
+            const moveScale = style.movement || {};
+            let mx = anim.offsetX, my = anim.offsetY, msx = anim.scaleX, msy = anim.scaleY, mr = anim.rotation;
+            if (f.state === FIGHTER_STATES.ATTACK || f.state === FIGHTER_STATES.SUPER_STARTUP) {
+                mx += motion.x;
+                my += motion.y;
+                msx *= motion.sx;
+                msy *= motion.sy;
+                mr += motion.rot;
+            }
+            if (f.state === FIGHTER_STATES.IDLE) {
+                msx *= moveScale.idle || 1;
+                msy *= moveScale.idle || 1;
+            } else if (f.state === FIGHTER_STATES.WALK_FWD || f.state === FIGHTER_STATES.WALK_BWD) {
+                msx *= moveScale.walk || 1;
+                msy *= moveScale.walk || 1;
+            }
+            ctx.translate(mx, my);
+            ctx.rotate(mr);
+            ctx.scale(msx, msy);
 
             // Draw champion cleanly with zero GPU shadow blur overhead
             ctx.drawImage(
@@ -1327,6 +1372,57 @@ export class FighterSpriteRenderer {
                 frame.dx, frame.dy, frame.dw, frame.dh
             );
 
+            ctx.restore();
+        } else {
+            this.drawFighterFallback(ctx, f, f.themeColor || '#ff6b2c');
+        }
+    }
+
+    static drawFighterFallback(ctx, f, color) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.5;
+        // Head
+        ctx.beginPath();
+        ctx.arc(0, -115, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // Torso
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(-24, -94, 48, 76, 8);
+        } else {
+            ctx.rect(-24, -94, 48, 76);
+        }
+        ctx.fill();
+        ctx.stroke();
+        // Legs
+        ctx.fillRect(-20, -18, 16, 18);
+        ctx.strokeRect(-20, -18, 16, 18);
+        ctx.fillRect(4, -18, 16, 18);
+        ctx.strokeRect(4, -18, 16, 18);
+        ctx.restore();
+    }
+
+    // =========================================================================
+    // DYNAMIC ATTACK MOTION FX & STREAKS
+    // =========================================================================
+    static drawAttackMotionFX(ctx, f) {
+        if ((f.state !== FIGHTER_STATES.ATTACK && f.state !== FIGHTER_STATES.SUPER_STARTUP) || !f.currentAttackData) return;
+        const style = getCombatStyle(f.charId || 'AARAV');
+        const color = style.color || f.themeColor || '#00e5ff';
+        const motion = getAttackMotion(f);
+        if (!motion) return;
+
+        if (f.attackPhase === 'ACTIVE') {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.65;
+            ctx.beginPath();
+            ctx.arc(motion.x * 1.5, -65 + motion.y, 42, -Math.PI / 3, Math.PI / 3);
+            ctx.stroke();
             ctx.restore();
         }
     }
@@ -1376,7 +1472,7 @@ export class FighterSpriteRenderer {
         if (ultimateManager.isActive && ultimateManager.attacker === f) return;
 
         const isUlt = (f.state === FIGHTER_STATES.ATTACK || f.state === FIGHTER_STATES.SUPER_STARTUP) &&
-                      f.currentAttackData && f.currentAttackData.type === ATTACK_TYPES.ULTIMATE;
+            f.currentAttackData && f.currentAttackData.type === ATTACK_TYPES.ULTIMATE;
         if (!isUlt) return;
 
         const timer = f.stateTimer || 0;
@@ -1406,7 +1502,13 @@ export class FighterSpriteRenderer {
             ctx.stroke();
         }
         ctx.restore();
-
         ctx.restore();
     }
 }
+
+// Preload all fighter sprites immediately on import
+if (typeof window !== 'undefined') {
+    FighterSpriteRenderer.initSprites();
+}
+
+

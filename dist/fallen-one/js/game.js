@@ -1,8 +1,8 @@
 // js/game.js - Main Game Loop, State Orchestration & Match Dispatcher (with 10-Floor Tower & 2v1 Boss)
 
-import { 
-    CANVAS_WIDTH, CANVAS_HEIGHT, GAME_STATES, GAME_MODES, 
-    AI_DIFFICULTIES, FIGHTER_STATES, ATTACK_TYPES, ROUNDS_TO_WIN, MAX_SUPER_METER, MAX_SPECIAL_ENERGY 
+import {
+    CANVAS_WIDTH, CANVAS_HEIGHT, GAME_STATES, GAME_MODES,
+    AI_DIFFICULTIES, FIGHTER_STATES, ATTACK_TYPES, ROUNDS_TO_WIN, MAX_SUPER_METER, MAX_SPECIAL_ENERGY
 } from './core/constants.js';
 import { ROSTER } from './entities/roster.js';
 import { inputManager } from './core/input.js';
@@ -108,7 +108,7 @@ export class GameEngine {
         if (requestFullscreen && !document.fullscreenElement && !document.webkitFullscreenElement) {
             const docEl = document.documentElement;
             const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
-            if (req) req.call(docEl).catch(() => {});
+            if (req) req.call(docEl).catch(() => { });
         }
 
         // 2. If in active combat match, run 3-second countdown before unpausing combat physics
@@ -150,7 +150,7 @@ export class GameEngine {
                 gain.connect(this.__cdCtx.destination);
                 osc.start();
                 osc.stop(this.__cdCtx.currentTime + duration);
-            } catch (e) {}
+            } catch (e) { }
         };
 
         const updateDisplay = () => {
@@ -545,7 +545,7 @@ export class GameEngine {
             };
         }
         const input = { ...this.__dummyInput, justPressed: {} };
-        
+
         // Reset all keys
         input.left = false;
         input.right = false;
@@ -623,3 +623,4 @@ if (document.readyState === 'loading') {
 } else {
     initGameEngine();
 }
+

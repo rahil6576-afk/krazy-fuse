@@ -214,5 +214,21 @@
     "primaryAssets": [
       "/tic-tac-toe/index.html"
     ]
+  },
+  "chess": {
+    "id": "chess",
+    "title": "Royal Chess: Grandmaster Arena",
+    "directory": "chess",
+    "fileCount": 18,
+    "totalBytes": 2202009,
+    "sizeMB": 2.1,
+    "formattedSize": "2.1 MB",
+    "tip": "Control the center four squares and castle early to safeguard your King!",
+    "primaryAssets": [
+      "/chess/index.html",
+      "/chess/assets/board_full_luxury.jpg",
+      "/chess/assets/pieces/wK.png",
+      "/chess/assets/pieces/bK.png"
+    ]
   }
 }

@@ -254,6 +254,32 @@ const GAMES_CATALOG = [
             { key: 'J / K', label: 'Punch / Kick' },
             { key: 'L / Space', label: 'Special Attack / Block' }
         ]
+    },
+    {
+        id: 'chess',
+        title: 'Royal Chess: Grandmaster Arena',
+        category: 'pvp',
+        thumbnail: '/thumbnails/bento/chess.webp',
+        tags: ['Chess', 'Multiplayer', 'Strategy', 'PvP', 'AI'],
+        desc: 'Realistic 3D Staunton chess! Battle Grandmaster AI, challenge friends locally, Pass & Play or play Online Multiplayer.',
+        fullDesc: 'Step onto the master board in Royal Chess! Featuring realistic weighted pieces, customizable walnut & obsidian marble boards, comprehensive legal move engine with castling, en passant, and promotions. Play solo vs multi-tier AI, Pass & Play with auto-flip, or battle online.',
+        emoji: '♚♟️',
+        heroEmoji: '♚👑',
+        status: 'live',
+        rating: '5.0',
+        plays: '58.7K',
+        likesCount: 5410,
+        link: '/chess/index.html',
+        trending: true,
+        isNew: true,
+        multiplayer: true,
+        themeClass: 'theme-chess',
+        actionBadge: '♚ GRANDMASTER AI & PVP',
+        controls: [
+            { key: 'Mouse Click / Tap', label: 'Select & Move Piece' },
+            { key: 'Drag & Drop', label: 'Move Piece' },
+            { key: 'Space / F', label: 'Flip Board View' }
+        ]
     }
 ];
 
@@ -306,7 +332,8 @@ const AUDIENCE_MODEL_DATA = {
         'fallen-one': { base: 22100, volatility: 25, avgMin: 91, genre: 'Fighting' },
         'gravity-flip': { base: 13200, volatility: 16, avgMin: 52, genre: 'Reflex' },
         'pop-up': { base: 11900, volatility: 15, avgMin: 48, genre: 'Shooter' },
-        'tic-tac-toe': { base: 15400, volatility: 18, avgMin: 43, genre: 'Strategy' }
+        'tic-tac-toe': { base: 15400, volatility: 18, avgMin: 43, genre: 'Strategy' },
+        'chess': { base: 28400, volatility: 26, avgMin: 85, genre: 'Strategy' }
     }
 };
 
@@ -537,7 +564,8 @@ let GAME_MANIFESTS = {
     'fallen-one': { id: 'fallen-one', title: 'Cyber Clash: PvP Arena', sizeMB: 54.47, formattedSize: '54.47 MB', totalBytes: 57116222, tip: 'Cancel standard punch into a crouching sweep to break enemy guard blocks!', primaryAssets: ['/fallen-one/index.html', '/fallen-one/assets/characters/champions_spritesheet.png', '/fallen-one/assets/characters/aarav_clean.png', '/fallen-one/assets/characters/cyber_samurai.png'] },
     'gravity-flip': { id: 'gravity-flip', title: 'Gravity Flip: Cavern Runner', sizeMB: 0.13, formattedSize: '0.13 MB', totalBytes: 132405, tip: 'Time your gravity flips between ceilings to avoid laser tripwires!', primaryAssets: ['/gravity-flip/index.html', '/gravity-flip/gravity-game.js', '/gravity-flip/gravity-audio.js'] },
     'pop-up': { id: 'pop-up', title: 'Pop Up: Balloon Blitz', sizeMB: 33.07, formattedSize: '33.07 MB', totalBytes: 34678716, tip: 'Aim for clustered balloon bundles to trigger cascading point explosions!', primaryAssets: ['/popup-game/index.html', '/popup-game/popup-game.js', '/popup-game/assets/beach_theme_bg-DJgZ4iMH.jpg', '/popup-game/assets/dystopia_dynamic-xRw41SFD.gif'] },
-    'tic-tac-toe': { id: 'tic-tac-toe', title: 'Sumi-e Tac Toe: Zen Brush & AI', sizeMB: 0.05, formattedSize: '0.05 MB', totalBytes: 54236, tip: 'Control the center canvas square to force the Zen AI bot into defensive strokes!', primaryAssets: ['/tic-tac-toe/index.html'] }
+    'tic-tac-toe': { id: 'tic-tac-toe', title: 'Sumi-e Tac Toe: Zen Brush & AI', sizeMB: 0.05, formattedSize: '0.05 MB', totalBytes: 54236, tip: 'Control the center canvas square to force the Zen AI bot into defensive strokes!', primaryAssets: ['/tic-tac-toe/index.html'] },
+    'chess': { id: 'chess', title: 'Royal Chess: Grandmaster Arena', sizeMB: 2.1, formattedSize: '2.1 MB', totalBytes: 2202009, tip: 'Control the center four squares and castle early to safeguard your King!', primaryAssets: ['/chess/index.html', '/chess/assets/board_full_luxury.jpg', '/chess/assets/pieces/wK.png', '/chess/assets/pieces/bK.png'] }
 };
 
 // Async manifest sync
@@ -1328,7 +1356,10 @@ async function executeGameLoading(game, onReady) {
     // Enable launch button
     if (btnLaunch) {
         btnLaunch.classList.remove('hidden');
-        btnLaunch.onclick = () => completeLaunch();
+        btnLaunch.onclick = () => {
+            requestGameFullscreen();
+            completeLaunch();
+        };
     }
 
     let launched = false;
@@ -1336,12 +1367,44 @@ async function executeGameLoading(game, onReady) {
         if (launched) return;
         launched = true;
         loader.classList.add('hidden');
+        requestGameFullscreen();
         if (onReady) onReady();
     }
 
     // Auto-launch smoothly after 500ms
     setTimeout(completeLaunch, 500);
 }
+
+// Universal Auto-Fullscreen Function for Game Launch
+function requestGameFullscreen() {
+    try {
+        const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+        if (!isFs) {
+            const wrapper = document.getElementById('game-screen-wrapper') || document.documentElement;
+            const req = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen || wrapper.mozRequestFullScreen || wrapper.msRequestFullscreen;
+            if (req) {
+                const promise = req.call(wrapper);
+                if (promise && promise.catch) {
+                    promise.catch(() => {
+                        const retry = () => {
+                            const currentFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+                            if (!currentFs && currentGame) {
+                                req.call(wrapper).catch(() => {});
+                            }
+                            window.removeEventListener('click', retry, true);
+                            window.removeEventListener('keydown', retry, true);
+                            window.removeEventListener('touchstart', retry, true);
+                        };
+                        window.addEventListener('click', retry, true);
+                        window.addEventListener('keydown', retry, true);
+                        window.addEventListener('touchstart', retry, true);
+                    });
+                }
+            }
+        }
+    } catch (e) {}
+}
+window.requestGameFullscreen = requestGameFullscreen;
 
 // ==========================================================
 // 1. CRAZYGAMES-STYLE GAME PLAYER ENGINE
@@ -1352,6 +1415,9 @@ function openGamePlayer(gameId) {
     if (!game) return;
 
     currentGame = game;
+
+    // Automatically enter fullscreen mode for seamless immersive gaming
+    requestGameFullscreen();
 
     // Switch view state & engage Low Device Load mode (pauses background catalog animations)
     document.body.setAttribute('data-view', 'player');
@@ -1493,12 +1559,14 @@ function closeGamePlayer() {
 }
 window.closeGamePlayer = closeGamePlayer;
 
-// Listen for embedded game exit messages
+// Listen for embedded game exit & fullscreen messages
 window.addEventListener('message', (event) => {
     if (!event || !event.data) return;
     const type = event.data.type || event.data.action || '';
     if (type === 'EXIT_TO_PORTAL' || type === 'BACK_TO_GAMES' || type === 'closeGame' || type === 'backToGames') {
         closeGamePlayer();
+    } else if (type === 'REQUEST_FULLSCREEN' || type === 'requestFullscreen' || type === 'enterFullscreen') {
+        requestGameFullscreen();
     }
 });
 
@@ -1569,6 +1637,7 @@ function createGameCard(game) {
     card.setAttribute('title', `Play ${game.title}`);
 
     const thumbUrl = game.thumbnail || `/thumbnails/${game.id}.svg`;
+    const liveCount = window.audienceEngine ? window.audienceEngine.formatCompact(window.audienceEngine.getGameCount(game.id)) : '24.5K';
 
     card.innerHTML = `
         <div class="card-thumb-wrap">
@@ -1576,8 +1645,16 @@ function createGameCard(game) {
             <div class="thumb-artwork ${game.themeClass || 'theme-office'}" style="position: absolute; inset: 0; z-index: 0;">
                 <div class="thumb-emoji-hero">${game.heroEmoji || game.emoji}</div>
             </div>
+            <div class="card-top-live-badge" data-game-live="${game.id}">
+                <span class="live-pulse-dot"></span>
+                <span class="live-card-val">${liveCount}</span> playing
+            </div>
             <div class="card-hover-overlay">
                 <span class="card-hover-title">${game.title}</span>
+                <div class="card-hover-meta-row">
+                    <span class="card-meta-live" data-game-live="${game.id}">🟢 <span class="live-card-val">${liveCount}</span> playing</span>
+                    <span class="card-meta-rating">★ ${game.rating}</span>
+                </div>
                 <span class="card-hover-play">▶ PLAY</span>
             </div>
         </div>
@@ -3118,6 +3195,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const bcHome = document.getElementById('bc-home-btn');
     if (bcHome) bcHome.addEventListener('click', closeGamePlayer);
+
+    const footerHome = document.getElementById('footer-link-home');
+    if (footerHome) {
+        footerHome.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeGamePlayer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 
 
     const btnRandom = document.getElementById('btn-nav-random');
