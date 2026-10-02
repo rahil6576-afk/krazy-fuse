@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../supabase-config.js"></script>
     <script>
         (function() {
             const isEmbed = window.parent !== window || window.location.search.includes('embedded=true');
@@ -519,8 +521,13 @@
 
         /* Move Indicator Dots (Glowing Inlaid Brass & Amber Optical Lens) */
         .move-hint-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
             width: 24px;
             height: 24px;
+            margin-top: -12px;
+            margin-left: -12px;
             border-radius: 50%;
             background: radial-gradient(circle at 35% 30%, #fffdec 0%, #fde047 25%, #d97706 65%, #78350f 100%);
             border: 1.5px solid #fef08a;
@@ -530,33 +537,44 @@
                 inset 0 1px 2px rgba(255, 255, 255, 0.95),
                 inset 0 -2px 3px rgba(120, 53, 15, 0.8);
             pointer-events: none;
-            z-index: 5;
+            z-index: 2;
             animation: hintPulse 1.4s infinite ease-in-out;
         }
 
         /* Capture Target Ring (Precision Etched Brass & Crimson Targeting Ring) */
         .capture-hint-ring {
-            width: 62px;
-            height: 62px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 76%;
+            height: 76%;
+            transform: translate(-50%, -50%);
             border-radius: 50%;
-            border: 2.5px solid #f87171;
-            background: radial-gradient(circle, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.4) 65%, rgba(127, 29, 29, 0.6) 100%);
+            border: 3px solid rgba(239, 68, 68, 0.85);
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.18) 0%, rgba(185, 28, 28, 0.35) 70%, rgba(127, 29, 29, 0.55) 100%);
             box-shadow: 
-                0 0 22px rgba(239, 68, 68, 0.75),
-                inset 0 0 12px rgba(239, 68, 68, 0.5),
-                0 4px 10px rgba(0, 0, 0, 0.7);
+                0 0 18px rgba(239, 68, 68, 0.7),
+                inset 0 0 10px rgba(239, 68, 68, 0.4),
+                0 3px 8px rgba(0, 0, 0, 0.6);
             pointer-events: none;
-            z-index: 5;
-            animation: hintPulse 1.4s infinite ease-in-out;
+            z-index: 2;
+            animation: captureRingPulse 1.4s infinite ease-in-out;
         }
 
         @keyframes hintPulse {
             0%, 100% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.12); filter: brightness(1.2); }
+            50% { transform: scale(1.15); filter: brightness(1.22); }
+        }
+
+        @keyframes captureRingPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+            50% { transform: translate(-50%, -50%) scale(1.06); filter: brightness(1.2); }
         }
 
         /* Realistic Chess Pieces with Contact Shadows & Hover Lift */
         .chess-piece {
+            position: absolute;
+            inset: 0;
             width: 100%;
             height: 100%;
             display: flex;
@@ -564,9 +582,9 @@
             justify-content: center;
             cursor: grab;
             transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
             z-index: 4;
             padding-bottom: 2px;
+            pointer-events: auto;
         }
 
         .chess-piece:hover {
@@ -953,6 +971,49 @@
             box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
         }
 
+        /* Online Multiplayer Toast & Pulsing Indicator */
+        .live-pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+            animation: pulse-dot-anim 1.5s infinite ease-in-out;
+            display: inline-block;
+        }
+        @keyframes pulse-dot-anim {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .chess-toast {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1200;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 22px;
+            background: rgba(14, 9, 6, 0.96);
+            border: 1.5px solid rgba(212, 175, 55, 0.8);
+            border-radius: 999px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.85), 0 0 24px rgba(212, 175, 55, 0.35);
+            color: #fbbf24;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 1;
+        }
+        .chess-toast.hidden {
+            opacity: 0;
+            transform: translate(-50%, -18px);
+            pointer-events: none;
+        }
+
         /* Move Review Banner */
         .review-banner {
             display: flex;
@@ -1267,6 +1328,11 @@
 
         <!-- Center: Board Stage -->
         <div class="board-stage">
+            <div id="chess-toast" class="chess-toast hidden">
+                <span id="chess-toast-icon">📋</span>
+                <span id="chess-toast-msg"></span>
+            </div>
+
             <div class="turn-status-banner" id="turn-banner">
                 <span class="turn-dot white" id="turn-banner-dot"></span>
                 <span id="turn-banner-text">White to move</span>
@@ -1329,14 +1395,30 @@
             </div>
 
             <!-- Online Room Controls (Hidden by default) -->
-            <div id="online-controls-box" style="display: none; flex-direction: column; gap: 8px;">
-                <div style="display: flex; gap: 6px;">
-                    <input type="text" id="room-code-input" placeholder="Room Code (e.g. 7491)" maxlength="6" style="flex: 1; padding: 9px 12px; background: #080503; border: 1.5px solid rgba(212, 175, 55, 0.35); border-radius: 8px; color: #fbbf24; font-family: 'Fira Code', monospace; font-size: 0.88rem; box-shadow: inset 0 2px 6px rgba(0,0,0,0.8);">
-                    <button id="btn-join-room" class="game-act-btn" style="flex: initial; padding: 7px 14px;">Join</button>
+            <div id="online-controls-box" style="display: none; flex-direction: column; gap: 10px;">
+                <div id="online-pre-join" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; gap: 6px;">
+                        <input type="text" id="room-code-input" placeholder="Room Code (e.g. KF-4921)" maxlength="8" style="flex: 1; padding: 9px 12px; background: #080503; border: 1.5px solid rgba(212, 175, 55, 0.35); border-radius: 8px; color: #fbbf24; font-family: 'Fira Code', monospace; font-size: 0.88rem; box-shadow: inset 0 2px 6px rgba(0,0,0,0.8); text-transform: uppercase;">
+                        <button id="btn-join-room" class="game-act-btn" style="flex: initial; padding: 7px 16px;">Join</button>
+                    </div>
+                    <button id="btn-create-room" class="game-act-btn" style="width: 100%; background: linear-gradient(180deg, #36261c 0%, #1e130d 100%); border-color: rgba(212, 175, 55, 0.5); color: #fbbf24;">
+                        <span>⚡ Create Room &amp; Share</span>
+                    </button>
                 </div>
-                <button id="btn-create-room" class="game-act-btn" style="width: 100%; background: linear-gradient(180deg, #36261c 0%, #1e130d 100%); border-color: rgba(212, 175, 55, 0.5); color: #fbbf24;">
-                    <span>⚡ Create Room &amp; Share</span>
-                </button>
+                <!-- Active Room Status Card -->
+                <div id="online-room-card" style="display: none; background: rgba(20, 14, 10, 0.85); border: 1.5px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 10px; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span id="online-status-badge" style="font-size: 0.78rem; font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
+                            <span class="live-pulse-dot"></span>
+                            <span id="online-status-text">Room KF-0000</span>
+                        </span>
+                        <span id="online-role-badge" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #fff;">White ♔</span>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button id="btn-copy-room-link" class="game-act-btn" style="flex: 1; font-size: 0.75rem; padding: 6px 10px;">📋 Copy Link</button>
+                        <button id="btn-leave-room" class="game-act-btn" style="flex: initial; font-size: 0.75rem; padding: 6px 10px; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5;">Leave</button>
+                    </div>
+                </div>
             </div>
 
             <div class="panel-section-title">
@@ -1403,7 +1485,7 @@
             <h2 class="modal-title" id="game-over-title">CHECKMATE!</h2>
             <p class="modal-desc" id="game-over-desc">White has delivered checkmate and won the match.</p>
             <div style="display: flex; gap: 10px; justify-content: center;">
-                <button class="btn-header" onclick="startNewGame()" style="background: var(--accent-gold); color: #000; font-weight: 800; padding: 10px 24px;">
+                <button class="btn-header" onclick="handlePlayAgain()" style="background: var(--accent-gold); color: #000; font-weight: 800; padding: 10px 24px;">
                     Play Again
                 </button>
                 <button class="btn-header" onclick="document.getElementById('game-over-modal').classList.remove('active')">
@@ -2344,9 +2426,50 @@
         let clockInterval = null;
         let clocks = { w: 600, b: 600 }; // 10 minutes
 
+        // Online Multiplayer State
+        let myOnlineColor = 'w'; // 'w' (Host) or 'b' (Guest)
+        let onlineRoomState = {
+            connected: false,
+            isHost: false,
+            roomCode: '',
+            opponentPresent: false
+        };
+        let supabaseClient = null;
+        let realtimeChannel = null;
+        let localBroadcastChannel = null;
+        const myClientId = 'cl_' + Math.random().toString(36).substring(2, 9);
+        const processedMessageIds = new Set();
+        let toastTimeout = null;
+
+        function showOnlineToast(msg, icon = 'ℹ️', duration = 3200) {
+            const toast = document.getElementById('chess-toast');
+            const msgEl = document.getElementById('chess-toast-msg');
+            const iconEl = document.getElementById('chess-toast-icon');
+            if (!toast || !msgEl) return;
+            msgEl.textContent = msg;
+            if (iconEl) iconEl.textContent = icon;
+            toast.classList.remove('hidden');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, duration);
+        }
+
         function initDOM() {
-            startNewGame();
+            initOnlineMultiplayer();
+
+            // Check if joining from URL (?room=KF-1234 or ?code=1234)
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomParam = urlParams.get('room') || urlParams.get('code');
+
+            if (roomParam) {
+                switchToOnlineMode(roomParam);
+            } else {
+                startNewGame();
+            }
+
             setupEventListeners();
+            autoEnterFullscreen();
 
             // Preview mode check
             if (document.documentElement.classList.contains('is-preview-mode')) {
@@ -2476,7 +2599,7 @@
 
         let hasAutoFullscreened = false;
         function autoEnterFullscreen() {
-            if (hasAutoFullscreened || window.location.search.includes('preview=1')) return;
+            if (window.location.search.includes('preview=1')) return;
             try {
                 // If inside iframe, ask parent portal to fullscreen the game window
                 if (window.parent && window.parent !== window) {
@@ -2502,8 +2625,9 @@
         }
 
         // Auto fullscreen on first interaction anywhere in the window
-        ['pointerdown', 'click', 'keydown', 'touchstart'].forEach(evt => {
+        ['pointerdown', 'mousedown', 'click', 'keydown', 'touchstart'].forEach(evt => {
             window.addEventListener(evt, autoEnterFullscreen, { passive: true });
+            document.addEventListener(evt, autoEnterFullscreen, { passive: true });
         });
 
         function toggleFullscreen() {
@@ -2637,14 +2761,21 @@
                         pieceEl.className = 'chess-piece';
                         pieceEl.innerHTML = getPieceHTML(piece);
                         if (!isObserving) {
-                            pieceEl.setAttribute('draggable', 'true');
-                            pieceEl.addEventListener('dragstart', (e) => {
-                                autoEnterFullscreen();
-                                selectedSquare = { r: row, c: col };
-                                activeLegalMoves = game.getLegalMoves(row, c);
-                                e.dataTransfer.setData('text/plain', JSON.stringify({ r: row, c: col }));
-                                setTimeout(() => renderBoard(), 0);
-                            });
+                            const pieceColor = game.getColor(piece);
+                            const canDrag = gameMode === 'online'
+                                ? (onlineRoomState.connected && pieceColor === myOnlineColor && game.turn === myOnlineColor)
+                                : (gameMode === 'pve' ? pieceColor === 'w' && game.turn === 'w' : pieceColor === game.turn);
+
+                            if (canDrag) {
+                                pieceEl.setAttribute('draggable', 'true');
+                                pieceEl.addEventListener('dragstart', (e) => {
+                                    autoEnterFullscreen();
+                                    selectedSquare = { r: row, c: col };
+                                    activeLegalMoves = game.getLegalMoves(row, col);
+                                    e.dataTransfer.setData('text/plain', JSON.stringify({ r: row, c: col }));
+                                    setTimeout(() => renderBoard(), 0);
+                                });
+                            }
                         }
                         sq.appendChild(pieceEl);
                     }
@@ -2694,10 +2825,25 @@
             // Prevent interaction during AI thinking or game over
             if (gameMode === 'pve' && game.turn === 'b') return;
 
+            // Online Mode checks: must be connected and player's turn
+            if (gameMode === 'online') {
+                if (!onlineRoomState.connected) {
+                    showOnlineToast('Waiting for opponent to connect to room...', '⏳');
+                    return;
+                }
+                if (game.turn !== myOnlineColor) {
+                    showOnlineToast("Opponent's turn! Please wait...", '⏳');
+                    return;
+                }
+            }
+
             const piece = game.board[r][c];
 
             // If square has piece of current player's turn, select it
             if (piece && game.getColor(piece) === game.turn) {
+                if (gameMode === 'online' && game.getColor(piece) !== myOnlineColor) {
+                    return;
+                }
                 if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) {
                     selectedSquare = null;
                     activeLegalMoves = [];
@@ -2722,7 +2868,7 @@
             }
         }
 
-        function executeMove(move, promoPiece = 'Q') {
+        function executeMove(move, promoPiece = 'Q', isRemote = false) {
             if (observedMoveIndex !== -1) {
                 returnToLive();
             }
@@ -2731,9 +2877,9 @@
             const captured = game.board[move.to.r][move.to.c] || move.isEnPassant;
             const color = game.getColor(piece);
 
-            // Check for Pawn Promotion requirement
+            // Check for Pawn Promotion requirement (only prompt modal for local player)
             const promoRank = color === 'w' ? 0 : 7;
-            if (piece.toUpperCase() === 'P' && move.to.r === promoRank && !move.promoDone) {
+            if (piece.toUpperCase() === 'P' && move.to.r === promoRank && !move.promoDone && !isRemote) {
                 promptPromotion(move);
                 return;
             }
@@ -2760,6 +2906,22 @@
             const notation = game.formatMoveNotation(move, piece, captured, isCheck, isMate, promoPiece !== 'Q' ? promoPiece : null);
             recordSnapshot(move, notation, color);
             addMoveHistory(notation, color);
+
+            // Broadcast to online opponent if made by local player
+            if (gameMode === 'online' && !isRemote) {
+                broadcastOnlineMessage({
+                    type: 'move',
+                    move: {
+                        from: move.from,
+                        to: move.to,
+                        isEnPassant: !!move.isEnPassant,
+                        isCastlingKingside: !!move.isCastlingKingside,
+                        isCastlingQueenside: !!move.isCastlingQueenside
+                    },
+                    promoPiece: promoPiece,
+                    clocks: { ...clocks }
+                });
+            }
 
             // Update UI & Trays
             updateCapturedTrays();
@@ -2881,6 +3043,10 @@
         }
 
         function undoMove() {
+            if (gameMode === 'online') {
+                showOnlineToast('Undo is not available in Online Multiplayer.', '⚠️');
+                return;
+            }
             if (gameHistorySnapshots.length <= 1) return;
             if (gameMode === 'pve') {
                 const steps = (game.turn === 'w' && gameHistorySnapshots.length >= 3) ? 2 : 1;
@@ -2917,16 +3083,17 @@
             trayTop.innerHTML = '';
             trayBottom.innerHTML = '';
 
-            // Render pieces captured by Black (White pieces)
-            game.captured.b.forEach(p => {
+            const topCaptured = isBoardFlipped ? game.captured.w : game.captured.b;
+            const bottomCaptured = isBoardFlipped ? game.captured.b : game.captured.w;
+
+            topCaptured.forEach(p => {
                 const el = document.createElement('span');
                 el.className = 'captured-piece-mini';
                 el.innerHTML = getPieceHTML(p);
                 trayTop.appendChild(el);
             });
 
-            // Render pieces captured by White (Black pieces)
-            game.captured.w.forEach(p => {
+            bottomCaptured.forEach(p => {
                 const el = document.createElement('span');
                 el.className = 'captured-piece-mini';
                 el.innerHTML = getPieceHTML(p);
@@ -2936,7 +3103,7 @@
             // Material Advantage counter
             const scoreWhite = game.captured.w.reduce((acc, p) => acc + (PIECE_VALUES[p.toUpperCase()] || 0), 0);
             const scoreBlack = game.captured.b.reduce((acc, p) => acc + (PIECE_VALUES[p.toUpperCase()] || 0), 0);
-            const diff = scoreWhite - scoreBlack;
+            const diff = isBoardFlipped ? (scoreBlack - scoreWhite) : (scoreWhite - scoreBlack);
 
             if (diff > 0) {
                 const advEl = document.createElement('span');
@@ -2957,16 +3124,30 @@
             const bannerText = document.getElementById('turn-banner-text');
             const bannerDot = document.getElementById('turn-banner-dot');
 
-            if (game.turn === 'w') {
-                if (cardBottom) cardBottom.classList.add('active-turn');
-                if (cardTop) cardTop.classList.remove('active-turn');
-                if (bannerText) bannerText.textContent = 'White to move';
-                if (bannerDot) { bannerDot.className = 'turn-dot white'; }
-            } else {
-                if (cardTop) cardTop.classList.add('active-turn');
-                if (cardBottom) cardBottom.classList.remove('active-turn');
-                if (bannerText) bannerText.textContent = gameMode === 'pve' ? 'Grandmaster AI is thinking...' : 'Black to move';
-                if (bannerDot) { bannerDot.className = 'turn-dot black'; }
+            const isWhiteTurn = game.turn === 'w';
+            const isBottomTurn = isBoardFlipped ? !isWhiteTurn : isWhiteTurn;
+
+            if (cardBottom) cardBottom.classList.toggle('active-turn', isBottomTurn);
+            if (cardTop) cardTop.classList.toggle('active-turn', !isBottomTurn);
+
+            if (bannerDot) {
+                bannerDot.className = `turn-dot ${isWhiteTurn ? 'white' : 'black'}`;
+            }
+
+            if (bannerText) {
+                if (gameMode === 'online') {
+                    if (!onlineRoomState.connected) {
+                        bannerText.textContent = `Room ${onlineRoomState.roomCode || ''} • Waiting for opponent...`;
+                    } else if (game.turn === myOnlineColor) {
+                        bannerText.textContent = `🟢 Your turn (${myOnlineColor === 'w' ? 'White' : 'Black'})`;
+                    } else {
+                        bannerText.textContent = `⏳ Opponent is thinking (${myOnlineColor === 'w' ? 'Black' : 'White'})...`;
+                    }
+                } else if (gameMode === 'pve') {
+                    bannerText.textContent = isWhiteTurn ? 'White to move' : 'Grandmaster AI is thinking...';
+                } else {
+                    bannerText.textContent = isWhiteTurn ? 'White to move' : 'Black to move';
+                }
             }
         }
 
@@ -2974,6 +3155,7 @@
             if (clockInterval) clearInterval(clockInterval);
             clockInterval = setInterval(() => {
                 if (document.documentElement.classList.contains('is-preview-mode')) return;
+                if (gameMode === 'online' && !onlineRoomState.connected) return;
                 clocks[game.turn] = Math.max(0, clocks[game.turn] - 1);
                 updateClockDisplay();
 
@@ -2993,13 +3175,16 @@
             };
             const clockTop = document.getElementById('clock-top');
             const clockBottom = document.getElementById('clock-bottom');
+            const timeTop = isBoardFlipped ? clocks.w : clocks.b;
+            const timeBottom = isBoardFlipped ? clocks.b : clocks.w;
+
             if (clockTop) {
-                clockTop.textContent = formatTime(clocks.b);
-                clockTop.classList.toggle('low-time', clocks.b <= 30 && clocks.b > 0);
+                clockTop.textContent = formatTime(timeTop);
+                clockTop.classList.toggle('low-time', timeTop <= 30 && timeTop > 0);
             }
             if (clockBottom) {
-                clockBottom.textContent = formatTime(clocks.w);
-                clockBottom.classList.toggle('low-time', clocks.w <= 30 && clocks.w > 0);
+                clockBottom.textContent = formatTime(timeBottom);
+                clockBottom.classList.toggle('low-time', timeBottom <= 30 && timeBottom > 0);
             }
         }
 
@@ -3156,8 +3341,16 @@
 
             // Resign
             document.getElementById('btn-resign').addEventListener('click', () => {
+                if (gameHistorySnapshots.length <= 1) return;
                 const winner = game.turn === 'w' ? 'Black' : 'White';
-                showGameOver('RESIGNATION', `${game.turn === 'w' ? 'White' : 'Black'} resigned. ${winner} wins!`, '🏳');
+                if (gameMode === 'online') {
+                    broadcastOnlineMessage({ type: 'resign', color: myOnlineColor });
+                    clearInterval(clockInterval);
+                    showGameOver('YOU RESIGNED', `You resigned the match. Opponent (${winner}) wins.`, '🏳');
+                } else {
+                    clearInterval(clockInterval);
+                    showGameOver('RESIGNATION', `${game.turn === 'w' ? 'White' : 'Black'} resigned. ${winner} wins!`, '🏳');
+                }
             });
 
             // Mode Tabs
@@ -3166,6 +3359,7 @@
                     autoEnterFullscreen();
                     document.querySelectorAll('.mode-tab-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+                    const prevMode = gameMode;
                     gameMode = btn.dataset.mode;
 
                     const label = document.getElementById('active-mode-label');
@@ -3175,18 +3369,26 @@
                     diffBox.style.display = gameMode === 'pve' ? 'block' : 'none';
                     onlineBox.style.display = gameMode === 'online' ? 'flex' : 'none';
 
+                    if (prevMode === 'online' && gameMode !== 'online') {
+                        leaveOnlineRoom();
+                    }
+
                     if (gameMode === 'pve') {
+                        isBoardFlipped = false;
                         label.textContent = `PvE (${aiDifficulty.toUpperCase()} AI)`;
-                        document.getElementById('name-top').textContent = `Grandmaster AI (${aiDifficulty})`;
+                        updateOnlinePlayerCards();
                     } else if (gameMode === 'pvp') {
+                        isBoardFlipped = false;
                         label.textContent = 'PvP Local (Same Screen)';
-                        document.getElementById('name-top').textContent = 'Player 2 (Black)';
+                        updateOnlinePlayerCards();
                     } else if (gameMode === 'pass') {
+                        isBoardFlipped = false;
                         label.textContent = 'Pass & Play (Auto-Flip)';
-                        document.getElementById('name-top').textContent = 'Player 2 (Pass & Play)';
+                        updateOnlinePlayerCards();
                     } else if (gameMode === 'online') {
                         label.textContent = 'Online Multiplayer';
-                        document.getElementById('name-top').textContent = 'Online Opponent';
+                        updateOnlinePlayerCards();
+                        showOnlineToast('Create a room or enter room code to play with a friend!', '⚡', 3500);
                     }
 
                     startNewGame();
@@ -3208,23 +3410,39 @@
             const btnCreate = document.getElementById('btn-create-room');
             if (btnCreate) {
                 btnCreate.addEventListener('click', () => {
+                    autoEnterFullscreen();
                     const code = 'KF-' + Math.floor(1000 + Math.random() * 9000);
                     document.getElementById('room-code-input').value = code;
-                    navigator.clipboard.writeText(window.location.origin + window.location.pathname + '?room=' + code);
-                    alert(`Room ${code} created!\nLink copied to clipboard. Share with a friend to play!`);
+                    connectToOnlineRoom(code, true);
                 });
             }
 
             const btnJoin = document.getElementById('btn-join-room');
             if (btnJoin) {
                 btnJoin.addEventListener('click', () => {
-                    const code = document.getElementById('room-code-input').value.trim();
-                    if (code) {
-                        alert(`Connected to Room ${code}! Opponent joining...`);
-                        document.getElementById('name-top').textContent = 'Online Opponent';
-                    } else {
-                        alert('Please enter a valid 4-digit room code.');
+                    autoEnterFullscreen();
+                    const raw = document.getElementById('room-code-input').value.trim();
+                    if (!raw) {
+                        showOnlineToast('Please enter a 4-digit room code.', '⚠️', 3000);
+                        return;
                     }
+                    connectToOnlineRoom(raw, false);
+                });
+            }
+
+            const btnCopyLink = document.getElementById('btn-copy-room-link');
+            if (btnCopyLink) {
+                btnCopyLink.addEventListener('click', () => {
+                    if (onlineRoomState.roomCode) {
+                        copyRoomLinkToClipboard(onlineRoomState.roomCode);
+                    }
+                });
+            }
+
+            const btnLeave = document.getElementById('btn-leave-room');
+            if (btnLeave) {
+                btnLeave.addEventListener('click', () => {
+                    leaveOnlineRoom();
                 });
             }
 
@@ -3250,6 +3468,351 @@
                 }
             });
         }
+
+        /* ==========================================================
+           6. REAL-TIME ONLINE MULTIPLAYER ENGINE (Supabase + BroadcastChannel)
+           ========================================================== */
+        function initOnlineMultiplayer() {
+            try {
+                const config = (window.KRAZY_SUPABASE_CONFIG) || {
+                    url: 'https://jjovwmzigxwyncjjnabb.supabase.co',
+                    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impqb3Z3bXppZ3h3eW5jampuYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NDg0NTksImV4cCI6MjEwNTUyNDQ1OX0.o23OZf0QeEyk1PF0USPjQ7rKIFPALCz7gVU4EEA1VPE'
+                };
+                if (window.supabase && window.supabase.createClient) {
+                    supabaseClient = window.supabase.createClient(config.url, config.anonKey, {
+                        realtime: { params: { eventsPerSecond: 10 } }
+                    });
+                }
+            } catch (e) {
+                console.warn('Supabase Realtime init error:', e);
+            }
+        }
+
+        function cleanUpOnlineRoom() {
+            if (realtimeChannel && supabaseClient) {
+                try { supabaseClient.removeChannel(realtimeChannel); } catch (e) {}
+                realtimeChannel = null;
+            }
+            if (localBroadcastChannel) {
+                try { localBroadcastChannel.close(); } catch (e) {}
+                localBroadcastChannel = null;
+            }
+            onlineRoomState.connected = false;
+            onlineRoomState.roomCode = '';
+            onlineRoomState.opponentPresent = false;
+        }
+
+        function getShareableRoomLink(code) {
+            let cleanCode = code.toUpperCase().trim();
+            if (!cleanCode.startsWith('KF-')) cleanCode = 'KF-' + cleanCode;
+            const origin = window.location.origin;
+            // Provide portal URL if running within portal or embed
+            if (window.parent !== window || window.location.search.includes('embedded=true')) {
+                return `${origin}/?game=chess&room=${encodeURIComponent(cleanCode)}`;
+            }
+            return `${origin}${window.location.pathname}?room=${encodeURIComponent(cleanCode)}`;
+        }
+
+        function copyRoomLinkToClipboard(code) {
+            const link = getShareableRoomLink(code);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(() => {
+                    showOnlineToast(`Room ${code} link copied! Share with your friend.`, '📋', 4500);
+                }).catch(() => {
+                    prompt('Share this link with your opponent:', link);
+                });
+            } else {
+                prompt('Share this link with your opponent:', link);
+            }
+        }
+
+        function connectToOnlineRoom(code, isHost = false) {
+            cleanUpOnlineRoom();
+            
+            let cleanCode = code.toUpperCase().trim();
+            if (!cleanCode.startsWith('KF-')) {
+                cleanCode = 'KF-' + cleanCode;
+            }
+
+            onlineRoomState.isHost = isHost;
+            onlineRoomState.roomCode = cleanCode;
+            myOnlineColor = isHost ? 'w' : 'b';
+            isBoardFlipped = !isHost; // Black plays flipped
+
+            // UI Updates
+            const preJoin = document.getElementById('online-pre-join');
+            if (preJoin) preJoin.style.display = 'none';
+            const roomCard = document.getElementById('online-room-card');
+            if (roomCard) roomCard.style.display = 'flex';
+            
+            const statusText = document.getElementById('online-status-text');
+            if (statusText) statusText.textContent = `Room ${cleanCode}`;
+            const roleBadge = document.getElementById('online-role-badge');
+            if (roleBadge) {
+                roleBadge.textContent = isHost ? 'White ♔ (Host)' : 'Black ♚ (Guest)';
+                roleBadge.style.background = isHost ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.4)';
+            }
+
+            updateOnlinePlayerCards();
+            startNewGame();
+            updatePlayerStatus();
+
+            // 1. Local BroadcastChannel for same-device/tab testing
+            try {
+                localBroadcastChannel = new BroadcastChannel(`kf_chess_${cleanCode}`);
+                localBroadcastChannel.onmessage = (e) => {
+                    if (e.data) handleOnlineMessage(e.data);
+                };
+            } catch (e) {}
+
+            // 2. Supabase Realtime Channel
+            if (!supabaseClient) initOnlineMultiplayer();
+            if (supabaseClient) {
+                realtimeChannel = supabaseClient.channel(`kf_chess_${cleanCode}`, {
+                    config: { broadcast: { ack: true, self: false } }
+                });
+
+                realtimeChannel
+                    .on('broadcast', { event: 'chess_msg' }, ({ payload }) => {
+                        if (payload) handleOnlineMessage(payload);
+                    })
+                    .subscribe((status) => {
+                        if (status === 'SUBSCRIBED') {
+                            if (!isHost) {
+                                broadcastOnlineMessage({
+                                    type: 'guest_join',
+                                    room: cleanCode
+                                });
+                            }
+                        }
+                    });
+            }
+
+            if (isHost) {
+                copyRoomLinkToClipboard(cleanCode);
+            } else {
+                broadcastOnlineMessage({
+                    type: 'guest_join',
+                    room: cleanCode
+                });
+                showOnlineToast(`Connected to Room ${cleanCode}! Waiting for Host...`, '⏳', 3500);
+            }
+        }
+
+        function leaveOnlineRoom() {
+            if (onlineRoomState.connected) {
+                broadcastOnlineMessage({ type: 'leave' });
+            }
+            cleanUpOnlineRoom();
+
+            const preJoin = document.getElementById('online-pre-join');
+            if (preJoin) preJoin.style.display = 'flex';
+            const roomCard = document.getElementById('online-room-card');
+            if (roomCard) roomCard.style.display = 'none';
+
+            myOnlineColor = 'w';
+            isBoardFlipped = false;
+            updateOnlinePlayerCards();
+            startNewGame();
+            showOnlineToast('Left online room.', '🚪');
+        }
+
+        function broadcastOnlineMessage(msg) {
+            msg._senderId = myClientId;
+            msg._timestamp = Date.now();
+
+            if (realtimeChannel) {
+                realtimeChannel.send({
+                    type: 'broadcast',
+                    event: 'chess_msg',
+                    payload: msg
+                }).catch(() => {});
+            }
+
+            if (localBroadcastChannel) {
+                try { localBroadcastChannel.postMessage(msg); } catch (e) {}
+            }
+        }
+
+        function handleOnlineMessage(msg) {
+            if (!msg || msg._senderId === myClientId) return;
+
+            const msgId = `${msg.type}_${msg._timestamp}_${JSON.stringify(msg.move || '')}`;
+            if (processedMessageIds.has(msgId)) return;
+            processedMessageIds.add(msgId);
+            if (processedMessageIds.size > 200) {
+                const first = processedMessageIds.values().next().value;
+                processedMessageIds.delete(first);
+            }
+
+            switch (msg.type) {
+                case 'guest_join': {
+                    if (myOnlineColor === 'w') {
+                        onlineRoomState.connected = true;
+                        onlineRoomState.opponentPresent = true;
+                        showOnlineToast('Opponent joined the room! Game is on.', '⚔️', 4500);
+                        updateOnlinePlayerCards();
+                        updatePlayerStatus();
+                        // Host sends game_init to guest
+                        broadcastOnlineMessage({
+                            type: 'game_init',
+                            board: game.board,
+                            turn: game.turn,
+                            clocks: clocks,
+                            fullMoveNumber: game.fullMoveNumber,
+                            captured: game.captured,
+                            lastMove: lastMove
+                        });
+                    }
+                    break;
+                }
+                case 'game_init': {
+                    if (myOnlineColor === 'b') {
+                        onlineRoomState.connected = true;
+                        onlineRoomState.opponentPresent = true;
+                        showOnlineToast('Connected to Host! You play Black.', '⚔️', 4500);
+                        if (msg.board) {
+                            game.board = msg.board.map(r => [...r]);
+                            game.turn = msg.turn || 'w';
+                            game.fullMoveNumber = msg.fullMoveNumber || 1;
+                            if (msg.captured) game.captured = { w: [...msg.captured.w], b: [...msg.captured.b] };
+                            if (msg.clocks) clocks = { ...msg.clocks };
+                            lastMove = msg.lastMove || null;
+                            renderBoard();
+                            drawMoveArrow(lastMove, isBoardFlipped);
+                            updateCapturedTrays();
+                        }
+                        updateOnlinePlayerCards();
+                        updatePlayerStatus();
+                    }
+                    break;
+                }
+                case 'move': {
+                    applyRemoteMove(msg.move, msg.promoPiece, msg.clocks);
+                    break;
+                }
+                case 'resign': {
+                    clearInterval(clockInterval);
+                    audio.playVictory();
+                    const winner = msg.color === 'w' ? 'Black' : 'White';
+                    showGameOver('OPPONENT RESIGNED', `Opponent (${msg.color === 'w' ? 'White' : 'Black'}) resigned. You win!`, '🏆');
+                    break;
+                }
+                case 'rematch': {
+                    showOnlineToast('Opponent started Rematch! Colors swapped.', '🔄', 3500);
+                    myOnlineColor = myOnlineColor === 'w' ? 'b' : 'w';
+                    isBoardFlipped = myOnlineColor === 'b';
+                    startNewGame();
+                    updateOnlinePlayerCards();
+                    updatePlayerStatus();
+                    break;
+                }
+                case 'leave': {
+                    onlineRoomState.connected = false;
+                    onlineRoomState.opponentPresent = false;
+                    showOnlineToast('Opponent left the room.', '🚪', 4000);
+                    updateOnlinePlayerCards();
+                    updatePlayerStatus();
+                    break;
+                }
+            }
+        }
+
+        function applyRemoteMove(remoteMove, promoPiece = 'Q', remoteClocks) {
+            if (!remoteMove || !remoteMove.from || !remoteMove.to) return;
+            if (remoteClocks) clocks = { ...remoteClocks };
+
+            const legalMoves = game.getLegalMoves(remoteMove.from.r, remoteMove.from.c);
+            const matched = legalMoves.find(m => m.to.r === remoteMove.to.r && m.to.c === remoteMove.to.c);
+
+            const move = matched || {
+                from: remoteMove.from,
+                to: remoteMove.to,
+                isEnPassant: remoteMove.isEnPassant,
+                isCastlingKingside: remoteMove.isCastlingKingside,
+                isCastlingQueenside: remoteMove.isCastlingQueenside
+            };
+
+            executeMove(move, promoPiece, true);
+        }
+
+        function updateOnlinePlayerCards() {
+            const nameTop = document.getElementById('name-top');
+            const badgeTop = document.getElementById('badge-top');
+            const avatarTop = document.getElementById('avatar-top');
+
+            const nameBottom = document.getElementById('name-bottom');
+            const badgeBottom = document.getElementById('badge-bottom');
+            const avatarBottom = document.getElementById('avatar-bottom');
+
+            if (gameMode === 'online') {
+                if (myOnlineColor === 'w') {
+                    if (nameBottom) nameBottom.textContent = 'You (White)';
+                    if (badgeBottom) badgeBottom.textContent = '♔ White';
+                    if (avatarBottom) avatarBottom.textContent = '♔';
+
+                    if (nameTop) nameTop.textContent = onlineRoomState.connected ? 'Opponent (Black)' : 'Waiting for Opponent...';
+                    if (badgeTop) badgeTop.textContent = '♚ Black';
+                    if (avatarTop) avatarTop.textContent = '♚';
+                } else {
+                    if (nameBottom) nameBottom.textContent = 'You (Black)';
+                    if (badgeBottom) badgeBottom.textContent = '♚ Black';
+                    if (avatarBottom) avatarBottom.textContent = '♚';
+
+                    if (nameTop) nameTop.textContent = onlineRoomState.connected ? 'Opponent (White)' : 'Waiting for Opponent...';
+                    if (badgeTop) badgeTop.textContent = '♔ White';
+                    if (avatarTop) avatarTop.textContent = '♔';
+                }
+            } else if (gameMode === 'pve') {
+                if (nameBottom) nameBottom.textContent = 'You';
+                if (badgeBottom) badgeBottom.textContent = 'White Pieces';
+                if (avatarBottom) avatarBottom.textContent = '♔';
+                if (nameTop) nameTop.textContent = `Grandmaster AI (${aiDifficulty})`;
+                if (badgeTop) badgeTop.textContent = 'Rating: 2200';
+                if (avatarTop) avatarTop.textContent = '♚';
+            } else if (gameMode === 'pvp') {
+                if (nameBottom) nameBottom.textContent = 'Player 1 (White)';
+                if (badgeBottom) badgeBottom.textContent = 'White Pieces';
+                if (nameTop) nameTop.textContent = 'Player 2 (Black)';
+                if (badgeTop) badgeTop.textContent = 'Black Pieces';
+            } else if (gameMode === 'pass') {
+                if (nameBottom) nameBottom.textContent = 'Active Player';
+                if (badgeBottom) badgeBottom.textContent = 'Pass & Play';
+                if (nameTop) nameTop.textContent = 'Waiting Player';
+                if (badgeTop) badgeTop.textContent = 'Pass & Play';
+            }
+        }
+
+        function switchToOnlineMode(roomCode = null) {
+            document.querySelectorAll('.mode-tab-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.mode === 'online');
+            });
+            gameMode = 'online';
+            document.getElementById('ai-difficulty-box').style.display = 'none';
+            document.getElementById('online-controls-box').style.display = 'flex';
+            document.getElementById('active-mode-label').textContent = 'Online Multiplayer';
+            
+            if (roomCode) {
+                document.getElementById('room-code-input').value = roomCode;
+                connectToOnlineRoom(roomCode, false);
+            }
+        }
+
+        function handlePlayAgain() {
+            document.getElementById('game-over-modal').classList.remove('active');
+            if (gameMode === 'online' && onlineRoomState.connected) {
+                broadcastOnlineMessage({ type: 'rematch' });
+                showOnlineToast('Starting rematch with swapped colors!', '🔄');
+                myOnlineColor = myOnlineColor === 'w' ? 'b' : 'w';
+                isBoardFlipped = myOnlineColor === 'b';
+                startNewGame();
+                updateOnlinePlayerCards();
+                updatePlayerStatus();
+            } else {
+                startNewGame();
+            }
+        }
+        window.handlePlayAgain = handlePlayAgain;
 
         // Initialize when DOM ready
         window.addEventListener('DOMContentLoaded', initDOM);

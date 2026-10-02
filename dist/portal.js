@@ -1386,6 +1386,11 @@ function requestGameFullscreen() {
                 const promise = req.call(wrapper);
                 if (promise && promise.catch) {
                     promise.catch(() => {
+                        // Fallback to documentElement
+                        const docReq = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen || document.documentElement.mozRequestFullScreen;
+                        if (docReq) {
+                            docReq.call(document.documentElement).catch(() => {});
+                        }
                         const retry = () => {
                             const currentFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
                             if (!currentFs && currentGame) {
@@ -1416,10 +1421,7 @@ function openGamePlayer(gameId) {
 
     currentGame = game;
 
-    // Automatically enter fullscreen mode for seamless immersive gaming
-    requestGameFullscreen();
-
-    // Switch view state & engage Low Device Load mode (pauses background catalog animations)
+    // Switch view state FIRST so player wrapper is visible in DOM before requesting fullscreen
     document.body.setAttribute('data-view', 'player');
     document.body.classList.add('in-game-active');
 
@@ -1428,6 +1430,9 @@ function openGamePlayer(gameId) {
 
     if (catalogView) catalogView.classList.add('hidden');
     if (playerView) playerView.classList.remove('hidden');
+
+    // Automatically enter fullscreen mode for seamless immersive gaming
+    requestGameFullscreen();
 
     // Scroll to top of player
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1512,7 +1517,12 @@ function openGamePlayer(gameId) {
     executeGameLoading(game, () => {
         if (iframe) {
             const gameUrl = game.link.startsWith('/') ? game.link : '/' + game.link;
-            const embedUrl = gameUrl.includes('?') ? `${gameUrl}&embedded=true` : `${gameUrl}?embedded=true`;
+            const currentParams = new URLSearchParams(window.location.search);
+            let embedUrl = gameUrl.includes('?') ? `${gameUrl}&embedded=true` : `${gameUrl}?embedded=true`;
+            const roomParam = currentParams.get('room');
+            if (roomParam) {
+                embedUrl += `&room=${encodeURIComponent(roomParam)}`;
+            }
             iframe.src = embedUrl;
             
             iframe.onload = () => {
@@ -1533,7 +1543,12 @@ function openGamePlayer(gameId) {
     });
 
     // Synchronize URL hash & query state
-    const newUrl = `${window.location.pathname}?game=${game.id}`;
+    const currentParams = new URLSearchParams(window.location.search);
+    const roomParam = currentParams.get('room');
+    let newUrl = `${window.location.pathname}?game=${game.id}`;
+    if (roomParam) {
+        newUrl += `&room=${encodeURIComponent(roomParam)}`;
+    }
     window.history.pushState({ gameId: game.id }, game.title, newUrl);
 }
 
@@ -3255,9 +3270,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: false });
     }
 
-    // Check URL parameters for direct game launch (e.g. ?game=office-escape or #play=dart-board)
+    // Check URL parameters for direct game launch (e.g. ?game=chess&room=KF-1234 or ?room=KF-1234)
     const urlParams = new URLSearchParams(window.location.search);
-    const gameParam = urlParams.get('game') || urlParams.get('play');
+    let gameParam = urlParams.get('game') || urlParams.get('play');
+    if (!gameParam && urlParams.get('room')) {
+        gameParam = 'chess';
+    }
     const hashParam = window.location.hash.replace('#', '').replace('play=', '').replace('game=', '');
 
     const targetGameId = gameParam || hashParam;
