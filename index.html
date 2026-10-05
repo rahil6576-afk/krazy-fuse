@@ -47,12 +47,6 @@
         </div>
 
         <div class="nav-actions">
-            <!-- Live Players Ticker Pill -->
-            <button id="btn-live-insights" class="nav-live-pill" title="Live Players Online across Krazy Fuze — Click for Audience Demographics">
-                <span class="live-dot-white"></span>
-                <span class="live-pill-text">Live</span>
-                <span class="live-ticker-badge" id="nav-global-live-count">188,898</span>
-            </button>
 
             <!-- Theme Toggle Circular Button -->
             <button id="btn-theme-toggle" class="nav-circle-btn" title="Toggle Day/Night Theme" aria-label="Toggle Theme">
@@ -86,44 +80,32 @@
         <!-- Left Vertical Navigation Sidebar (Landing Page Card Style) -->
         <aside class="sidebar-rail expanded sidebar-open" id="sidebar-rail">
             <div class="sidebar-menu-card">
-                <button class="sidebar-nav-item active" data-category="all" title="Home Arcade">
+                <button class="sidebar-nav-item active" data-category="all" data-filter="all" title="Home Arcade">
                     <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
                     <span class="sb-label">Home</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="trending" title="Popular &amp; Trending">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 2C10.5 4.5 10 7.5 11 10C8.5 7.5 7.5 11 7 13.5C6.5 16 8 22 13 22C17.5 22 19 18 19 15C19 10.5 15.5 6 12 2Z"/></svg></span>
-                    <span class="sb-label">Popular</span>
-                </button>
-                <button class="sidebar-nav-item" data-category="new" title="New Releases">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 2L13.8 8.2L20 10L13.8 11.8L12 18L10.2 11.8L4 10L10.2 8.2L12 2Z"/><path d="M19 15L19.7 17.3L22 18L19.7 18.7L19 21L18.3 18.7L16 18L18.3 17.3L19 15Z"/></svg></span>
-                    <span class="sb-label">New</span>
-                </button>
-                <button class="sidebar-nav-item" data-category="multiplayer" title="Multiplayer &amp; PvP">
+                <button class="sidebar-nav-item" data-category="multiplayer" data-filter="multiplayer" title="Multiplayer &amp; PvP">
                     <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></span>
                     <span class="sb-label">Multiplayer</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="action" title="Action &amp; Combat">
+                <button class="sidebar-nav-item" data-category="action" data-filter="action" title="Action &amp; Combat">
                     <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></span>
                     <span class="sb-label">Action</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="runner" title="Runners &amp; Escape">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
+                <button class="sidebar-nav-item" data-category="runner" data-filter="runner" title="Runners &amp; Escape">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l2.4-1-1.8 9.1z"/></svg></span>
                     <span class="sb-label">Runners</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="pvp" title="Darts &amp; Targets">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
+                <button class="sidebar-nav-item" data-category="pvp" data-filter="pvp" title="Darts &amp; Targets">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><circle cx="12" cy="12" r="9" stroke="#0084FF" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="5" stroke="#0084FF" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="2" fill="#0084FF"/></svg></span>
                     <span class="sb-label">Darts</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="arcade" title="Arcade &amp; Physics">
+                <button class="sidebar-nav-item" data-category="arcade" data-filter="arcade" title="Arcade &amp; Physics">
                     <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><circle cx="12" cy="7" r="2.5"/><path d="M12 9.5V13" stroke="#0084FF" stroke-width="1.8"/><ellipse cx="12" cy="14" rx="7" ry="2.5" fill="none" stroke="#0084FF" stroke-width="1.8"/><path d="M7 17c1.2 1.2 8.8 1.2 10 0" stroke="#0084FF" stroke-width="1.8" fill="none"/></svg></span>
                     <span class="sb-label">Arcade</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="reflex" title="Gravity &amp; Reflex">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
-                    <span class="sb-label">Reflex</span>
-                </button>
-                <button class="sidebar-nav-item" id="btn-sidebar-random" title="Surprise Me!">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
+                <button class="sidebar-nav-item" data-category="random" data-filter="random" id="btn-sidebar-random" title="Surprise Me!">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></span>
                     <span class="sb-label">Random</span>
                 </button>
             </div>
@@ -250,12 +232,7 @@
                                     <h2 class="game-player-title" id="player-game-title">Tunnel Runner</h2>
                                     <div class="game-player-sub-meta">
                                         <span class="player-rating-star">⭐ <strong id="player-game-rating">4.9</strong></span>
-                                        <span class="meta-dot">·</span>
-                                        <span class="player-live-badge" id="player-live-badge-wrap" title="Real-time live players active in this game">
-                                            <span class="live-pulse-dot"></span>
-                                            <strong id="player-game-live-count">14,280</strong>
-                                            <span class="player-live-sub">playing now</span>
-                                        </span>
+
                                         <span class="meta-dot">·</span>
                                         <span id="player-game-plays">👥 <strong id="player-game-plays-val" class="plays-val">28.4K</strong> Plays</span>
                                         <span class="meta-dot">·</span>
@@ -387,8 +364,8 @@
                 <!-- Arcade Hero Section -->
                 <section class="arcade-hero">
                     <div class="hero-content-wrap">
-                        <div class="hero-mascot-wrap">
-                            <img src="krazio-mascot.svg" alt="Krazio Fuze Mascot" class="hero-mascot-img">
+                        <div class="hero-mascot-wrap" id="hero-mascot-wrap" role="button" tabindex="0" title="Click to play Krazy Fuze intro!" aria-label="Play Krazy Fuze mascot animation">
+                            <img src="krazio-mascot.svg" alt="Krazy Fuze Mascot" class="hero-mascot-img" id="hero-mascot-img">
                         </div>
                         <h1 class="hero-big-title">KRAZIO FUZE</h1>
                         <p class="hero-subtitle">Fast, chaotic, instant-play browser games with zero downloads.</p>
@@ -423,20 +400,12 @@
                                     <img src="thumbnails/bento/office-escape.webp" alt="Office Escape: Corporate Run" loading="eager">
                                     <div class="bento-preview-wrap" data-preview="office-escape"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="office-escape">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">23.5K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">⚡ SPRINT &amp; DODGE</span>
                                             <h3 class="bento-card-title">Office Escape</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="office-escape">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">23.5K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 4.9</span>
                                         </div>
                                     </div>
@@ -447,20 +416,12 @@
                                     <img src="thumbnails/bento/dart-board.webp" alt="Dart Master 301/501" loading="eager">
                                     <div class="bento-preview-wrap" data-preview="dart-board"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="dart-board">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">26.2K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">🎯 BULLSEYE 1v1</span>
                                             <h3 class="bento-card-title">Dart Master</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="dart-board">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">26.2K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 5.0</span>
                                         </div>
                                     </div>
@@ -471,20 +432,12 @@
                                     <img src="thumbnails/bento/tic-tac-toe.webp" alt="Sumi-e Tac Toe: Zen Brush & AI" loading="eager">
                                     <div class="bento-preview-wrap" data-preview="tic-tac-toe"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="tic-tac-toe">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">15.4K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">🧘 ZEN MASTER AI</span>
                                             <h3 class="bento-card-title">Sumi-e Tac Toe</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="tic-tac-toe">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">15.4K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 5.0</span>
                                         </div>
                                     </div>
@@ -495,20 +448,12 @@
                                     <img src="thumbnails/bento/flappy-man.webp" alt="Flappy Man: Superhero Flight" loading="eager">
                                     <div class="bento-preview-wrap" data-preview="flappy-man"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="flappy-man">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">21.8K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">🌟 5 HERO SKINS</span>
                                             <h3 class="bento-card-title">Flappy Man</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="flappy-man">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">21.8K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 4.9</span>
                                         </div>
                                     </div>
@@ -519,20 +464,12 @@
                                     <img src="thumbnails/bento/wild-swings.webp" alt="Wild Swings: Hook & Flight" loading="eager">
                                     <div class="bento-preview-wrap" data-preview="wild-swings"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="wild-swings">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">19.4K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">🕸️ 20 LEVELS</span>
                                             <h3 class="bento-card-title">Wild Swings</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="wild-swings">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">19.4K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 5.0</span>
                                         </div>
                                     </div>
@@ -543,20 +480,12 @@
                                     <img src="thumbnails/bento/gravity-flip.webp" alt="Gravity Flip: Cavern Runner" loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="gravity-flip"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="gravity-flip">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">13.2K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">🔄 FLIP GRAVITY</span>
                                             <h3 class="bento-card-title">Gravity Flip</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="gravity-flip">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">13.2K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 4.9</span>
                                         </div>
                                     </div>
@@ -567,20 +496,12 @@
                                     <img src="thumbnails/bento/pop-up.webp" alt="Pop Up Blitz" loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="pop-up"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="pop-up">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">11.9K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">⚡ 20 LEVELS</span>
                                             <h3 class="bento-card-title">Pop Up Blitz</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="pop-up">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">11.9K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 4.8</span>
                                         </div>
                                     </div>
@@ -591,20 +512,12 @@
                                     <img src="thumbnails/bento/bomb-panic.webp" alt="Bomb Panic: Hot Potato" loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="bomb-panic"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="bomb-panic">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">29.5K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">💣 HOT POTATO</span>
                                             <h3 class="bento-card-title">Bomb Panic</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="bomb-panic">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">29.5K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 5.0</span>
                                         </div>
                                     </div>
@@ -615,20 +528,12 @@
                                     <img src="thumbnails/bento/elevator-doom.webp" alt="Elevator of Doom: Floor 99" loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="elevator-doom"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="elevator-doom">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">18.8K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">🚨 ROGUELITE</span>
                                             <h3 class="bento-card-title">Elevator of Doom</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="elevator-doom">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">18.8K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 4.9</span>
                                         </div>
                                     </div>
@@ -639,20 +544,12 @@
                                     <img src="thumbnails/bento/fallen-one.webp" alt="Cyber Clash: PvP Arena" loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="fallen-one"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="fallen-one">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">22.1K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">⚔️ 2D PVP FIGHTER</span>
                                             <h3 class="bento-card-title">Cyber Clash</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="fallen-one">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">22.1K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 5.0</span>
                                         </div>
                                     </div>
@@ -663,20 +560,12 @@
                                     <img src="thumbnails/bento/chess.webp" alt="Royal Chess: Grandmaster Arena" loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="chess"></div>
                                     <div class="bento-hover-glow"></div>
-                                    <div class="bento-top-live" data-game-live="chess">
-                                        <span class="live-pulse-dot"></span>
-                                        <span class="live-card-val">28.4K</span> playing
-                                    </div>
                                     <div class="bento-card-info">
                                         <div class="bento-card-title-col">
                                             <span class="bento-card-badge">♚ GRANDMASTER AI &amp; PVP</span>
                                             <h3 class="bento-card-title">Royal Chess</h3>
                                         </div>
                                         <div class="bento-card-meta-col">
-                                            <span class="bento-card-live" data-game-live="chess">
-                                                <span class="bento-live-dot"></span>
-                                                <span class="live-card-val">28.4K</span>
-                                            </span>
                                             <span class="bento-card-rating">★ 5.0</span>
                                         </div>
                                     </div>
@@ -772,25 +661,6 @@
                 </div>
             </div>
 
-            <!-- Profile Quick Stats Ribbon (Coins, Cloud Saves, High Scores) -->
-            <div class="auth-stats-ribbon" id="auth-stats-ribbon">
-                <div class="auth-stat-mini-card">
-                    <span class="stat-mini-label">🪙 BANKED COINS</span>
-                    <strong class="stat-mini-val" id="profile-stat-coins">0 P</strong>
-                </div>
-                <div class="auth-stat-mini-card">
-                    <span class="stat-mini-label">🎮 SAVED GAMES</span>
-                    <strong class="stat-mini-val" id="profile-stat-saves">0 Games</strong>
-                </div>
-                <div class="auth-stat-mini-card">
-                    <span class="stat-mini-label">⚡ CLOUD SYNC</span>
-                    <strong class="stat-mini-val" id="profile-stat-sync" style="color: #4ade80;">Active</strong>
-                </div>
-                <div class="auth-stat-mini-card">
-                    <span class="stat-mini-label">🛡️ ACCOUNT TIER</span>
-                    <strong class="stat-mini-val" id="profile-stat-tier">Gamer</strong>
-                </div>
-            </div>
 
             <!-- Toggle button to expand/collapse sign-in options when logged in -->
             <button type="button" id="btn-toggle-switch-account" class="btn-switch-acc hidden">
@@ -814,13 +684,6 @@
                             <span class="btn-social-label">Google</span>
                         </button>
 
-                        <!-- Apple Sign In Button -->
-                        <button type="button" id="btn-auth-apple" class="btn-auth-social btn-apple" title="Sign in with Apple">
-                            <svg class="social-icon-svg" viewBox="0 0 170 170" width="20" height="20" fill="currentColor">
-                                <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.74 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.6-7.85-11.7-14.44-6.3-10.08-11.08-21.75-14.34-35.01-3.26-13.26-4.9-25.17-4.9-35.73 0-14.36 3.6-26.06 10.8-35.1 7.2-9.04 16.27-13.68 27.21-13.91 4.8 0 10.14 1.21 16.03 3.64 5.9 2.42 9.87 3.69 11.91 3.8 2.37-.12 6.59-1.47 12.65-4.05 6.07-2.58 11.28-3.75 15.65-3.52 11.87.68 21.43 5.34 28.69 13.98-10.36 6.3-15.42 15.11-15.18 26.43.23 8.91 3.66 16.32 10.28 22.23 6.63 5.91 14.51 9.29 23.65 10.14-2.18 6.64-4.8 13.1-7.86 19.38zM119.22 33.02c0-7.23 2.66-13.97 7.97-20.21 5.31-6.24 11.83-10.38 19.57-12.43.68 2.6 1.02 5.09 1.02 7.48 0 7.23-2.78 14.07-8.34 20.52-5.56 6.45-12.3 10.42-20.22 11.91-.46-2.4-.69-4.82-.69-7.27z"/>
-                            </svg>
-                            <span class="btn-social-label">Apple</span>
-                        </button>
 
                         <!-- Instant Guest Sign In Button -->
                         <button type="button" id="btn-auth-guest-quick" class="btn-auth-social btn-guest-quick" title="Play as Guest immediately without credentials">
@@ -856,16 +719,6 @@
                 </div>
             </div>
 
-            <!-- Active User Game Data Summary -->
-            <div class="auth-game-saves-section">
-                <div class="auth-saves-header">
-                    <h4 class="auth-section-title">ACTIVE GAME DATA & PROGRESS</h4>
-                    <span class="auth-saves-hint" id="auth-saves-hint">Scoped to current active credentials</span>
-                </div>
-                <div class="auth-game-saves-grid" id="auth-game-saves-grid">
-                    <!-- Populated dynamically with each game's saved score/coins/progress -->
-                </div>
-            </div>
 
             <div class="auth-modal-footer">
                 <button id="btn-auth-modal-close" class="btn-arcade-cta" style="padding: 8px 28px; font-size: 0.95rem;">Done</button>
@@ -1101,6 +954,13 @@
             </div>
         </div>
     </footer>
+
+    <!-- Fullscreen Mascot Animation Overlay -->
+    <div id="fullscreen-mascot-overlay" class="fullscreen-mascot-overlay hidden" aria-hidden="true">
+        <div class="fullscreen-video-container">
+            <video id="fullscreen-mascot-video" class="fullscreen-mascot-video" src="public/gemini_generated_video_6306540a-ezgif.com-video-to-webm-converter.webm" playsinline preload="auto"></video>
+        </div>
+    </div>
 
     <!-- Supabase Realtime & Portal Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

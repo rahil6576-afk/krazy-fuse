@@ -2269,6 +2269,29 @@
                     this.state = 'GAMEOVER';
                     const winner = aliveSurvivors[0] || victim;
                     const playerWon = winner && winner.isPlayer;
+
+                    // Record multiplayer / match results to database
+                    try {
+                        const isMulti = this.mode === 'local';
+                        const matchPayload = {
+                            game_id: 'bomb-panic',
+                            game_title: 'Bomb Panic: Hot Potato',
+                            mode: isMulti ? 'local_pvp' : `single_${this.mode}`,
+                            player1_name: (this.players[0] && this.players[0].name) || 'Player 1',
+                            player2_name: (this.players[1] && this.players[1].name) || 'Bot 1',
+                            winner: winner ? winner.name : 'Nobody',
+                            score_p1: winner && winner.isPlayer ? 1 : 0,
+                            score_p2: winner && !winner.isPlayer ? 1 : 0,
+                            room_code: null,
+                            details: { mode: this.mode, totalPlayers: this.players.length }
+                        };
+                        if (window.parent && window.parent !== window) {
+                            window.parent.postMessage({ type: 'RECORD_MULTIPLAYER_MATCH', data: matchPayload }, '*');
+                        } else if (window.KrazySupabase && typeof window.KrazySupabase.recordMultiplayerMatch === 'function') {
+                            window.KrazySupabase.recordMultiplayerMatch(matchPayload);
+                        }
+                    } catch(e) { console.warn('Failed recording bomb panic match:', e); }
+
                     setTimeout(() => {
                         const modal = document.getElementById('modalOverlay');
                         const titleEl = document.getElementById('modalTitle');

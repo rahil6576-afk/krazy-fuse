@@ -415,6 +415,35 @@ export class GameEngine {
             matchManager.update(this.p1, this.p2, (results) => {
                 this.gameState = GAME_STATES.MATCH_OVER;
                 this.menuManager.showResults(results);
+
+                // Record match outcome to database
+                try {
+                    const isLocalVs = this.gameMode === GAME_MODES.LOCAL_VS;
+                    const isOnline = this.gameMode === GAME_MODES.ONLINE_MATCH;
+                    const matchPayload = {
+                        game_id: 'fallen-one',
+                        game_title: 'Cyber Clash: PvP Arena',
+                        mode: isOnline ? 'online_pvp' : (isLocalVs ? 'local_pvp' : 'arcade_tower'),
+                        player1_name: (this.p1 && this.p1.name) || 'Player 1',
+                        player2_name: (this.p2 && this.p2.name) || 'Opponent',
+                        winner: results.winner || 'Player 1',
+                        score_p1: results.p1Rounds || 0,
+                        score_p2: results.p2Rounds || 0,
+                        room_code: null,
+                        details: {
+                            matchTime: results.matchTime,
+                            xpEarned: results.xpEarned,
+                            mode: this.gameMode
+                        }
+                    };
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'RECORD_MULTIPLAYER_MATCH', data: matchPayload }, '*');
+                    } else if (window.KrazySupabase && typeof window.KrazySupabase.recordMultiplayerMatch === 'function') {
+                        window.KrazySupabase.recordMultiplayerMatch(matchPayload);
+                    }
+                } catch(err) {
+                    console.warn('Failed recording fallen-one match:', err);
+                }
             }, this.p3);
         }
     }

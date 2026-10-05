@@ -1115,9 +1115,27 @@ const AuthManager = {
                 : 'Guest Session (Auto-clears on website reload)';
         }
 
+        // Show selected avatar emoji in the nav auth button
         const btnUserAuth = document.getElementById('btn-user-auth');
         if (btnUserAuth) {
             btnUserAuth.title = user.isLoggedIn ? `Profile: ${user.username}` : 'Gamer Account & Profiles';
+            // Show avatar emoji in the button icon area
+            const navUserSvg = btnUserAuth.querySelector('.nav-user-svg');
+            if (navUserSvg && user.avatar && !user.avatar.startsWith('http') && !user.avatar.startsWith('data:')) {
+                navUserSvg.style.display = 'none';
+                let avatarSpan = btnUserAuth.querySelector('.nav-btn-avatar-emoji');
+                if (!avatarSpan) {
+                    avatarSpan = document.createElement('span');
+                    avatarSpan.className = 'nav-btn-avatar-emoji';
+                    avatarSpan.style.cssText = 'font-size:18px;line-height:1;flex-shrink:0;';
+                    btnUserAuth.insertBefore(avatarSpan, btnUserAuth.firstChild);
+                }
+                avatarSpan.textContent = user.avatar;
+            } else if (navUserSvg) {
+                navUserSvg.style.display = '';
+                const emojiSpan = btnUserAuth.querySelector('.nav-btn-avatar-emoji');
+                if (emojiSpan) emojiSpan.remove();
+            }
         }
 
         if (bankBadge) {
@@ -1582,6 +1600,13 @@ window.addEventListener('message', (event) => {
         closeGamePlayer();
     } else if (type === 'REQUEST_FULLSCREEN' || type === 'requestFullscreen' || type === 'enterFullscreen') {
         requestGameFullscreen();
+    } else if (type === 'RECORD_MULTIPLAYER_MATCH') {
+        const { gameId, roomCode, gameMode, player1Name, player2Name, winnerName, scoreDetails } = event.data;
+        if (typeof KrazySupabase !== 'undefined') {
+            KrazySupabase.recordMultiplayerMatch({
+                gameId, roomCode, gameMode, player1Name, player2Name, winnerName, scoreDetails
+            });
+        }
     }
 });
 
@@ -1614,8 +1639,6 @@ function renderPlayNextSidebar(activeGame) {
                 <div class="pn-meta">
                     <span class="pn-badge">${rec.tags[0] || 'Action'}</span>
                     <span class="meta-dot">·</span>
-                    <span class="pn-live-stat"><span class="live-pulse-dot mini"></span> <strong data-game-live-rec="${rec.id}">${window.audienceEngine ? window.audienceEngine.formatCompact(window.audienceEngine.getGameCount(rec.id)) : '15K'}</strong> live</span>
-                    <span class="meta-dot">·</span>
                     <span class="pn-likes">👍 ${formatCompactNumber(rec.likesCount)}</span>
                 </div>
             </div>
@@ -1645,32 +1668,25 @@ function formatCompactNumber(num) {
 
 function createGameCard(game) {
     const card = document.createElement('div');
-    card.className = 'game-card';
+    card.className = 'bento-card bento-span-1x1';
     card.dataset.id = game.id;
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
     card.setAttribute('title', `Play ${game.title}`);
 
-    const thumbUrl = game.thumbnail || `/thumbnails/${game.id}.svg`;
-    const liveCount = window.audienceEngine ? window.audienceEngine.formatCompact(window.audienceEngine.getGameCount(game.id)) : '24.5K';
+    const thumbUrl = game.thumbnail || `/thumbnails/bento/${game.id}.webp`;
+    const badgeText = game.actionBadge || (game.category ? game.category.toUpperCase() : 'ARCADE');
 
     card.innerHTML = `
-        <div class="card-thumb-wrap">
-            <img src="${thumbUrl}" alt="${game.title} Cover" class="card-thumb-img" loading="lazy" onerror="this.style.display='none'">
-            <div class="thumb-artwork ${game.themeClass || 'theme-office'}" style="position: absolute; inset: 0; z-index: 0;">
-                <div class="thumb-emoji-hero">${game.heroEmoji || game.emoji}</div>
+        <img src="${thumbUrl}" alt="${game.title}" class="card-thumb-img" loading="lazy" onerror="this.onerror=null;this.src='/thumbnails/${game.id}.svg';">
+        <div class="bento-hover-glow"></div>
+        <div class="bento-card-info" style="opacity: 1; transform: translateY(0);">
+            <div class="bento-card-title-col">
+                <span class="bento-card-badge">${badgeText}</span>
+                <h3 class="bento-card-title">${game.title}</h3>
             </div>
-            <div class="card-top-live-badge" data-game-live="${game.id}">
-                <span class="live-pulse-dot"></span>
-                <span class="live-card-val">${liveCount}</span> playing
-            </div>
-            <div class="card-hover-overlay">
-                <span class="card-hover-title">${game.title}</span>
-                <div class="card-hover-meta-row">
-                    <span class="card-meta-live" data-game-live="${game.id}">🟢 <span class="live-card-val">${liveCount}</span> playing</span>
-                    <span class="card-meta-rating">★ ${game.rating}</span>
-                </div>
-                <span class="card-hover-play">▶ PLAY</span>
+            <div class="bento-card-meta-col">
+                <span class="bento-card-rating">★ ${game.rating || '5.0'}</span>
             </div>
         </div>
     `;
@@ -1695,19 +1711,29 @@ function renderPortal() {
 
         if (filteredGrid) {
             filteredGrid.innerHTML = '';
+            const catKey = (activeCategory || 'all').toLowerCase();
             const matched = GAMES_CATALOG.filter(game => {
                 let matchesCategory = true;
-                if (activeCategory === 'trending' || activeCategory === 'popular') matchesCategory = game.trending;
-                else if (activeCategory === 'new') matchesCategory = game.isNew;
-                else if (activeCategory === 'multiplayer') matchesCategory = game.multiplayer;
-                else if (activeCategory === 'runners') matchesCategory = game.category === 'runner' || game.tags.some(t => t.toLowerCase() === 'runner');
-                else if (activeCategory === 'action') matchesCategory = game.category === 'action' || game.tags.some(t => t.toLowerCase() === 'action');
-                else if (activeCategory === 'darts') matchesCategory = game.id === 'dart-board' || game.category === 'pvp';
-                else if (activeCategory === 'arcade') matchesCategory = game.category === 'arcade' || game.tags.some(t => t.toLowerCase() === 'arcade');
-                else if (activeCategory === 'reflex') matchesCategory = game.category === 'reflex' || game.tags.some(t => t.toLowerCase() === 'reflex');
-                else if (activeCategory === 'bookmarks') matchesCategory = getStoredBookmarks().includes(game.id);
-                else if (activeCategory !== 'all') {
-                    matchesCategory = game.category === activeCategory || game.tags.some(t => t.toLowerCase() === activeCategory.toLowerCase());
+                if (catKey === 'trending' || catKey === 'popular') {
+                    matchesCategory = Boolean(game.trending);
+                } else if (catKey === 'new') {
+                    matchesCategory = Boolean(game.isNew);
+                } else if (catKey === 'multiplayer') {
+                    matchesCategory = Boolean(game.multiplayer) || game.category === 'multiplayer' || game.tags.some(t => /multiplayer|pvp/i.test(t));
+                } else if (catKey === 'runners' || catKey === 'runner') {
+                    matchesCategory = game.category === 'runner' || game.tags.some(t => /runner/i.test(t));
+                } else if (catKey === 'action') {
+                    matchesCategory = game.category === 'action' || game.tags.some(t => /action|combat|fighting|roguelite/i.test(t));
+                } else if (catKey === 'darts' || catKey === 'pvp') {
+                    matchesCategory = game.id === 'dart-board' || game.tags.some(t => /dart/i.test(t));
+                } else if (catKey === 'arcade') {
+                    matchesCategory = game.category === 'arcade' || game.tags.some(t => /arcade|physics|flappy/i.test(t));
+                } else if (catKey === 'reflex') {
+                    matchesCategory = game.category === 'reflex' || game.tags.some(t => /reflex|timing/i.test(t));
+                } else if (catKey === 'bookmarks') {
+                    matchesCategory = getStoredBookmarks().includes(game.id);
+                } else if (catKey !== 'all' && catKey !== 'home') {
+                    matchesCategory = game.category === catKey || game.tags.some(t => t.toLowerCase() === catKey);
                 }
 
                 const q = searchQuery.toLowerCase();
@@ -1721,15 +1747,15 @@ function renderPortal() {
             if (countEl) countEl.textContent = `${matched.length} games`;
             if (titleEl) {
                 if (searchQuery) titleEl.textContent = `🔍 SEARCH RESULTS FOR "${searchQuery.toUpperCase()}"`;
-                else if (activeCategory === 'trending' || activeCategory === 'popular') titleEl.textContent = `🔥 POPULAR & TRENDING GAMES`;
-                else if (activeCategory === 'new') titleEl.textContent = `🆕 NEW ARCADE RELEASES`;
-                else if (activeCategory === 'multiplayer') titleEl.textContent = `🏆 MULTIPLAYER & PVP BATTLES`;
-                else if (activeCategory === 'runners') titleEl.textContent = `🏃 ENDLESS RUNNERS`;
-                else if (activeCategory === 'darts') titleEl.textContent = `🎯 DARTS & PUB SPORTS`;
-                else if (activeCategory === 'action') titleEl.textContent = `⚔️ ACTION & COMBAT`;
-                else if (activeCategory === 'arcade') titleEl.textContent = `🕹️ CLASSIC ARCADE GAMES`;
-                else if (activeCategory === 'reflex') titleEl.textContent = `⚡ REFLEX & TIMING`;
-                else if (activeCategory === 'bookmarks') titleEl.textContent = `🔖 SAVED BOOKMARKS`;
+                else if (catKey === 'trending' || catKey === 'popular') titleEl.textContent = `🔥 POPULAR & TRENDING GAMES`;
+                else if (catKey === 'new') titleEl.textContent = `🆕 NEW ARCADE RELEASES`;
+                else if (catKey === 'multiplayer') titleEl.textContent = `🏆 MULTIPLAYER & PVP BATTLES`;
+                else if (catKey === 'runners' || catKey === 'runner') titleEl.textContent = `🏃 ENDLESS RUNNERS & ESCAPE`;
+                else if (catKey === 'darts' || catKey === 'pvp') titleEl.textContent = `🎯 DARTS & TARGET GAMES`;
+                else if (catKey === 'action') titleEl.textContent = `⚔️ ACTION & COMBAT`;
+                else if (catKey === 'arcade') titleEl.textContent = `🕹️ CLASSIC ARCADE GAMES`;
+                else if (catKey === 'reflex') titleEl.textContent = `⚡ REFLEX & TIMING`;
+                else if (catKey === 'bookmarks') titleEl.textContent = `🔖 SAVED BOOKMARKS`;
                 else titleEl.textContent = `⚡ ${activeCategory.toUpperCase()} GAMES`;
             }
 
@@ -2073,7 +2099,7 @@ function setupCategoryControls() {
     const pills = document.querySelectorAll('.category-pill');
     const navShortcuts = document.querySelectorAll('.nav-shortcut-btn');
     const railBtns = document.querySelectorAll('.sidebar-icon-btn[data-category]');
-    const sidebarNavItems = document.querySelectorAll('.sidebar-nav-item[data-filter]');
+    const sidebarNavItems = document.querySelectorAll('.sidebar-nav-item[data-filter], .sidebar-nav-item[data-category]');
     const sectionLinks = document.querySelectorAll('.section-title-link[data-filter]');
 
     const updateActiveCategory = (cat) => {
@@ -2082,12 +2108,29 @@ function setupCategoryControls() {
             return;
         }
 
+        if (cat === 'home') cat = 'all';
+
         activeCategory = cat;
+
+        // Clear active search so the genre results aren't blocked by a search keyword
+        if (cat !== 'all') {
+            searchQuery = '';
+            const heroInput = document.getElementById('hero-search-input') || document.getElementById('search-games-input');
+            const navInput = document.getElementById('nav-search-input');
+            const btnClearNav = document.getElementById('nav-search-clear');
+            if (heroInput) heroInput.value = '';
+            if (navInput) navInput.value = '';
+            if (btnClearNav) btnClearNav.classList.add('hidden');
+        }
 
         pills.forEach(p => p.classList.toggle('active', p.dataset.category === cat));
         navShortcuts.forEach(n => n.classList.toggle('active', n.dataset.category === cat));
         railBtns.forEach(r => r.classList.toggle('active', r.dataset.category === cat));
-        sidebarNavItems.forEach(s => s.classList.toggle('active', s.dataset.filter === cat));
+        sidebarNavItems.forEach(s => {
+            const sc = s.dataset.filter || s.dataset.category;
+            const isMatch = sc === cat || (cat === 'all' && (sc === 'home' || sc === 'all'));
+            s.classList.toggle('active', isMatch);
+        });
 
         // If inside player view, close it to view category catalog
         if (document.body.getAttribute('data-view') === 'player') {
@@ -2095,17 +2138,41 @@ function setupCategoryControls() {
         }
 
         renderPortal();
+
+        // Direct user right into view of the selected genre's games!
+        if (cat !== 'all') {
+            const filterSec = document.getElementById('filtered-section');
+            if (filterSec) {
+                setTimeout(() => {
+                    const navHeight = 90;
+                    const topPos = filterSec.getBoundingClientRect().top + window.pageYOffset - navHeight;
+                    window.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
+                }, 60);
+            }
+            try {
+                history.replaceState(null, '', `#genre=${cat}`);
+            } catch (_) {}
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            try {
+                history.replaceState(null, '', window.location.pathname);
+            } catch (_) {}
+        }
     };
 
+    window.updateActiveCategory = updateActiveCategory;
+
     sidebarNavItems.forEach(item => {
-        item.addEventListener('click', () => updateActiveCategory(item.dataset.filter || 'all'));
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            updateActiveCategory(item.dataset.filter || item.dataset.category || 'all');
+        });
     });
 
     sectionLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             updateActiveCategory(link.dataset.filter || 'all');
-            window.scrollTo({ top: 280, behavior: 'smooth' });
         });
     });
 
@@ -2120,6 +2187,18 @@ function setupCategoryControls() {
     railBtns.forEach(btn => {
         btn.addEventListener('click', () => updateActiveCategory(btn.dataset.category || 'all'));
     });
+
+    // Check URL hash or query param for initial category redirection
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hashMatch = window.location.hash.match(/genre=([a-zA-Z0-9_-]+)/);
+        const initialGenre = urlParams.get('genre') || (hashMatch ? hashMatch[1] : null);
+        if (initialGenre && initialGenre !== 'all' && initialGenre !== 'home') {
+            setTimeout(() => {
+                updateActiveCategory(initialGenre);
+            }, 100);
+        }
+    } catch (_) {}
 }
 
 function setupSearchControls() {
@@ -2150,6 +2229,182 @@ function setupSearchControls() {
             else if (navInput) onSearchChange(navInput.value);
         });
     }
+}
+
+// ==========================================================
+// Center Logo Interactive Fullscreen Animation Playback Engine
+// Plays video across whole screen on click, then reverts to site
+// ==========================================================
+function setupHeroMascotVideo() {
+    const wrap = document.getElementById('hero-mascot-wrap');
+    const overlay = document.getElementById('fullscreen-mascot-overlay');
+    const video = document.getElementById('fullscreen-mascot-video');
+    const btnClose = document.getElementById('btn-close-mascot-video');
+    if (!wrap || !overlay || !video) return;
+
+    let isPlaying = false;
+    let isRetreating = false;
+    const container = overlay.querySelector('.fullscreen-video-container');
+
+    function calculateLogoTarget() {
+        const rect = wrap.getBoundingClientRect();
+        const logoCenterX = rect.left + rect.width / 2;
+        const logoCenterY = rect.top + rect.height / 2;
+        const cRect = container ? container.getBoundingClientRect() : { left: window.innerWidth / 2 - 400, top: window.innerHeight / 2 - 225, width: 800, height: 450 };
+        const containerCenterX = cRect.left + cRect.width / 2;
+        const containerCenterY = cRect.top + cRect.height / 2;
+        const dx = logoCenterX - containerCenterX;
+        const dy = logoCenterY - containerCenterY;
+        const scale = Math.max(0.12, Math.min(0.28, (rect.width || 180) / cRect.width));
+        return { dx, dy, scale };
+    }
+
+    function playMascotVideo() {
+        if (isPlaying) return;
+        isPlaying = true;
+        isRetreating = false;
+
+        // Calculate dynamic starting coordinates from the hero center logo
+        const { dx, dy, scale } = calculateLogoTarget();
+
+        // 1. Position video container exactly over the hero mascot crest initially
+        if (container) {
+            container.style.transition = 'none';
+            container.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+            container.style.opacity = '0';
+            container.style.filter = 'blur(6px) brightness(1.3)';
+        }
+
+        overlay.classList.remove('retreating');
+        overlay.classList.remove('hidden');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        // 2. Trigger mascot launch burst on the logo
+        const heroImg = wrap.querySelector('.hero-mascot-img, .brand-mascot-img') || wrap;
+        heroImg.classList.remove('mascot-returning', 'mascot-launching');
+        void heroImg.offsetWidth;
+        heroImg.classList.add('mascot-launching');
+        setTimeout(() => {
+            heroImg.classList.remove('mascot-launching');
+        }, 750);
+
+        // 3. Force reflow so starting transformation is registered by browser
+        void overlay.offsetWidth;
+        overlay.classList.add('active');
+
+        // 4. Smoothly burst / expand out of the logo into fullscreen center!
+        requestAnimationFrame(() => {
+            if (container) {
+                container.style.transition = 'transform 0.68s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), filter 0.55s ease';
+                container.style.transform = 'translate(0px, 0px) scale(1)';
+                container.style.opacity = '1';
+                container.style.filter = 'drop-shadow(0 20px 50px rgba(0, 0, 0, 0.7))';
+            }
+        });
+
+        video.currentTime = 0;
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(err => {
+                console.warn('Fullscreen animation playback note:', err);
+            });
+        }
+    }
+
+    function retreatMascotVideo() {
+        if (!isPlaying || isRetreating) return;
+        isRetreating = true;
+
+        // Calculate dynamic translation directly into the hero center logo
+        if (container) {
+            const { dx, dy, scale } = calculateLogoTarget();
+            container.style.transition = 'transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.55s ease';
+            container.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+            container.style.opacity = '0';
+            container.style.filter = 'blur(4px) brightness(1.25)';
+        }
+
+        overlay.classList.add('retreating');
+
+        // Welcome the fox back into the logo with a smooth landing pulse
+        const heroImg = wrap.querySelector('.hero-mascot-img, .brand-mascot-img') || wrap;
+        heroImg.classList.remove('mascot-returning', 'mascot-launching');
+        void heroImg.offsetWidth;
+        heroImg.classList.add('mascot-returning');
+        setTimeout(() => {
+            heroImg.classList.remove('mascot-returning');
+        }, 800);
+
+        // After the smooth retreat completes (650ms), cleanup
+        setTimeout(() => {
+            if (isRetreating) {
+                cleanupMascotVideo();
+            }
+        }, 650);
+    }
+
+    function cleanupMascotVideo() {
+        isPlaying = false;
+        isRetreating = false;
+        overlay.classList.remove('active');
+        overlay.classList.remove('retreating');
+        overlay.classList.add('hidden');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (container) {
+            container.style.transition = '';
+            container.style.transform = '';
+            container.style.opacity = '';
+            container.style.filter = '';
+        }
+        try {
+            video.pause();
+            video.currentTime = 0;
+        } catch (_) {}
+    }
+
+    // Click on centre hero logo triggers whole-screen animation
+    wrap.addEventListener('click', (e) => {
+        e.preventDefault();
+        playMascotVideo();
+    });
+
+    wrap.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            playMascotVideo();
+        }
+    });
+
+    // Monitor playback: transition smoothly before the video cut/freeze at 7.3s
+    video.addEventListener('timeupdate', () => {
+        if (isPlaying && !isRetreating && video.currentTime >= 7.3) {
+            retreatMascotVideo();
+        }
+    });
+
+    // When video completes, retreat naturally if not already retreating
+    video.addEventListener('ended', () => {
+        if (!isRetreating) retreatMascotVideo();
+    });
+
+    video.addEventListener('error', cleanupMascotVideo);
+
+    // Clicking anywhere on the overlay also initiates natural retreat
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay || e.target === overlay.querySelector('.fullscreen-video-container')) {
+            retreatMascotVideo();
+        }
+    });
+
+    // Escape key initiates natural retreat
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isPlaying) {
+            e.preventDefault();
+            retreatMascotVideo();
+        }
+    });
 }
 
 function playRandomGame() {
@@ -2383,6 +2638,13 @@ function setupThemeToggle() {
 function applyTheme(theme) {
     const btn = document.getElementById('btn-theme-toggle');
     document.documentElement.setAttribute('data-theme', theme);
+
+    // Dynamically swap mascot crest between Day Mode (white crest) and Night Mode (dark crest)
+    const mascotSrc = (theme === 'day') ? 'krazio-mascot-day.svg' : 'krazio-mascot.svg';
+    document.querySelectorAll('.brand-mascot-img, .hero-mascot-img, .footer-mascot-img').forEach(img => {
+        if (img) img.src = mascotSrc;
+    });
+
     if (btn) {
         if (theme === 'day') {
             btn.innerHTML = `<svg class="nav-action-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a6a4ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
@@ -2766,31 +3028,6 @@ function renderAuthModalContent() {
         }
     }
 
-    // 2. Profile Quick Stats Ribbon
-    const statCoins = document.getElementById('profile-stat-coins');
-    const statSaves = document.getElementById('profile-stat-saves');
-    const statSync = document.getElementById('profile-stat-sync');
-    const statTier = document.getElementById('profile-stat-tier');
-
-    const coins = AuthManager.getUserCoins(user.username);
-    if (statCoins) statCoins.textContent = `${coins.toLocaleString()} P`;
-
-    const registry = AuthManager.getRegistry();
-    const userReg = registry[user.username] || {};
-    const userGames = userReg.games || {};
-    const countSaved = Object.keys(userGames).length;
-    if (statSaves) statSaves.textContent = `${countSaved} Games`;
-
-    if (statSync) {
-        statSync.textContent = user.isLoggedIn ? (user.provider === 'google' ? 'Google Cloud' : 'Active') : 'Temporary';
-        statSync.style.color = user.isLoggedIn ? '#4ade80' : '#fbbf24';
-    }
-
-    if (statTier) {
-        if (user.provider === 'google') statTier.textContent = 'Verified (Google)';
-        else if (user.isLoggedIn) statTier.textContent = 'Registered Gamer';
-        else statTier.textContent = 'Guest Player';
-    }
 
     // 3. Toggle button & container state based on login status
     const btnToggleSwitch = document.getElementById('btn-toggle-switch-account');
@@ -2806,50 +3043,6 @@ function renderAuthModalContent() {
         }
     }
 
-    // 5. Active Game Saves Breakdown
-    const savesGrid = document.getElementById('auth-game-saves-grid');
-    const savesHint = document.getElementById('auth-saves-hint');
-    if (savesHint) {
-        savesHint.textContent = `Showing data for: ${user.username}`;
-    }
-
-    if (savesGrid) {
-        savesGrid.innerHTML = '';
-        GAMES_CATALOG.forEach(game => {
-            const card = document.createElement('div');
-            card.className = 'auth-game-card';
-            
-            // Format game specific summary
-            let summaryText = 'No save data yet';
-            if (game.id === 'wild-swings') {
-                const lvl = KrazyGameStorage.getItem(game.id, 'wild_swings_level', '1');
-                const best = KrazyGameStorage.getItem(game.id, 'wild_swings_best_endless', '0');
-                summaryText = `Level ${lvl} · Endless: ${best}m`;
-            } else if (game.id === 'elevator-doom') {
-                const coins = KrazyGameStorage.getItem(game.id, 'doom_banked_coins', '0');
-                const floor = KrazyGameStorage.getItem(game.id, 'doom_failed_floor', '1');
-                summaryText = `🪙 ${coins} Coins · Floor ${floor}`;
-            } else if (game.id === 'popup-game') {
-                const score = KrazyGameStorage.getItem(game.id, 'float_high_score', '0');
-                summaryText = `High Score: ${score} pts`;
-            } else if (game.id === 'fallen-one') {
-                const fighter = KrazyGameStorage.getItem(game.id, 'fallen_last_fighter', 'SOLAR');
-                summaryText = `Fighter: ${fighter} · Ultimate Ready`;
-            } else {
-                const score = KrazyGameStorage.getItem(game.id, `${game.id}_high_score`, null);
-                if (score !== null) summaryText = `High Score: ${score}`;
-            }
-
-            card.innerHTML = `
-                <div class="auth-gc-emoji">${(game.heroEmoji || game.emoji || '🎮').split(' ')[0]}</div>
-                <div class="auth-gc-info">
-                    <div class="auth-gc-title">${game.title}</div>
-                    <div class="auth-gc-val">${summaryText}</div>
-                </div>
-            `;
-            savesGrid.appendChild(card);
-        });
-    }
 }
 
 function setupAudienceModal() {
@@ -3173,6 +3366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPortal();
     setupCategoryControls();
     setupSearchControls();
+    setupHeroMascotVideo();
     setupSuggestModal();
     setupBentoCardHoverPreviews();
     updateBookmarkBadge();
@@ -3336,6 +3530,29 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (e.data.type === 'KRAZY_ESC') {
             if (typeof e.data.isPaused === 'boolean') {
                 showToast(e.data.isPaused ? 'Game Paused ⏸️' : 'Game Resumed ▶️', e.data.isPaused ? '⏸️' : '▶️');
+            }
+        } else if (e.data.type === 'RECORD_MULTIPLAYER_MATCH') {
+            const matchData = e.data.data || e.data.match || e.data;
+            if (window.KrazySupabase && typeof window.KrazySupabase.recordMultiplayerMatch === 'function') {
+                window.KrazySupabase.recordMultiplayerMatch({
+                    game_id: matchData.game_id || matchData.gameId || activeGameId || 'arcade-game',
+                    game_title: matchData.game_title || matchData.gameTitle || (GAMES_CATALOG.find(g => g.id === (matchData.game_id || matchData.gameId || activeGameId))?.title) || 'Multiplayer Game',
+                    mode: matchData.mode || 'pvp',
+                    player1_name: matchData.player1_name || matchData.player1Name || 'Player 1',
+                    player2_name: matchData.player2_name || matchData.player2Name || 'Player 2',
+                    winner: matchData.winner || 'Player 1',
+                    score_p1: Number(matchData.score_p1 || matchData.scoreP1 || 0),
+                    score_p2: Number(matchData.score_p2 || matchData.scoreP2 || 0),
+                    room_code: matchData.room_code || matchData.roomCode || null,
+                    details: matchData.details || {}
+                }).then(res => {
+                    console.log('🏆 [Portal] Multiplayer match recorded to database:', res);
+                    if (matchData.winner && typeof showToast === 'function') {
+                        showToast(`🏆 Match Result Saved: ${matchData.winner} Wins!`, '🏆');
+                    }
+                }).catch(err => {
+                    console.warn('⚠️ [Portal] Match recording error:', err);
+                });
             }
         }
     });

@@ -446,6 +446,31 @@
                     window.dartAudio.announce(`Game Shot, and the match! ${p.name} wins!`);
                 }
                 this.showCallout(`🏆 ${p.name.toUpperCase()} WINS!`);
+
+                // Record multiplayer / match results to database
+                try {
+                    const isMulti = this.gameMode === 'pass' || this.gameMode === 'online' || this.gameMode === 'multiplayer';
+                    const p1 = this.players[0] || { name: 'Player 1', dartsThrown: 0 };
+                    const p2 = this.players[1] || { name: 'Player 2', dartsThrown: 0 };
+                    const matchPayload = {
+                        game_id: 'dart-board',
+                        game_title: 'Dart Master: 301 / 501 Arena',
+                        mode: isMulti ? (this.gameMode === 'online' ? 'online_pvp' : 'local_pvp') : 'vs_ai',
+                        player1_name: p1.name,
+                        player2_name: p2.name,
+                        winner: p.name,
+                        score_p1: p1.dartsThrown || 0,
+                        score_p2: p2.dartsThrown || 0,
+                        room_code: this.roomCode || null,
+                        details: { gameType: this.gameType, winnerId: p.id, dartsThrown: p.dartsThrown }
+                    };
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'RECORD_MULTIPLAYER_MATCH', data: matchPayload }, '*');
+                    } else if (window.KrazySupabase && typeof window.KrazySupabase.recordMultiplayerMatch === 'function') {
+                        window.KrazySupabase.recordMultiplayerMatch(matchPayload);
+                    }
+                } catch(e) { console.warn('Failed recording dart match:', e); }
+
                 return;
             } else if (newScore < 0 || (this.doubleOut && newScore === 1)) {
                 p.score = p.startTurnScore;

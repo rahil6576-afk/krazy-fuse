@@ -1286,6 +1286,27 @@
 
             statusTextEl.innerHTML = `🏆 <strong style="color: var(--hanko-red);">${winnerName}</strong> Achieves Victory! (勝利)`;
             updateScoreUI();
+
+            // Record match outcome to database
+            try {
+                const matchPayload = {
+                    game_id: 'tic-tac-toe',
+                    game_title: 'Sumi-e Tac Toe: Zen Brush & AI',
+                    mode: gameMode === 'pvp' ? 'local_pvp' : 'vs_ai',
+                    player1_name: gameMode === 'bot' ? 'You (Sumi X)' : 'Player X',
+                    player2_name: gameMode === 'bot' ? 'Zen Master (O)' : 'Player O',
+                    winner: winnerName,
+                    score_p1: scores.X,
+                    score_p2: scores.O,
+                    room_code: null,
+                    details: { gridSize, winStreakReq, winningLine: winResult.line }
+                };
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'RECORD_MULTIPLAYER_MATCH', data: matchPayload }, '*');
+                } else if (window.KrazySupabase && typeof window.KrazySupabase.recordMultiplayerMatch === 'function') {
+                    window.KrazySupabase.recordMultiplayerMatch(matchPayload);
+                }
+            } catch(e) { console.warn('Failed recording tic-tac-toe match:', e); }
         }
 
         function handleDraw() {
@@ -1294,6 +1315,27 @@
             audio.playZenBell();
             statusTextEl.innerHTML = `⚖️ <strong>Zen Harmony!</strong> It is a peaceful Draw (引き分け)`;
             updateScoreUI();
+
+            // Record draw match outcome to database
+            try {
+                const matchPayload = {
+                    game_id: 'tic-tac-toe',
+                    game_title: 'Sumi-e Tac Toe: Zen Brush & AI',
+                    mode: gameMode === 'pvp' ? 'local_pvp' : 'vs_ai',
+                    player1_name: gameMode === 'bot' ? 'You (Sumi X)' : 'Player X',
+                    player2_name: gameMode === 'bot' ? 'Zen Master (O)' : 'Player O',
+                    winner: 'Draw (Harmony)',
+                    score_p1: scores.X,
+                    score_p2: scores.O,
+                    room_code: null,
+                    details: { gridSize, winStreakReq, isDraw: true }
+                };
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'RECORD_MULTIPLAYER_MATCH', data: matchPayload }, '*');
+                } else if (window.KrazySupabase && typeof window.KrazySupabase.recordMultiplayerMatch === 'function') {
+                    window.KrazySupabase.recordMultiplayerMatch(matchPayload);
+                }
+            } catch(e) { console.warn('Failed recording tic-tac-toe draw:', e); }
         }
 
         function drawStrikeLine(lineIndices) {

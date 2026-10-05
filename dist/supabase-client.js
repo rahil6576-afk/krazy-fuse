@@ -471,6 +471,75 @@ const KrazySupabase = (function() {
         }
     }
 
+    async function recordMultiplayerMatch({ gameId, roomCode, gameMode, player1Name, player2Name, winnerName, scoreDetails }) {
+        if (!gameId) return null;
+        const matchData = {
+            game_id: gameId,
+            room_code: roomCode || null,
+            game_mode: gameMode || 'multiplayer',
+            player1_name: player1Name || 'Player 1',
+            player2_name: player2Name || 'Player 2',
+            winner_name: winnerName || 'Draw',
+            score_details: scoreDetails || {},
+            created_at: new Date().toISOString()
+        };
+
+        // Always store locally as reliable offline store
+        try {
+            const STORAGE_MP_KEY = 'kf_multiplayer_match_history';
+            const history = JSON.parse(localStorage.getItem(STORAGE_MP_KEY) || '[]');
+            history.unshift(matchData);
+            if (history.length > 50) history.pop();
+            localStorage.setItem(STORAGE_MP_KEY, JSON.stringify(history));
+            console.log('💾 [KrazySupabase] Match stored locally in browser history:', matchData);
+        } catch (_) {}
+
+        // Cloud write to Supabase if connected
+        if (isConfigured()) {
+            try {
+                const { data, error } = await client
+                    .from('multiplayer_matches')
+                    .insert([matchData])
+                    .select();
+                if (error) {
+                    console.warn('⚠️ [KrazySupabase] Cloud write multiplayer match warning:', error.message);
+                } else {
+                    console.log('🏆 [KrazySupabase] Match successfully written to Supabase cloud database:', data);
+                    return data;
+                }
+            } catch (err) {
+                console.warn('⚠️ [KrazySupabase] Cloud write exception:', err);
+            }
+        }
+        return matchData;
+    }
+
+    async function getRecentMultiplayerMatches(gameId = null, limit = 10) {
+        if (isConfigured()) {
+            try {
+                let query = client
+                    .from('multiplayer_matches')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(limit);
+                if (gameId) query = query.eq('game_id', gameId);
+                const { data, error } = await query;
+                if (!error && data) return data;
+            } catch (err) {
+                console.warn('Failed to fetch cloud matches:', err);
+            }
+        }
+        // Local fallback
+        try {
+            const STORAGE_MP_KEY = 'kf_multiplayer_match_history';
+            const history = JSON.parse(localStorage.getItem(STORAGE_MP_KEY) || '[]');
+            if (gameId) return history.filter(m => m.game_id === gameId).slice(0, limit);
+            return history.slice(0, limit);
+        } catch (_) {
+            return [];
+        }
+    }
+
     function getClient() {
         if (!client) init();
         return client;
@@ -491,6 +560,8 @@ const KrazySupabase = (function() {
         getLocalPitches,
         onReactionChange,
         onNewPitch,
+        recordMultiplayerMatch,
+        getRecentMultiplayerMatches,
         // Auth
         getClient,
         signInWithOAuth,

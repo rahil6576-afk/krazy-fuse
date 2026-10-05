@@ -175,14 +175,23 @@ body {
 
 .brand-mascot-img {
     width: 38px;
-    height: 35px;
+    height: 38px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(26, 114, 239, 0.4));
-    transition: transform 0.2s ease;
+    filter: drop-shadow(0 2px 8px rgba(220, 38, 38, 0.45));
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+}
+
+[data-theme="day"] .brand-mascot-img {
+    filter: drop-shadow(0 2px 6px rgba(220, 38, 38, 0.22)) drop-shadow(0 1px 3px rgba(15, 23, 42, 0.12));
 }
 
 .logo-container:hover .brand-mascot-img {
-    transform: scale(1.06);
+    transform: scale(1.08);
+    filter: drop-shadow(0 4px 14px rgba(220, 38, 38, 0.65));
+}
+
+[data-theme="day"] .logo-container:hover .brand-mascot-img {
+    filter: drop-shadow(0 4px 12px rgba(220, 38, 38, 0.35)) drop-shadow(0 2px 4px rgba(15, 23, 42, 0.15));
 }
 
 .brand-title-wrap {
@@ -567,9 +576,9 @@ body {
 }
 
 [data-theme="day"] .sidebar-menu-card {
-    background: #0b1122;
-    border: 1px solid #282940;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
 }
 
 /* Navigation Item: Collapsed (Icon / Logo Only) */
@@ -595,6 +604,10 @@ body {
     position: relative;
 }
 
+[data-theme="day"] .sidebar-nav-item {
+    color: #475569;
+}
+
 /* Navigation Item: Expanded (Icon + Label) */
 .sidebar-rail.expanded .sidebar-nav-item {
     width: 100%;
@@ -611,9 +624,9 @@ body {
 }
 
 [data-theme="day"] .sidebar-nav-item:hover:not(.active) {
-    background: rgba(0, 145, 255, 0.12);
-    border-color: rgba(0, 145, 255, 0.3);
-    color: #ffffff;
+    background: rgba(2, 132, 199, 0.08);
+    border-color: rgba(2, 132, 199, 0.25);
+    color: #0284c7;
 }
 
 .sidebar-nav-item.active {
@@ -624,8 +637,20 @@ body {
     box-shadow: inset 0 0 10px rgba(0, 145, 255, 0.15);
 }
 
+[data-theme="day"] .sidebar-nav-item.active {
+    background: rgba(2, 132, 199, 0.12);
+    border: 1px solid rgba(2, 132, 199, 0.45);
+    color: #0284c7;
+    font-weight: 700;
+    box-shadow: inset 0 0 10px rgba(2, 132, 199, 0.08);
+}
+
 .sidebar-rail.expanded .sidebar-nav-item.active {
     background: linear-gradient(90deg, rgba(0, 95, 255, 0.28) 0%, rgba(0, 95, 255, 0.10) 65%, rgba(0, 95, 255, 0.01) 100%);
+}
+
+[data-theme="day"] .sidebar-rail.expanded .sidebar-nav-item.active {
+    background: linear-gradient(90deg, rgba(2, 132, 199, 0.16) 0%, rgba(2, 132, 199, 0.05) 65%, transparent 100%);
 }
 
 .sidebar-icon, .sb-icon {
@@ -657,6 +682,20 @@ body {
 .sidebar-rail.expanded .sidebar-label,
 .sidebar-rail.expanded .sb-label {
     display: block;
+}
+
+[data-theme="day"] .sidebar-label,
+[data-theme="day"] .sb-label {
+    color: #334155;
+}
+
+[data-theme="day"] .sidebar-nav-item:hover .sb-label {
+    color: #0284c7;
+}
+
+[data-theme="day"] .sidebar-nav-item.active .sb-label {
+    color: #0284c7;
+    font-weight: 700;
 }
 
 /* Center Main Area */
@@ -692,20 +731,28 @@ body {
 }
 
 .hero-mascot-wrap {
-    width: clamp(140px, 14vw, 180px);
-    aspect-ratio: 125 / 114;
+    width: clamp(160px, 16vw, 200px);
+    height: clamp(160px, 16vw, 200px);
+    aspect-ratio: 1 / 1;
+    position: relative;
     margin: 0 auto 20px auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    filter: drop-shadow(0 12px 36px rgba(0, 132, 255, 0.45)) drop-shadow(0 2px 10px rgba(26, 114, 239, 0.35));
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+    filter: drop-shadow(0 14px 36px rgba(220, 38, 38, 0.42)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7));
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
     cursor: pointer;
+    user-select: none;
+    outline: none;
 }
 
 .hero-mascot-wrap:hover {
-    transform: scale(1.06) translateY(-4px);
-    filter: drop-shadow(0 18px 45px rgba(0, 132, 255, 0.7)) drop-shadow(0 4px 16px rgba(26, 114, 239, 0.5));
+    transform: scale(1.06) translateY(-2px);
+    filter: drop-shadow(0 20px 48px rgba(220, 38, 38, 0.65)) drop-shadow(0 6px 16px rgba(0, 0, 0, 0.9));
+}
+
+.hero-mascot-wrap:active {
+    transform: scale(0.97);
 }
 
 .hero-mascot-img {
@@ -713,6 +760,120 @@ body {
     height: 100%;
     object-fit: contain;
     display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+[data-theme="day"] .hero-mascot-wrap {
+    filter: drop-shadow(0 14px 34px rgba(220, 38, 38, 0.22)) drop-shadow(0 6px 16px rgba(15, 23, 42, 0.12));
+}
+
+[data-theme="day"] .hero-mascot-wrap:hover {
+    filter: drop-shadow(0 20px 44px rgba(220, 38, 38, 0.35)) drop-shadow(0 8px 22px rgba(15, 23, 42, 0.18));
+}
+
+/* ==========================================================
+   Fullscreen Mascot Animation Overlay
+   ========================================================== */
+.fullscreen-mascot-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                visibility 0.35s ease;
+    cursor: pointer;
+}
+
+[data-theme="day"] .fullscreen-mascot-overlay {
+    background: transparent;
+}
+
+.fullscreen-mascot-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.fullscreen-mascot-overlay.retreating {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    pointer-events: none !important;
+}
+
+.fullscreen-video-container {
+    position: relative;
+    width: min(84vw, 920px);
+    max-height: min(66vh, 480px);
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transform-origin: center center;
+    margin-top: 36px; /* Offset so it sits comfortably below the search bar and never cuts at top or bottom */
+    filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.7));
+    transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                filter 0.55s ease;
+}
+
+.fullscreen-mascot-overlay.retreating .fullscreen-video-container {
+    opacity: 0 !important;
+    filter: blur(4px) brightness(1.25) !important;
+}
+
+.fullscreen-mascot-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    mix-blend-mode: normal;
+    /* Remove outer black video rectangle; preserve mascot shield interior & character animation */
+    -webkit-mask-image: url('public/krazio-video-mask.png');
+    mask-image: url('public/krazio-video-mask.png');
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+}
+
+/* Mascot Animation Pulses (Launch & Land) */
+.brand-mascot-img.mascot-launching,
+.hero-mascot-img.mascot-launching {
+    animation: mascotLaunchPulse 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes mascotLaunchPulse {
+    0% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 15px rgba(220, 38, 38, 0.6)); }
+    40% { transform: scale(1.16); opacity: 0.95; filter: drop-shadow(0 0 40px rgba(220, 38, 38, 0.98)) brightness(1.2); }
+    100% { transform: scale(0.92); opacity: 0.35; filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.3)); }
+}
+
+/* Mascot Landing Pulse when returning into crest */
+.brand-mascot-img.mascot-returning,
+.hero-mascot-img.mascot-returning {
+    animation: mascotLandPulse 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes mascotLandPulse {
+    0% { transform: scale(0.82); opacity: 0.5; filter: drop-shadow(0 0 35px rgba(220, 38, 38, 0.95)); }
+    50% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.75)); }
+    100% { transform: scale(1); opacity: 1; filter: none; }
 }
 
 .hero-big-title {
@@ -1182,16 +1343,68 @@ body {
     }
 }
 
-@media (max-width: 640px) {
-    .bento-arcade-grid {
-        grid-template-columns: 1fr;
-        grid-auto-rows: 220px;
-    }
-    .bento-span-2x2 {
-        grid-column: span 1;
-        grid-row: span 1;
-    }
 }
+
+/* ==========================================================
+   4.1 Filtered & Category Catalog Grid (Genre Redirection)
+   ========================================================== */
+#filtered-section {
+    width: 100%;
+    max-width: 1240px;
+    margin: 0 auto 50px;
+    box-sizing: border-box;
+    padding: 24px 8px 10px;
+    scroll-margin-top: 100px;
+}
+
+#filtered-section .section-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#filtered-title {
+    font-family: var(--font-heading, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.5px;
+}
+
+#filtered-count {
+    padding: 4px 14px;
+    background: rgba(0, 132, 255, 0.15);
+    border: 1px solid rgba(0, 132, 255, 0.4);
+    border-radius: 999px;
+    color: #38bdf8;
+    font-family: var(--font-heading, sans-serif);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+#filtered-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#filtered-grid .bento-card {
+    height: 250px;
+}
+
+#filtered-grid .bento-card .bento-card-info {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
 
 /* Horizontal Scroll Carousels */
 .games-carousel-row {
@@ -1691,22 +1904,33 @@ body {
 }
 
 .footer-mascot-frame {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
-    background: rgba(0, 132, 255, 0.12);
-    border: 1px solid rgba(0, 132, 255, 0.3);
+    background: transparent;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 18px rgba(0, 132, 255, 0.22);
+    box-shadow: none;
     flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.footer-mascot-frame:hover {
+    transform: scale(1.08);
 }
 
 .footer-mascot-img {
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
     object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(220, 38, 38, 0.4));
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+}
+
+[data-theme="day"] .footer-mascot-img {
+    filter: drop-shadow(0 2px 6px rgba(220, 38, 38, 0.2)) drop-shadow(0 1px 3px rgba(15, 23, 42, 0.1));
 }
 
 .footer-brand-text {
@@ -5313,10 +5537,15 @@ body.eco-mode .game-screen-wrapper {
 .reaction-pulse {
     animation: reactionBump 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-@keyframes reactionBump {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.35); filter: brightness(1.3); }
-    100% { transform: scale(1); }
+/* Permanently hide all live playing badges, pills, and counters across all games */
+.bento-top-live,
+.bento-card-live,
+.player-live-badge,
+#player-live-badge-wrap,
+.pn-live-stat,
+.nav-live-pill {
+    display: none !important;
 }
+
 
 
