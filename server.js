@@ -103,7 +103,8 @@ const server = http.createServer((req, res) => {
             const ext = path.extname(filePath).toLowerCase();
             res.writeHead(200, {
                 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
-                'Access-Control-Allow-Origin': '*'
+                'Access-Control-Allow-Origin': '*',
+                'Cache-Control': 'no-cache, no-store, must-revalidate'
             });
             res.end(data);
         });

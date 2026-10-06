@@ -312,6 +312,37 @@ const AUDIENCE_MODEL_DATA = {
         { name: 'Nintendo Switch', share: 2.5, color: '#ef4444', icon: '🕹️' },
         { name: 'Other', share: 2.0, color: '#94a3b8', icon: '🌐' }
     ],
+    cities: [
+        // India (UTC +5.5) - Key States & Metropolitan Tech Hubs
+        { id: 'mumbai', city: 'Mumbai', state: 'Maharashtra', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 29500 },
+        { id: 'delhi', city: 'Delhi NCR', state: 'Delhi', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 27800 },
+        { id: 'bengaluru', city: 'Bengaluru', state: 'Karnataka', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 24200 },
+        { id: 'hyderabad', city: 'Hyderabad', state: 'Telangana', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 19800 },
+        { id: 'ahmedabad', city: 'Ahmedabad', state: 'Gujarat', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 15600 },
+        { id: 'pune', city: 'Pune', state: 'Maharashtra', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 14700 },
+        { id: 'kolkata', city: 'Kolkata', state: 'West Bengal', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 13500 },
+        { id: 'chennai', city: 'Chennai', state: 'Tamil Nadu', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 12900 },
+
+        // United States (UTC -4 to -7) - Coast-to-Coast Key States
+        { id: 'los-angeles', city: 'Los Angeles', state: 'California', country: 'USA', flag: '🇺🇸', tzOffset: -7, basePool: 21500 },
+        { id: 'new-york', city: 'New York City', state: 'New York', country: 'USA', flag: '🇺🇸', tzOffset: -4, basePool: 23800 },
+        { id: 'dallas', city: 'Dallas / Austin', state: 'Texas', country: 'USA', flag: '🇺🇸', tzOffset: -5, basePool: 17200 },
+        { id: 'chicago', city: 'Chicago', state: 'Illinois', country: 'USA', flag: '🇺🇸', tzOffset: -5, basePool: 14600 },
+        { id: 'miami', city: 'Miami', state: 'Florida', country: 'USA', flag: '🇺🇸', tzOffset: -4, basePool: 12100 },
+        { id: 'seattle', city: 'Seattle', state: 'Washington', country: 'USA', flag: '🇺🇸', tzOffset: -7, basePool: 11200 },
+
+        // Europe & United Kingdom (UTC +1 to +2)
+        { id: 'london', city: 'London', state: 'Greater London', country: 'UK', flag: '🇬🇧', tzOffset: 1, basePool: 18200 },
+        { id: 'berlin', city: 'Berlin', state: 'Berlin', country: 'Germany', flag: '🇩🇪', tzOffset: 2, basePool: 13400 },
+        { id: 'paris', city: 'Paris', state: 'Île-de-France', country: 'France', flag: '🇫🇷', tzOffset: 2, basePool: 12800 },
+
+        // Asia-Pacific & Latin America
+        { id: 'tokyo', city: 'Tokyo', state: 'Kantō', country: 'Japan', flag: '🇯🇵', tzOffset: 9, basePool: 19500 },
+        { id: 'seoul', city: 'Seoul', state: 'Gyeonggi', country: 'South Korea', flag: '🇰🇷', tzOffset: 9, basePool: 16800 },
+        { id: 'sao-paulo', city: 'São Paulo', state: 'São Paulo', country: 'Brazil', flag: '🇧🇷', tzOffset: -3, basePool: 15900 },
+        { id: 'singapore', city: 'Singapore', state: 'Central', country: 'Singapore', flag: '🇸🇬', tzOffset: 8, basePool: 10400 },
+        { id: 'sydney', city: 'Sydney', state: 'New South Wales', country: 'Australia', flag: '🇦🇺', tzOffset: 11, basePool: 9800 }
+    ],
     countries: [
         { name: 'India', share: 26.1, flag: '🇮🇳' },
         { name: 'China', share: 17.0, flag: '🇨🇳' },
@@ -341,8 +372,13 @@ class LiveAudienceEngine {
     constructor() {
         this.counts = {};
         this.trends = {};
+        this.cityStats = [];
         this.globalCount = 0;
-        this.timer = null;
+        this.plays = {};
+        // Countdown timer: Strictly updates every 60 seconds (1 minute, not less than that)
+        this.updateIntervalSeconds = 60;
+        this.secondsRemaining = this.updateIntervalSeconds;
+        this.countdownTimer = null;
         this.init();
     }
 
@@ -380,77 +416,169 @@ class LiveAudienceEngine {
         return parseInt(s.replace(/[^0-9]/g, ''), 10) || 25000;
     }
 
-    init() {
-        const factor = this.getDiurnalFactor();
-        this.plays = {};
-        this.tickCounter = 0;
+    computeCityStateAnalytics() {
+        const now = new Date();
+        const utcHours = now.getUTCHours() + (now.getUTCMinutes() / 60) + (now.getUTCSeconds() / 3600);
 
-        for (const [id, param] of Object.entries(AUDIENCE_MODEL_DATA.gameParams)) {
-            const target = Math.round(param.base * factor);
-            const variance = Math.round((Math.random() - 0.5) * 600);
-            this.counts[id] = Math.max(1200, target + variance);
-            this.trends[id] = 0;
+        const analyzed = AUDIENCE_MODEL_DATA.cities.map(c => {
+            let localHour = (utcHours + c.tzOffset) % 24;
+            if (localHour < 0) localHour += 24;
 
-            // Load saved total plays or initialize from game catalogue base plays
-            const gameObj = GAMES_CATALOG.find(g => g.id === id);
-            const basePlays = this.parseBasePlays(gameObj ? gameObj.plays : '25.0K');
-            try {
-                const stored = localStorage.getItem(`kf_total_plays_${id}`);
-                this.plays[id] = stored ? Math.max(basePlays, parseInt(stored, 10)) : basePlays;
-            } catch (e) {
-                this.plays[id] = basePlays;
+            let factor = 1.0;
+            let phase = 'Active';
+            let phaseClass = 'aud-phase-active';
+            let barColor = '#38bdf8';
+
+            if (localHour >= 0 && localHour < 5) {
+                factor = 0.32 + 0.12 * Math.cos((localHour / 5) * Math.PI);
+                phase = '🌙 Night Owl';
+                phaseClass = 'aud-phase-night';
+                barColor = '#818cf8';
+            } else if (localHour >= 5 && localHour < 8) {
+                factor = 0.44 + ((localHour - 5) / 3) * 0.28;
+                phase = '🌅 Early Morning';
+                phaseClass = 'aud-phase-day';
+                barColor = '#34d399';
+            } else if (localHour >= 8 && localHour < 12) {
+                factor = 0.72 + ((localHour - 8) / 4) * 0.35;
+                phase = '☀️ Daytime Active';
+                phaseClass = 'aud-phase-day';
+                barColor = '#22c55e';
+            } else if (localHour >= 12 && localHour < 17) {
+                factor = 1.07 + ((localHour - 12) / 5) * 0.38;
+                phase = '⚡ Afternoon';
+                phaseClass = 'aud-phase-active';
+                barColor = '#f59e0b';
+            } else if (localHour >= 17 && localHour < 22) {
+                const t = (localHour - 17) / 5;
+                factor = 1.45 + Math.sin(t * Math.PI) * 0.75;
+                phase = '🔥 Evening Prime';
+                phaseClass = 'aud-phase-prime';
+                barColor = '#ef4444';
+            } else {
+                const t = (localHour - 22) / 2;
+                factor = 1.65 - t * 0.85;
+                phase = '🎮 Night Gaming';
+                phaseClass = 'aud-phase-active';
+                barColor = '#a855f7';
             }
-        }
-        this.updateGlobal();
-        this.startTicker();
+
+            // Natural minute-level subtle variation (within +/- 1.5%)
+            const minuteSeed = now.getMinutes() + now.getHours() * 60;
+            const seedVariance = Math.sin(c.basePool + minuteSeed * 1.3) * 0.015;
+            const activePlayers = Math.max(350, Math.round(c.basePool * factor * (1 + seedVariance)));
+
+            const localH = Math.floor(localHour);
+            const localM = Math.floor((localHour % 1) * 60);
+            const ampm = localH >= 12 ? 'PM' : 'AM';
+            const displayH = localH % 12 === 0 ? 12 : localH % 12;
+            const displayM = localM < 10 ? '0' + localM : localM;
+            const formattedTime = `${displayH}:${displayM} ${ampm}`;
+
+            return {
+                ...c,
+                localHour,
+                formattedTime,
+                factor,
+                phase,
+                phaseClass,
+                barColor,
+                activePlayers
+            };
+        });
+
+        analyzed.sort((a, b) => b.activePlayers - a.activePlayers);
+        return analyzed;
     }
 
-    startTicker() {
-        if (this.timer) clearInterval(this.timer);
-        // Constantly changing live tick every 1.8 seconds
-        this.timer = setInterval(() => {
-            this.tick();
-        }, 1800);
-    }
+    recomputeAudiences() {
+        // 1. Analyze all states & cities and their local times
+        this.cityStats = this.computeCityStateAnalytics();
 
-    tick() {
-        const factor = this.getDiurnalFactor();
-        this.tickCounter = (this.tickCounter || 0) + 1;
+        // 2. Aggregate global player headcount from the state & city model
+        const totalCityAudience = this.cityStats.reduce((sum, c) => sum + c.activePlayers, 0);
+        this.globalCount = totalCityAudience;
 
+        // 3. Proportional game player headcount calibrated to global audience
+        const totalGameBase = Object.values(AUDIENCE_MODEL_DATA.gameParams).reduce((s, g) => s + g.base, 0);
         for (const [id, param] of Object.entries(AUDIENCE_MODEL_DATA.gameParams)) {
-            const target = Math.round(param.base * factor);
-            const current = this.counts[id] || target;
-            
-            // Stochastic Poisson-like fluctuation with mean-reversion pull
-            const pull = (target - current) * 0.06;
-            const noise = (Math.random() - 0.48) * param.volatility * 4;
-            const delta = Math.round(pull + noise);
-            
-            this.counts[id] = Math.max(850, current + delta);
-            this.trends[id] = delta;
+            const share = param.base / totalGameBase;
+            const jitter = 0.98 + (Math.sin(param.base + Date.now()) % 0.04);
+            const target = Math.max(850, Math.round(this.globalCount * share * jitter));
+            this.counts[id] = target;
 
-            // Dynamic plays accumulation DIRECTLY PROPORTIONAL to amount of active concurrent plays
-            const activeAudience = this.counts[id];
-            const proportionalRate = 0.00032; // proportional play completion factor
-            const jitter = 0.75 + Math.random() * 0.5;
-            const deltaPlays = Math.max(1, Math.round(activeAudience * proportionalRate * jitter));
-            this.plays[id] = (this.plays[id] || 25000) + deltaPlays;
-
-            // Periodically persist plays every 5 ticks (~9 seconds)
-            if (this.tickCounter % 5 === 0) {
+            // Initialize or accumulate dynamic plays
+            if (!this.plays[id]) {
+                const gameObj = (typeof GAMES_CATALOG !== 'undefined') ? GAMES_CATALOG.find(g => g.id === id) : null;
+                const basePlays = this.parseBasePlays(gameObj ? gameObj.plays : '25.0K');
+                try {
+                    const stored = localStorage.getItem(`kf_total_plays_${id}`);
+                    this.plays[id] = stored ? Math.max(basePlays, parseInt(stored, 10)) : basePlays;
+                } catch (e) {
+                    this.plays[id] = basePlays;
+                }
+            } else {
+                const deltaPlays = Math.max(2, Math.round(target * 0.008));
+                this.plays[id] += deltaPlays;
                 try {
                     localStorage.setItem(`kf_total_plays_${id}`, this.plays[id]);
                 } catch (e) {}
             }
         }
-        this.updateGlobal();
+    }
+
+    init() {
+        this.recomputeAudiences();
         this.syncDOM();
+        this.startCountdownTicker();
+    }
+
+    startCountdownTicker() {
+        if (this.countdownTimer) clearInterval(this.countdownTimer);
+        // Ticks every second to decrement visible countdown; changes player count strictly every 60s
+        this.countdownTimer = setInterval(() => {
+            this.countdownTick();
+        }, 1000);
+    }
+
+    countdownTick() {
+        this.secondsRemaining--;
+
+        // Update navbar countdown indicator badge
+        const cdBadge = document.getElementById('live-sync-countdown');
+        if (cdBadge) {
+            cdBadge.textContent = `${this.secondsRemaining}s`;
+            if (this.secondsRemaining <= 5) {
+                cdBadge.classList.add('pulse');
+            } else {
+                cdBadge.classList.remove('pulse');
+            }
+        }
+
+        // Update modal sync countdown if open
+        const modalCd = document.getElementById('aud-modal-countdown');
+        if (modalCd) {
+            modalCd.textContent = `${this.secondsRemaining}s`;
+        }
+
+        // Cycle trigger: strictly every minute (60s)
+        if (this.secondsRemaining <= 0) {
+            this.secondsRemaining = this.updateIntervalSeconds;
+            this.recomputeAudiences();
+            this.syncDOM();
+
+            // Refresh modal if active
+            const modal = document.getElementById('audience-modal');
+            if (modal && modal.classList.contains('active') && typeof window.renderAudienceModal === 'function') {
+                window.renderAudienceModal();
+            }
+        }
     }
 
     recordGamePlay(id) {
         if (!id) return;
         if (!this.plays[id]) {
-            const g = GAMES_CATALOG.find(x => x.id === id);
+            const g = (typeof GAMES_CATALOG !== 'undefined') ? GAMES_CATALOG.find(x => x.id === id) : null;
             this.plays[id] = this.parseBasePlays(g ? g.plays : '25.0K');
         }
         this.plays[id] += 1;
@@ -464,12 +592,8 @@ class LiveAudienceEngine {
         return this.plays[id] || 25000;
     }
 
-    updateGlobal() {
-        this.globalCount = Object.values(this.counts).reduce((a, b) => a + b, 0);
-    }
-
     getGameCount(id) {
-        return this.counts[id] || (AUDIENCE_MODEL_DATA.gameParams[id] ? Math.round(AUDIENCE_MODEL_DATA.gameParams[id].base * this.getDiurnalFactor()) : 15000);
+        return this.counts[id] || 15000;
     }
 
     formatCompact(num) {
@@ -484,11 +608,11 @@ class LiveAudienceEngine {
         if (navGlobal) {
             navGlobal.textContent = this.globalCount.toLocaleString();
             navGlobal.classList.add('live-flash');
-            setTimeout(() => navGlobal.classList.remove('live-flash'), 500);
+            setTimeout(() => navGlobal.classList.remove('live-flash'), 650);
         }
 
         // 2. Update Active Game Player Counters (Playing now & Dynamic Plays)
-        if (currentGame) {
+        if (typeof currentGame !== 'undefined' && currentGame) {
             const playerLiveCount = document.getElementById('player-game-live-count');
             if (playerLiveCount) {
                 playerLiveCount.textContent = this.getGameCount(currentGame.id).toLocaleString();
@@ -1268,129 +1392,15 @@ const KrazyGameStorage = {
 };
 
 // ==========================================================
-// HIGH-TECH ARCADE LOADING SCREEN ENGINE
+// INSTANT GAME LAUNCH ENGINE (Zero Delays, Instant Play)
 // ==========================================================
 async function executeGameLoading(game, onReady) {
     const loader = document.getElementById('game-loader-overlay');
-    if (!loader) {
-        if (onReady) onReady();
-        return;
-    }
-
-    const manifest = GAME_MANIFESTS[game.id] || {
-        id: game.id,
-        title: game.title,
-        sizeMB: 1.0,
-        formattedSize: '1.0 MB',
-        totalBytes: 1048576,
-        tip: game.desc
-    };
-
-    // Populate Header
-    const iconEl = document.getElementById('loader-game-icon');
-    const titleEl = document.getElementById('loader-game-title');
-    const tagEl = document.getElementById('loader-game-tag');
-    const sizeVal = document.getElementById('loader-size-val');
-    const cacheStatus = document.getElementById('loader-cache-status');
-
-    if (iconEl) iconEl.textContent = (game.heroEmoji || game.emoji || '🎮').split(' ')[0];
-    if (titleEl) titleEl.textContent = game.title;
-    if (tagEl) tagEl.textContent = game.tags ? game.tags[0] : (game.category || 'Arcade');
-    if (sizeVal) sizeVal.textContent = manifest.formattedSize;
-
-    // Pro-Tip & Controls
-    const tipText = document.getElementById('loader-tip-text');
-    if (tipText) tipText.textContent = manifest.tip || game.desc;
-
-    const controlsTags = document.getElementById('loader-controls-tags');
-    if (controlsTags) {
-        controlsTags.innerHTML = '';
-        (game.controls || [{ key: 'WASD / Space', label: 'Play' }]).slice(0, 3).forEach(c => {
-            const pill = document.createElement('span');
-            pill.className = 'loader-key-pill';
-            pill.textContent = `${formatKeyForPlatform(c.key)}: ${c.label}`;
-            controlsTags.appendChild(pill);
-        });
-    }
-
-    // Diagnostics Elements
-    const diagStorage = document.getElementById('diag-storage');
-    const diagAssets = document.getElementById('diag-assets');
-    const diagAudio = document.getElementById('diag-audio');
-    const diagEngine = document.getElementById('diag-engine');
-    const diagStorageIcon = document.getElementById('diag-storage-icon');
-    const diagAssetsIcon = document.getElementById('diag-assets-icon');
-    const diagAudioIcon = document.getElementById('diag-audio-icon');
-    const diagEngineIcon = document.getElementById('diag-engine-icon');
-
-    [diagStorage, diagAssets, diagAudio, diagEngine].forEach(d => d && d.classList.remove('done'));
-    [diagStorageIcon, diagAssetsIcon, diagAudioIcon, diagEngineIcon].forEach(i => i && (i.textContent = '⏳'));
-
-    // Progress Elements
-    const fillEl = document.getElementById('loader-fill');
-    const pctEl = document.getElementById('loader-percent');
-    const mbCounter = document.getElementById('loader-mb-counter');
-    const stageMsg = document.getElementById('loader-stage-msg');
-    const btnLaunch = document.getElementById('btn-loader-launch');
-
-    if (fillEl) fillEl.style.width = '0%';
-    if (pctEl) pctEl.textContent = '0%';
-    if (mbCounter) mbCounter.textContent = `0.0 MB / ${manifest.formattedSize}`;
-    if (btnLaunch) btnLaunch.classList.add('hidden');
-
-    loader.classList.remove('hidden');
-
-    const user = AuthManager.getActiveUser();
-    if (cacheStatus) {
-        cacheStatus.textContent = user.isLoggedIn ? `Save Profile: ${user.username}` : 'Guest Session (Clears on reload)';
-    }
-    if (stageMsg) {
-        stageMsg.textContent = user.isLoggedIn 
-            ? `⚡ Connected to profile "${user.username}" — Loading isolated game data...` 
-            : '⚡ Launching game in Guest mode — Progress clears on website reload...';
-    }
-
-    // Fast, responsive engine verification sweep
-    for (let step = 1; step <= 10; step++) {
-        const p = step / 10;
-        if (fillEl) fillEl.style.width = `${Math.floor(p * 100)}%`;
-        if (pctEl) pctEl.textContent = `${Math.floor(p * 100)}%`;
-        if (mbCounter) mbCounter.textContent = `${(manifest.sizeMB * p).toFixed(1)} MB / ${manifest.formattedSize}`;
-        if (p >= 0.25 && diagStorage) { diagStorage.classList.add('done'); if (diagStorageIcon) diagStorageIcon.textContent = '✅'; }
-        if (p >= 0.55 && diagAssets) { diagAssets.classList.add('done'); if (diagAssetsIcon) diagAssetsIcon.textContent = '✅'; }
-        if (p >= 0.80 && diagAudio) { diagAudio.classList.add('done'); if (diagAudioIcon) diagAudioIcon.textContent = '✅'; }
-        if (p >= 0.95 && diagEngine) { diagEngine.classList.add('done'); if (diagEngineIcon) diagEngineIcon.textContent = '✅'; }
-        await new Promise(r => setTimeout(r, 18));
-    }
-
-    // Completed State
-    if (fillEl) fillEl.style.width = '100%';
-    if (pctEl) pctEl.textContent = '100%';
-    if (mbCounter) mbCounter.textContent = `${manifest.formattedSize} / ${manifest.formattedSize}`;
-    if (stageMsg) stageMsg.textContent = '⚡ Low Device Load Ready — Launching!';
-    [diagStorage, diagAssets, diagAudio, diagEngine].forEach(d => d && d.classList.add('done'));
-    [diagStorageIcon, diagAssetsIcon, diagAudioIcon, diagEngineIcon].forEach(i => i && (i.textContent = '✅'));
-
-    // Enable launch button
-    if (btnLaunch) {
-        btnLaunch.classList.remove('hidden');
-        btnLaunch.onclick = () => {
-            requestGameFullscreen();
-            completeLaunch();
-        };
-    }
-
-    let launched = false;
-    function completeLaunch() {
-        if (launched) return;
-        launched = true;
+    if (loader) {
         loader.classList.add('hidden');
-        requestGameFullscreen();
-        if (onReady) onReady();
+        loader.style.display = 'none';
     }
-
-    // Auto-launch smoothly after 500ms
-    setTimeout(completeLaunch, 500);
+    if (onReady) onReady();
 }
 
 // Universal Auto-Fullscreen Function for Game Launch
@@ -1746,7 +1756,7 @@ function renderPortal() {
             const titleEl = document.getElementById('filtered-title');
             if (countEl) countEl.textContent = `${matched.length} games`;
             if (titleEl) {
-                if (searchQuery) titleEl.textContent = `🔍 SEARCH RESULTS FOR "${searchQuery.toUpperCase()}"`;
+                if (searchQuery) titleEl.textContent = `SEARCH RESULTS FOR "${searchQuery.toUpperCase()}"`;
                 else if (catKey === 'trending' || catKey === 'popular') titleEl.textContent = `🔥 POPULAR & TRENDING GAMES`;
                 else if (catKey === 'new') titleEl.textContent = `🆕 NEW ARCADE RELEASES`;
                 else if (catKey === 'multiplayer') titleEl.textContent = `🏆 MULTIPLAYER & PVP BATTLES`;
@@ -3083,20 +3093,34 @@ function setupAudienceModal() {
             `).join('');
         }
 
-        // Render Geo Bars
+        // Render Geo Bars (States & Cities with local times and active player counts)
         const geoContainer = document.getElementById('aud-geo-bars');
         if (geoContainer) {
-            geoContainer.innerHTML = AUDIENCE_MODEL_DATA.countries.map(c => `
-                <div class="aud-bar-row">
-                    <div class="aud-bar-label">
-                        <span>${c.flag} ${c.name}</span>
-                        <strong>${c.share}%</strong>
+            const cities = window.audienceEngine.cityStats || [];
+            const maxCityPlayers = cities.length ? cities[0].activePlayers : 1;
+            
+            geoContainer.innerHTML = cities.map(c => {
+                const fillPct = Math.round((c.activePlayers / maxCityPlayers) * 100);
+                return `
+                    <div class="aud-city-row" title="${c.city}, ${c.state} (${c.country}) — Local Time: ${c.formattedTime}">
+                        <div class="aud-city-top">
+                            <div class="aud-city-info">
+                                <span class="aud-city-flag">${c.flag}</span>
+                                <span class="aud-city-name">${c.city}</span>
+                                <span class="aud-city-state">${c.state}</span>
+                            </div>
+                            <div class="aud-city-stats">
+                                <span class="aud-city-time">${c.formattedTime}</span>
+                                <span class="aud-city-phase-badge ${c.phaseClass}">${c.phase}</span>
+                                <strong class="aud-city-count">${c.activePlayers.toLocaleString()}</strong>
+                            </div>
+                        </div>
+                        <div class="aud-bar-track">
+                            <div class="aud-bar-fill" style="width: ${fillPct}%; background: ${c.barColor};"></div>
+                        </div>
                     </div>
-                    <div class="aud-bar-track">
-                        <div class="aud-bar-fill" style="width: ${c.share * 3.5}%; background: #fbbf24;"></div>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Render Timeline Track
@@ -3118,6 +3142,7 @@ function setupAudienceModal() {
             }).join('');
         }
     }
+    window.renderAudienceModal = renderAudienceModal;
 
     const openAudienceModal = () => {
         renderAudienceModal();

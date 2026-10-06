@@ -1,0 +1,97 @@
+/* Spark/Particle explosion styling */
+.pop-particle {
+  position: fixed;
+  width: var(--size, 8px);
+  height: var(--size, 8px);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  background: var(--particle-color, #ff66c4);
+  box-shadow: 0 0 8px var(--particle-color, #ff66c4);
+  animation: particleExplode 0.7s cubic-bezier(0.1, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes particleExplode {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
+}
+
+.popup-text {
+  position: fixed;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.2rem;
+  pointer-events: none;
+  z-index: 10000;
+  animation: textFloatUp 0.8s ease-out forwards;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes textFloatUp {
+  0% {
+    transform: translate(-50%, -50%) translateY(0) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -50%) translateY(-10px) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translateY(-40px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* Space Theme: Asteroid Shards/Pieces */
+.pop-particle.particle-theme-space {
+  border-radius: 0;
+  background: #2b233a;
+  border: 1px solid var(--particle-color, #00f0ff);
+  box-shadow: 0 0 10px var(--particle-color, #00f0ff);
+  clip-path: polygon(30% 0%, 80% 15%, 100% 50%, 75% 85%, 25% 100%, 0% 55%);
+  animation: asteroidPieceExplode 0.8s cubic-bezier(0.15, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes asteroidPieceExplode {
+  0% {
+    transform: translate(0, 0) scale(1.2) rotate(var(--start-rot, 0deg));
+    opacity: 1;
+  }
+  30% {
+    transform: translate(var(--tx), calc(var(--ty) - 20px)) scale(1) rotate(calc(var(--rot, 360deg) / 2));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(var(--tx) * 1.5), calc(var(--ty) + 150px)) scale(0) rotate(var(--rot, 360deg));
+    opacity: 0;
+  }
+}
+
+/* Slimy Theme: Gooey Slime Splatter */
+.pop-particle.particle-theme-slimy {
+  border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+  background: var(--particle-color, #39ff14);
+  box-shadow: 0 0 15px var(--particle-color, #39ff14), inset 0 0 6px rgba(255, 255, 255, 0.85);
+  animation: slimeSplatAnimation 0.85s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+}
+
+@keyframes slimeSplatAnimation {
+  0% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(var(--tx), var(--ty)) scale(1.45);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(var(--tx), calc(var(--ty) + 45px)) scale(0);
+    opacity: 0;
+  }
+}

@@ -522,7 +522,7 @@ body {
 
 #catalog-view, .catalog-view {
     width: 100%;
-    min-height: 2925px;
+    min-height: auto;
     transform: rotate(0deg);
     opacity: 1;
     box-sizing: border-box;
@@ -535,8 +535,10 @@ body {
     padding: 0;
     margin: 0;
     position: sticky;
-    top: 76px;
-    height: calc(100vh - 86px);
+    top: 84px;
+    align-self: flex-start;
+    height: fit-content;
+    max-height: calc(100vh - 96px);
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
@@ -556,7 +558,7 @@ body {
 /* Card Container with border: 1px solid #282940 */
 .sidebar-menu-card {
     width: 100%;
-    min-height: 861px;
+    min-height: auto;
     background: #060914;
     border: 1px solid #282940;
     border-radius: 12px;
@@ -702,7 +704,7 @@ body {
 .portal-main-area, .content-viewport {
     flex: 1;
     min-width: 0;
-    padding: 0 8px 64px;
+    padding: 0 8px 16px;
 }
 
 /* ==========================================================
@@ -929,7 +931,7 @@ body {
     color: #ffffff;
     font-family: var(--font-body);
     font-size: 0.95rem;
-    padding: 13px 130px 13px 46px;
+    padding: 13px 130px 13px 22px;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1020,7 +1022,7 @@ body {
 .bento-arcade-section {
     width: 100%;
     max-width: 1240px;
-    margin: 0 auto 50px;
+    margin: 0 auto 28px;
     box-sizing: border-box;
     padding: 0 8px;
 }
@@ -1858,9 +1860,9 @@ body {
     background: #050811;
     background: linear-gradient(180deg, #070b16 0%, #03060c 100%);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 48px 32px 32px;
+    padding: 36px 32px 28px;
     width: 100%;
-    margin-top: 64px;
+    margin-top: 36px;
     box-sizing: border-box;
     position: relative;
     z-index: 20;
@@ -1876,13 +1878,13 @@ body {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 24px;
 }
 
 /* Main Top Tier */
 .footer-main-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 28px 48px;
@@ -1893,20 +1895,20 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-width: 440px;
+    max-width: 520px;
     min-width: 260px;
 }
 
 .footer-brand-wrap {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 22px;
 }
 
 .footer-mascot-frame {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 96px;
+    height: 96px;
+    border-radius: 20px;
     background: transparent;
     border: none;
     display: flex;
@@ -1922,15 +1924,15 @@ body {
 }
 
 .footer-mascot-img {
-    width: 34px;
-    height: 34px;
+    width: 88px;
+    height: 88px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 6px rgba(220, 38, 38, 0.4));
+    filter: drop-shadow(0 6px 18px rgba(220, 38, 38, 0.55));
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
 }
 
 [data-theme="day"] .footer-mascot-img {
-    filter: drop-shadow(0 2px 6px rgba(220, 38, 38, 0.2)) drop-shadow(0 1px 3px rgba(15, 23, 42, 0.1));
+    filter: drop-shadow(0 5px 16px rgba(220, 38, 38, 0.32)) drop-shadow(0 2px 6px rgba(15, 23, 42, 0.12));
 }
 
 .footer-brand-text {
@@ -1941,7 +1943,7 @@ body {
 .footer-brand-title, .footer-brand-main {
     font-family: var(--font-heading);
     font-weight: 800;
-    font-size: 1.25rem;
+    font-size: 1.55rem;
     color: #ffffff;
     letter-spacing: 0.8px;
     line-height: 1.15;
@@ -1952,10 +1954,11 @@ body {
 }
 
 .footer-brand-sub {
-    font-size: 0.78rem;
+    font-size: 0.88rem;
     font-weight: 600;
     color: #38bdf8;
     letter-spacing: 0.3px;
+    margin-top: 4px;
 }
 
 .footer-brand-tagline {
@@ -2097,15 +2100,21 @@ body {
     background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.08) 15%, rgba(0, 0, 0, 0.08) 85%, transparent);
 }
 
-/* Bottom Marginalized Row */
+/* Bottom Marginalized Row (Centered Copyright) */
 .footer-bottom-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
     gap: 14px;
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     color: #64748b;
+}
+
+.footer-copy-text {
+    text-align: center;
+    width: 100%;
 }
 
 .footer-copy-text strong {
@@ -2704,25 +2713,7 @@ body {
    HIGH-PERFORMANCE ARCADE LOADING SCREEN & DEVICE LOAD OPTIMIZER
    ========================================================== */
 .game-loader-overlay {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center, rgba(14, 20, 32, 0.97) 0%, rgba(5, 8, 14, 0.99) 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 25;
-    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s ease;
-    padding: 20px;
-    overflow: hidden;
-}
-
-.game-loader-overlay.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+    display: none !important;
 }
 
 .loader-backdrop-glow {
@@ -4980,6 +4971,23 @@ body.eco-mode .game-screen-wrapper {
     transition: color 0.2s ease;
 }
 
+[data-theme="day"] .nav-live-ticker {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #0f172a;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08), 0 0 10px rgba(34, 197, 94, 0.15);
+}
+
+[data-theme="day"] .nav-live-ticker:hover {
+    background: rgba(240, 253, 244, 0.95);
+    border-color: #16a34a;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.2);
+}
+
+[data-theme="day"] .live-ticker-num {
+    color: #15803d;
+}
+
 .live-ticker-divider {
     width: 1.5px;
     height: 15px;
@@ -5015,6 +5023,39 @@ body.eco-mode .game-screen-wrapper {
     letter-spacing: 0.8px;
     padding: 2px 6px;
     border-radius: 4px;
+}
+
+/* Live Countdown Indicator Badge */
+.live-countdown-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-family: var(--font-heading);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 7px;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+}
+
+[data-theme="day"] .live-countdown-badge {
+    background: rgba(0, 0, 0, 0.06);
+    color: #64748b;
+}
+
+.live-countdown-badge.pulse {
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.25);
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+@media (max-width: 640px) {
+    .live-countdown-badge {
+        display: none;
+    }
 }
 
 /* Pulsing Green Live Dot */
@@ -5239,6 +5280,176 @@ body.eco-mode .game-screen-wrapper {
     height: 100%;
     border-radius: 999px;
     transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* State & City Live Demographics Styles */
+.aud-split-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.aud-split-header-row .aud-split-title {
+    margin-bottom: 0;
+}
+
+.aud-geo-countdown {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.aud-geo-countdown strong {
+    color: #4ade80;
+    font-family: var(--font-heading);
+}
+
+.aud-bars-list.scrollable {
+    max-height: 290px;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.aud-bars-list.scrollable::-webkit-scrollbar {
+    width: 4px;
+}
+
+.aud-bars-list.scrollable::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+.aud-city-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 7px 9px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.aud-city-row:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.aud-city-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.aud-city-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    min-width: 0;
+}
+
+.aud-city-flag {
+    font-size: 0.95rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.aud-city-name {
+    font-weight: 700;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.aud-city-state {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.aud-city-stats {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.aud-city-time {
+    font-size: 0.7rem;
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.07);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.aud-city-phase-badge {
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+
+.aud-phase-prime {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.aud-phase-active {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.aud-phase-day {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.aud-phase-night {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+    border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+.aud-city-count {
+    font-family: var(--font-heading);
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #38bdf8;
+    min-width: 52px;
+    text-align: right;
+}
+
+[data-theme="day"] .aud-city-row {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="day"] .aud-city-row:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="day"] .aud-city-name {
+    color: #0f172a;
+}
+
+[data-theme="day"] .aud-city-time {
+    background: rgba(0, 0, 0, 0.05);
+    color: #475569;
 }
 
 /* Diurnal Timeline Track */

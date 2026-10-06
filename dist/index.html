@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,600;1,6..12,700&family=Outfit:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="portal.css">
+    <link rel="stylesheet" href="portal.css?v=instant">
 </head>
 <body data-view="catalog">
 
@@ -47,6 +47,12 @@
         </div>
 
         <div class="nav-actions">
+            <!-- Real-time Live Players Telemetry Badge -->
+            <button type="button" class="nav-live-ticker" id="btn-live-insights" title="Live Players Currently Playing (Click to view State &amp; City Demographics)">
+                <span class="live-pulse-dot"></span>
+                <span class="live-ticker-num" id="nav-global-live-count">142,850</span>
+                <span class="live-ticker-label">ONLINE</span>
+            </button>
 
             <!-- Theme Toggle Circular Button -->
             <button id="btn-theme-toggle" class="nav-circle-btn" title="Toggle Day/Night Theme" aria-label="Toggle Theme">
@@ -141,7 +147,7 @@
                         <div class="game-screen-wrapper" id="game-screen-wrapper">
                             <div class="game-screen-inner" id="game-screen-inner">
                                 <!-- High-Performance Game Loading Screen with Real Device Storage Progress -->
-                                <div class="game-loader-overlay" id="game-loader-overlay">
+                                <div class="game-loader-overlay hidden" id="game-loader-overlay" style="display: none;">
                                     <div class="loader-backdrop-glow" id="loader-backdrop-glow"></div>
                                     <div class="loader-content-card">
                                         <!-- Header: Icon, Title & Meta Badges -->
@@ -372,7 +378,6 @@
 
                         <!-- Big Center Search Bar with Find Game Button -->
                         <div class="hero-search-box">
-                            <span class="hero-search-icon">🔍</span>
                             <input type="text" id="search-games-input" class="hero-search-input" placeholder="Search 12+ krazy arcade games...">
                             <button class="hero-search-btn" id="btn-search-go">Find Game</button>
                         </div>
@@ -859,9 +864,12 @@
                     </div>
                 </div>
                 <div class="aud-split-col">
-                    <h4 class="aud-split-title">🌍 TOP AUDIENCE GEOGRAPHIES</h4>
-                    <div class="aud-bars-list" id="aud-geo-bars">
-                        <!-- Filled dynamically -->
+                    <div class="aud-split-header-row">
+                        <h4 class="aud-split-title">🌍 LIVE PLAYERS BY STATE &amp; CITY</h4>
+                        <span class="aud-geo-countdown"><span class="live-pulse-dot mini"></span> Real-Time Demographics</span>
+                    </div>
+                    <div class="aud-bars-list scrollable" id="aud-geo-bars">
+                        <!-- Populated dynamically with states, cities, local times & live players -->
                     </div>
                 </div>
             </div>
@@ -894,7 +902,7 @@
     <!-- Modern Arcade Footer (Marginalized 2-Tier Layout) -->
     <footer class="portal-footer footer">
         <div class="footer-container">
-            <!-- Main Top Tier: Brand, Navigation & Creator Signature Badge -->
+            <!-- Main Top Tier: Brand & Creator Signature Badge -->
             <div class="footer-main-row">
                 <!-- Left: Mascot & Brand Identity -->
                 <div class="footer-brand-col">
@@ -907,24 +915,10 @@
                             <span class="footer-brand-sub">Live to Play &bull; Fast, Playful &amp; Chaotic</span>
                         </div>
                     </div>
-                    <p class="footer-brand-tagline">
-                        Instant zero-lag browser gaming crafted with WebGL &amp; Canvas engines. Jump straight in!
-                    </p>
-                </div>
-
-                <!-- Center: Navigation & Legal Links -->
-                <div class="footer-nav-col">
-                    <h5 class="footer-nav-heading">Explore &amp; Legal</h5>
-                    <div class="footer-nav-links">
-                        <a href="#" class="footer-link" id="footer-link-home">Home Arcade</a>
-                        <a href="#privacy" class="footer-link footer-legal-link">Privacy Policy</a>
-                        <a href="#terms" class="footer-link footer-legal-link">Terms &amp; Conditions</a>
-                    </div>
                 </div>
 
                 <!-- Right: Creator Signature Card & Interactive Badge -->
                 <div class="footer-creator-col">
-                    <span class="footer-creator-label">Crafted &amp; Powered By</span>
                     <a href="https://kraziocloud.com" target="_blank" rel="noopener noreferrer" class="creator-badge" title="Visit KrazioCloud (kraziocloud.com)">
                         <span class="creator-badge-icon">☁️</span>
                         <div class="creator-badge-info">
@@ -942,14 +936,10 @@
             <!-- Subtle Gradient Divider -->
             <div class="footer-divider"></div>
 
-            <!-- Bottom Tier: Marginalized Copyright & Realtime Engine Status -->
+            <!-- Bottom Tier: Marginalized Copyright -->
             <div class="footer-bottom-row">
                 <div class="footer-copy-text">
-                    &copy; 2026 <strong>Krazy Fuze</strong>. Fast, Playful &amp; Chaotic Web Arcade &bull; New games dropping regularly!
-                </div>
-                <div class="footer-status-pill">
-                    <span class="status-live-dot"></span>
-                    <span>60 FPS Native Web Engine &bull; Low Device Load</span>
+                    &copy; 2026 <strong>Krazy Fuze</strong>. All rights reserved.
                 </div>
             </div>
         </div>
@@ -966,6 +956,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="supabase-client.js"></script>
-    <script src="portal.js"></script>
+    <script src="portal.js?v=instant"></script>
 </body>
 </html>
