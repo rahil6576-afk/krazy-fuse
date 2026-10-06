@@ -2,6 +2,27 @@
 const canvas = document.getElementById('elevatorCanvas');
 const ctx = canvas.getContext('2d');
 
+// Safe Storage Helper (prevents crashes in restricted/third-party iframes)
+const SafeStorage = {
+    _mem: {},
+    getItem(key) {
+        try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                return window.localStorage.getItem(key);
+            }
+        } catch (e) {}
+        return this._mem[key] !== undefined ? this._mem[key] : null;
+    },
+    setItem(key, val) {
+        try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                window.localStorage.setItem(key, String(val));
+            }
+        } catch (e) {}
+        this._mem[key] = String(val);
+    }
+};
+
 // Game States
 const STATE = {
     LOBBY: 'LOBBY',
@@ -16,7 +37,8 @@ const STATE = {
 let gameState = STATE.LOBBY;
 let currentFloor = 1;
 let runCoins = 0;
-let bankedCoins = parseInt(localStorage.getItem('doom_banked_coins') || '0', 10);
+let bankedCoins = parseInt(SafeStorage.getItem('doom_banked_coins') || '0', 10);
+if (isNaN(bankedCoins)) bankedCoins = 0;
 let enemiesSlain = 0;
 let bossesDefeated = 0;
 let secretsFound = 0;
@@ -1255,7 +1277,7 @@ function openSafeRoom() {
 // Cash-Out / Bank Coins
 function cashOutAndEscape() {
     bankedCoins += runCoins;
-    localStorage.setItem('doom_banked_coins', bankedCoins.toString());
+    SafeStorage.setItem('doom_banked_coins', bankedCoins.toString());
     if (window.doomAudio) window.doomAudio.playCashOut();
     document.getElementById('safe-room-modal').classList.add('hidden');
 
@@ -1293,7 +1315,8 @@ function advanceToNextFloor() {
     }, 600);
 }
 
-let lastFailedFloor = parseInt(localStorage.getItem('doom_failed_floor') || '1', 10);
+let lastFailedFloor = parseInt(SafeStorage.getItem('doom_failed_floor') || '1', 10);
+if (isNaN(lastFailedFloor)) lastFailedFloor = 1;
 
 function updateRetryFloorButtons() {
     const btnRetry = document.getElementById('btn-retry-floor');
@@ -1330,7 +1353,7 @@ function triggerGameOver(reason) {
 
     // Save failed floor checkpoint
     lastFailedFloor = currentFloor;
-    localStorage.setItem('doom_failed_floor', lastFailedFloor.toString());
+    SafeStorage.setItem('doom_failed_floor', lastFailedFloor.toString());
 
     // Cause of death
     const randomDeath = CAUSES_OF_DEATH[Math.floor(Math.random() * CAUSES_OF_DEATH.length)];
@@ -1854,24 +1877,39 @@ window.resumeElevatorGame = function() {
 
 window.startNewRun = startNewRun;
 
-// Button Bindings
+// Robust Button Bindings with Touch and Pointer Fallbacks
+function bindActionBtn(btn, action) {
+    if (!btn) return;
+    btn.onclick = (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        action();
+    };
+    btn.addEventListener('click', (e) => {
+        action();
+    });
+    btn.addEventListener('touchend', (e) => {
+        if (e && e.cancelable) e.preventDefault();
+        action();
+    }, { passive: false });
+}
+
 const btnStart = document.getElementById('btn-start-game');
-if (btnStart) btnStart.onclick = startNewRun;
+bindActionBtn(btnStart, startNewRun);
 
 const btnRestart = document.getElementById('btn-restart');
-if (btnRestart) btnRestart.onclick = startNewRun;
+bindActionBtn(btnRestart, startNewRun);
 
 const btnRetryFloor = document.getElementById('btn-retry-floor');
-if (btnRetryFloor) btnRetryFloor.onclick = restartAtFailedFloor;
+bindActionBtn(btnRetryFloor, restartAtFailedFloor);
 
 const btnLobbyContinue = document.getElementById('btn-lobby-continue-floor');
-if (btnLobbyContinue) btnLobbyContinue.onclick = restartAtFailedFloor;
+bindActionBtn(btnLobbyContinue, restartAtFailedFloor);
 
 const btnCashOut = document.getElementById('btn-cash-out');
-if (btnCashOut) btnCashOut.onclick = cashOutAndEscape;
+bindActionBtn(btnCashOut, cashOutAndEscape);
 
 const btnGoHigher = document.getElementById('btn-go-higher');
-if (btnGoHigher) btnGoHigher.onclick = advanceToNextFloor;
+bindActionBtn(btnGoHigher, advanceToNextFloor);
 
 const btnSoundToggle = document.getElementById('btn-sound-toggle');
 if (btnSoundToggle) {
@@ -1883,7 +1921,24 @@ if (btnSoundToggle) {
     };
 }
 
-// Initialize Lobby & Start Game Loop
-initLobby();
-updateRetryFloorButtons();
-requestAnimationFrame(gameLoop);
+// Resilient Bootloader (runs immediately or upon DOM ready)
+let hasBooted = false;
+function bootElevatorDoom() {
+    if (hasBooted) return;
+    hasBooted = true;
+    try {
+        initLobby();
+        updateRetryFloorButtons();
+        updateHUD();
+        requestAnimationFrame(gameLoop);
+    } catch (err) {
+        console.warn('Elevator of Doom initialization warning:', err);
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootElevatorDoom);
+} else {
+    bootElevatorDoom();
+}
+window.addEventListener('load', bootElevatorDoom);

@@ -1384,12 +1384,25 @@ const KrazyGameStorage = {
         const iframe = document.getElementById('active-game-iframe');
         if (iframe && iframe.contentWindow && window.currentGame) {
             const game = window.currentGame;
-            const gameUrl = game.link.startsWith('/') ? game.link : '/' + game.link;
+            const gameUrl = resolveGameUrl(game.link);
             const embedUrl = gameUrl.includes('?') ? `${gameUrl}&embedded=true` : `${gameUrl}?embedded=true`;
             iframe.src = embedUrl;
         }
     }
 };
+
+// Robust URL resolution supporting root deployments and GitHub Pages subpaths
+function resolveGameUrl(rawLink) {
+    if (!rawLink) return '';
+    if (/^https?:\/\//i.test(rawLink)) return rawLink;
+    const cleanPath = rawLink.replace(/^\/+/, '');
+    let base = window.location.pathname;
+    if (!base.endsWith('/')) {
+        base = base.substring(0, base.lastIndexOf('/') + 1);
+    }
+    if (!base) base = '/';
+    return base + cleanPath;
+}
 
 // ==========================================================
 // INSTANT GAME LAUNCH ENGINE (Zero Delays, Instant Play)
@@ -1544,7 +1557,7 @@ function openGamePlayer(gameId) {
     
     executeGameLoading(game, () => {
         if (iframe) {
-            const gameUrl = game.link.startsWith('/') ? game.link : '/' + game.link;
+            const gameUrl = resolveGameUrl(game.link);
             const currentParams = new URLSearchParams(window.location.search);
             let embedUrl = gameUrl.includes('?') ? `${gameUrl}&embedded=true` : `${gameUrl}?embedded=true`;
             const roomParam = currentParams.get('room');
