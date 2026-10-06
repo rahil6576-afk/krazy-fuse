@@ -3,7 +3,7 @@
  * Handles live synchronization for Likes, Dislikes, and Game Pitches with offline fallback.
  */
 
-const KrazySupabase = (function() {
+const KrazySupabase = (function () {
     const STORAGE_URL_KEY = 'kf_supabase_url';
     const STORAGE_ANON_KEY = 'kf_supabase_anon_key';
     const STORAGE_LOCAL_PITCHES_KEY = 'kf_local_saved_pitches';
@@ -131,16 +131,6 @@ const KrazySupabase = (function() {
                         console.log('💡 [Realtime] New pitch received:', payload);
                         notifyPitchListeners(payload.new);
                         window.dispatchEvent(new CustomEvent('krazy:new_pitch', { detail: payload.new }));
-                    }
-                )
-                // Listen to new high scores on global leaderboards
-                .on(
-                    'postgres_changes',
-                    { event: 'INSERT', schema: 'public', table: 'game_leaderboards' },
-                    (payload) => {
-                        console.log('🏆 [Realtime] New high score received:', payload);
-                        notifyLeaderboardListeners(payload.new);
-                        window.dispatchEvent(new CustomEvent('krazy:leaderboard_updated', { detail: payload.new }));
                     }
                 )
                 .subscribe((status) => {
@@ -356,7 +346,7 @@ const KrazySupabase = (function() {
             const list = getLocalPitches();
             list.unshift(pitchObj);
             localStorage.setItem(STORAGE_LOCAL_PITCHES_KEY, JSON.stringify(list.slice(0, 100)));
-        } catch (e) {}
+        } catch (e) { }
     }
 
     function getLocalPitches() {
@@ -395,8 +385,8 @@ const KrazySupabase = (function() {
                         const errJson = await probeRes.json().catch(() => ({}));
                         const errMsg = errJson.msg || errJson.error_description || errJson.message || `Provider ${provider} is not enabled`;
                         const isNotEnabled = errMsg.toLowerCase().includes('not enabled') ||
-                                             errMsg.toLowerCase().includes('could not be found') ||
-                                             errMsg.toLowerCase().includes('unsupported');
+                            errMsg.toLowerCase().includes('could not be found') ||
+                            errMsg.toLowerCase().includes('unsupported');
                         const customErr = new Error(errMsg);
                         customErr.isProviderDisabled = isNotEnabled;
                         customErr.provider = provider;
@@ -502,7 +492,7 @@ const KrazySupabase = (function() {
             if (history.length > 50) history.pop();
             localStorage.setItem(STORAGE_MP_KEY, JSON.stringify(history));
             console.log('💾 [KrazySupabase] Match stored locally in browser history:', matchData);
-        } catch (_) {}
+        } catch (_) { }
 
         // Cloud write to Supabase if connected
         if (isConfigured()) {
@@ -550,161 +540,34 @@ const KrazySupabase = (function() {
         }
     }
 
-    // ==========================================
-    // GLOBAL HIGH SCORES LEADERBOARD API
-    // ==========================================
-    let leaderboardListeners = [];
-
-    function onLeaderboardUpdate(callback) {
-        if (typeof callback === 'function') leaderboardListeners.push(callback);
-    }
-
-    function notifyLeaderboardListeners(record) {
-        leaderboardListeners.forEach(cb => {
-            try { cb(record); } catch (e) { console.error(e); }
-        });
-    }
-
-    // Default baseline hall-of-fame records per game so new players immediately see engaging targets
-    const DEFAULT_LEADERBOARDS = {
-        'elevator-doom': [
-            { player_name: 'ApexSurv', player_avatar: '⚡', score: 98, created_at: new Date(Date.now() - 3600000 * 2).toISOString() },
-            { player_name: 'DoomSlayer', player_avatar: '🔥', score: 87, created_at: new Date(Date.now() - 3600000 * 5).toISOString() },
-            { player_name: 'NeonEcho', player_avatar: '👾', score: 74, created_at: new Date(Date.now() - 3600000 * 12).toISOString() },
-            { player_name: 'Vortex_99', player_avatar: '🚀', score: 65, created_at: new Date(Date.now() - 86400000).toISOString() },
-            { player_name: 'CipherBlade', player_avatar: '🤖', score: 52, created_at: new Date(Date.now() - 86400000 * 2).toISOString() }
-        ],
-        'flappy-man': [
-            { player_name: 'SkyLord', player_avatar: '🦸‍♂️', score: 142, created_at: new Date(Date.now() - 3600000 * 3).toISOString() },
-            { player_name: 'AeroAce', player_avatar: '🦅', score: 119, created_at: new Date(Date.now() - 3600000 * 7).toISOString() },
-            { player_name: 'WingSpan', player_avatar: '⚡', score: 94, created_at: new Date(Date.now() - 3600000 * 18).toISOString() },
-            { player_name: 'GliderPro', player_avatar: '🌟', score: 81, created_at: new Date(Date.now() - 86400000).toISOString() },
-            { player_name: 'PixelCape', player_avatar: '👾', score: 68, created_at: new Date(Date.now() - 86400000 * 2).toISOString() }
-        ],
-        'office-escape': [
-            { player_name: 'CoffeeAddict', player_avatar: '☕', score: 4850, created_at: new Date(Date.now() - 3600000 * 4).toISOString() },
-            { player_name: 'PaperPlane', player_avatar: '🏃', score: 4120, created_at: new Date(Date.now() - 3600000 * 9).toISOString() },
-            { player_name: 'SprintMaster', player_avatar: '⚡', score: 3680, created_at: new Date(Date.now() - 3600000 * 22).toISOString() },
-            { player_name: 'DeskJockey', player_avatar: '👔', score: 2940, created_at: new Date(Date.now() - 86400000).toISOString() },
-            { player_name: 'LunchBreaker', player_avatar: '🍕', score: 2310, created_at: new Date(Date.now() - 86400000 * 3).toISOString() }
-        ],
-        'pop-up': [
-            { player_name: 'PopQueen', player_avatar: '🎈', score: 3840, created_at: new Date(Date.now() - 3600000 * 3).toISOString() },
-            { player_name: 'BurstKing', player_avatar: '💥', score: 3410, created_at: new Date(Date.now() - 3600000 * 8).toISOString() },
-            { player_name: 'NeedleGuy', player_avatar: '🎯', score: 2950, created_at: new Date(Date.now() - 3600000 * 15).toISOString() },
-            { player_name: 'Balloony', player_avatar: '🎪', score: 2400, created_at: new Date(Date.now() - 86400000).toISOString() },
-            { player_name: 'AirBlaster', player_avatar: '🚀', score: 1890, created_at: new Date(Date.now() - 86400000 * 2).toISOString() }
-        ],
-        'dart-board': [
-            { player_name: 'BullseyePro', player_avatar: '🎯', score: 501, created_at: new Date(Date.now() - 3600000 * 4).toISOString() },
-            { player_name: 'DartMaster', player_avatar: '🏹', score: 480, created_at: new Date(Date.now() - 3600000 * 10).toISOString() },
-            { player_name: 'TripleTwenty', player_avatar: '🔥', score: 420, created_at: new Date(Date.now() - 86400000).toISOString() }
-        ]
-    };
-
-    function getLocalLeaderboard(gameId) {
-        try {
-            const key = `kf_leaderboard_${gameId}`;
-            const raw = localStorage.getItem(key);
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-            }
-        } catch (_) {}
-
-        const defaults = DEFAULT_LEADERBOARDS[gameId] || [
-            { player_name: 'ArcadeChamp', player_avatar: '👑', score: 1500, created_at: new Date(Date.now() - 3600000 * 2).toISOString() },
-            { player_name: 'HyperGamer', player_avatar: '⚡', score: 1240, created_at: new Date(Date.now() - 3600000 * 6).toISOString() },
-            { player_name: 'RetroLegend', player_avatar: '🕹️', score: 980, created_at: new Date(Date.now() - 86400000).toISOString() },
-            { player_name: 'PixelNinja', player_avatar: '🥷', score: 760, created_at: new Date(Date.now() - 86400000 * 2).toISOString() },
-            { player_name: 'KrazyPlayer', player_avatar: '👾', score: 540, created_at: new Date(Date.now() - 86400000 * 3).toISOString() }
-        ];
-        return defaults.map(d => ({ ...d, game_id: gameId }));
-    }
-
-    function saveLocalLeaderboard(gameId, record) {
-        try {
-            const key = `kf_leaderboard_${gameId}`;
-            const list = getLocalLeaderboard(gameId);
-            list.push(record);
-            list.sort((a, b) => Number(b.score) - Number(a.score));
-            localStorage.setItem(key, JSON.stringify(list.slice(0, 30)));
-        } catch (_) {}
-    }
-
-    async function submitHighScore({ gameId, playerName, playerAvatar, score, userIdentifier }) {
-        if (!gameId || typeof score === 'undefined' || isNaN(Number(score))) {
-            return { success: false, error: 'Invalid score or gameId' };
-        }
-
-        const cleanScore = Math.round(Number(score));
-        if (cleanScore <= 0) return { success: false, error: 'Score must be greater than 0' };
-
-        const record = {
-            id: 'score_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-            game_id: gameId,
-            player_name: playerName || 'Guest Gamer',
-            player_avatar: playerAvatar || '👾',
-            user_identifier: userIdentifier || ('user_' + (localStorage.getItem('kf_guest_id') || 'guest')),
-            score: cleanScore,
-            created_at: new Date().toISOString()
-        };
-
-        // 1. Always save in local storage fallback
-        saveLocalLeaderboard(gameId, record);
-        notifyLeaderboardListeners(record);
-        window.dispatchEvent(new CustomEvent('krazy:leaderboard_updated', { detail: record }));
-
-        // 2. Post to Supabase Cloud if online
+    async function getCloudTakenUsernames() {
+        const taken = new Set();
         if (isConfigured()) {
             try {
-                const { data, error } = await client
-                    .from('game_leaderboards')
-                    .insert([{
-                        game_id: record.game_id,
-                        player_name: record.player_name,
-                        player_avatar: record.player_avatar,
-                        user_identifier: record.user_identifier,
-                        score: record.score
-                    }])
-                    .select();
+                // Fetch authors of pitches
+                const { data: pitches } = await client.from('game_pitches').select('username').limit(200);
+                if (pitches && Array.isArray(pitches)) {
+                    pitches.forEach(p => {
+                        if (p.username && p.username !== 'Guest' && p.username !== 'Guest Gamer') {
+                            taken.add(p.username.trim());
+                        }
+                    });
+                }
 
-                if (error) {
-                    console.warn('⚠️ [KrazySupabase] Cloud leaderboard insert warning:', error.message);
-                } else if (data && data[0]) {
-                    console.log('🏆 [KrazySupabase] High score successfully posted to cloud:', data[0]);
-                    return { success: true, cloud: true, data: data[0] };
+                // Fetch players in matches
+                const { data: matches } = await client.from('multiplayer_matches').select('player1_name, player2_name, winner_name').limit(200);
+                if (matches && Array.isArray(matches)) {
+                    matches.forEach(m => {
+                        if (m.player1_name && !m.player1_name.startsWith('Player')) taken.add(m.player1_name.trim());
+                        if (m.player2_name && !m.player2_name.startsWith('Player')) taken.add(m.player2_name.trim());
+                        if (m.winner_name && !m.winner_name.startsWith('Player')) taken.add(m.winner_name.trim());
+                    });
                 }
             } catch (err) {
-                console.warn('⚠️ [KrazySupabase] Cloud leaderboard insert exception:', err);
+                console.warn('⚠️ [KrazySupabase] Failed to fetch taken cloud usernames:', err);
             }
         }
-
-        return { success: true, localOnly: true, data: record };
-    }
-
-    async function getLeaderboard(gameId, limit = 10) {
-        if (!gameId) return [];
-
-        if (isConfigured()) {
-            try {
-                const { data, error } = await client
-                    .from('game_leaderboards')
-                    .select('*')
-                    .eq('game_id', gameId)
-                    .order('score', { ascending: false })
-                    .limit(limit);
-
-                if (!error && data && data.length > 0) {
-                    return data;
-                }
-            } catch (e) {
-                console.warn('⚠️ [KrazySupabase] Fetch cloud leaderboard exception:', e);
-            }
-        }
-
-        // Return local leaderboard fallback
-        return getLocalLeaderboard(gameId).slice(0, limit);
+        return Array.from(taken);
     }
 
     function getClient() {
@@ -729,10 +592,7 @@ const KrazySupabase = (function() {
         onNewPitch,
         recordMultiplayerMatch,
         getRecentMultiplayerMatches,
-        // Global High Scores Leaderboard
-        submitHighScore,
-        getLeaderboard,
-        onLeaderboardUpdate,
+        getCloudTakenUsernames,
         // Auth
         getClient,
         signInWithOAuth,

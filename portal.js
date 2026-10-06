@@ -779,6 +779,7 @@ const AuthManager = {
         this.updateNavUI();
         this.bindUnloadAutoClear();
         this.initSupabaseAuthListener();
+        this.fetchCloudTakenNames();
     },
 
     initSupabaseAuthListener() {
@@ -859,6 +860,32 @@ const AuthManager = {
         return this.currentUser || { username: 'Guest', avatar: '👾', isLoggedIn: false, provider: 'guest' };
     },
 
+    cloudTakenNames: new Set(),
+
+    getDeviceOwnerId() {
+        let id = localStorage.getItem('kf_client_device_id');
+        if (!id) {
+            id = 'dev_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
+            localStorage.setItem('kf_client_device_id', id);
+        }
+        return id;
+    },
+
+    async fetchCloudTakenNames() {
+        try {
+            if (typeof KrazySupabase !== 'undefined' && typeof KrazySupabase.getCloudTakenUsernames === 'function') {
+                const names = await KrazySupabase.getCloudTakenUsernames();
+                if (Array.isArray(names)) {
+                    names.forEach(n => {
+                        if (n && typeof n === 'string') {
+                            this.cloudTakenNames.add(n.trim().toLowerCase());
+                        }
+                    });
+                }
+            }
+        } catch (e) { }
+    },
+
     isUsernameTaken(username, excludeCurrentName = '') {
         if (!username) return false;
         const clean = username.trim().toLowerCase();
@@ -889,7 +916,70 @@ const AuthManager = {
             }
         }
 
+        if (this.cloudTakenNames && this.cloudTakenNames.has(clean)) {
+            if (currentClean && clean === currentClean) {
+                // Same as active user
+            } else {
+                return true;
+            }
+        }
+
         return false;
+    },
+
+    checkUsernameAvailability(username, enteredPin = '') {
+        const clean = (username || '').trim();
+        if (!clean) return { available: false, message: '' };
+        if (clean.length < 2) return { available: false, message: 'Gamer tag must be at least 2 characters.' };
+        if (clean.length > 20) return { available: false, message: 'Gamer tag cannot exceed 20 characters.' };
+
+        const tagRegex = /^[a-zA-Z0-9_\- .]+$/;
+        if (!tagRegex.test(clean)) {
+            return { available: false, message: 'Only letters, numbers, spaces, dots, underscores, and hyphens are allowed.' };
+        }
+
+        const lower = clean.toLowerCase();
+        if (lower === 'guest' || lower === 'guest player') {
+            return { available: false, message: 'The name "Guest" is reserved. Please pick a unique name.' };
+        }
+
+        const reserved = ['admin', 'administrator', 'system', 'krazy', 'krazyfuze', 'support'];
+        if (reserved.includes(lower)) {
+            return { available: false, message: `The name "${clean}" is reserved by the system.` };
+        }
+
+        // If currently active user
+        if (this.currentUser && this.currentUser.username && this.currentUser.username.toLowerCase() === lower && this.currentUser.isLoggedIn) {
+            return { available: true, isCurrent: true, message: `✓ Currently signed in as ${clean}` };
+        }
+
+        const registry = this.getRegistry();
+        const existingKey = Object.keys(registry).find(k => k.toLowerCase() === lower);
+
+        if (existingKey) {
+            const acc = registry[existingKey];
+            const myDevice = this.getDeviceOwnerId();
+            const isOwner = acc.ownerDeviceId && acc.ownerDeviceId === myDevice;
+
+            if (acc.pin) {
+                if (enteredPin && acc.pin === enteredPin) {
+                    return { available: true, isOwner: true, message: `🔑 PIN verified! Click to sign in.` };
+                }
+                return { available: false, isProtected: true, message: `⚠️ "${clean}" is taken! Enter your 4-digit PIN to sign in.` };
+            }
+
+            if (isOwner) {
+                return { available: true, isOwner: true, message: `✓ Your saved profile on this device.` };
+            }
+
+            return { available: false, isTaken: true, message: `⚠️ The name "${clean}" is already taken and cannot be used by another person!` };
+        }
+
+        if (this.cloudTakenNames && this.cloudTakenNames.has(lower)) {
+            return { available: false, isTaken: true, message: `⚠️ The name "${clean}" is already taken and cannot be used by another person!` };
+        }
+
+        return { available: true, isNew: true, message: `✓ "${clean}" is available!` };
     },
 
     changeUsername(oldName, newName) {
@@ -923,7 +1013,7 @@ const AuthManager = {
 
         // Check if taken by another account
         if (this.isUsernameTaken(cleanNew, cleanOld)) {
-            return { success: false, error: `⚠️ The name "${cleanNew}" is already taken! Every player must have a unique name.` };
+            return { success: false, error: `⚠️ The name "${cleanNew}" is already taken and cannot be used by another person! Every player must have a unique name.` };
         }
 
         if (cleanNew === cleanOld) {
@@ -942,6 +1032,7 @@ const AuthManager = {
                 userRecord = {
                     username: cleanNew,
                     avatar: this.currentUser.avatar || '👾',
+                    ownerDeviceId: this.getDeviceOwnerId(),
                     provider: this.currentUser.provider || 'local',
                     createdAt: Date.now(),
                     games: {}
@@ -952,9 +1043,11 @@ const AuthManager = {
         }
 
         userRecord.username = cleanNew;
+        userRecord.ownerDeviceId = this.getDeviceOwnerId();
         userRecord.updatedAt = Date.now();
         registry[cleanNew] = userRecord;
         this.saveRegistry(registry);
+        this.cloudTakenNames.add(cleanNew.toLowerCase());
 
         // Migrate all localStorage keys for this user's games (kf_u_OldName_g_gameId -> kf_u_NewName_g_gameId)
         const oldPrefix = `kf_u_${cleanOld}_g_`;
@@ -1005,25 +1098,50 @@ const AuthManager = {
             return { success: false, error: 'Cannot log in as guest.' };
         }
 
+        if (cleanName.length < 2) {
+            return { success: false, error: 'Gamer tag must be at least 2 characters long!' };
+        }
+        if (cleanName.length > 20) {
+            return { success: false, error: 'Gamer tag cannot exceed 20 characters!' };
+        }
+        const tagRegex = /^[a-zA-Z0-9_\- .]+$/;
+        if (!tagRegex.test(cleanName)) {
+            return { success: false, error: 'Gamer tag can only contain letters, numbers, spaces, dots, underscores, and hyphens!' };
+        }
+
+        const reserved = ['admin', 'administrator', 'system', 'krazy', 'krazyfuze', 'support'];
+        if (reserved.includes(cleanName.toLowerCase())) {
+            return { success: false, error: `The name "${cleanName}" is reserved by the system!` };
+        }
+
         const registry = this.getRegistry();
         const existingKey = Object.keys(registry).find(k => k.toLowerCase() === cleanName.toLowerCase());
+        const myDeviceId = this.getDeviceOwnerId();
 
         let chosenAvatar = avatar;
 
         if (existingKey) {
             const existingAcc = registry[existingKey];
-            // If existing account has PIN set and user entered wrong PIN:
-            if (existingAcc.pin && pin && existingAcc.pin !== pin) {
-                return { success: false, error: `⚠️ The username "${cleanName}" is already taken! If this is your account, please enter the correct PIN.` };
-            }
-            // If existing account has PIN set and user did not enter a PIN:
-            if (existingAcc.pin && !pin) {
-                return { success: false, error: `⚠️ The username "${cleanName}" is already registered. Please enter your 4-digit PIN to sign in.` };
+            const isOwner = existingAcc.ownerDeviceId && existingAcc.ownerDeviceId === myDeviceId;
+
+            // If account has a PIN set
+            if (existingAcc.pin) {
+                if (!pin) {
+                    return { success: false, error: `⚠️ The name "${cleanName}" is already taken! If this is your account, please enter your 4-digit PIN.` };
+                }
+                if (existingAcc.pin !== pin) {
+                    return { success: false, error: `⚠️ Incorrect PIN! The name "${cleanName}" is already taken by another person. Please enter the correct PIN or choose a unique name.` };
+                }
+            } else {
+                // Account does NOT have a PIN:
+                // Only the device that created it can access it; prevent any other person/device from taking it!
+                if (!isOwner && !meta.isOAuth) {
+                    return { success: false, error: `⚠️ The name "${cleanName}" is already taken and cannot be used by another person! Please choose a unique name.` };
+                }
             }
 
             cleanName = existingKey; // preserve original casing
 
-            // PRESERVE user's chosen avatar: never overwrite on login unless account has no avatar
             if (existingAcc.avatar) {
                 chosenAvatar = existingAcc.avatar;
             } else {
@@ -1032,13 +1150,14 @@ const AuthManager = {
             }
 
             if (pin && !existingAcc.pin) existingAcc.pin = pin;
+            if (!existingAcc.ownerDeviceId) existingAcc.ownerDeviceId = myDeviceId;
             if (meta.provider) existingAcc.provider = meta.provider;
             if (meta.email) existingAcc.email = meta.email;
             registry[existingKey] = existingAcc;
         } else {
-            // Check if name is reserved or taken
+            // Check if name is reserved or taken in cloud/other players
             if (this.isUsernameTaken(cleanName)) {
-                return { success: false, error: `⚠️ The username "${cleanName}" is already taken! Please choose a unique gamer tag.` };
+                return { success: false, error: `⚠️ The name "${cleanName}" is already taken and cannot be used by another person! Please choose a unique gamer tag.` };
             }
 
             chosenAvatar = avatar || localStorage.getItem('kf_preferred_avatar') || '👾';
@@ -1047,11 +1166,14 @@ const AuthManager = {
                 username: cleanName,
                 pin: pin,
                 avatar: chosenAvatar,
+                ownerDeviceId: myDeviceId,
                 provider: meta.provider || 'local',
                 email: meta.email || '',
                 createdAt: Date.now(),
                 games: {}
             };
+
+            this.cloudTakenNames.add(cleanName.toLowerCase());
         }
         this.saveRegistry(registry);
 
@@ -1268,6 +1390,7 @@ const AuthManager = {
         }
     }
 };
+window.AuthManager = AuthManager;
 
 // ==========================================================
 // UNIVERSAL GAME STORAGE MANAGER (ISOLATED PER GAME & USER)
@@ -1390,6 +1513,7 @@ const KrazyGameStorage = {
         }
     }
 };
+window.KrazyGameStorage = KrazyGameStorage;
 
 // Robust URL resolution supporting root deployments and GitHub Pages subpaths
 function resolveGameUrl(rawLink) {
@@ -1405,18 +1529,105 @@ function resolveGameUrl(rawLink) {
 }
 
 // ==========================================================
-// INSTANT GAME LAUNCH ENGINE (Zero Delays, Instant Play)
+// SMOOTH ARCADE GAME LAUNCH ENGINE (Zero Black Screen, Butter Smooth)
 // ==========================================================
-async function executeGameLoading(game, onReady) {
+function executeGameLoading(game, onReady) {
     const loader = document.getElementById('game-loader-overlay');
-    if (loader) {
-        loader.classList.add('hidden');
-        loader.style.display = 'none';
+    const iframe = document.getElementById('active-game-iframe');
+
+    if (iframe) {
+        iframe.classList.remove('loaded');
     }
+
+    if (loader) {
+        loader.classList.remove('fade-out', 'hidden');
+        loader.style.display = 'flex';
+        loader.style.opacity = '1';
+
+        // Update loader card details
+        const iconEl = document.getElementById('loader-game-icon');
+        const titleEl = document.getElementById('loader-game-title');
+        const tagEl = document.getElementById('loader-game-tag');
+        const fillEl = document.getElementById('loader-fill');
+        const pctEl = document.getElementById('loader-percent');
+        const stageMsgEl = document.getElementById('loader-stage-msg');
+        const tipTextEl = document.getElementById('loader-tip-text');
+        const ctrlTagsEl = document.getElementById('loader-controls-tags');
+        const sizeValEl = document.getElementById('loader-size-val');
+        const mbCounterEl = document.getElementById('loader-mb-counter');
+
+        if (iconEl) iconEl.textContent = (game && game.emoji) ? game.emoji.split(' ')[0] : '🎮';
+        if (titleEl) titleEl.textContent = (game && game.title) ? game.title : 'Arcade Game';
+        if (tagEl) tagEl.textContent = (game && game.tags) ? game.tags[0] : 'Arcade';
+        if (sizeValEl) sizeValEl.textContent = 'Instant Stream';
+        if (mbCounterEl) mbCounterEl.textContent = '⚡ GPU Hardware Accelerated';
+        if (fillEl) fillEl.style.width = '75%';
+        if (pctEl) pctEl.textContent = '75%';
+        if (stageMsgEl) stageMsgEl.textContent = '⚡ Initializing high-speed game engine...';
+        if (tipTextEl) tipTextEl.textContent = (game && game.desc) ? game.desc : 'Get ready to play!';
+
+        // Reset diagnostic checklist items with Fox theme icons
+        const diagConfig = [
+            { id: 'storage', icon: '⚡' },
+            { id: 'assets', icon: '🚀' },
+            { id: 'audio', icon: '🎵' },
+            { id: 'engine', icon: '🛡️' }
+        ];
+        diagConfig.forEach(item => {
+            const row = document.getElementById(`diag-${item.id}`);
+            const icon = document.getElementById(`diag-${item.id}-icon`);
+            if (row) row.classList.remove('done');
+            if (icon) icon.textContent = item.icon;
+        });
+
+        if (ctrlTagsEl && game && game.controls) {
+            ctrlTagsEl.innerHTML = '';
+            game.controls.slice(0, 3).forEach(c => {
+                const span = document.createElement('span');
+                span.className = 'loader-key-pill';
+                span.textContent = `${c.key}: ${c.label}`;
+                ctrlTagsEl.appendChild(span);
+            });
+        }
+    }
+
     if (onReady) onReady();
 }
 
-// Universal Auto-Fullscreen Function for Game Launch
+function dismissGameLoading() {
+    const loader = document.getElementById('game-loader-overlay');
+    const iframe = document.getElementById('active-game-iframe');
+
+    const fillEl = document.getElementById('loader-fill');
+    const pctEl = document.getElementById('loader-percent');
+    const stageMsgEl = document.getElementById('loader-stage-msg');
+    if (fillEl) fillEl.style.width = '100%';
+    if (pctEl) pctEl.textContent = '100%';
+    if (stageMsgEl) stageMsgEl.textContent = '🎮 Game ready!';
+
+    // Mark all diagnostics as completed
+    ['storage', 'assets', 'audio', 'engine'].forEach(k => {
+        const row = document.getElementById(`diag-${k}`);
+        const icon = document.getElementById(`diag-${k}-icon`);
+        if (row) row.classList.add('done');
+        if (icon) icon.textContent = '✓';
+    });
+
+    setTimeout(() => {
+        if (iframe) {
+            iframe.classList.add('loaded');
+        }
+        if (loader) {
+            loader.classList.add('fade-out');
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                loader.style.display = 'none';
+            }, 300);
+        }
+    }, 120);
+}
+
+// Universal Fullscreen Function for Game Player (Invoked via Action Bar Fullscreen Button)
 function requestGameFullscreen() {
     try {
         const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
@@ -1427,23 +1638,10 @@ function requestGameFullscreen() {
                 const promise = req.call(wrapper);
                 if (promise && promise.catch) {
                     promise.catch(() => {
-                        // Fallback to documentElement
                         const docReq = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen || document.documentElement.mozRequestFullScreen;
                         if (docReq) {
                             docReq.call(document.documentElement).catch(() => { });
                         }
-                        const retry = () => {
-                            const currentFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-                            if (!currentFs && currentGame) {
-                                req.call(wrapper).catch(() => { });
-                            }
-                            window.removeEventListener('click', retry, true);
-                            window.removeEventListener('keydown', retry, true);
-                            window.removeEventListener('touchstart', retry, true);
-                        };
-                        window.addEventListener('click', retry, true);
-                        window.addEventListener('keydown', retry, true);
-                        window.addEventListener('touchstart', retry, true);
                     });
                 }
             }
@@ -1462,7 +1660,7 @@ function openGamePlayer(gameId) {
 
     currentGame = game;
 
-    // Switch view state FIRST so player wrapper is visible in DOM before requesting fullscreen
+    // Switch view state FIRST so player wrapper is visible in DOM
     document.body.setAttribute('data-view', 'player');
     document.body.classList.add('in-game-active');
 
@@ -1472,11 +1670,11 @@ function openGamePlayer(gameId) {
     if (catalogView) catalogView.classList.add('hidden');
     if (playerView) playerView.classList.remove('hidden');
 
-    // Automatically enter fullscreen mode for seamless immersive gaming
-    requestGameFullscreen();
-
-    // Scroll to top of player
+    // Scroll smoothly to top of player
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Automatically trigger fullscreen mode upon clicking the game
+    requestGameFullscreen();
 
     // Restore or apply preferred display aspect mode
     try {
@@ -1566,6 +1764,14 @@ function openGamePlayer(gameId) {
             }
             iframe.src = embedUrl;
 
+            let loadDismissed = false;
+            const completeLaunch = () => {
+                if (loadDismissed) return;
+                loadDismissed = true;
+                dismissGameLoading();
+                iframe.focus();
+            };
+
             iframe.onload = () => {
                 try {
                     // Synchronize active user credentials & per-game isolated storage
@@ -1578,8 +1784,11 @@ function openGamePlayer(gameId) {
                         }
                     }
                 } catch (err) { }
-                iframe.focus();
+                completeLaunch();
             };
+
+            // Safety fallback so loading overlay gracefully reveals game even if onload event was intercepted
+            setTimeout(completeLaunch, 2200);
         }
     });
 
@@ -1607,7 +1816,10 @@ function closeGamePlayer() {
     if (playerGrid) playerGrid.classList.remove('theater-mode');
 
     const iframe = document.getElementById('active-game-iframe');
-    if (iframe) iframe.src = 'about:blank'; // Unload game to completely free RAM and audio
+    if (iframe) {
+        iframe.classList.remove('loaded');
+        iframe.src = 'about:blank'; // Unload game to completely free RAM and audio
+    }
 
     currentGame = null;
     window.history.pushState({}, 'Krazy Fuse', window.location.pathname);
@@ -2937,6 +3149,48 @@ function setupAuthModal() {
         });
     }
 
+    const authFeedback = document.getElementById('auth-username-feedback');
+
+    function updateAuthUsernameFeedback() {
+        if (!usernameInput || !authFeedback) return;
+        const val = usernameInput.value.trim();
+        const pin = pinInput ? pinInput.value.trim() : '';
+
+        if (!val) {
+            authFeedback.className = 'auth-input-feedback hidden';
+            authFeedback.textContent = '';
+            usernameInput.classList.remove('input-error', 'input-success');
+            return;
+        }
+
+        const check = AuthManager.checkUsernameAvailability(val, pin);
+        authFeedback.classList.remove('hidden');
+
+        if (check.available) {
+            authFeedback.className = 'auth-input-feedback success';
+            authFeedback.textContent = check.message;
+            usernameInput.classList.remove('input-error');
+            usernameInput.classList.add('input-success');
+        } else {
+            authFeedback.className = 'auth-input-feedback error';
+            authFeedback.textContent = check.message;
+            usernameInput.classList.add('input-error');
+            usernameInput.classList.remove('input-success');
+        }
+    }
+
+    if (usernameInput) {
+        usernameInput.addEventListener('input', updateAuthUsernameFeedback);
+        if (pinInput) {
+            pinInput.addEventListener('input', updateAuthUsernameFeedback);
+        }
+        usernameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && btnLogin) {
+                btnLogin.click();
+            }
+        });
+    }
+
     // Login submit
     if (btnLogin) {
         btnLogin.addEventListener('click', () => {
@@ -2947,6 +3201,18 @@ function setupAuthModal() {
                 if (usernameInput) usernameInput.focus();
                 return;
             }
+
+            // Real-time pre-check against taken names
+            const check = AuthManager.checkUsernameAvailability(name, pin);
+            if (!check.available && !check.isOwner) {
+                const errMsg = check.message || `⚠️ The name "${name}" is already taken and cannot be used by another person!`;
+                showToast(errMsg, '⚠️');
+                alert(errMsg);
+                if (usernameInput) usernameInput.focus();
+                updateAuthUsernameFeedback();
+                return;
+            }
+
             // Check if returning user already has a saved avatar to preserve it
             const registry = AuthManager.getRegistry();
             const existingKey = Object.keys(registry).find(k => k.toLowerCase() === name.toLowerCase());
@@ -2959,10 +3225,16 @@ function setupAuthModal() {
                 showToast(res.error, '⚠️');
                 alert(res.error);
                 if (usernameInput) usernameInput.focus();
+                updateAuthUsernameFeedback();
                 return;
             }
             closeNameEditPanel();
             renderAuthModalContent();
+            if (authFeedback) {
+                authFeedback.className = 'auth-input-feedback hidden';
+                authFeedback.textContent = '';
+            }
+            if (usernameInput) usernameInput.classList.remove('input-error', 'input-success');
         });
     }
 

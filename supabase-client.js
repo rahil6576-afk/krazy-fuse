@@ -540,6 +540,36 @@ const KrazySupabase = (function () {
         }
     }
 
+    async function getCloudTakenUsernames() {
+        const taken = new Set();
+        if (isConfigured()) {
+            try {
+                // Fetch authors of pitches
+                const { data: pitches } = await client.from('game_pitches').select('username').limit(200);
+                if (pitches && Array.isArray(pitches)) {
+                    pitches.forEach(p => {
+                        if (p.username && p.username !== 'Guest' && p.username !== 'Guest Gamer') {
+                            taken.add(p.username.trim());
+                        }
+                    });
+                }
+
+                // Fetch players in matches
+                const { data: matches } = await client.from('multiplayer_matches').select('player1_name, player2_name, winner_name').limit(200);
+                if (matches && Array.isArray(matches)) {
+                    matches.forEach(m => {
+                        if (m.player1_name && !m.player1_name.startsWith('Player')) taken.add(m.player1_name.trim());
+                        if (m.player2_name && !m.player2_name.startsWith('Player')) taken.add(m.player2_name.trim());
+                        if (m.winner_name && !m.winner_name.startsWith('Player')) taken.add(m.winner_name.trim());
+                    });
+                }
+            } catch (err) {
+                console.warn('⚠️ [KrazySupabase] Failed to fetch taken cloud usernames:', err);
+            }
+        }
+        return Array.from(taken);
+    }
+
     function getClient() {
         if (!client) init();
         return client;
@@ -562,6 +592,7 @@ const KrazySupabase = (function () {
         onNewPitch,
         recordMultiplayerMatch,
         getRecentMultiplayerMatches,
+        getCloudTakenUsernames,
         // Auth
         getClient,
         signInWithOAuth,

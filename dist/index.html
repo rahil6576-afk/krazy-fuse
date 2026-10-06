@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,20 +10,26 @@
     <!-- Google Fonts: Nunito Sans (Login & Auth), Outfit (Brand/Headings/UI) + Rubik (Numbers/Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,600;1,6..12,700&family=Outfit:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,600;1,6..12,700&family=Outfit:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="portal.css?v=instant">
 </head>
+
 <body data-view="catalog">
 
     <!-- Top Navigation Bar (Task Bar matching user screenshot) -->
     <header class="navbar" id="main-navbar">
         <div class="nav-left">
-            <button id="btn-sidebar-toggle" class="nav-icon-btn" title="Toggle Navigation Menu" aria-label="Toggle navigation menu">
-                <svg class="nav-hamburger-svg" width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect class="hamburger-bar" x="0" y="1" width="16" height="2.5" rx="1.25" fill="currentColor"/>
-                    <rect class="hamburger-bar" x="0" y="7.75" width="10" height="2.5" rx="1.25" fill="currentColor"/>
-                    <path d="M19 4.5 L14.5 9 L19 13.5" stroke="#0084FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <rect class="hamburger-bar" x="0" y="14.5" width="16" height="2.5" rx="1.25" fill="currentColor"/>
+            <button id="btn-sidebar-toggle" class="nav-icon-btn" title="Toggle Navigation Menu"
+                aria-label="Toggle navigation menu">
+                <svg class="nav-hamburger-svg" width="22" height="18" viewBox="0 0 22 18" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <rect class="hamburger-bar" x="0" y="1" width="16" height="2.5" rx="1.25" fill="currentColor" />
+                    <rect class="hamburger-bar" x="0" y="7.75" width="10" height="2.5" rx="1.25" fill="currentColor" />
+                    <path d="M19 4.5 L14.5 9 L19 13.5" stroke="#e11d48" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <rect class="hamburger-bar" x="0" y="14.5" width="16" height="2.5" rx="1.25" fill="currentColor" />
                 </svg>
             </button>
 
@@ -37,26 +44,31 @@
 
         <div class="nav-center">
             <div class="nav-search-wrap">
-                <svg class="nav-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7d7b97" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="nav-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7d7b97"
+                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" id="nav-search-input" class="nav-search-input" placeholder="Search games and categories" autocomplete="off" spellcheck="false">
+                <input type="text" id="nav-search-input" class="nav-search-input"
+                    placeholder="Search games and categories" autocomplete="off" spellcheck="false">
                 <button id="nav-search-clear" class="nav-search-clear hidden" title="Clear search">✕</button>
             </div>
         </div>
 
         <div class="nav-actions">
             <!-- Real-time Live Players Telemetry Badge -->
-            <button type="button" class="nav-live-ticker" id="btn-live-insights" title="Live Players Currently Playing (Click to view State &amp; City Demographics)">
+            <button type="button" class="nav-live-ticker" id="btn-live-insights"
+                title="Live Players Currently Playing (Click to view State &amp; City Demographics)">
                 <span class="live-pulse-dot"></span>
                 <span class="live-ticker-num" id="nav-global-live-count">142,850</span>
                 <span class="live-ticker-label">ONLINE</span>
             </button>
 
             <!-- Theme Toggle Circular Button -->
-            <button id="btn-theme-toggle" class="nav-circle-btn" title="Toggle Day/Night Theme" aria-label="Toggle Theme">
-                <svg class="nav-action-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a6a4ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button id="btn-theme-toggle" class="nav-circle-btn" title="Toggle Day/Night Theme"
+                aria-label="Toggle Theme">
+                <svg class="nav-action-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a6a4ba"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="4.5"></circle>
                     <line x1="12" y1="2" x2="12" y2="4.5"></line>
                     <line x1="12" y1="19.5" x2="12" y2="22"></line>
@@ -71,8 +83,10 @@
 
             <!-- User Auth / Login Pill Button -->
             <button id="btn-user-auth" class="nav-login-cta-btn" title="Gamer Account &amp; Profiles">
-                <svg class="nav-user-svg" width="16" height="16" viewBox="0 0 24 24" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                <svg class="nav-user-svg" width="16" height="16" viewBox="0 0 24 24" fill="#FFFFFF"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
                 </svg>
                 <span id="nav-user-name" class="user-name-text">Login</span>
                 <span id="nav-auth-status" class="auth-status-dot guest hidden"></span>
@@ -87,31 +101,58 @@
         <aside class="sidebar-rail expanded sidebar-open" id="sidebar-rail">
             <div class="sidebar-menu-card">
                 <button class="sidebar-nav-item active" data-category="all" data-filter="all" title="Home Arcade">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg></span>
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z" />
+                        </svg></span>
                     <span class="sb-label">Home</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="multiplayer" data-filter="multiplayer" title="Multiplayer &amp; PvP">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></span>
+                <button class="sidebar-nav-item" data-category="multiplayer" data-filter="multiplayer"
+                    title="Multiplayer &amp; PvP">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                        </svg></span>
                     <span class="sb-label">Multiplayer</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="action" data-filter="action" title="Action &amp; Combat">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></span>
+                <button class="sidebar-nav-item" data-category="action" data-filter="action"
+                    title="Action &amp; Combat">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 2v11h3v9l7-12h-4l4-8z" />
+                        </svg></span>
                     <span class="sb-label">Action</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="runner" data-filter="runner" title="Runners &amp; Escape">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l2.4-1-1.8 9.1z"/></svg></span>
+                <button class="sidebar-nav-item" data-category="runner" data-filter="runner"
+                    title="Runners &amp; Escape">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l2.4-1-1.8 9.1z" />
+                        </svg></span>
                     <span class="sb-label">Runners</span>
                 </button>
                 <button class="sidebar-nav-item" data-category="pvp" data-filter="pvp" title="Darts &amp; Targets">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><circle cx="12" cy="12" r="9" stroke="#0084FF" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="5" stroke="#0084FF" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="2" fill="#0084FF"/></svg></span>
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none" />
+                            <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none" />
+                            <circle cx="12" cy="12" r="2" fill="currentColor" />
+                        </svg></span>
                     <span class="sb-label">Darts</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="arcade" data-filter="arcade" title="Arcade &amp; Physics">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><circle cx="12" cy="7" r="2.5"/><path d="M12 9.5V13" stroke="#0084FF" stroke-width="1.8"/><ellipse cx="12" cy="14" rx="7" ry="2.5" fill="none" stroke="#0084FF" stroke-width="1.8"/><path d="M7 17c1.2 1.2 8.8 1.2 10 0" stroke="#0084FF" stroke-width="1.8" fill="none"/></svg></span>
+                <button class="sidebar-nav-item" data-category="arcade" data-filter="arcade"
+                    title="Arcade &amp; Physics">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="7" r="2.5" />
+                            <path d="M12 9.5V13" stroke="currentColor" stroke-width="1.8" />
+                            <ellipse cx="12" cy="14" rx="7" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.8" />
+                            <path d="M7 17c1.2 1.2 8.8 1.2 10 0" stroke="currentColor" stroke-width="1.8" fill="none" />
+                        </svg></span>
                     <span class="sb-label">Arcade</span>
                 </button>
-                <button class="sidebar-nav-item" data-category="random" data-filter="random" id="btn-sidebar-random" title="Surprise Me!">
-                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#0084FF"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></span>
+                <button class="sidebar-nav-item" data-category="random" data-filter="random" id="btn-sidebar-random"
+                    title="Surprise Me!">
+                    <span class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
+                        </svg></span>
                     <span class="sb-label">Random</span>
                 </button>
             </div>
@@ -128,7 +169,7 @@
 
                     <!-- Left/Center Main Game Stage -->
                     <div class="player-main-col">
-                        
+
                         <!-- Breadcrumbs & Quick Back Link -->
                         <div class="player-top-bar">
                             <button id="btn-back-to-catalog" class="btn-player-back">
@@ -156,11 +197,15 @@
                                             <div class="loader-title-wrap">
                                                 <div class="loader-badge-row">
                                                     <span class="loader-tag-pill" id="loader-game-tag">Action</span>
-                                                    <span class="loader-size-pill" id="loader-size-pill" title="Physical download & storage package size">
-                                                        <span class="pill-icon">📦</span> Package: <strong id="loader-size-val">0.0 MB</strong>
+                                                    <span class="loader-size-pill" id="loader-size-pill"
+                                                        title="Physical download & storage package size">
+                                                        <span class="pill-icon">📦</span> Package: <strong
+                                                            id="loader-size-val">Instant Stream</strong>
                                                     </span>
-                                                    <span class="loader-cache-pill" id="loader-cache-pill" title="Arcade Engine Status">
-                                                        <span class="pill-icon">⚡</span> <span id="loader-cache-status">Engine Ready</span>
+                                                    <span class="loader-cache-pill" id="loader-cache-pill"
+                                                        title="Arcade Engine Status">
+                                                        <span class="pill-icon">⚡</span> <span
+                                                            id="loader-cache-status">Engine Ready</span>
                                                     </span>
                                                 </div>
                                                 <h2 class="loader-title" id="loader-game-title">Office Escape</h2>
@@ -170,16 +215,16 @@
                                         <!-- Cyber Dynamic Progress Bar -->
                                         <div class="loader-progress-box">
                                             <div class="loader-progress-top">
-                                                <span class="loader-stage-msg" id="loader-stage-msg">Allocating device storage cache buffer...</span>
-                                                <span class="loader-percent" id="loader-percent">0%</span>
+                                                <span class="loader-stage-msg" id="loader-stage-msg">Initializing high-speed game engine...</span>
+                                                <span class="loader-percent" id="loader-percent">75%</span>
                                             </div>
                                             <div class="loader-track">
-                                                <div class="loader-fill" id="loader-fill" style="width: 0%;">
+                                                <div class="loader-fill" id="loader-fill" style="width: 75%;">
                                                     <div class="loader-sheen"></div>
                                                 </div>
                                             </div>
                                             <div class="loader-progress-bottom">
-                                                <span class="loader-mb-counter" id="loader-mb-counter">0.0 MB / 0.0 MB</span>
+                                                <span class="loader-mb-counter" id="loader-mb-counter">⚡ GPU Hardware Accelerated</span>
                                                 <span class="loader-status-mode" id="loader-status-mode">⚡ Low Device Load Mode Active</span>
                                             </div>
                                         </div>
@@ -187,19 +232,19 @@
                                         <!-- Diagnostic Step Checklist -->
                                         <div class="loader-diagnostics-grid">
                                             <div class="diag-item" id="diag-storage">
-                                                <span class="diag-icon" id="diag-storage-icon">⏳</span>
+                                                <span class="diag-icon" id="diag-storage-icon">⚡</span>
                                                 <span class="diag-label">Device Cache</span>
                                             </div>
                                             <div class="diag-item" id="diag-assets">
-                                                <span class="diag-icon" id="diag-assets-icon">⏳</span>
+                                                <span class="diag-icon" id="diag-assets-icon">🚀</span>
                                                 <span class="diag-label">Asset Pipeline</span>
                                             </div>
                                             <div class="diag-item" id="diag-audio">
-                                                <span class="diag-icon" id="diag-audio-icon">⏳</span>
+                                                <span class="diag-icon" id="diag-audio-icon">🎵</span>
                                                 <span class="diag-label">Audio & SFX</span>
                                             </div>
                                             <div class="diag-item" id="diag-engine">
-                                                <span class="diag-icon" id="diag-engine-icon">⏳</span>
+                                                <span class="diag-icon" id="diag-engine-icon">🛡️</span>
                                                 <span class="diag-label">Low CPU Guard</span>
                                             </div>
                                         </div>
@@ -209,7 +254,8 @@
                                             <div class="loader-tip-title">
                                                 <span class="tip-sparkle">💡</span> <strong>PRO TIP & CONTROLS:</strong>
                                             </div>
-                                            <div class="loader-tip-text" id="loader-tip-text">Slide under meeting room glass dividers by pressing S or Down Arrow!</div>
+                                            <div class="loader-tip-text" id="loader-tip-text">Slide under meeting room
+                                                glass dividers by pressing S or Down Arrow!</div>
                                             <div class="loader-controls-tags" id="loader-controls-tags">
                                                 <!-- Populated dynamically -->
                                             </div>
@@ -225,7 +271,10 @@
                                 </div>
 
                                 <!-- The Game iframe -->
-                                <iframe id="active-game-iframe" src="about:blank" allow="fullscreen; autoplay; gamepad; clipboard-write; microphone; camera" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" tabindex="0"></iframe>
+                                <iframe id="active-game-iframe" src="about:blank"
+                                    allow="fullscreen; autoplay; gamepad; clipboard-write; microphone; camera"
+                                    allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"
+                                    tabindex="0"></iframe>
                             </div>
                         </div>
 
@@ -237,10 +286,12 @@
                                 <div class="game-player-title-box">
                                     <h2 class="game-player-title" id="player-game-title">Tunnel Runner</h2>
                                     <div class="game-player-sub-meta">
-                                        <span class="player-rating-star">⭐ <strong id="player-game-rating">4.9</strong></span>
+                                        <span class="player-rating-star">⭐ <strong
+                                                id="player-game-rating">4.9</strong></span>
 
                                         <span class="meta-dot">·</span>
-                                        <span id="player-game-plays">👥 <strong id="player-game-plays-val" class="plays-val">28.4K</strong> Plays</span>
+                                        <span id="player-game-plays">👥 <strong id="player-game-plays-val"
+                                                class="plays-val">28.4K</strong> Plays</span>
                                         <span class="meta-dot">·</span>
                                         <span class="player-tag-badge" id="player-game-tag">Runner</span>
                                     </div>
@@ -254,7 +305,7 @@
                                     <span class="ctrl-icon">👍</span>
                                     <span id="game-likes-count" class="ctrl-label">2.4K</span>
                                 </button>
-                                
+
                                 <!-- Dislike Button -->
                                 <button id="btn-game-dislike" class="game-ctrl-btn btn-dislike" title="Dislike">
                                     <span class="ctrl-icon">👎</span>
@@ -265,11 +316,6 @@
                                     <span class="ctrl-icon" id="bookmark-icon">🔖</span>
                                 </button>
 
-                                <!-- Global High Scores Leaderboard Toggle -->
-                                <button id="btn-game-leaderboard" class="game-ctrl-btn btn-leaderboard-highlight" title="Global High Scores Leaderboard">
-                                    <span class="ctrl-icon">🏆</span>
-                                    <span class="ctrl-label">Leaderboard</span>
-                                </button>
 
                                 <!-- Share Link -->
                                 <button id="btn-game-share" class="game-ctrl-btn" title="Share Game Link">
@@ -282,7 +328,8 @@
                                 </button>
 
                                 <!-- Low Device Load / Battery Saver Toggle -->
-                                <button id="btn-game-eco" class="game-ctrl-btn" title="Toggle Low Device Load (Eco Battery Saver)">
+                                <button id="btn-game-eco" class="game-ctrl-btn"
+                                    title="Toggle Low Device Load (Eco Battery Saver)">
                                     <span class="ctrl-icon" id="game-eco-icon">⚡</span>
                                 </button>
 
@@ -292,9 +339,13 @@
                                 </button>
 
                                 <!-- Native Fullscreen Toggle -->
-                                <button id="btn-game-fullscreen" class="game-ctrl-btn btn-fullscreen-highlight" title="Enter Fullscreen (F)">
-                                    <svg class="fullscreen-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                                <button id="btn-game-fullscreen" class="game-ctrl-btn btn-fullscreen-highlight"
+                                    title="Enter Fullscreen (F)">
+                                    <svg class="fullscreen-icon-svg" viewBox="0 0 24 24" width="20" height="20"
+                                        fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                                     </svg>
                                 </button>
                             </div>
@@ -302,13 +353,14 @@
 
                         <!-- Bottom Banner & Game Guides Section -->
                         <div class="player-bottom-details">
-                            
+
                             <!-- Stylized Promotional Feature Banner (Styled like Adobe Firefly banner in screenshot) -->
                             <div class="player-promo-banner">
                                 <div class="promo-banner-art">⚡</div>
                                 <div class="promo-banner-text">
                                     <h4>Krazy Fuse Instant Arcade</h4>
-                                    <p>Fast, chaotic games made for instant fun. No downloads, zero paywalls, pure gameplay.</p>
+                                    <p>Fast, chaotic games made for instant fun. No downloads, zero paywalls, pure
+                                        gameplay.</p>
                                 </div>
                                 <button class="btn-promo-action" id="btn-promo-random">
                                     <span>🎲 Surprise Game</span>
@@ -332,67 +384,18 @@
                                 </div>
                             </div>
 
-                            <!-- Global High Scores Leaderboard Card -->
-                            <div class="player-info-card player-leaderboard-card" id="player-leaderboard-card">
-                                <div class="leaderboard-card-header">
-                                    <div class="card-section-title">
-                                        <span class="cs-icon">🏆</span>
-                                        <h3 id="leaderboard-game-heading">GLOBAL HIGH SCORES</h3>
-                                    </div>
-                                    <div class="leaderboard-actions">
-                                        <span class="leaderboard-live-pill" id="leaderboard-live-pill" title="Live Cloud Sync">
-                                            <span class="live-dot-pulse"></span>
-                                            <span id="leaderboard-status-text">CLOUD SYNC</span>
-                                        </span>
-                                        <button id="btn-refresh-leaderboard" class="btn-refresh-leaderboard" title="Refresh Live Scores">🔄 Refresh</button>
-                                    </div>
-                                </div>
-
-                                <div class="leaderboard-user-strip">
-                                    <div class="user-score-highlight">
-                                        <span class="user-strip-lbl">YOUR PERSONAL BEST</span>
-                                        <div class="user-strip-val">
-                                            <span class="user-avatar-tag" id="leaderboard-user-avatar">👾</span>
-                                            <strong id="leaderboard-user-best-val">0</strong>
-                                            <span class="pts-unit">PTS</span>
-                                        </div>
-                                    </div>
-                                    <form id="form-submit-score" class="leaderboard-submit-form" title="Post your current game score to global board">
-                                        <input type="number" id="input-quick-score" class="leaderboard-input" placeholder="Enter Score..." min="1" max="9999999" required />
-                                        <button type="submit" class="btn-post-score" id="btn-post-score">
-                                            <span>Post Score 🚀</span>
-                                        </button>
-                                    </form>
-                                </div>
-
-                                <div class="leaderboard-table-wrap">
-                                    <table class="leaderboard-table">
-                                        <thead>
-                                            <tr>
-                                                <th class="col-rank">RANK</th>
-                                                <th class="col-player">CHAMPION</th>
-                                                <th class="col-score">HIGH SCORE</th>
-                                                <th class="col-time">DATE</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="leaderboard-table-body">
-                                            <!-- Dynamically populated rows -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
 
                     <!-- Right Sidebar: "Play next" Recommendations & Spotlight -->
                     <aside class="player-right-sidebar">
-                        
+
                         <!-- Top Spotlight Ad / Feature Box -->
                         <div class="sidebar-spotlight-card">
                             <div class="spotlight-badge">🔥 ARCADE SPOTLIGHT</div>
                             <div class="spotlight-title" id="spotlight-title">Ready for more chaos?</div>
-                            <p class="spotlight-desc" id="spotlight-desc">Discover high-octane 1v1 arenas, survival elevators & physics flyers.</p>
+                            <p class="spotlight-desc" id="spotlight-desc">Discover high-octane 1v1 arenas, survival
+                                elevators & physics flyers.</p>
                             <button class="btn-spotlight-cta" id="btn-spotlight-play">
                                 <span>Play Featured ⚡</span>
                             </button>
@@ -421,19 +424,22 @@
                  VIEW 2: HOME CATALOG & HERO VIEW
                  ========================================================== -->
             <section id="catalog-view" class="catalog-view">
-                
+
                 <!-- Arcade Hero Section -->
                 <section class="arcade-hero">
                     <div class="hero-content-wrap">
-                        <div class="hero-mascot-wrap" id="hero-mascot-wrap" role="button" tabindex="0" title="Click to play Krazy Fuze intro!" aria-label="Play Krazy Fuze mascot animation">
-                            <img src="krazio-mascot.svg" alt="Krazy Fuze Mascot" class="hero-mascot-img" id="hero-mascot-img">
+                        <div class="hero-mascot-wrap" id="hero-mascot-wrap" role="button" tabindex="0"
+                            title="Click to play Krazy Fuze intro!" aria-label="Play Krazy Fuze mascot animation">
+                            <img src="krazio-mascot.svg" alt="Krazy Fuze Mascot" class="hero-mascot-img"
+                                id="hero-mascot-img">
                         </div>
                         <h1 class="hero-big-title">KRAZIO FUZE</h1>
                         <p class="hero-subtitle">Fast, chaotic, instant-play browser games with zero downloads.</p>
 
                         <!-- Big Center Search Bar with Find Game Button -->
                         <div class="hero-search-box">
-                            <input type="text" id="search-games-input" class="hero-search-input" placeholder="Search 12+ krazy arcade games...">
+                            <input type="text" id="search-games-input" class="hero-search-input"
+                                placeholder="Search 12+ krazy arcade games...">
                             <button class="hero-search-btn" id="btn-search-go">Find Game</button>
                         </div>
                     </div>
@@ -454,10 +460,12 @@
                         <!-- Bento Arcade Grid (Our 10 Real Playable Games) -->
                         <section id="bento-arcade-section" class="bento-arcade-section">
                             <div class="bento-arcade-grid">
-                                
+
                                 <!-- 1. Office Escape: Corporate Run (2x2 Flagship Card - Top Left) -->
-                                <div class="bento-card bento-span-2x2" data-id="office-escape" title="Play Office Escape: Corporate Run">
-                                    <img src="thumbnails/bento/office-escape.webp" alt="Office Escape: Corporate Run" loading="eager">
+                                <div class="bento-card bento-span-2x2" data-id="office-escape"
+                                    title="Play Office Escape: Corporate Run">
+                                    <img src="thumbnails/bento/office-escape.webp" alt="Office Escape: Corporate Run"
+                                        loading="eager">
                                     <div class="bento-preview-wrap" data-preview="office-escape"></div>
                                     <div class="bento-hover-glow"></div>
                                     <div class="bento-card-info">
@@ -472,8 +480,10 @@
                                 </div>
 
                                 <!-- 2. Dart Master: 301 / 501 Arena (1x1 Card - Top Row 1 Col 3) -->
-                                <div class="bento-card bento-span-1x1" data-id="dart-board" title="Play Dart Master: 301 / 501 Arena">
-                                    <img src="thumbnails/bento/dart-board.webp" alt="Dart Master 301/501" loading="eager">
+                                <div class="bento-card bento-span-1x1" data-id="dart-board"
+                                    title="Play Dart Master: 301 / 501 Arena">
+                                    <img src="thumbnails/bento/dart-board.webp" alt="Dart Master 301/501"
+                                        loading="eager">
                                     <div class="bento-preview-wrap" data-preview="dart-board"></div>
                                     <div class="bento-hover-glow"></div>
                                     <div class="bento-card-info">
@@ -488,8 +498,10 @@
                                 </div>
 
                                 <!-- 3. Sumi-e Tac Toe (1x1 Card - Swapped to Top Row 1 Col 4) -->
-                                <div class="bento-card bento-span-1x1" data-id="tic-tac-toe" title="Play Sumi-e Tac Toe: Zen Brush &amp; AI">
-                                    <img src="thumbnails/bento/tic-tac-toe.webp" alt="Sumi-e Tac Toe: Zen Brush & AI" loading="eager">
+                                <div class="bento-card bento-span-1x1" data-id="tic-tac-toe"
+                                    title="Play Sumi-e Tac Toe: Zen Brush &amp; AI">
+                                    <img src="thumbnails/bento/tic-tac-toe.webp" alt="Sumi-e Tac Toe: Zen Brush & AI"
+                                        loading="eager">
                                     <div class="bento-preview-wrap" data-preview="tic-tac-toe"></div>
                                     <div class="bento-hover-glow"></div>
                                     <div class="bento-card-info">
@@ -504,8 +516,10 @@
                                 </div>
 
                                 <!-- 4. Flappy Man (1x1 Card - Swapped to Top Row 2 Col 3) -->
-                                <div class="bento-card bento-span-1x1" data-id="flappy-man" title="Play Flappy Man: Superhero Flight">
-                                    <img src="thumbnails/bento/flappy-man.webp" alt="Flappy Man: Superhero Flight" loading="eager">
+                                <div class="bento-card bento-span-1x1" data-id="flappy-man"
+                                    title="Play Flappy Man: Superhero Flight">
+                                    <img src="thumbnails/bento/flappy-man.webp" alt="Flappy Man: Superhero Flight"
+                                        loading="eager">
                                     <div class="bento-preview-wrap" data-preview="flappy-man"></div>
                                     <div class="bento-hover-glow"></div>
                                     <div class="bento-card-info">
@@ -520,8 +534,10 @@
                                 </div>
 
                                 <!-- 5. Wild Swings: Hook & Flight (1x1 Card - Top Row 2 Col 4) -->
-                                <div class="bento-card bento-span-1x1" data-id="wild-swings" title="Play Wild Swings: Hook &amp; Flight">
-                                    <img src="thumbnails/bento/wild-swings.webp" alt="Wild Swings: Hook & Flight" loading="eager">
+                                <div class="bento-card bento-span-1x1" data-id="wild-swings"
+                                    title="Play Wild Swings: Hook &amp; Flight">
+                                    <img src="thumbnails/bento/wild-swings.webp" alt="Wild Swings: Hook & Flight"
+                                        loading="eager">
                                     <div class="bento-preview-wrap" data-preview="wild-swings"></div>
                                     <div class="bento-hover-glow"></div>
                                     <div class="bento-card-info">
@@ -536,8 +552,10 @@
                                 </div>
 
                                 <!-- 6. Gravity Flip: Cavern Runner (1x1 Card - Bottom Row 3 Col 1) -->
-                                <div class="bento-card bento-span-1x1" data-id="gravity-flip" title="Play Gravity Flip: Cavern Runner">
-                                    <img src="thumbnails/bento/gravity-flip.webp" alt="Gravity Flip: Cavern Runner" loading="lazy">
+                                <div class="bento-card bento-span-1x1" data-id="gravity-flip"
+                                    title="Play Gravity Flip: Cavern Runner">
+                                    <img src="thumbnails/bento/gravity-flip.webp" alt="Gravity Flip: Cavern Runner"
+                                        loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="gravity-flip"></div>
                                     <div class="bento-hover-glow"></div>
                                     <div class="bento-card-info">
@@ -568,8 +586,10 @@
                                 </div>
 
                                 <!-- 8. Bomb Panic: Hot Potato (1x1 Card - Swapped to Bottom Row 4 Col 1) -->
-                                <div class="bento-card bento-span-1x1" data-id="bomb-panic" title="Play Bomb Panic: Hot Potato">
-                                    <img src="thumbnails/bento/bomb-panic.webp" alt="Bomb Panic: Hot Potato" loading="lazy">
+                                <div class="bento-card bento-span-1x1" data-id="bomb-panic"
+                                    title="Play Bomb Panic: Hot Potato">
+                                    <img src="thumbnails/bento/bomb-panic.webp" alt="Bomb Panic: Hot Potato"
+                                        loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="bomb-panic"></div>
                                     <div class="bento-hover-glow"></div>
                                     <div class="bento-card-info">
@@ -584,8 +604,10 @@
                                 </div>
 
                                 <!-- 9. Elevator of Doom (1x1 Card - Swapped to Bottom Row 4 Col 2) -->
-                                <div class="bento-card bento-span-1x1" data-id="elevator-doom" title="Play Elevator of Doom: Floor 99">
-                                    <img src="thumbnails/bento/elevator-doom.webp" alt="Elevator of Doom: Floor 99" loading="lazy">
+                                <div class="bento-card bento-span-1x1" data-id="elevator-doom"
+                                    title="Play Elevator of Doom: Floor 99">
+                                    <img src="thumbnails/bento/elevator-doom.webp" alt="Elevator of Doom: Floor 99"
+                                        loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="elevator-doom"></div>
                                     <div class="bento-hover-glow"></div>
                                     <div class="bento-card-info">
@@ -600,8 +622,10 @@
                                 </div>
 
                                 <!-- 10. Cyber Clash / Fallen One (2x2 Flagship Card - Bottom Right) -->
-                                <div class="bento-card bento-span-2x2" data-id="fallen-one" title="Play Cyber Clash: PvP Arena">
-                                    <img src="thumbnails/bento/fallen-one.webp" alt="Cyber Clash: PvP Arena" loading="lazy">
+                                <div class="bento-card bento-span-2x2" data-id="fallen-one"
+                                    title="Play Cyber Clash: PvP Arena">
+                                    <img src="thumbnails/bento/fallen-one.webp" alt="Cyber Clash: PvP Arena"
+                                        loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="fallen-one"></div>
                                     <div class="bento-hover-glow"></div>
                                     <div class="bento-card-info">
@@ -616,8 +640,10 @@
                                 </div>
 
                                 <!-- 11. Royal Chess: Grandmaster Arena (Wide Flagship Card - Bottom Row 5) -->
-                                <div class="bento-card bento-span-4x1" data-id="chess" title="Play Royal Chess: Grandmaster Arena">
-                                    <img src="thumbnails/bento/chess.webp" alt="Royal Chess: Grandmaster Arena" loading="lazy">
+                                <div class="bento-card bento-span-4x1" data-id="chess"
+                                    title="Play Royal Chess: Grandmaster Arena">
+                                    <img src="thumbnails/bento/chess.webp" alt="Royal Chess: Grandmaster Arena"
+                                        loading="lazy">
                                     <div class="bento-preview-wrap" data-preview="chess"></div>
                                     <div class="bento-hover-glow"></div>
                                     <div class="bento-card-info">
@@ -648,7 +674,7 @@
                     <div>
                         <h3 class="modal-title">Gamer Account & Saves</h3>
                         <p class="auth-modal-desc">
-                            Log in with your credentials to preserve high scores, coins, and progress for each game. 
+                            Log in with your credentials to preserve high scores, coins, and progress for each game.
                             In Guest Mode, all game data automatically clears whenever the website is reloaded.
                         </p>
                     </div>
@@ -663,8 +689,10 @@
                     <div class="auth-current-info">
                         <div class="auth-current-name-row">
                             <h4 id="auth-current-username">Guest Player</h4>
-                            <button type="button" id="btn-edit-username" class="btn-edit-name-trigger hidden" title="Change in-game name">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <button type="button" id="btn-edit-username" class="btn-edit-name-trigger hidden"
+                                title="Change in-game name">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                 </svg>
@@ -675,7 +703,8 @@
                         <!-- Change In-Game Name Inline Panel -->
                         <div id="auth-username-edit-panel" class="auth-name-edit-panel hidden">
                             <div class="name-edit-input-wrap">
-                                <input type="text" id="input-change-username" class="auth-name-edit-input" maxlength="20" placeholder="New gamer tag..." autocomplete="off" spellcheck="false">
+                                <input type="text" id="input-change-username" class="auth-name-edit-input"
+                                    maxlength="20" placeholder="New gamer tag..." autocomplete="off" spellcheck="false">
                                 <button type="button" id="btn-save-username" class="btn-name-save">Save</button>
                                 <button type="button" id="btn-cancel-username" class="btn-name-cancel">Cancel</button>
                             </div>
@@ -689,7 +718,8 @@
                 </div>
                 <div class="auth-status-right">
                     <button id="btn-auth-logout" class="btn-auth-logout hidden" title="Log out to guest mode">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                             <polyline points="16 17 21 12 16 7"></polyline>
                             <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -734,19 +764,25 @@
                     <h4 class="auth-section-title">QUICK SIGN IN WITH SOCIAL OR GUEST</h4>
                     <div class="auth-social-grid">
                         <!-- Google Sign In Button -->
-                        <button type="button" id="btn-auth-google" class="btn-auth-social btn-google" title="Sign in with your Google account">
+                        <button type="button" id="btn-auth-google" class="btn-auth-social btn-google"
+                            title="Sign in with your Google account">
                             <svg class="social-icon-svg" viewBox="0 0 24 24" width="20" height="20">
-                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                <path fill="#4285F4"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="#34A853"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="#FBBC05"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                                <path fill="#EA4335"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                             </svg>
                             <span class="btn-social-label">Google</span>
                         </button>
 
 
                         <!-- Instant Guest Sign In Button -->
-                        <button type="button" id="btn-auth-guest-quick" class="btn-auth-social btn-guest-quick" title="Play as Guest immediately without credentials">
+                        <button type="button" id="btn-auth-guest-quick" class="btn-auth-social btn-guest-quick"
+                            title="Play as Guest immediately without credentials">
                             <span class="social-icon-emoji">⚡</span>
                             <span class="btn-social-label">Guest Play</span>
                         </button>
@@ -764,41 +800,52 @@
                     <div class="auth-inputs-grid">
                         <div class="auth-input-group">
                             <label for="auth-username-input">Gamer Tag / Username</label>
-                            <input type="text" id="auth-username-input" class="auth-text-input" placeholder="e.g. Rahil, SolarAce, Ninja99" maxlength="20" autocomplete="off">
+                            <input type="text" id="auth-username-input" class="auth-text-input"
+                                placeholder="e.g. Rahil, SolarAce, Ninja99" maxlength="20" autocomplete="off">
+                            <div id="auth-username-feedback" class="auth-input-feedback hidden"></div>
                         </div>
                         <div class="auth-input-group">
                             <label for="auth-pin-input">PIN / Passcode (Optional)</label>
-                            <input type="password" id="auth-pin-input" class="auth-text-input" placeholder="4-digit PIN or password" maxlength="16">
+                            <input type="password" id="auth-pin-input" class="auth-text-input"
+                                placeholder="4-digit PIN or password" maxlength="16">
                         </div>
                     </div>
 
                     <div class="auth-form-actions">
-                        <button id="btn-auth-login-submit" class="btn-arcade-cta" style="padding: 9px 24px;">🚀 LOG IN / SAVE PROFILE</button>
-                        <button id="btn-auth-switch-guest" class="nav-btn">⚡ Play as Guest (Auto-Clears on Reload)</button>
+                        <button id="btn-auth-login-submit" class="btn-arcade-cta" style="padding: 9px 24px;">🚀 LOG IN /
+                            SAVE PROFILE</button>
+                        <button id="btn-auth-switch-guest" class="nav-btn">⚡ Play as Guest (Auto-Clears on
+                            Reload)</button>
                     </div>
                 </div>
             </div>
 
 
             <div class="auth-modal-footer">
-                <button id="btn-auth-modal-close" class="btn-arcade-cta" style="padding: 8px 28px; font-size: 0.95rem;">Done</button>
+                <button id="btn-auth-modal-close" class="btn-arcade-cta"
+                    style="padding: 8px 28px; font-size: 0.95rem;">Done</button>
             </div>
         </div>
     </div>
 
     <!-- OAuth Provider Setup & Troubleshooting Guidance Modal -->
     <div id="oauth-help-modal" class="modal-backdrop">
-        <div class="modal-box auth-modal-box" style="max-width: 580px; border-color: rgba(99, 102, 241, 0.45); box-shadow: 0 0 35px rgba(99, 102, 241, 0.25);">
+        <div class="modal-box auth-modal-box"
+            style="max-width: 580px; border-color: rgba(99, 102, 241, 0.45); box-shadow: 0 0 35px rgba(99, 102, 241, 0.25);">
             <div class="auth-modal-header">
                 <div class="auth-title-wrap">
                     <span class="auth-header-icon" id="oauth-help-icon">⚠️</span>
                     <div>
                         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                            <h3 class="modal-title" id="oauth-help-title" style="margin: 0; font-size: 1.35rem;">Social Sign-In Setup</h3>
-                            <span class="auth-badge-pill" id="oauth-help-badge" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171;">Provider Disabled in Supabase</span>
+                            <h3 class="modal-title" id="oauth-help-title" style="margin: 0; font-size: 1.35rem;">Social
+                                Sign-In Setup</h3>
+                            <span class="auth-badge-pill" id="oauth-help-badge"
+                                style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171;">Provider
+                                Disabled in Supabase</span>
                         </div>
                         <p class="auth-modal-desc" id="oauth-help-desc" style="margin-top: 6px;">
-                            Facebook & Instagram sign-in require enabling the provider in your Supabase project dashboard.
+                            Facebook & Instagram sign-in require enabling the provider in your Supabase project
+                            dashboard.
                         </p>
                     </div>
                 </div>
@@ -806,52 +853,71 @@
             </div>
 
             <!-- Diagnostics Card -->
-            <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
-                <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.45;">
+            <div
+                style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                <div
+                    style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.45;">
                     <span style="font-size: 1.25rem; flex-shrink: 0;">💡</span>
                     <div>
                         <strong style="color: #f8fafc;">Why this happens:</strong>
                         <div id="oauth-help-reason" style="margin-top: 3px;">
-                            Your Supabase backend (<code id="oauth-project-ref-code" style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #38bdf8;">jjovwmzigxwyncjjnabb</code>) has not turned on the Facebook/Meta OAuth provider yet. Instagram authentication on the web uses Meta/Facebook Login.
+                            Your Supabase backend (<code id="oauth-project-ref-code"
+                                style="background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #fb7185;">jjovwmzigxwyncjjnabb</code>)
+                            has not turned on the Facebook/Meta OAuth provider yet. Instagram authentication on the web
+                            uses Meta/Facebook Login.
                         </div>
                     </div>
                 </div>
 
                 <!-- Steps to Enable in Supabase -->
-                <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #94a3b8; display: flex; flex-direction: column; gap: 8px;">
+                <div
+                    style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #94a3b8; display: flex; flex-direction: column; gap: 8px;">
                     <div style="font-weight: 700; color: #e2e8f0; display: flex; align-items: center; gap: 6px;">
                         <span>⚙️ Quick Setup (Takes 2 minutes):</span>
                     </div>
                     <ol style="margin: 0; padding-left: 20px; line-height: 1.55;">
                         <li>Open your Supabase Dashboard: <strong>Authentication → Providers → Facebook</strong>.</li>
                         <li>Toggle <strong>"Enable Facebook provider"</strong> to <strong>ON</strong>.</li>
-                        <li>Enter your Meta <strong>Client ID (App ID)</strong> and <strong>Client Secret</strong> from Meta for Developers.</li>
+                        <li>Enter your Meta <strong>Client ID (App ID)</strong> and <strong>Client Secret</strong> from
+                            Meta for Developers.</li>
                         <li>In your Meta App Settings, set the <strong>Valid OAuth Redirect URI</strong> to:</li>
                     </ol>
-                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 6px; padding: 6px 10px;">
-                        <code id="oauth-redirect-uri-display" style="font-size: 0.75rem; color: #a5b4fc; flex: 1; word-break: break-all; font-family: monospace;">https://jjovwmzigxwyncjjnabb.supabase.co/auth/v1/callback</code>
-                        <button type="button" id="btn-copy-oauth-uri" class="nav-btn" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(99, 102, 241, 0.5); flex-shrink: 0;" title="Copy Redirect URI">📋 Copy</button>
+                    <div
+                        style="display: flex; align-items: center; gap: 8px; margin-top: 4px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 6px; padding: 6px 10px;">
+                        <code id="oauth-redirect-uri-display"
+                            style="font-size: 0.75rem; color: #a5b4fc; flex: 1; word-break: break-all; font-family: monospace;">https://jjovwmzigxwyncjjnabb.supabase.co/auth/v1/callback</code>
+                        <button type="button" id="btn-copy-oauth-uri" class="nav-btn"
+                            style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(99, 102, 241, 0.5); flex-shrink: 0;"
+                            title="Copy Redirect URI">📋 Copy</button>
                     </div>
                 </div>
             </div>
 
             <!-- Instant Alternatives Section -->
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <span style="font-size: 0.75rem; font-weight: 800; color: #64748b; letter-spacing: 0.8px;">OR PLAY RIGHT NOW WITH:</span>
+                <span style="font-size: 0.75rem; font-weight: 800; color: #64748b; letter-spacing: 0.8px;">OR PLAY RIGHT
+                    NOW WITH:</span>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                    <button type="button" id="btn-oauth-fallback-google" class="btn-auth-social btn-google" style="padding: 10px; font-size: 0.85rem;" title="Sign in with Google">
+                    <button type="button" id="btn-oauth-fallback-google" class="btn-auth-social btn-google"
+                        style="padding: 10px; font-size: 0.85rem;" title="Sign in with Google">
                         <svg class="social-icon-svg" viewBox="0 0 24 24" width="18" height="18">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                            <path fill="#4285F4"
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853"
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05"
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                            <path fill="#EA4335"
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                         </svg>
                         <span>Google (Active)</span>
                     </button>
-                    <button type="button" id="btn-oauth-fallback-guest" class="btn-auth-social btn-guest-quick" style="padding: 10px; font-size: 0.85rem;" title="Play as Guest">
+                    <button type="button" id="btn-oauth-fallback-guest" class="btn-auth-social btn-guest-quick"
+                        style="padding: 10px; font-size: 0.85rem;" title="Play as Guest">
                         <span>⚡ Guest Play</span>
                     </button>
-                    <button type="button" id="btn-oauth-fallback-tag" class="btn-arcade-cta" style="padding: 10px; font-size: 0.85rem;" title="Gamer Tag Login">
+                    <button type="button" id="btn-oauth-fallback-tag" class="btn-arcade-cta"
+                        style="padding: 10px; font-size: 0.85rem;" title="Gamer Tag Login">
                         <span>🎮 Gamer Tag</span>
                     </button>
                 </div>
@@ -859,7 +925,10 @@
 
             <!-- Footer Action Buttons -->
             <div class="auth-modal-footer" style="padding-top: 10px; justify-content: space-between;">
-                <a id="btn-open-supabase-dashboard" href="https://supabase.com/dashboard/project/jjovwmzigxwyncjjnabb/auth/providers" target="_blank" rel="noopener noreferrer" class="btn-arcade-cta" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;">
+                <a id="btn-open-supabase-dashboard"
+                    href="https://supabase.com/dashboard/project/jjovwmzigxwyncjjnabb/auth/providers" target="_blank"
+                    rel="noopener noreferrer" class="btn-arcade-cta"
+                    style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;">
                     <span>⚡ Open Supabase Providers Dashboard ↗</span>
                 </a>
                 <button type="button" id="btn-done-oauth-help" class="nav-btn" style="padding: 10px 20px;">Done</button>
@@ -879,7 +948,9 @@
                             <span class="audience-live-tag"><span class="live-pulse-dot"></span> LIVE MODEL</span>
                         </div>
                         <p class="audience-modal-desc">
-                            Real-time platform viewership dynamically calculated from the <strong>251,136-row Gaming Audience Master Dataset</strong> (diurnal traffic curves, device distribution & genre session times).
+                            Real-time platform viewership dynamically calculated from the <strong>251,136-row Gaming
+                                Audience Master Dataset</strong> (diurnal traffic curves, device distribution & genre
+                            session times).
                         </p>
                     </div>
                 </div>
@@ -905,7 +976,7 @@
                 </div>
                 <div class="audience-stat-card">
                     <span class="stat-card-label">Top Device Share</span>
-                    <div class="stat-card-val"><span style="color:#38bdf8;">Android 51.5%</span></div>
+                    <div class="stat-card-val"><span style="color:#fb7185;">Android 51.5%</span></div>
                     <span class="stat-subtext">Windows PC 14.2% · iOS 13.7%</span>
                 </div>
             </div>
@@ -921,7 +992,8 @@
                 <div class="aud-split-col">
                     <div class="aud-split-header-row">
                         <h4 class="aud-split-title">🌍 LIVE PLAYERS BY STATE &amp; CITY</h4>
-                        <span class="aud-geo-countdown"><span class="live-pulse-dot mini"></span> Real-Time Demographics</span>
+                        <span class="aud-geo-countdown"><span class="live-pulse-dot mini"></span> Real-Time
+                            Demographics</span>
                     </div>
                     <div class="aud-bars-list scrollable" id="aud-geo-bars">
                         <!-- Populated dynamically with states, cities, local times & live players -->
@@ -942,7 +1014,8 @@
                     Source: Sensor Tower FY2024-25 & Master Gaming Demographic Model
                 </div>
                 <div class="sm-actions-right">
-                    <button id="btn-audience-close" class="btn-arcade-cta" style="padding: 8px 24px; font-size: 0.95rem;">Close Insights</button>
+                    <button id="btn-audience-close" class="btn-arcade-cta"
+                        style="padding: 8px 24px; font-size: 0.95rem;">Close Insights</button>
                 </div>
             </div>
         </div>
@@ -974,13 +1047,15 @@
 
                 <!-- Right: Creator Signature Card & Interactive Badge -->
                 <div class="footer-creator-col">
-                    <a href="https://kraziocloud.com" target="_blank" rel="noopener noreferrer" class="creator-badge" title="Visit KrazioCloud (kraziocloud.com)">
+                    <a href="https://kraziocloud.com" target="_blank" rel="noopener noreferrer" class="creator-badge"
+                        title="Visit KrazioCloud (kraziocloud.com)">
                         <span class="creator-badge-icon">☁️</span>
                         <div class="creator-badge-info">
                             <span class="creator-badge-prefix">Created by</span>
                             <strong class="creator-badge-name">KrazioCloud</strong>
                         </div>
-                        <svg class="creator-badge-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="creator-badge-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="7" y1="17" x2="17" y2="7"></line>
                             <polyline points="7 7 17 7 17 17"></polyline>
                         </svg>
@@ -1003,7 +1078,9 @@
     <!-- Fullscreen Mascot Animation Overlay -->
     <div id="fullscreen-mascot-overlay" class="fullscreen-mascot-overlay hidden" aria-hidden="true">
         <div class="fullscreen-video-container">
-            <video id="fullscreen-mascot-video" class="fullscreen-mascot-video" src="public/gemini_generated_video_6306540a-ezgif.com-video-to-webm-converter.webm" playsinline preload="auto"></video>
+            <video id="fullscreen-mascot-video" class="fullscreen-mascot-video"
+                src="public/gemini_generated_video_6306540a-ezgif.com-video-to-webm-converter.webm" playsinline
+                preload="auto"></video>
         </div>
     </div>
 
@@ -1013,4 +1090,5 @@
     <script src="supabase-client.js"></script>
     <script src="portal.js?v=instant"></script>
 </body>
+
 </html>
