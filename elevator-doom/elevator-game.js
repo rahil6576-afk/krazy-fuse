@@ -96,7 +96,7 @@ const WEAPONS = {
         icon: '🔫',
         damage: 34,
         cooldown: 20,
-        speed: 12,
+        speed: 8.5,
         type: 'projectile',
         color: '#38bdf8',
         desc: 'High-speed kinetic bolts.'
@@ -118,7 +118,7 @@ const WEAPONS = {
         icon: '🔥',
         damage: 75,
         cooldown: 45,
-        speed: 8,
+        speed: 5.5,
         type: 'explosive',
         color: '#ea580c',
         desc: 'Heavy rocket with destructive AoE blast.'
@@ -219,7 +219,7 @@ class Player {
         this.y = ELEVATOR.floorY - this.h;
         this.vx = 0;
         this.vy = 0;
-        this.speed = 3.2;
+        this.speed = 2.6; // Refined for clearer pacing and player control
         this.isGrounded = true;
         this.isAlive = true;
         this.facing = 1; // 1 = right, -1 = left
@@ -389,7 +389,7 @@ class Player {
         if (this.isDashing > 0) this.isDashing--;
 
         // Horizontal Movement
-        let moveSpeed = this.speed * (this.hasPassive('OVERCLOCK') ? 1.25 : 1.0);
+        let moveSpeed = this.speed * (this.hasPassive('OVERCLOCK') ? 1.2 : 1.0);
         if (this.isDashing <= 0) {
             if (keys['KeyA'] || keys['ArrowLeft']) {
                 this.vx = -moveSpeed;
@@ -398,19 +398,19 @@ class Player {
                 this.vx = moveSpeed;
                 this.facing = 1;
             } else {
-                this.vx *= 0.75;
+                this.vx *= 0.72;
             }
 
             // Jump
             if ((keys['KeyW'] || keys['ArrowUp'] || keys['Space']) && this.isGrounded) {
-                this.vy = -10.0;
+                this.vy = -8.8; // Tuned for clear readable trajectory
                 this.isGrounded = false;
                 if (window.doomAudio) window.doomAudio.playJump();
             }
         }
 
         // Gravity & Physics
-        this.vy += 0.50;
+        this.vy += 0.44;
         this.x += this.vx;
         this.y += this.vy;
 
@@ -522,34 +522,34 @@ class Enemy {
             this.h = 48;
             this.hp = 85;
             this.maxHp = 85;
-            this.speed = 1.1;
+            this.speed = 0.85; // Tuned for clear reaction windows
             this.color = '#78350f';
             this.damage = 30;
             this.attackRange = 48;
-            this.attackCooldownMax = 70;
+            this.attackCooldownMax = 90;
         } else if (type === 'ELEVATOR_MAN') {
             this.name = 'The Elevator Man';
             this.w = 30;
             this.h = 46;
             this.hp = 65;
             this.maxHp = 65;
-            this.speed = 1.6;
+            this.speed = 1.25;
             this.color = '#1e1b4b';
             this.damage = 35;
             this.attackRange = 40;
-            this.attackCooldownMax = 80;
-            this.teleportCooldown = 180;
+            this.attackCooldownMax = 100;
+            this.teleportCooldown = 260; // ~4.3 seconds window
         } else if (type === 'CRAWLER') {
             this.name = 'Vent Crawler';
             this.w = 34;
             this.h = 24;
             this.hp = 45;
             this.maxHp = 45;
-            this.speed = 2.3;
+            this.speed = 1.7;
             this.color = '#15803d';
             this.damage = 20;
             this.attackRange = 36;
-            this.attackCooldownMax = 45;
+            this.attackCooldownMax = 65;
         } else if (type === 'MIMIC') {
             this.name = 'Greed Mimic';
             this.w = 32;
@@ -561,29 +561,29 @@ class Enemy {
             this.color = '#eab308';
             this.damage = 40;
             this.attackRange = 42;
-            this.attackCooldownMax = 50;
+            this.attackCooldownMax = 70;
         } else if (type === 'SECURITY_BOT') {
             this.name = 'Security Bot';
             this.w = 30;
             this.h = 36;
             this.hp = 50;
             this.maxHp = 50;
-            this.speed = 1.3;
+            this.speed = 0.95;
             this.color = '#38bdf8';
             this.damage = 25;
             this.attackRange = 350;
-            this.attackCooldownMax = 90;
+            this.attackCooldownMax = 110;
         } else if (type === 'DOOM_CHILD') {
             this.name = 'Doom Child';
             this.w = 24;
             this.h = 32;
             this.hp = 30;
             this.maxHp = 30;
-            this.speed = 2.8;
+            this.speed = 1.9;
             this.color = '#ec4899';
             this.damage = 15;
             this.attackRange = 30;
-            this.attackCooldownMax = 60;
+            this.attackCooldownMax = 75;
         }
 
         this.attackCooldown = 0;
@@ -603,7 +603,7 @@ class Enemy {
         // Wake up mimic if sleeping
         if (this.type === 'MIMIC' && !this.isAwake) {
             this.isAwake = true;
-            this.speed = 2.2;
+            this.speed = 1.6;
         }
 
         if (this.hp <= 0) {
@@ -651,7 +651,7 @@ class Enemy {
         this.facing = dx >= 0 ? 1 : -1;
 
         // Apply Time Warp slow motion
-        const timeMod = timeWarpTimer > 0 ? 0.4 : (doomLevel >= 50 ? 1.25 : 1.0);
+        const timeMod = timeWarpTimer > 0 ? 0.45 : (doomLevel >= 75 ? 1.12 : 1.0);
 
         // Archetype AI Routines
         if (this.type === 'JANITOR') {
@@ -682,7 +682,7 @@ class Enemy {
             // High speed scuttle & jump
             this.vx = Math.sign(dx) * this.speed * timeMod;
             if (dist < 120 && this.vy === 0 && Math.random() < 0.04) {
-                this.vy = -6.5; // Pounce jump!
+                this.vy = -5.2; // Pounce jump!
             }
             if (dist < this.attackRange && this.attackCooldown <= 0) {
                 this.attackCooldown = this.attackCooldownMax;
@@ -692,7 +692,7 @@ class Enemy {
             // Wait until player approaches
             if (!this.isAwake && dist < 70) {
                 this.isAwake = true;
-                this.speed = 2.2;
+                this.speed = 1.6;
                 createSparks(this.x, this.y, '#eab308', 15);
                 if (window.doomAudio) window.doomAudio.playAlarm();
             }
@@ -720,7 +720,7 @@ class Enemy {
                 projectiles.push({
                     x: this.x + this.w / 2,
                     y: this.y + this.h / 2,
-                    vx: Math.sign(dx) * 5,
+                    vx: Math.sign(dx) * 3.6,
                     vy: 0,
                     radius: 4,
                     damage: this.damage,
@@ -734,7 +734,7 @@ class Enemy {
         }
 
         // Gravity & Movement
-        this.vy += 0.55;
+        this.vy += 0.48;
         this.x += this.vx;
         this.y += this.vy;
 
@@ -833,28 +833,28 @@ class Boss {
             this.hp = 350;
             this.maxHp = 350;
             this.color = '#78350f';
-            this.speed = 1.4;
+            this.speed = 1.0;
         } else if (floor <= 20) {
             this.name = 'SECURITY CHIEF V-9000';
             this.icon = '🤖';
             this.hp = 500;
             this.maxHp = 500;
             this.color = '#0284c7';
-            this.speed = 1.8;
+            this.speed = 1.35;
         } else if (floor <= 30) {
             this.name = 'THE ELEVATOR MAN (UNBOUND)';
             this.icon = '🕴️';
             this.hp = 680;
             this.maxHp = 680;
             this.color = '#581c87';
-            this.speed = 2.3;
+            this.speed = 1.65;
         } else {
             this.name = 'THE HARBINGER OF DOOM';
             this.icon = '💀';
             this.hp = 950;
             this.maxHp = 950;
             this.color = '#b91c1c';
-            this.speed = 2.6;
+            this.speed = 1.95;
         }
 
         showBossHUD(this);
@@ -1312,7 +1312,7 @@ function advanceToNextFloor() {
 
     setTimeout(() => {
         generateFloorDecision(currentFloor);
-    }, 600);
+    }, 800);
 }
 
 let lastFailedFloor = parseInt(SafeStorage.getItem('doom_failed_floor') || '1', 10);
@@ -1396,7 +1396,7 @@ function restartAtFailedFloor() {
     player.resetForMatch();
     player.maxHp = selectedSurvivor ? selectedSurvivor.hp : 100;
     player.hp = player.maxHp;
-    player.speed = selectedSurvivor ? selectedSurvivor.speed : 3.2;
+    player.speed = selectedSurvivor ? selectedSurvivor.speed : 2.6;
     player.weapon = selectedSurvivor ? selectedSurvivor.weapon : WEAPONS.KNIFE;
     player.ability = selectedSurvivor ? selectedSurvivor.ability : ABILITIES.DASH;
     player.passives = [];
@@ -1430,7 +1430,7 @@ function startNewRun() {
     player.resetForMatch();
     player.maxHp = selectedSurvivor ? selectedSurvivor.hp : 100;
     player.hp = player.maxHp;
-    player.speed = selectedSurvivor ? selectedSurvivor.speed : 3.2;
+    player.speed = selectedSurvivor ? selectedSurvivor.speed : 2.6;
     player.weapon = selectedSurvivor ? selectedSurvivor.weapon : WEAPONS.KNIFE;
     player.ability = selectedSurvivor ? selectedSurvivor.ability : ABILITIES.DASH;
     player.passives = [];
@@ -1453,7 +1453,7 @@ function update() {
 
     // Slowly increase Doom Meter over time during active combat
     if (gameState === STATE.COMBAT) {
-        doomLevel = Math.min(100, doomLevel + 0.008);
+        doomLevel = Math.min(100, doomLevel + 0.005);
 
         // Check Malfunctioning Floor (75% Doom)
         if (doomLevel >= 75 && Math.random() < 0.005) {
@@ -1780,7 +1780,7 @@ const SURVIVORS = [
         icon: '💼',
         role: 'Agile & Fast',
         hp: 100,
-        speed: 3.2,
+        speed: 2.6,
         weapon: WEAPONS.KNIFE,
         ability: ABILITIES.DASH,
         desc: 'Quick reflexes with a rapid slash knife & tactical dash.'
@@ -1791,7 +1791,7 @@ const SURVIVORS = [
         icon: '👔',
         role: 'Tactical Blaster',
         hp: 120,
-        speed: 2.8,
+        speed: 2.3,
         weapon: WEAPONS.BLASTER,
         ability: ABILITIES.SHIELD,
         desc: 'High resilience equipped with kinetic blaster & shield bubble.'
@@ -1802,7 +1802,7 @@ const SURVIVORS = [
         icon: '⚡',
         role: 'Crowd Stunner',
         hp: 90,
-        speed: 3.4,
+        speed: 2.7,
         weapon: WEAPONS.BATON,
         ability: ABILITIES.TIME_WARP,
         desc: 'High speed with chain shock baton & temporal slow-motion.'
@@ -1813,7 +1813,7 @@ const SURVIVORS = [
         icon: '🧹',
         role: 'Heavy Artillery',
         hp: 140,
-        speed: 2.7,
+        speed: 2.2,
         weapon: WEAPONS.LAUNCHER,
         ability: ABILITIES.STIM,
         desc: 'Tanky veteran armed with Doom explosive launcher & health stim.'
