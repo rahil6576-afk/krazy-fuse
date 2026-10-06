@@ -1369,11 +1369,27 @@ const KrazyGameStorage = {
             iframeWindow.localStorage.setItem('office_escape_coins', userCoins.toString());
             iframeWindow.localStorage.setItem('coins', userCoins.toString());
 
+            // Expose quick submit bridge inside iframe
+            iframeWindow.submitArcadeScore = (score) => {
+                if (typeof score !== 'undefined' && !isNaN(Number(score)) && Number(score) > 0) {
+                    submitPlayerScore(gameId, Number(score));
+                }
+            };
+
             // Hook iframe localStorage.setItem so in-game updates mirror to active user's storage
             const originalSetItem = iframeWindow.localStorage.setItem.bind(iframeWindow.localStorage);
             iframeWindow.localStorage.setItem = (k, v) => {
                 originalSetItem(k, v);
                 this.setItem(gameId, k, v);
+
+                // Auto-detect high score submissions from in-game saves
+                const scoreKeys = ['highScore', 'bestScore', 'flappyman_best', 'office_high_score', 'office_escape_highScore', 'doom_failed_floor', 'popup_high_score', 'gravity_high_score'];
+                if (scoreKeys.includes(k) && v && !isNaN(Number(v))) {
+                    const numVal = Number(v);
+                    if (numVal > 0) {
+                        submitPlayerScore(gameId, numVal, false);
+                    }
+                }
             };
         } catch (e) {
             console.warn('Game storage preparation note:', e);
@@ -1551,6 +1567,9 @@ function openGamePlayer(gameId) {
 
     // Play next
     renderPlayNextSidebar(game);
+
+    // Load and render Global High Scores Leaderboard for this game
+    renderGameLeaderboard(game.id);
 
     // Run high-performance loading screen with real device storage caching
     const iframe = document.getElementById('active-game-iframe');
@@ -3560,6 +3579,204 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ==========================================================
+    // GLOBAL HIGH SCORES LEADERBOARD SYSTEM (POWERED BY SUPABASE)
+    // ==========================================================
+    async function renderGameLeaderboard(gameId) {
+        const card = document.getElementById('player-leaderboard-card');
+        if (!card) return;
+
+        const game = GAMES_CATALOG.find(g => g.id === gameId) || currentGame;
+        const heading = document.getElementById('leaderboard-game-heading');
+        if (heading) {
+            heading.textContent = game ? `GLOBAL HIGH SCORES — ${game.title.toUpperCase()}` : 'GLOBAL HIGH SCORES';
+        }
+
+        const user = AuthManager.getActiveUser();
+        const avatarTag = document.getElementById('leaderboard-user-avatar');
+        if (avatarTag) avatarTag.textContent = user.avatar || '👾';
+
+        // Show current user personal best
+        const bestEl = document.getElementById('leaderboard-user-best-val');
+        let userBest = 0;
+        try {
+            const saved = KrazyGameStorage.getAllGameKeys(gameId);
+            const scoreKeys = ['highScore', 'bestScore', 'score', 'flappyman_best', 'office_high_score', 'office_escape_highScore', 'doom_failed_floor', 'popup_high_score', 'gravity_high_score'];
+            for (const k of scoreKeys) {
+                if (saved[k] && !isNaN(Number(saved[k]))) {
+                    userBest = Math.max(userBest, Number(saved[k]));
+                }
+            }
+        } catch (_) {}
+        if (bestEl) bestEl.textContent = userBest.toLocaleString();
+
+        // Live sync indicator state
+        const statusPill = document.getElementById('leaderboard-live-pill');
+        const statusText = document.getElementById('leaderboard-status-text');
+        if (typeof KrazySupabase !== 'undefined' && KrazySupabase.isConfigured()) {
+            if (statusPill) statusPill.style.background = 'rgba(16, 185, 129, 0.12)';
+            if (statusText) statusText.textContent = 'CLOUD SYNC ACTIVE';
+        } else {
+            if (statusPill) statusPill.style.background = 'rgba(245, 158, 11, 0.15)';
+            if (statusText) statusText.textContent = 'LOCAL HALL OF FAME';
+        }
+
+        const tbody = document.getElementById('leaderboard-table-body');
+        if (!tbody) return;
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="leaderboard-empty-state">
+                    <span>⚡ Fetching global champions...</span>
+                </td>
+            </tr>
+        `;
+
+        try {
+            let scores = [];
+            if (typeof KrazySupabase !== 'undefined') {
+                scores = await KrazySupabase.getLeaderboard(gameId, 10);
+            }
+
+            if (!scores || scores.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="leaderboard-empty-state">
+                            <span>No scores registered yet. Be the first champion! 🚀</span>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            scores.forEach((row, idx) => {
+                const rank = idx + 1;
+                const tr = document.createElement('tr');
+                const isUser = (row.user_identifier && user.identifier && row.user_identifier === user.identifier) ||
+                               (row.player_name && user.username && row.player_name.toLowerCase() === user.username.toLowerCase());
+                
+                if (isUser) tr.classList.add('tr-is-you');
+
+                let rankHtml = '';
+                if (rank === 1) rankHtml = '<span class="rank-badge rank-1">🥇</span>';
+                else if (rank === 2) rankHtml = '<span class="rank-badge rank-2">🥈</span>';
+                else if (rank === 3) rankHtml = '<span class="rank-badge rank-3">🥉</span>';
+                else rankHtml = `<span class="rank-badge rank-other">#${rank}</span>`;
+
+                let timeStr = 'Recently';
+                if (row.created_at) {
+                    const diffMs = Date.now() - new Date(row.created_at).getTime();
+                    const diffMin = Math.floor(diffMs / 60000);
+                    const diffHr = Math.floor(diffMin / 60);
+                    const diffDay = Math.floor(diffHr / 24);
+                    if (diffDay > 0) timeStr = `${diffDay}d ago`;
+                    else if (diffHr > 0) timeStr = `${diffHr}h ago`;
+                    else if (diffMin > 0) timeStr = `${diffMin}m ago`;
+                    else timeStr = 'Just now';
+                }
+
+                tr.innerHTML = `
+                    <td class="col-rank">${rankHtml}</td>
+                    <td class="col-player">
+                        <div class="player-cell-wrap">
+                            <span class="player-cell-avatar">${row.player_avatar || '👾'}</span>
+                            <span class="player-name-text">${escapeHtml(row.player_name || 'Guest Gamer')}</span>
+                            ${isUser ? '<span class="player-you-pill">YOU</span>' : ''}
+                        </div>
+                    </td>
+                    <td class="col-score">${Number(row.score).toLocaleString()}</td>
+                    <td class="col-time">${timeStr}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (err) {
+            console.warn('Leaderboard render error:', err);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="leaderboard-empty-state">
+                        <span>Leaderboard temporarily unavailable. Play locally!</span>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    async function submitPlayerScore(gameId, score, showCelebration = true) {
+        if (!gameId || isNaN(Number(score)) || Number(score) <= 0) return;
+        const cleanScore = Math.round(Number(score));
+        const user = AuthManager.getActiveUser();
+
+        // Update local UI immediately
+        const bestEl = document.getElementById('leaderboard-user-best-val');
+        if (bestEl) {
+            const curBest = Number(bestEl.textContent.replace(/,/g, '')) || 0;
+            if (cleanScore > curBest) {
+                bestEl.textContent = cleanScore.toLocaleString();
+            }
+        }
+
+        if (typeof KrazySupabase !== 'undefined') {
+            await KrazySupabase.submitHighScore({
+                gameId: gameId,
+                playerName: user.username || 'Guest Gamer',
+                playerAvatar: user.avatar || '👾',
+                score: cleanScore,
+                userIdentifier: user.identifier || 'guest'
+            });
+
+            if (showCelebration) {
+                showToast(`🏆 Score of ${cleanScore.toLocaleString()} posted to Global Leaderboard!`, '🌟');
+            }
+
+            renderGameLeaderboard(gameId);
+        }
+    }
+
+    // Leaderboard Controls & Listeners
+    const btnLeaderboardScroll = document.getElementById('btn-game-leaderboard');
+    if (btnLeaderboardScroll) {
+        btnLeaderboardScroll.addEventListener('click', () => {
+            const card = document.getElementById('player-leaderboard-card');
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                card.classList.add('reaction-pulse');
+                setTimeout(() => card.classList.remove('reaction-pulse'), 800);
+            }
+        });
+    }
+
+    const btnRefreshLeaderboard = document.getElementById('btn-refresh-leaderboard');
+    if (btnRefreshLeaderboard) {
+        btnRefreshLeaderboard.addEventListener('click', () => {
+            if (currentGame) {
+                renderGameLeaderboard(currentGame.id);
+                showToast('Leaderboard refreshed! 🔄', '🏆');
+            }
+        });
+    }
+
+    const formSubmitScore = document.getElementById('form-submit-score');
+    if (formSubmitScore) {
+        formSubmitScore.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('input-quick-score');
+            if (!input || !currentGame) return;
+            const val = Number(input.value);
+            if (val > 0) {
+                submitPlayerScore(currentGame.id, val, true);
+                input.value = '';
+            }
+        });
+    }
+
+    // Realtime update listener from Supabase
+    window.addEventListener('krazy:leaderboard_updated', (e) => {
+        if (currentGame && e.detail && e.detail.game_id === currentGame.id) {
+            renderGameLeaderboard(currentGame.id);
+        }
+    });
+
     // Listen for events emitted from inside game iframes
     window.addEventListener('message', (e) => {
         if (!e.data) return;
@@ -3568,6 +3785,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (e.data.type === 'KRAZY_ESC') {
             if (typeof e.data.isPaused === 'boolean') {
                 showToast(e.data.isPaused ? 'Game Paused ⏸️' : 'Game Resumed ▶️', e.data.isPaused ? '⏸️' : '▶️');
+            }
+        } else if (e.data.type === 'SUBMIT_SCORE' || e.data.type === 'KRAZY_SCORE') {
+            const sc = e.data.score || e.data.val;
+            const gid = e.data.gameId || (currentGame ? currentGame.id : null);
+            if (gid && sc) {
+                submitPlayerScore(gid, sc, true);
             }
         } else if (e.data.type === 'RECORD_MULTIPLAYER_MATCH') {
             const matchData = e.data.data || e.data.match || e.data;

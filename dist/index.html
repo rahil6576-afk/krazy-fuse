@@ -265,6 +265,11 @@
                                     <span class="ctrl-icon" id="bookmark-icon">🔖</span>
                                 </button>
 
+                                <!-- Global High Scores Leaderboard Toggle -->
+                                <button id="btn-game-leaderboard" class="game-ctrl-btn btn-leaderboard-highlight" title="Global High Scores Leaderboard">
+                                    <span class="ctrl-icon">🏆</span>
+                                    <span class="ctrl-label">Leaderboard</span>
+                                </button>
 
                                 <!-- Share Link -->
                                 <button id="btn-game-share" class="game-ctrl-btn" title="Share Game Link">
@@ -324,6 +329,56 @@
                                 </div>
                                 <div class="game-features-row" id="player-game-tags">
                                     <!-- Tags -->
+                                </div>
+                            </div>
+
+                            <!-- Global High Scores Leaderboard Card -->
+                            <div class="player-info-card player-leaderboard-card" id="player-leaderboard-card">
+                                <div class="leaderboard-card-header">
+                                    <div class="card-section-title">
+                                        <span class="cs-icon">🏆</span>
+                                        <h3 id="leaderboard-game-heading">GLOBAL HIGH SCORES</h3>
+                                    </div>
+                                    <div class="leaderboard-actions">
+                                        <span class="leaderboard-live-pill" id="leaderboard-live-pill" title="Live Cloud Sync">
+                                            <span class="live-dot-pulse"></span>
+                                            <span id="leaderboard-status-text">CLOUD SYNC</span>
+                                        </span>
+                                        <button id="btn-refresh-leaderboard" class="btn-refresh-leaderboard" title="Refresh Live Scores">🔄 Refresh</button>
+                                    </div>
+                                </div>
+
+                                <div class="leaderboard-user-strip">
+                                    <div class="user-score-highlight">
+                                        <span class="user-strip-lbl">YOUR PERSONAL BEST</span>
+                                        <div class="user-strip-val">
+                                            <span class="user-avatar-tag" id="leaderboard-user-avatar">👾</span>
+                                            <strong id="leaderboard-user-best-val">0</strong>
+                                            <span class="pts-unit">PTS</span>
+                                        </div>
+                                    </div>
+                                    <form id="form-submit-score" class="leaderboard-submit-form" title="Post your current game score to global board">
+                                        <input type="number" id="input-quick-score" class="leaderboard-input" placeholder="Enter Score..." min="1" max="9999999" required />
+                                        <button type="submit" class="btn-post-score" id="btn-post-score">
+                                            <span>Post Score 🚀</span>
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div class="leaderboard-table-wrap">
+                                    <table class="leaderboard-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="col-rank">RANK</th>
+                                                <th class="col-player">CHAMPION</th>
+                                                <th class="col-score">HIGH SCORE</th>
+                                                <th class="col-time">DATE</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="leaderboard-table-body">
+                                            <!-- Dynamically populated rows -->
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
 
