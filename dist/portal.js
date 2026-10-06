@@ -314,34 +314,34 @@ const AUDIENCE_MODEL_DATA = {
     ],
     cities: [
         // India (UTC +5.5) - Key States & Metropolitan Tech Hubs
-        { id: 'mumbai', city: 'Mumbai', state: 'Maharashtra', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 29500 },
-        { id: 'delhi', city: 'Delhi NCR', state: 'Delhi', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 27800 },
-        { id: 'bengaluru', city: 'Bengaluru', state: 'Karnataka', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 24200 },
-        { id: 'hyderabad', city: 'Hyderabad', state: 'Telangana', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 19800 },
-        { id: 'ahmedabad', city: 'Ahmedabad', state: 'Gujarat', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 15600 },
-        { id: 'pune', city: 'Pune', state: 'Maharashtra', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 14700 },
-        { id: 'kolkata', city: 'Kolkata', state: 'West Bengal', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 13500 },
-        { id: 'chennai', city: 'Chennai', state: 'Tamil Nadu', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 12900 },
+        { id: 'mumbai', city: 'Mumbai', state: 'Maharashtra', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 1480 },
+        { id: 'delhi', city: 'Delhi NCR', state: 'Delhi', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 1390 },
+        { id: 'bengaluru', city: 'Bengaluru', state: 'Karnataka', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 1220 },
+        { id: 'hyderabad', city: 'Hyderabad', state: 'Telangana', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 990 },
+        { id: 'ahmedabad', city: 'Ahmedabad', state: 'Gujarat', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 780 },
+        { id: 'pune', city: 'Pune', state: 'Maharashtra', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 740 },
+        { id: 'kolkata', city: 'Kolkata', state: 'West Bengal', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 680 },
+        { id: 'chennai', city: 'Chennai', state: 'Tamil Nadu', country: 'India', flag: '🇮🇳', tzOffset: 5.5, basePool: 650 },
 
         // United States (UTC -4 to -7) - Coast-to-Coast Key States
-        { id: 'los-angeles', city: 'Los Angeles', state: 'California', country: 'USA', flag: '🇺🇸', tzOffset: -7, basePool: 21500 },
-        { id: 'new-york', city: 'New York City', state: 'New York', country: 'USA', flag: '🇺🇸', tzOffset: -4, basePool: 23800 },
-        { id: 'dallas', city: 'Dallas / Austin', state: 'Texas', country: 'USA', flag: '🇺🇸', tzOffset: -5, basePool: 17200 },
-        { id: 'chicago', city: 'Chicago', state: 'Illinois', country: 'USA', flag: '🇺🇸', tzOffset: -5, basePool: 14600 },
-        { id: 'miami', city: 'Miami', state: 'Florida', country: 'USA', flag: '🇺🇸', tzOffset: -4, basePool: 12100 },
-        { id: 'seattle', city: 'Seattle', state: 'Washington', country: 'USA', flag: '🇺🇸', tzOffset: -7, basePool: 11200 },
+        { id: 'los-angeles', city: 'Los Angeles', state: 'California', country: 'USA', flag: '🇺🇸', tzOffset: -7, basePool: 1080 },
+        { id: 'new-york', city: 'New York City', state: 'New York', country: 'USA', flag: '🇺🇸', tzOffset: -4, basePool: 1200 },
+        { id: 'dallas', city: 'Dallas / Austin', state: 'Texas', country: 'USA', flag: '🇺🇸', tzOffset: -5, basePool: 860 },
+        { id: 'chicago', city: 'Chicago', state: 'Illinois', country: 'USA', flag: '🇺🇸', tzOffset: -5, basePool: 730 },
+        { id: 'miami', city: 'Miami', state: 'Florida', country: 'USA', flag: '🇺🇸', tzOffset: -4, basePool: 610 },
+        { id: 'seattle', city: 'Seattle', state: 'Washington', country: 'USA', flag: '🇺🇸', tzOffset: -7, basePool: 560 },
 
         // Europe & United Kingdom (UTC +1 to +2)
-        { id: 'london', city: 'London', state: 'Greater London', country: 'UK', flag: '🇬🇧', tzOffset: 1, basePool: 18200 },
-        { id: 'berlin', city: 'Berlin', state: 'Berlin', country: 'Germany', flag: '🇩🇪', tzOffset: 2, basePool: 13400 },
-        { id: 'paris', city: 'Paris', state: 'Île-de-France', country: 'France', flag: '🇫🇷', tzOffset: 2, basePool: 12800 },
+        { id: 'london', city: 'London', state: 'Greater London', country: 'UK', flag: '🇬🇧', tzOffset: 1, basePool: 920 },
+        { id: 'berlin', city: 'Berlin', state: 'Berlin', country: 'Germany', flag: '🇩🇪', tzOffset: 2, basePool: 670 },
+        { id: 'paris', city: 'Paris', state: 'Île-de-France', country: 'France', flag: '🇫🇷', tzOffset: 2, basePool: 640 },
 
         // Asia-Pacific & Latin America
-        { id: 'tokyo', city: 'Tokyo', state: 'Kantō', country: 'Japan', flag: '🇯🇵', tzOffset: 9, basePool: 19500 },
-        { id: 'seoul', city: 'Seoul', state: 'Gyeonggi', country: 'South Korea', flag: '🇰🇷', tzOffset: 9, basePool: 16800 },
-        { id: 'sao-paulo', city: 'São Paulo', state: 'São Paulo', country: 'Brazil', flag: '🇧🇷', tzOffset: -3, basePool: 15900 },
-        { id: 'singapore', city: 'Singapore', state: 'Central', country: 'Singapore', flag: '🇸🇬', tzOffset: 8, basePool: 10400 },
-        { id: 'sydney', city: 'Sydney', state: 'New South Wales', country: 'Australia', flag: '🇦🇺', tzOffset: 11, basePool: 9800 }
+        { id: 'tokyo', city: 'Tokyo', state: 'Kantō', country: 'Japan', flag: '🇯🇵', tzOffset: 9, basePool: 980 },
+        { id: 'seoul', city: 'Seoul', state: 'Gyeonggi', country: 'South Korea', flag: '🇰🇷', tzOffset: 9, basePool: 840 },
+        { id: 'sao-paulo', city: 'São Paulo', state: 'São Paulo', country: 'Brazil', flag: '🇧🇷', tzOffset: -3, basePool: 800 },
+        { id: 'singapore', city: 'Singapore', state: 'Central', country: 'Singapore', flag: '🇸🇬', tzOffset: 8, basePool: 520 },
+        { id: 'sydney', city: 'Sydney', state: 'New South Wales', country: 'Australia', flag: '🇦🇺', tzOffset: 11, basePool: 490 }
     ],
     countries: [
         { name: 'India', share: 26.1, flag: '🇮🇳' },
@@ -354,17 +354,17 @@ const AUDIENCE_MODEL_DATA = {
         { name: 'Germany', share: 3.6, flag: '🇩🇪' }
     ],
     gameParams: {
-        'office-escape': { base: 23500, volatility: 24, avgMin: 75, genre: 'Action' },
-        'dart-board': { base: 26200, volatility: 28, avgMin: 68, genre: 'Sports' },
-        'elevator-doom': { base: 18800, volatility: 20, avgMin: 84, genre: 'Action' },
-        'bomb-panic': { base: 29500, volatility: 32, avgMin: 72, genre: 'Party' },
-        'flappy-man': { base: 21800, volatility: 22, avgMin: 54, genre: 'Arcade' },
-        'wild-swings': { base: 19400, volatility: 20, avgMin: 59, genre: 'Arcade' },
-        'fallen-one': { base: 22100, volatility: 25, avgMin: 91, genre: 'Fighting' },
-        'gravity-flip': { base: 13200, volatility: 16, avgMin: 52, genre: 'Reflex' },
-        'pop-up': { base: 11900, volatility: 15, avgMin: 48, genre: 'Shooter' },
-        'tic-tac-toe': { base: 15400, volatility: 18, avgMin: 43, genre: 'Strategy' },
-        'chess': { base: 28400, volatility: 26, avgMin: 85, genre: 'Strategy' }
+        'office-escape': { base: 2350, volatility: 24, avgMin: 75, genre: 'Action' },
+        'dart-board': { base: 2620, volatility: 28, avgMin: 68, genre: 'Sports' },
+        'elevator-doom': { base: 1880, volatility: 20, avgMin: 84, genre: 'Action' },
+        'bomb-panic': { base: 2950, volatility: 32, avgMin: 72, genre: 'Party' },
+        'flappy-man': { base: 2180, volatility: 22, avgMin: 54, genre: 'Arcade' },
+        'wild-swings': { base: 1940, volatility: 20, avgMin: 59, genre: 'Arcade' },
+        'fallen-one': { base: 2210, volatility: 25, avgMin: 91, genre: 'Fighting' },
+        'gravity-flip': { base: 1320, volatility: 16, avgMin: 52, genre: 'Reflex' },
+        'pop-up': { base: 1190, volatility: 15, avgMin: 48, genre: 'Shooter' },
+        'tic-tac-toe': { base: 1540, volatility: 18, avgMin: 43, genre: 'Strategy' },
+        'chess': { base: 2840, volatility: 26, avgMin: 85, genre: 'Strategy' }
     }
 };
 
@@ -466,7 +466,7 @@ class LiveAudienceEngine {
             // Natural minute-level subtle variation (within +/- 1.5%)
             const minuteSeed = now.getMinutes() + now.getHours() * 60;
             const seedVariance = Math.sin(c.basePool + minuteSeed * 1.3) * 0.015;
-            const activePlayers = Math.max(350, Math.round(c.basePool * factor * (1 + seedVariance)));
+            const activePlayers = Math.max(40, Math.round(c.basePool * factor * (1 + seedVariance)));
 
             const localH = Math.floor(localHour);
             const localM = Math.floor((localHour % 1) * 60);
@@ -495,16 +495,16 @@ class LiveAudienceEngine {
         // 1. Analyze all states & cities and their local times
         this.cityStats = this.computeCityStateAnalytics();
 
-        // 2. Aggregate global player headcount from the state & city model
+        // 2. Aggregate global player headcount from the state & city model (calibrated strictly within 15,000 - 30,000)
         const totalCityAudience = this.cityStats.reduce((sum, c) => sum + c.activePlayers, 0);
-        this.globalCount = totalCityAudience;
+        this.globalCount = Math.max(15100, Math.min(29900, totalCityAudience));
 
         // 3. Proportional game player headcount calibrated to global audience
         const totalGameBase = Object.values(AUDIENCE_MODEL_DATA.gameParams).reduce((s, g) => s + g.base, 0);
         for (const [id, param] of Object.entries(AUDIENCE_MODEL_DATA.gameParams)) {
             const share = param.base / totalGameBase;
             const jitter = 0.98 + (Math.sin(param.base + Date.now()) % 0.04);
-            const target = Math.max(850, Math.round(this.globalCount * share * jitter));
+            const target = Math.max(350, Math.round(this.globalCount * share * jitter));
             this.counts[id] = target;
 
             // Initialize or accumulate dynamic plays
@@ -593,7 +593,7 @@ class LiveAudienceEngine {
     }
 
     getGameCount(id) {
-        return this.counts[id] || 15000;
+        return this.counts[id] || 2100;
     }
 
     formatCompact(num) {
