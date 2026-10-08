@@ -10,6 +10,7 @@ const args = [
     outPattern
 ];
 
+
 console.log('Running ffmpeg from:', ffmpegPath);
 execFile(ffmpegPath, args, (error, stdout, stderr) => {
     if (error) {
