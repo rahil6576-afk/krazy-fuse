@@ -2598,7 +2598,6 @@
                 <button class="mode-tab-btn active" data-mode="pve" title="Play vs Smart Chess Engine">PvE (AI)</button>
                 <button class="mode-tab-btn" data-mode="pvp" title="Play 1v1 on Same Screen">PvP Local</button>
                 <button class="mode-tab-btn" data-mode="pass" title="Pass and play with auto board flip">Pass &amp; Play</button>
-                <button class="mode-tab-btn" data-mode="online" title="Online Room & Multiplayer">Online</button>
             </div>
 
             <!-- AI Difficulty Selection (Shown in PvE mode) -->
@@ -2610,32 +2609,7 @@
                 </div>
             </div>
 
-            <!-- Online Room Controls (Hidden by default) -->
-            <div id="online-controls-box" style="display: none; flex-direction: column; gap: 10px;">
-                <div id="online-pre-join" style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="display: flex; gap: 6px;">
-                        <input type="text" id="room-code-input" placeholder="Room Code (e.g. KF-4921)" maxlength="8" style="flex: 1; padding: 9px 12px; background: #050d08; border: 1.5px solid rgba(52, 211, 153, 0.4); border-radius: 8px; color: #34d399; font-family: 'Fira Code', monospace; font-size: 0.88rem; box-shadow: inset 0 2px 6px rgba(0,0,0,0.8); text-transform: uppercase;">
-                        <button id="btn-join-room" class="game-act-btn" style="flex: initial; padding: 7px 16px;">Join</button>
-                    </div>
-                    <button id="btn-create-room" class="game-act-btn" style="width: 100%; background: linear-gradient(180deg, #1e4a2d 0%, #102e1b 100%); border-color: rgba(52, 211, 153, 0.6); color: #34d399;">
-                        <span>⚡ Create Room &amp; Share</span>
-                    </button>
-                </div>
-                <!-- Active Room Status Card -->
-                <div id="online-room-card" style="display: none; background: rgba(10, 26, 17, 0.9); border: 1.5px solid rgba(52, 211, 153, 0.4); border-radius: 8px; padding: 10px; flex-direction: column; gap: 8px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span id="online-status-badge" style="font-size: 0.78rem; font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 6px;">
-                            <span class="live-pulse-dot"></span>
-                            <span id="online-status-text">Room KF-0000</span>
-                        </span>
-                        <span id="online-role-badge" style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #fff;">White ♔</span>
-                    </div>
-                    <div style="display: flex; gap: 6px;">
-                        <button id="btn-copy-room-link" class="game-act-btn" style="flex: 1; font-size: 0.75rem; padding: 6px 10px;">📋 Copy Link</button>
-                        <button id="btn-leave-room" class="game-act-btn" style="flex: initial; font-size: 0.75rem; padding: 6px 10px; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5;">Leave</button>
-                    </div>
-                </div>
-            </div>
+
 
             <div class="panel-section-title">
                 <span>MOVE LOG &amp; OBSERVER</span>
