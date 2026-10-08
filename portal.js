@@ -32,8 +32,8 @@ const GAMES_CATALOG = [
         title: 'Dart Master: 301 / 501 Arena',
         category: 'pvp',
         thumbnail: '/thumbnails/bento/dart-board.webp',
-        tags: ['PvP', 'Multiplayer', 'AI Bot', 'Sports'],
-        desc: 'Realistic London dartboard arcade! Challenge smart AI bots, Pass & Play with friends, or battle online.',
+        tags: ['PvP', 'Pass & Play', 'AI Bot', 'Sports'],
+        desc: 'Realistic London dartboard arcade! Challenge smart AI bots, or Pass & Play with friends locally.',
         fullDesc: 'Step up to the oche in classic English pub venues! Play traditional 301, 501, or Around The Clock with true 3D dart flight physics, authentic double-out finishes, and intelligent AI bots across 4 difficulty tiers.',
         emoji: '🎯🍺',
         heroEmoji: '🎯🏆',
@@ -44,7 +44,7 @@ const GAMES_CATALOG = [
         link: '/dart-board/index.html',
         trending: true,
         isNew: false,
-        multiplayer: true,
+        multiplayer: false,
         themeClass: 'theme-dart',
         actionBadge: '🎯 BULLSEYE 1v1',
         controls: [
@@ -58,7 +58,7 @@ const GAMES_CATALOG = [
         title: 'Sumi-e Tac Toe: Zen Brush & AI',
         category: 'pvp',
         thumbnail: '/thumbnails/bento/tic-tac-toe.webp',
-        tags: ['PvP', 'Multiplayer', 'AI Bot', 'Strategy', 'Zen'],
+        tags: ['PvP', 'Pass & Play', 'AI Bot', 'Strategy', 'Zen'],
         desc: 'Traditional Japanese ink-wash Sumi-e Tic Tac Toe with calligraphy brush strokes, Ensō circle marks, Hanko seals, and Zen Master AI!',
         fullDesc: 'Experience the timeless beauty of Japanese ink wash painting (水墨画). Wield calligraphic brush marks (Sumi X & Ensō O) against the contemplative Zen Master AI across classic 3x3, 4x4, and 5x5 boards with authentic acoustic soundscapes.',
         emoji: '墨⭕',
@@ -70,7 +70,7 @@ const GAMES_CATALOG = [
         link: '/tic-tac-toe/index.html',
         trending: false,
         isNew: true,
-        multiplayer: true,
+        multiplayer: false,
         themeClass: 'theme-tictactoe',
         actionBadge: '🧘 ZEN MASTER AI',
         controls: [
@@ -180,7 +180,7 @@ const GAMES_CATALOG = [
         title: 'Bomb Panic: Hot Potato',
         category: 'pvp',
         thumbnail: '/thumbnails/bento/bomb-panic.webp',
-        tags: ['Party', 'PvP', 'Multiplayer', 'Survival'],
+        tags: ['Party', 'PvP', 'Pass & Play', 'Survival'],
         desc: 'One player gets a ticking bomb! PASS → RUN → THROW → SURVIVE before the fuse hits 0!',
         fullDesc: 'Extreme multiplayer hot potato! When the bomb is in your hands, the clock is ticking down to a massive explosion. Sprint after other players, pass the bomb with pinpoint tackles, and be the last runner standing.',
         emoji: '💣💥',
@@ -192,7 +192,7 @@ const GAMES_CATALOG = [
         link: '/bomb-panic/index.html',
         trending: true,
         isNew: true,
-        multiplayer: true,
+        multiplayer: false,
         themeClass: 'theme-bomb',
         actionBadge: '💣 PASS OR BOOM',
         controls: [
@@ -245,7 +245,7 @@ const GAMES_CATALOG = [
         link: '/fallen-one/index.html',
         trending: false,
         isNew: false,
-        multiplayer: true,
+        multiplayer: false,
         themeClass: 'theme-fallen',
         actionBadge: '⚔️ COMBO FIGHTER',
         controls: [
@@ -260,9 +260,9 @@ const GAMES_CATALOG = [
         title: 'Royal Chess: Grandmaster Arena',
         category: 'pvp',
         thumbnail: '/thumbnails/bento/chess.webp',
-        tags: ['Chess', 'Multiplayer', 'Strategy', 'PvP', 'AI'],
-        desc: 'Realistic 3D Staunton chess! Battle Grandmaster AI, challenge friends locally, Pass & Play or play Online Multiplayer.',
-        fullDesc: 'Step onto the master board in Royal Chess! Featuring realistic weighted pieces, customizable walnut & obsidian marble boards, comprehensive legal move engine with castling, en passant, and promotions. Play solo vs multi-tier AI, Pass & Play with auto-flip, or battle online.',
+        tags: ['Chess', 'Pass & Play', 'Strategy', 'PvP', 'AI'],
+        desc: 'Realistic 3D Staunton chess! Battle Grandmaster AI, challenge friends locally, or Pass & Play.',
+        fullDesc: 'Step onto the master board in Royal Chess! Featuring realistic weighted pieces, customizable walnut & obsidian marble boards, comprehensive legal move engine with castling, en passant, and promotions. Play solo vs multi-tier AI, or Pass & Play with auto-flip.',
         emoji: '♚♟️',
         heroEmoji: '♚👑',
         status: 'live',
@@ -272,7 +272,7 @@ const GAMES_CATALOG = [
         link: '/chess/index.html',
         trending: true,
         isNew: true,
-        multiplayer: true,
+        multiplayer: false,
         themeClass: 'theme-chess',
         actionBadge: '♚ GRANDMASTER AI & PVP',
         controls: [
@@ -1953,8 +1953,8 @@ function renderPortal() {
                     matchesCategory = Boolean(game.trending);
                 } else if (catKey === 'new') {
                     matchesCategory = Boolean(game.isNew);
-                } else if (catKey === 'multiplayer') {
-                    matchesCategory = Boolean(game.multiplayer) || game.category === 'multiplayer' || game.tags.some(t => /multiplayer|pvp/i.test(t));
+                } else if (catKey === 'Pass & Play') {
+                    matchesCategory = Boolean(game.multiplayer) || game.category === 'Pass & Play' || game.tags.some(t => /multiplayer|pvp/i.test(t));
                 } else if (catKey === 'runners' || catKey === 'runner') {
                     matchesCategory = game.category === 'runner' || game.tags.some(t => /runner/i.test(t));
                 } else if (catKey === 'action') {
@@ -1984,7 +1984,7 @@ function renderPortal() {
                 if (searchQuery) titleEl.textContent = `SEARCH RESULTS FOR "${searchQuery.toUpperCase()}"`;
                 else if (catKey === 'trending' || catKey === 'popular') titleEl.textContent = `🔥 POPULAR & TRENDING GAMES`;
                 else if (catKey === 'new') titleEl.textContent = `🆕 NEW ARCADE RELEASES`;
-                else if (catKey === 'multiplayer') titleEl.textContent = `🏆 MULTIPLAYER & PVP BATTLES`;
+                else if (catKey === 'Pass & Play') titleEl.textContent = `🏆 MULTIPLAYER & PVP BATTLES`;
                 else if (catKey === 'runners' || catKey === 'runner') titleEl.textContent = `🏃 ENDLESS RUNNERS & ESCAPE`;
                 else if (catKey === 'darts' || catKey === 'pvp') titleEl.textContent = `🎯 DARTS & TARGET GAMES`;
                 else if (catKey === 'action') titleEl.textContent = `⚔️ ACTION & COMBAT`;
