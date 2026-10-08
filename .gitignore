@@ -13,3 +13,6 @@ scratch/
 .env.local
 .env.*.local
 
+# Dynamically generated files containing sensitive keys
+supabase-config.js
+dist/

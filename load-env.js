@@ -19,9 +19,8 @@ function loadEnv(envFilePath = path.join(__dirname, '.env')) {
                     if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
                         val = val.slice(1, -1);
                     }
-                    if (process.env[key] === undefined) {
-                        process.env[key] = val;
-                    }
+                    // Forcefully use the value from .env, overriding any direct environment variables
+                    process.env[key] = val;
                 }
             }
         } catch (err) {
