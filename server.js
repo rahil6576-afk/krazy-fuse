@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 
+const { loadEnv, generateConfigJs } = require('./load-env');
+loadEnv();
+
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = __dirname;
 
@@ -34,6 +37,30 @@ const server = http.createServer((req, res) => {
     try {
         cleanUrl = decodeURIComponent(cleanUrl);
     } catch (e) { }
+
+    // Intercept dynamic environment-based Supabase configuration
+    if (cleanUrl.endsWith('supabase-config.js')) {
+        res.writeHead(200, {
+            'Content-Type': 'text/javascript; charset=utf-8',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Access-Control-Allow-Origin': '*'
+        });
+        res.end(generateConfigJs());
+        return;
+    }
+
+    if (cleanUrl === '/api/config') {
+        res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Access-Control-Allow-Origin': '*'
+        });
+        res.end(JSON.stringify({
+            url: process.env.SUPABASE_URL || '',
+            anonKey: process.env.SUPABASE_ANON_KEY || ''
+        }));
+        return;
+    }
 
     let filePath = path.join(PUBLIC_DIR, cleanUrl);
 

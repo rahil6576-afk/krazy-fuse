@@ -6135,11 +6135,8 @@
            ========================================================== */
         function initOnlineMultiplayer() {
             try {
-                const config = (window.KRAZY_SUPABASE_CONFIG) || {
-                    url: 'https://jjovwmzigxwyncjjnabb.supabase.co',
-                    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impqb3Z3bXppZ3h3eW5jampuYWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NDg0NTksImV4cCI6MjEwNTUyNDQ1OX0.o23OZf0QeEyk1PF0USPjQ7rKIFPALCz7gVU4EEA1VPE'
-                };
-                if (window.supabase && window.supabase.createClient) {
+                const config = window.KRAZY_SUPABASE_CONFIG || {};
+                if (config.url && config.anonKey && window.supabase && window.supabase.createClient) {
                     supabaseClient = window.supabase.createClient(config.url, config.anonKey, {
                         realtime: { params: { eventsPerSecond: 10 } }
                     });

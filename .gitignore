@@ -7,3 +7,9 @@ scratch/
 *.zip
 *- Copy/
 * - Copy/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+

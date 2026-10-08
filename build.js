@@ -1,5 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const { loadEnv, generateConfigJs } = require('./load-env');
+
+// Load environment variables (.env or process.env from deployment environment like Vercel)
+loadEnv();
 
 const dist = path.join(__dirname, 'dist');
 if (fs.existsSync(dist)) {
@@ -11,7 +15,6 @@ const itemsToCopy = [
   'index.html',
   'portal.css',
   'portal.js',
-  'supabase-config.js',
   'supabase-client.js',
   'supabase-schema.sql',
   'krazio-icon.svg',
@@ -41,8 +44,6 @@ const itemsToCopy = [
   'game-manifests.json'
 ];
 
-
-
 for (const item of itemsToCopy) {
   const src = path.join(__dirname, item);
   const dest = path.join(dist, item);
@@ -51,4 +52,12 @@ for (const item of itemsToCopy) {
   }
 }
 
-console.log('Successfully built static arcade distribution into /dist');
+// Generate dynamic supabase-config.js into dist from environment variables
+const dynamicConfig = generateConfigJs();
+fs.writeFileSync(path.join(dist, 'supabase-config.js'), dynamicConfig, 'utf8');
+
+// Also sync root supabase-config.js with current active env for local preview
+fs.writeFileSync(path.join(__dirname, 'supabase-config.js'), dynamicConfig, 'utf8');
+
+console.log('Successfully built arcade distribution into /dist with dynamic environment configuration.');
+

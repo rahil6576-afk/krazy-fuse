@@ -3002,7 +3002,7 @@ function setupAuthModal() {
                     }
                 }
             } else {
-                showToast('Supabase is not configured yet. Check credentials in supabase-config.js', '⚠️');
+                showToast('Supabase is not configured yet. Set SUPABASE_URL & SUPABASE_ANON_KEY in .env', '⚠️');
             }
         });
     }
@@ -3025,7 +3025,7 @@ function setupAuthModal() {
                     }
                 }
             } else {
-                showToast('Supabase is not configured yet. Check credentials in supabase-config.js', '⚠️');
+                showToast('Supabase is not configured yet. Set SUPABASE_URL & SUPABASE_ANON_KEY in .env', '⚠️');
             }
         });
     }
@@ -3466,14 +3466,14 @@ function setupOAuthHelpModal() {
     if (!modal) return;
 
     const config = (typeof KrazySupabase !== 'undefined' && KrazySupabase.getConfig) ? KrazySupabase.getConfig() : {};
-    const url = config.url || 'https://jjovwmzigxwyncjjnabb.supabase.co';
+    const url = (config.url || '').trim();
     const match = url.match(/https:\/\/([a-z0-9_-]+)\.supabase\.co/i);
-    const projectRef = match ? match[1] : 'jjovwmzigxwyncjjnabb';
-    const callbackUrl = `${url.replace(/\/$/, '')}/auth/v1/callback`;
+    const projectRef = match ? match[1] : '';
+    const callbackUrl = url ? `${url.replace(/\/$/, '')}/auth/v1/callback` : 'https://your-project.supabase.co/auth/v1/callback';
 
     if (uriDisplay) uriDisplay.textContent = callbackUrl;
-    if (projectRefCode) projectRefCode.textContent = projectRef;
-    if (dashboardLink) dashboardLink.href = `https://supabase.com/dashboard/project/${projectRef}/auth/providers`;
+    if (projectRefCode) projectRefCode.textContent = projectRef || 'your-project-ref';
+    if (dashboardLink) dashboardLink.href = projectRef ? `https://supabase.com/dashboard/project/${projectRef}/auth/providers` : 'https://supabase.com/dashboard';
 
     function closeModal() {
         modal.classList.remove('active', 'open');
