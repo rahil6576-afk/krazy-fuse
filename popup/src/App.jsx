@@ -214,7 +214,6 @@ export default function App() {
 
         <div className="portal-nav-pills">
           <a href="../index.html" className="nav-pill active">🔥 HOT</a>
-          <a href="../dart-board/index.html" className="nav-pill">🎯 2-PLAYER</a>
           <a href="../office-escape/index.html" className="nav-pill">🏃 RUNNER</a>
           <a href="../flappy-man/index.html" className="nav-pill">🦸 SUPERHERO</a>
           <a href="../wild-swings/index.html" className="nav-pill">🕸️ ACTION</a>
@@ -234,7 +233,6 @@ export default function App() {
         <aside className="portal-sidebar">
           <a href="../index.html" className="side-btn active" title="Home"><span>🏠</span><small>Home</small></a>
           <a href="../index.html" className="side-btn" title="Hot"><span>🔥</span><small>Hot</small></a>
-          <a href="../dart-board/index.html" className="side-btn" title="2-Player"><span>👥</span><small>2-Player</small></a>
           <a href="../flappy-man/index.html" className="side-btn" title="Arcade"><span>🕹️</span><small>Arcade</small></a>
           <a href="../wild-swings/index.html" className="side-btn" title="Action"><span>⚡</span><small>Action</small></a>
           <a href="../bomb-panic/index.html" className="side-btn" title="Party"><span>💣</span><small>Party</small></a>
